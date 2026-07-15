@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Offline source, domain, and version atlas for the Minecraft development ecosystem.">
+  <title>MinecraftKit | Ecosystem Atlas</title>
+  <link rel="stylesheet" href="ecosystem.css">
+</head>
+<body>
+  <a class="skip-link" href="#atlas-main">Skip to atlas content</a>
+
+  <header class="atlas-header">
+    <a class="wordmark" href="ecosystem.html" aria-label="MinecraftKit ecosystem atlas home">
+      <span class="wordmark-code" aria-hidden="true">MK</span>
+      <span>
+        <strong>MinecraftKit</strong>
+        <small>Ecosystem atlas</small>
+      </span>
+    </a>
+
+    <nav class="atlas-nav" aria-label="Atlas views">
+      <button type="button" data-view="overview" aria-current="page">Overview</button>
+      <button type="button" data-view="sources">Source index</button>
+      <button type="button" data-view="versions">Version history</button>
+    </nav>
+
+    <a class="rpg-link" href="index.html">
+      <span>Deep RPG explorer</span>
+      <small>41,887 members</small>
+    </a>
+  </header>
+
+  <main id="atlas-main" tabindex="-1">
+    <section class="atlas-intro" aria-labelledby="atlas-title">
+      <p class="eyebrow">Nine routed domains / pinned upstream evidence</p>
+      <div class="intro-grid">
+        <div>
+          <h1 id="atlas-title">The Minecraft engineering surface, indexed.</h1>
+          <p class="intro-copy">Trace platforms, protocols, shaders, packs, client systems, models, dialogs, internals, and RPG architecture from reviewed sources to exact revisions.</p>
+        </div>
+        <dl class="headline-metrics" aria-label="Atlas totals">
+          <div>
+            <dt>Sources</dt>
+            <dd id="metric-source-count">Pending</dd>
+          </div>
+          <div>
+            <dt>Versions</dt>
+            <dd id="metric-version-count">Pending</dd>
+          </div>
+          <div>
+            <dt>Domains</dt>
+            <dd id="metric-domain-count">9</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section id="view-overview" class="atlas-view" data-view-panel="overview" aria-labelledby="overview-title">
+      <div class="section-index" aria-hidden="true">01 / Orientation</div>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Routing matrix</p>
+          <h2 id="overview-title">Choose the engineering boundary first</h2>
+        </div>
+        <p>Each domain maps a focused <code>/mc:*</code> workflow to reviewed references and pinned upstream repositories.</p>
+      </div>
+      <div id="domain-grid" class="domain-grid" aria-live="polite"></div>
+
+      <div class="overview-lower-grid">
+        <section class="provenance-panel" aria-labelledby="provenance-title">
+          <p class="eyebrow">Evidence ledger</p>
+          <h3 id="provenance-title">Provenance and freshness</h3>
+          <dl id="provenance-list" class="provenance-list"></dl>
+        </section>
+        <section class="distribution-panel" aria-labelledby="distribution-title">
+          <p class="eyebrow">Coverage profile</p>
+          <h3 id="distribution-title">Reviewed source distribution</h3>
+          <div id="distribution-list" class="distribution-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="view-sources" class="atlas-view" data-view-panel="sources" aria-labelledby="sources-title" hidden>
+      <div class="section-index" aria-hidden="true">02 / Repositories</div>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Pinned GitHub inventory</p>
+          <h2 id="sources-title">Source index</h2>
+        </div>
+        <p>Filter by domain and review policy. Every record retains its exact default-branch revision and release metadata.</p>
+      </div>
+
+      <div class="source-workbench">
+        <form id="source-filter-form" class="filter-panel" role="search" aria-label="Filter ecosystem sources">
+          <div class="filter-header">
+            <h3>Source filters</h3>
+            <button id="reset-source-filters" class="text-button" type="button">Reset all</button>
+          </div>
+          <div class="field field-wide">
+            <label for="source-query">Search sources</label>
+            <input id="source-query" name="query" type="search" autocomplete="off" spellcheck="false" placeholder="Repository, rationale, technology">
+            <small><kbd>/</kbd> focuses this field</small>
+          </div>
+          <div class="filter-grid">
+            <div class="field">
+              <label for="domain-filter">Domain</label>
+              <select id="domain-filter" name="domain">
+                <option value="all">All nine domains</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="priority-filter">Priority</label>
+              <select id="priority-filter" name="priority">
+                <option value="all">All priorities</option>
+                <option value="P0">P0 / foundational</option>
+                <option value="P1">P1 / important</option>
+                <option value="P2">P2 / extended</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="policy-filter">Ingestion policy</label>
+              <select id="policy-filter" name="policy">
+                <option value="all">All policies</option>
+                <option value="index">Index</option>
+                <option value="derive">Derive</option>
+                <option value="metadata-only">Metadata only</option>
+                <option value="link-only">Link only</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="lifecycle-filter">Repository state</label>
+              <select id="lifecycle-filter" name="lifecycle">
+                <option value="all">Current and archived</option>
+                <option value="current">Current only</option>
+                <option value="archived">Archived only</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="license-filter">License</label>
+              <select id="license-filter" name="license">
+                <option value="all">All licenses</option>
+              </select>
+            </div>
+          </div>
+        </form>
+
+        <div class="source-results">
+          <div class="result-bar">
+            <p id="source-result-count" tabindex="-1" role="status" aria-live="polite">Loading source snapshot.</p>
+            <label for="source-sort">Sort</label>
+            <select id="source-sort" name="sort">
+              <option value="priority">Priority then name</option>
+              <option value="stars">Stars descending</option>
+              <option value="freshness">Recently pushed</option>
+              <option value="name">Name</option>
+            </select>
+          </div>
+          <div id="source-list" class="source-list" aria-busy="true"></div>
+          <div id="source-empty" class="empty-panel" hidden>
+            <h3>No reviewed source matches</h3>
+            <p>Clear one or more filters to widen the source boundary.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-versions" class="atlas-view" data-view-panel="versions" aria-labelledby="versions-title" hidden>
+      <div class="section-index" aria-hidden="true">03 / Releases</div>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Official Mojang manifest</p>
+          <h2 id="versions-title">Version history</h2>
+        </div>
+        <p>Complete manifest history with hydrated metadata for the latest release and snapshot. Binary locations are provenance, not downloads.</p>
+      </div>
+
+      <dl id="version-metrics" class="version-metrics" aria-label="Version totals"></dl>
+      <div id="latest-versions" class="latest-grid" aria-label="Latest hydrated versions"></div>
+      <section id="release-capability-profile" class="capability-profile" aria-labelledby="capability-profile-title"></section>
+
+      <section class="history-panel" aria-labelledby="history-title">
+        <div class="history-header">
+          <div>
+            <p class="eyebrow">Manifest chronology</p>
+            <h3 id="history-title">All indexed versions</h3>
+          </div>
+          <div class="history-controls">
+            <div class="field">
+              <label for="version-query">Search version</label>
+              <input id="version-query" type="search" autocomplete="off" spellcheck="false" placeholder="26.2, 1.21, rd-">
+            </div>
+            <div class="field">
+              <label for="version-type-filter">Release channel</label>
+              <select id="version-type-filter">
+                <option value="all">All channels</option>
+                <option value="release">Release</option>
+                <option value="snapshot">Snapshot</option>
+                <option value="old_beta">Old beta</option>
+                <option value="old_alpha">Old alpha</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <p id="version-result-count" class="history-result" role="status" aria-live="polite"></p>
+        <div class="table-scroll" tabindex="0" aria-label="Scrollable Minecraft version history">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Version</th>
+                <th scope="col">Channel</th>
+                <th scope="col">Released</th>
+                <th scope="col">Compliance</th>
+                <th scope="col">Manifest digest</th>
+              </tr>
+            </thead>
+            <tbody id="version-history-body"></tbody>
+          </table>
+        </div>
+        <button id="load-more-versions" class="load-more" type="button">Show more versions</button>
+      </section>
+    </section>
+  </main>
+
+  <footer class="atlas-footer">
+    <p>Offline-first atlas. Runtime uses local HTML, CSS, JavaScript, and generated catalogs only.</p>
+    <p id="footer-freshness">Dataset pending.</p>
+  </footer>
+
+  <noscript>
+    <p class="noscript-message">JavaScript is required to explore the local catalog. No network connection is used.</p>
+  </noscript>
+  <div id="atlas-status" class="visually-hidden" role="status" aria-live="polite"></div>
+
+  <script src="data/ecosystem.js"></script>
+  <script src="ecosystem-renderers.js"></script>
+  <script src="ecosystem-app.js"></script>
+</body>
+</html>
