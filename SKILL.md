@@ -1,11 +1,13 @@
 ---
 name: minecraftkit
-description: Research, design, implement, debug, or review Minecraft Java systems across vanilla, Paper/Folia/Purpur, Fabric/Forge/NeoForge, Velocity, packets, ProtocolLib, PacketEvents, ViaVersion, NMS/mappings, shaders, dialogs, client projections, resource/data packs, Blockbench models/animation, and RPG plugins. Automatically route Minecraft work to the focused mc:* domain and use pinned upstream/version evidence.
+description: Research, design, build, implement, debug, review, release, or publish Minecraft Java systems across Kotlin/Java/Gradle plugin engineering, vanilla, Paper/Folia/Purpur, Fabric/Forge/NeoForge, Velocity, packets, ProtocolLib, PacketEvents, ViaVersion, NMS/mappings, shaders, dialogs, client projections, resource/data packs, Blockbench models/animation, and RPG plugins. Automatically route Minecraft work to the focused mc:* domain and use pinned upstream/version evidence.
 ---
 
 # MinecraftKit
 
 Use MinecraftKit as an evidence-backed router for Minecraft engineering. RPG is a deep domain, not the boundary of the kit. Select the smallest relevant route, resolve the exact version/platform contract, then load only the references needed for the task.
+
+**Salyyy Minecraft Kit — authored by SalyVn / Salyyy.**
 
 ## Establish The Contract
 
@@ -23,6 +25,7 @@ If a value cannot be discovered locally, mark it `UNVERIFIED`; do not silently s
 
 | Route | Use for | Reference |
 |---|---|---|
+| `mc:build` | Kotlin/Java plugin projects, Gradle, descriptors, dependencies, databases, SemVer, CI and marketplace shipping | [Plugin build and shipping](references/plugin-build-and-shipping.md) |
 | `mc:core` | Vanilla versions, APIs, forks, loaders, proxies, Java compatibility | [Core platforms and versions](references/core-platforms-and-versions.md) |
 | `mc:rpg` | Stats, combat, skills, items, classes, loot, quests, dungeons, RPG integrations | [RPG feature design](references/rpg-feature-design.md) |
 | `mc:shader` | Vanilla core shaders, GLSL, render pipelines, Iris, Sodium, Canvas, Veil | [Shaders and rendering](references/shaders-and-rendering.md) |
@@ -34,6 +37,8 @@ If a value cannot be discovered locally, mark it `UNVERIFIED`; do not silently s
 | `mc:nms` | Minecraft internals, mappings, paperweight, reflection and version modules | [NMS and mappings](references/nms-and-mappings.md) |
 
 For multi-domain work, choose one primary route and add dependencies explicitly. A model-backed RPG boss may need `mc:rpg` + `mc:model` + `mc:pack`; do not treat those layers as one API.
+
+For production plugin work, route the build/release contract through `mc:build` and load only the required direct references: [Kotlin, Java, and Gradle](references/kotlin-java-gradle.md), [database, configuration, and runtime](references/database-config-and-runtime.md), and [release publishing checklist](references/release-publishing-checklist.md).
 
 ## Evidence Sources
 

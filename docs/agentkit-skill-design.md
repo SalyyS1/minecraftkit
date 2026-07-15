@@ -28,13 +28,13 @@ The local line distribution ranged from 6 to 902, with median 133 and p90 365. L
 - **Scripts** perform deterministic operations without loading implementation into prompt context.
 - **References** load focused context on demand; **assets** are copied/used in output.
 
-MinecraftKit installs one canonical skill plus nine focused sibling skills. Claude additionally receives static `/mc:*` command files. It does not add global hooks, rules, agents, MCP servers, or client configuration.
+MinecraftKit installs one canonical skill plus ten focused sibling skills. Claude additionally receives static `/mc:*` command files. It does not add global hooks, rules, agents, MCP servers, or client configuration.
 
 ## Effective Skill Anatomy
 
 ### Discovery layer
 
-Use only `name` and `description` in common skill frontmatter. The canonical name is `minecraftkit`; focused installed skill names are `mc-core`, `mc-rpg`, `mc-shader`, `mc-dialog`, `mc-client`, `mc-pack`, `mc-model`, `mc-protocol`, and `mc-nms`. Claude exposes the corresponding `/mc:core` through `/mc:nms` slash routes. Descriptions carry domain trigger vocabulary so Codex/Claude can auto-route without a slash command.
+Use only `name` and `description` in common skill frontmatter. The canonical name is `minecraftkit`; focused installed skill names are `mc-build`, `mc-core`, `mc-rpg`, `mc-shader`, `mc-dialog`, `mc-client`, `mc-pack`, `mc-model`, `mc-protocol`, and `mc-nms`. Claude exposes the corresponding `/mc:*` slash routes. Descriptions carry domain trigger vocabulary so Codex/Claude can auto-route without a slash command.
 
 ### Procedural root
 
@@ -69,9 +69,9 @@ Large JVM/upstream/version metadata remains in files, not prompt context. Script
 | plugin versions | store artifact-specific version and hashes | snapshots and NMS are not universal contracts |
 | source material | no bodies/JARs/assets in kit | factual interoperability research only |
 | cross-client behavior | common frontmatter and relative resources | one canonical payload works for Codex and Claude |
-| routing scale | one canonical core plus nine sibling wrappers | broad trigger coverage without loading the encyclopedia |
+| routing scale | one canonical core plus ten sibling wrappers | broad trigger coverage without loading the encyclopedia |
 | slash commands | Claude `commands/mc/*.md`; rich descriptions for Codex auto-routing | works with each client's native discovery model |
-| global installation | 21-target transaction with hash comparison and rollback | no junction coupling; drift and partial installs become detectable |
+| global installation | target-aware 11/12/23-target transaction with hash comparison and rollback | installs only Codex, only Claude, or both without junction coupling |
 | web delivery | static `file://` explorer, no network | portable and privacy-preserving |
 
 ## Anti-patterns Avoided

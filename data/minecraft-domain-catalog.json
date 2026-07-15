@@ -2,6 +2,14 @@
   "schema_version": 1,
   "domains": [
     {
+      "id": "build",
+      "name": "Plugin Build And Shipping",
+      "route": "mc:build",
+      "skill_directory": "mc-build",
+      "reference": "references/plugin-build-and-shipping.md",
+      "keywords": ["build", "build.gradle.kts", "ci", "database", "dependency", "folia compatibility", "gradle", "hangar", "java", "kotlin", "modrinth", "paper plugin", "paper-plugin.yml", "plugin.yml", "publish", "release", "semantic versioning", "shadow", "spigot", "sql"]
+    },
+    {
       "id": "client",
       "name": "Client And Projection",
       "route": "mc:client",

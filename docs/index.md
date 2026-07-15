@@ -6,8 +6,8 @@ MinecraftKit separates upstream facts, bytecode facts, source-derived architectu
 
 - 103 reviewed GitHub sources pinned to canonical identity and commit SHA.
 - 901 official Mojang Java Edition version records in manifest order.
-- 9 focused routes across core, RPG, shaders, dialogs, clients, packs, models, protocols, and NMS.
-- Static ecosystem/source/version atlas plus the original deep RPG API explorer.
+- 10 focused routes across production builds, core, RPG, shaders, dialogs, clients, packs, models, protocols, and NMS.
+- Static VI/EN command wiki, ecosystem/source/version atlas, and deep RPG API explorer.
 
 ## Catalog Snapshot
 
@@ -22,6 +22,7 @@ MinecraftKit separates upstream facts, bytecode facts, source-derived architectu
 
 | Need | Document |
 |---|---|
+| Build and ship a Kotlin/Java plugin | [Plugin engineering handbook](plugin-engineering-handbook.md) |
 | Route public Minecraft platform/plugin APIs | [Minecraft ecosystem API atlas](minecraft-ecosystem-api-atlas.md) |
 | Browse every extracted symbol | [Complete API catalog](api/index.md) |
 | Understand architecture and logic | [Plugin architecture and logic](plugin-architecture-and-logic.md) |

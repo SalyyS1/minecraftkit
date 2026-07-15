@@ -50,8 +50,8 @@ def validate_domains(root: Path, document: Any) -> list[str]:
     if not isinstance(document, dict) or document.get("schema_version") != 1:
         return ["Minecraft domain catalog schema is invalid"]
     domains = document.get("domains")
-    if not isinstance(domains, list) or len(domains) != 9:
-        return ["Minecraft domain catalog must contain 9 domains"]
+    if not isinstance(domains, list) or len(domains) != 10:
+        return ["Minecraft domain catalog must contain 10 domains"]
     expected_keys = {
         "id", "name", "route", "skill_directory", "reference", "keywords",
     }

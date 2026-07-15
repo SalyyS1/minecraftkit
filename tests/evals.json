@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "positive_triggers": [
+    "Build and ship a Kotlin Paper plugin with Gradle, Folia-safe schedulers, PostgreSQL migrations, and SemVer.",
     "Find the ModelEngine ActiveModel API and explain its lifecycle.",
     "Which MMOItems event should I use after an item is built?",
     "Design a profile-safe custom equipment board with MMOProfiles and MMOInventory.",

@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "minecraftkit",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
@@ -12,7 +12,7 @@
     "parse_errors": 0,
     "addon_ideas": 30,
     "decompiled_files_inventoried": 11490,
-    "minecraft_domains": 9,
+    "minecraft_domains": 10,
     "upstream_sources": 103,
     "minecraft_versions": 901,
     "latest_minecraft_release": "26.2",
@@ -141,8 +141,12 @@
       "sha256": "c72db5bc64d522570e8c0302317d64b490261f8f9078c59132d8a3e525ec4014"
     },
     "data/minecraft-domain-catalog.json": {
-      "bytes": 3354,
-      "sha256": "a052b3aeab7de6fbf9e8bb743aa95fdd925959bc8560dcce7ac3b5d9526b8819"
+      "bytes": 3832,
+      "sha256": "4f01ad57a72be1c67ff8739bb1f3e99903a0d33c9a3462164d90c374eb6c8d08"
+    },
+    "data/wiki-content.json": {
+      "bytes": 49727,
+      "sha256": "89799116143c9a200a23607708e6577cfe62e55f12d9d8335a8eff59ca91ecb2"
     },
     "data/minecraft-version-catalog.json": {
       "bytes": 323457,
@@ -153,12 +157,12 @@
       "sha256": "d2ea4a13149bb07641c7e5dcb6ae9fd92f7edb008a3b305eb9864a0b753522e5"
     },
     "data/github-source-catalog.json": {
-      "bytes": 41752,
-      "sha256": "711f48c324e8cec1b8f2e05d2420ec74ccfea9d23e1bf2be04f8f6c0fa2ff333"
+      "bytes": 41854,
+      "sha256": "5fa117c5fe8955e26423b0e68b674294ad9ae6f98bca86f4729698d8c5a5be26"
     },
     "data/github-source-snapshot.json": {
-      "bytes": 144585,
-      "sha256": "16e4751260ae7a9949d2b403d7cd593795bec924fee9945b15e4d452b1fdaf5f"
+      "bytes": 144687,
+      "sha256": "d87246854a6d031a09d417ceafdc8369266417275bdfac83bb231ec01c15c077"
     },
     "web/data/manifest.js": {
       "bytes": 2117,
@@ -169,24 +173,28 @@
       "sha256": "e734a34f06014d1523b0e94a076e62691a6aea2af87b34b3785796799de51583"
     },
     "web/data/ecosystem.js": {
-      "bytes": 374000,
-      "sha256": "43b8355c762e5a0af84bc45aa06d2f9bf7b905aa6f66117a8d1c1efc41d3b69c"
+      "bytes": 374459,
+      "sha256": "4eb2eb5f8408a70c94ce9f01d89d3cd9d0fba9f8d09f1886d7bd77e4bd5ff8f8"
+    },
+    "web/data/wiki.js": {
+      "bytes": 44250,
+      "sha256": "a77e591462db42ce500c6ffaef4de5cfec472cd800b8fa05f8014fdff4a801cd"
     },
     "web/index.html": {
-      "bytes": 9522,
-      "sha256": "d1b29541118a6e83e2ad560fad99660432eba4937540d568e8c54949c1cba30e"
+      "bytes": 9968,
+      "sha256": "ccf25dcf8ec4f48f8dacae44b838df8bccce0d8ef0b58ef002e7fdcdc146ee81"
     },
     "web/styles.css": {
       "bytes": 23865,
       "sha256": "ee4ef80ff9662d82e926eeca44adc2e938012db949ba8a42c4ad29475e8f2e44"
     },
     "web/ecosystem.html": {
-      "bytes": 10616,
-      "sha256": "cf7451ced448dcae203bb718768521b98e458e21534ec1ad0985e377130e1614"
+      "bytes": 11055,
+      "sha256": "d5ed118b81ab62405fdb2b2a29b3948ceca55815e5dbdfff69fb811430c6f1e4"
     },
     "web/ecosystem.css": {
-      "bytes": 25036,
-      "sha256": "1fafc62e41923da4aaa25f9e9cc7c026b70f6e52870a4d93b974188be55d73a0"
+      "bytes": 25145,
+      "sha256": "1e2aeaccfb9fc58a9a72fab0603dbdd971c949f042fad18d72618d25abe4eabc"
     },
     "web/ecosystem-app.js": {
       "bytes": 13826,
@@ -195,6 +203,38 @@
     "web/ecosystem-renderers.js": {
       "bytes": 17710,
       "sha256": "8d51b1ce5f08a61f36bb198661b2c222d18eb289bcf525d39b6f73cbe728eb1c"
+    },
+    "web/wiki.html": {
+      "bytes": 6573,
+      "sha256": "9c111ca463034918ffb64fe318912e1c6a74ca0ab4d70e831ce94c711ac2df9c"
+    },
+    "web/wiki.css": {
+      "bytes": 18520,
+      "sha256": "982eb61aed43ecbeac8f841c5d03782b4198148cf75224507c7f254918154d80"
+    },
+    "web/wiki-app.js": {
+      "bytes": 12267,
+      "sha256": "f99e7a43e21dc6bb74562f4014d01932afcb1be8af9eeedc8b86fe4c658974dc"
+    },
+    "docs/plugin-engineering-handbook.md": {
+      "bytes": 20980,
+      "sha256": "26c58123a2cc4a8527b32aab4b6afeaa9617b7368b7ddcb4f0e8f5ca74c8dd47"
+    },
+    "scripts/install-global.ps1": {
+      "bytes": 23071,
+      "sha256": "bf2f4e238449e03671f604c5d9c5612e7d9c8ec4b163b2d572da347b55366023"
+    },
+    "scripts/install-from-github.ps1": {
+      "bytes": 28049,
+      "sha256": "39ca05e24aede06f4838adfca3ef994668dc01abd6691901d64794f597c529bf"
+    },
+    "tests/test_install_layout.py": {
+      "bytes": 23357,
+      "sha256": "c27b296aedc0600ddf8ce801108f2f118c3ec9fc3964ab9ce02a65ef4313b5cb"
+    },
+    "tests/test_github_bootstrap_installer.py": {
+      "bytes": 15567,
+      "sha256": "d91309692d557eef1b10c78b6bd69c48730757264a3367998556acb54f2c3a9a"
     }
   },
   "install_targets": {

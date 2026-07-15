@@ -465,6 +465,7 @@
       "name": "Fabric Loom",
       "repository": "FabricMC/fabric-loom",
       "domains": [
+        "build",
         "core",
         "nms"
       ],
@@ -540,6 +541,7 @@
       "name": "Folia",
       "repository": "PaperMC/Folia",
       "domains": [
+        "build",
         "core"
       ],
       "priority": "P0",
@@ -583,6 +585,7 @@
       "name": "ForgeGradle",
       "repository": "MinecraftForge/ForgeGradle",
       "domains": [
+        "build",
         "core",
         "nms"
       ],
@@ -915,6 +918,7 @@
       "name": "Paper",
       "repository": "PaperMC/Paper",
       "domains": [
+        "build",
         "client",
         "core",
         "dialog",
@@ -933,6 +937,7 @@
       "name": "Paper Documentation",
       "repository": "PaperMC/docs",
       "domains": [
+        "build",
         "client",
         "core",
         "dialog",
@@ -949,6 +954,7 @@
       "name": "paperweight",
       "repository": "PaperMC/paperweight",
       "domains": [
+        "build",
         "core",
         "nms"
       ],

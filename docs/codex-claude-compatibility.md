@@ -1,14 +1,14 @@
 # Codex And Claude Compatibility
 
-MinecraftKit installs one canonical knowledge root plus nine thin route skills for both clients. Claude also receives path-based `/mc:*` command wrappers.
+Salyyy Minecraft Kit by **SalyVn / Salyyy** installs one canonical knowledge root plus ten thin route skills for both clients. Claude also receives path-based `/mc:*` command wrappers.
 
 ## Compatibility Matrix
 
 | Concern | Codex | Claude | Shared implementation |
 |---|---|---|---|
 | canonical root | `$HOME/.agents/skills/minecraftkit` | `$HOME/.claude/skills/minecraftkit` | validated physical copy |
-| focused routes | `$HOME/.agents/skills/mc-*` | `$HOME/.claude/skills/mc-*` | nine sibling `SKILL.md` wrappers |
-| slash commands | auto-routing skill descriptions | `$HOME/.claude/commands/mc/*.md` | `/mc:core`, `/mc:rpg`, `/mc:shader`, etc. |
+| focused routes | `$HOME/.agents/skills/mc-*` | `$HOME/.claude/skills/mc-*` | ten sibling `SKILL.md` wrappers |
+| slash commands | auto-routing skill descriptions | `$HOME/.claude/commands/mc/*.md` | `/mc:build`, `/mc:core`, `/mc:rpg`, `/mc:shader`, etc. |
 | discovery metadata | `name`, `description` | `name`, `description` | only common frontmatter keys |
 | progressive disclosure | metadata, wrapper, shared references/data | same | wrappers locate sibling `minecraftkit` |
 | client UI metadata | optional `agents/openai.yaml` | ignored safely | does not change workflow |
@@ -24,8 +24,8 @@ The project repository is the source of truth. Global targets are independent ph
 
 `scripts/install-global.ps1`:
 
-1. Validates source paths, the nine-domain catalog and all source trees.
-2. Builds a 21-target plan: two cores, eighteen route wrappers and one Claude command directory.
+1. Validates source paths, the ten-domain catalog and all source trees.
+2. Builds only the selected target plan: 11 Codex targets, 12 Claude targets, or 23 combined targets.
 3. Stages every payload beside its final target.
 4. Validates both staged canonical cores and compares SHA-256 tree manifests for every payload.
 5. Moves existing targets to unique timestamp/transaction backups.
@@ -37,20 +37,42 @@ It rejects overlapping roots, path escapes, unsafe names and reparse points. It 
 Preview without writes:
 
 ```text
-powershell -ExecutionPolicy Bypass -File scripts/install-global.ps1 -PlanOnly
+powershell -ExecutionPolicy Bypass -File scripts/install-global.ps1 -Target both -PlanOnly
 ```
 
-## Discovery Smoke Test
+## Install From GitHub
 
-From each installed canonical root:
+Run one PowerShell command for the intended client. The bootstrap verifies the release ZIP against its published SHA-256 sidecar before safe extraction and transactional installation.
+
+```powershell
+# Codex only
+& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/SalyyS1/minecraftkit/main/scripts/install-from-github.ps1'))) -Target codex
+
+# Claude only
+& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/SalyyS1/minecraftkit/main/scripts/install-from-github.ps1'))) -Target claude
+
+# Both
+& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/SalyyS1/minecraftkit/main/scripts/install-from-github.ps1'))) -Target both
+```
+
+## Validation And Discovery Smoke Tests
+
+Run the complete release validator from a source checkout or extracted release package, before installation:
+
+```text
+python scripts/validate_kit.py .
+```
+
+The installer validates that full staged source first, then intentionally omits the nested `skill-wrappers` directory from each installed canonical root so agents discover exactly one canonical skill plus ten sibling routes. After installation, smoke-test each canonical root with:
 
 ```text
 python scripts/query_sources.py shader --domain shader --limit 1
 python scripts/query_api.py ActiveModel --plugin ModelEngine --limit 1
-python scripts/validate_kit.py .
 ```
 
-Positive triggers should activate the narrow route: “debug this Iris shader” -> `mc:shader`; “design MMOItems stats” -> `mc:rpg`; “migrate this ProtocolLib packet” -> `mc:protocol`. A generic non-Minecraft task should not invoke the kit.
+Also verify `.version` in the installed `manifest.json`, one canonical `SKILL.md`, ten sibling `mc-*` skills (including `mc-build`), and—for Claude—ten `commands/mc/*.md` files. Do not run the full source-layout validator against the intentionally filtered canonical install.
+
+Positive triggers should activate the narrow route: “ship this Kotlin Paper plugin” -> `mc:build`; “debug this Iris shader” -> `mc:shader`; “design MMOItems stats” -> `mc:rpg`; “migrate this ProtocolLib packet” -> `mc:protocol`. A generic non-Minecraft task should not invoke the kit.
 
 Claude commands accept the task in `$ARGUMENTS`, activate the matching skill and preserve the same evidence/safety contract. Codex relies on the rich skill descriptions for auto-routing.
 

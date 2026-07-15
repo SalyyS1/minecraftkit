@@ -12,7 +12,7 @@ The authorized local input contained ten plugin JARs and ten matching decompiled
 
 No input file was modified.
 
-The v2 ecosystem expansion separately reviewed 103 canonical public GitHub repositories across nine Minecraft domains and the official Mojang Java version manifest. It records metadata, public API entrypoints, original summaries, license-aware ingestion policy, and immutable commit observations; it does not clone or mirror upstream repositories.
+The v2 ecosystem expansion separately reviewed 103 canonical public GitHub repositories across ten Minecraft domains and the official Mojang Java version manifest. It records metadata, public API entrypoints, original summaries, license-aware ingestion policy, and immutable commit observations; it does not clone or mirror upstream repositories.
 
 ## Upstream Research And Version Provenance
 

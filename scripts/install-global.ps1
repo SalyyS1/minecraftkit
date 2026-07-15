@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$SourceRoot,
+    [ValidateSet('codex', 'claude', 'both')]
+    [string]$Target = 'both',
     [string]$CodexSkillsRoot = (Join-Path $HOME '.agents\skills'),
     [string]$ClaudeSkillsRoot = (Join-Path $HOME '.claude\skills'),
     [string]$ClaudeCommandsRoot = (Join-Path $HOME '.claude\commands'),
@@ -15,6 +17,8 @@ if ([string]::IsNullOrWhiteSpace($SourceRoot)) {
 $CanonicalSkillName = 'minecraftkit'
 $LegacySkillName = 'minecraft-rpg-kit'
 $ExcludedNames = @('dist', '__pycache__', '.git', '.gitignore', '.gitattributes')
+$InstallCodex = $Target -eq 'codex' -or $Target -eq 'both'
+$InstallClaude = $Target -eq 'claude' -or $Target -eq 'both'
 
 function Get-FullPath {
     param([Parameter(Mandatory)][string]$Path)
@@ -182,6 +186,80 @@ function Remove-SafeTree {
     Remove-Item -LiteralPath $Path -Recurse -Force
 }
 
+function Get-InstallLockName {
+    param([Parameter(Mandatory)][string]$Root)
+    $normalizedRoot = (Get-FullPath $Root).TrimEnd(
+        [IO.Path]::DirectorySeparatorChar,
+        [IO.Path]::AltDirectorySeparatorChar
+    ).ToUpperInvariant()
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = [Text.Encoding]::UTF8.GetBytes($normalizedRoot)
+        $hash = [BitConverter]::ToString($algorithm.ComputeHash($bytes)).Replace('-', '').ToLowerInvariant()
+    }
+    finally {
+        $algorithm.Dispose()
+    }
+    return "Global\SalyyyMinecraftKitInstall-$hash"
+}
+
+function Exit-InstallLocks {
+    param([object[]]$Locks)
+    for ($index = $Locks.Count - 1; $index -ge 0; $index--) {
+        $installLock = $Locks[$index]
+        try {
+            if ($installLock.Acquired) {
+                $installLock.Mutex.ReleaseMutex()
+                $installLock.Acquired = $false
+            }
+        }
+        finally {
+            $installLock.Mutex.Dispose()
+        }
+    }
+}
+
+function Enter-InstallLocks {
+    param([Parameter(Mandatory)][string[]]$Roots)
+    $locks = [Collections.Generic.List[object]]::new()
+    $orderedRoots = @(
+        $Roots |
+            ForEach-Object { Get-FullPath $_ } |
+            Sort-Object { $_.ToUpperInvariant() } -Unique
+    )
+    try {
+        foreach ($root in $orderedRoots) {
+            $mutex = [Threading.Mutex]::new($false, (Get-InstallLockName -Root $root))
+            $acquired = $false
+            try {
+                try {
+                    $acquired = $mutex.WaitOne(0)
+                }
+                catch [Threading.AbandonedMutexException] {
+                    $acquired = $true
+                }
+                if (-not $acquired) {
+                    throw "Another MinecraftKit installation is already using root: $root"
+                }
+                $locks.Add([pscustomobject]@{
+                    Root = $root
+                    Mutex = $mutex
+                    Acquired = $true
+                })
+                $mutex = $null
+            }
+            finally {
+                if ($null -ne $mutex) { $mutex.Dispose() }
+            }
+        }
+        return $locks.ToArray()
+    }
+    catch {
+        Exit-InstallLocks -Locks $locks.ToArray()
+        throw
+    }
+}
+
 function Get-DomainDefinitions {
     param([Parameter(Mandatory)][string]$Root)
     $catalogPath = Join-Path $Root 'data\minecraft-domain-catalog.json'
@@ -190,8 +268,8 @@ function Get-DomainDefinitions {
     }
     $catalog = Get-Content -LiteralPath $catalogPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $domains = @($catalog.domains)
-    if ($catalog.schema_version -ne 1 -or $domains.Count -ne 9) {
-        throw 'Minecraft domain catalog must contain exactly nine schema-v1 domains.'
+    if ($catalog.schema_version -ne 1 -or $domains.Count -lt 1) {
+        throw 'Minecraft domain catalog must contain at least one schema-v1 domain.'
     }
     $definitions = @()
     $seenIds = @{}
@@ -256,10 +334,20 @@ if (-not (Test-Path -LiteralPath (Join-Path $source 'SKILL.md') -PathType Leaf))
 Assert-NoReparseAncestors $source
 Assert-PhysicalTree $source
 
-$codexRoot = Get-FullPath $CodexSkillsRoot
-$claudeRoot = Get-FullPath $ClaudeSkillsRoot
-$commandsRoot = Get-FullPath $ClaudeCommandsRoot
-$destinationRoots = @($codexRoot, $claudeRoot, $commandsRoot)
+$codexRoot = $null
+$claudeRoot = $null
+$commandsRoot = $null
+$destinationRoots = @()
+if ($InstallCodex) {
+    $codexRoot = Get-FullPath $CodexSkillsRoot
+    $destinationRoots += $codexRoot
+}
+if ($InstallClaude) {
+    $claudeRoot = Get-FullPath $ClaudeSkillsRoot
+    $commandsRoot = Get-FullPath $ClaudeCommandsRoot
+    $destinationRoots += $claudeRoot
+    $destinationRoots += $commandsRoot
+}
 for ($first = 0; $first -lt $destinationRoots.Count; $first++) {
     if (Test-PathsOverlap -First $source -Second $destinationRoots[$first]) {
         throw "The canonical source and destination roots must be disjoint: $source; $($destinationRoots[$first])"
@@ -292,23 +380,42 @@ foreach ($domain in $domains) {
 
 $transaction = [guid]::NewGuid().ToString('N')
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$codexContainer = Join-Path $codexRoot ".minecraftkit-stage-$transaction"
-$claudeContainer = Join-Path $claudeRoot ".minecraftkit-stage-$transaction"
-$commandsContainer = Join-Path $commandsRoot ".minecraftkit-commands-stage-$transaction"
-Assert-DirectChild -Child $codexContainer -Parent $codexRoot
-Assert-DirectChild -Child $claudeContainer -Parent $claudeRoot
-Assert-DirectChild -Child $commandsContainer -Parent $commandsRoot
-
-$records = @(
-    New-InstallRecord -Client 'Codex' -Kind 'canonical' -Name $CanonicalSkillName -Source $source -Root $codexRoot -Container $codexContainer -Stamp $stamp -Transaction $transaction
-    New-InstallRecord -Client 'Claude' -Kind 'canonical' -Name $CanonicalSkillName -Source $source -Root $claudeRoot -Container $claudeContainer -Stamp $stamp -Transaction $transaction
-)
+$codexContainer = $null
+$claudeContainer = $null
+$commandsContainer = $null
+$containers = @()
+$records = @()
+if ($InstallCodex) {
+    $codexContainer = Join-Path $codexRoot ".minecraftkit-stage-$transaction"
+    Assert-DirectChild -Child $codexContainer -Parent $codexRoot
+    $containers += $codexContainer
+    $records += New-InstallRecord -Client 'Codex' -Kind 'canonical' -Name $CanonicalSkillName -Source $source -Root $codexRoot -Container $codexContainer -Stamp $stamp -Transaction $transaction
+}
+if ($InstallClaude) {
+    $claudeContainer = Join-Path $claudeRoot ".minecraftkit-stage-$transaction"
+    $commandsContainer = Join-Path $commandsRoot ".minecraftkit-commands-stage-$transaction"
+    Assert-DirectChild -Child $claudeContainer -Parent $claudeRoot
+    Assert-DirectChild -Child $commandsContainer -Parent $commandsRoot
+    $containers += $claudeContainer
+    $containers += $commandsContainer
+    $records += New-InstallRecord -Client 'Claude' -Kind 'canonical' -Name $CanonicalSkillName -Source $source -Root $claudeRoot -Container $claudeContainer -Stamp $stamp -Transaction $transaction
+}
 foreach ($domain in $domains) {
     $wrapperSource = Join-Path $wrappersSource $domain.Directory
-    $records += New-InstallRecord -Client 'Codex' -Kind 'wrapper' -Name $domain.Directory -Source $wrapperSource -Root $codexRoot -Container $codexContainer -Stamp $stamp -Transaction $transaction
-    $records += New-InstallRecord -Client 'Claude' -Kind 'wrapper' -Name $domain.Directory -Source $wrapperSource -Root $claudeRoot -Container $claudeContainer -Stamp $stamp -Transaction $transaction
+    if ($InstallCodex) {
+        $records += New-InstallRecord -Client 'Codex' -Kind 'wrapper' -Name $domain.Directory -Source $wrapperSource -Root $codexRoot -Container $codexContainer -Stamp $stamp -Transaction $transaction
+    }
+    if ($InstallClaude) {
+        $records += New-InstallRecord -Client 'Claude' -Kind 'wrapper' -Name $domain.Directory -Source $wrapperSource -Root $claudeRoot -Container $claudeContainer -Stamp $stamp -Transaction $transaction
+    }
 }
-$records += New-InstallRecord -Client 'Claude' -Kind 'commands' -Name 'mc' -Source $commandsSource -Root $commandsRoot -Container $commandsContainer -Stamp $stamp -Transaction $transaction
+if ($InstallClaude) {
+    $records += New-InstallRecord -Client 'Claude' -Kind 'commands' -Name 'mc' -Source $commandsSource -Root $commandsRoot -Container $commandsContainer -Stamp $stamp -Transaction $transaction
+}
+
+$preservedLegacyTargets = @()
+if ($InstallCodex) { $preservedLegacyTargets += Join-Path $codexRoot $LegacySkillName }
+if ($InstallClaude) { $preservedLegacyTargets += Join-Path $claudeRoot $LegacySkillName }
 
 if ($PlanOnly) {
     $installs = @(
@@ -325,113 +432,128 @@ if ($PlanOnly) {
     )
     [ordered]@{
         schemaVersion = 1
+        target = $Target
         canonicalSkill = $CanonicalSkillName
         installs = $installs
-        preservedLegacyTargets = @(
-            (Join-Path $codexRoot $LegacySkillName),
-            (Join-Path $claudeRoot $LegacySkillName)
-        )
+        preservedLegacyTargets = $preservedLegacyTargets
     } | ConvertTo-Json -Depth 5
     return
 }
 
-foreach ($root in $destinationRoots) {
-    New-Item -ItemType Directory -Path $root -Force | Out-Null
-    Assert-NoReparseAncestors $root
-}
-$containers = @($codexContainer, $claudeContainer, $commandsContainer)
-foreach ($container in $containers) {
-    if (Test-Path -LiteralPath $container) {
-        throw "Transaction staging path already exists: $container"
-    }
-}
-
+$installLocks = @()
 try {
-    foreach ($record in $records) {
-        $record.ExpectedManifest = @(Get-ContentManifest -Root $record.Source)
-        Copy-Payload -Source $record.Source -Destination $record.Stage
-        Assert-PhysicalTree $record.Stage
-        Assert-ManifestMatch -Expected $record.ExpectedManifest -Actual @(Get-ContentManifest -Root $record.Stage) -Label "$($record.Client) $($record.Name) stage"
-        if ($record.Kind -eq 'canonical') {
-            & $Python -B (Join-Path $record.Stage 'scripts\validate_kit.py') $record.Stage | Out-Host
-            if ($LASTEXITCODE -ne 0) { throw "$($record.Client) staged canonical validation failed." }
+    $installLocks = @(Enter-InstallLocks -Roots $destinationRoots)
+    foreach ($root in $destinationRoots) {
+        New-Item -ItemType Directory -Path $root -Force | Out-Null
+        Assert-NoReparseAncestors $root
+    }
+    foreach ($container in $containers) {
+        if (Test-Path -LiteralPath $container) {
+            throw "Transaction staging path already exists: $container"
         }
     }
 
-    foreach ($record in $records) {
-        if (Test-Path -LiteralPath $record.Backup) {
-            throw "Refusing to overwrite an existing backup: $($record.Backup)"
-        }
-        if (Test-Path -LiteralPath $record.Target) {
-            if (Test-ReparsePoint $record.Target) { throw "Existing target is a reparse point: $($record.Target)" }
-            if (Test-Path -LiteralPath $record.Target -PathType Container) { Assert-PhysicalTree $record.Target }
-            $record.HadTarget = $true
-            Move-Item -LiteralPath $record.Target -Destination $record.Backup
-            if ((Test-Path -LiteralPath $record.Target) -or -not (Test-Path -LiteralPath $record.Backup)) {
-                throw "Target backup did not complete: $($record.Target)"
-            }
-        }
-    }
-
-    foreach ($record in $records) {
-        if (Test-Path -LiteralPath $record.Target) {
-            throw "Target appeared during transaction: $($record.Target)"
-        }
-        $record.Promoted = $true
-        Move-Item -LiteralPath $record.Stage -Destination $record.Target
-        if (-not (Test-Path -LiteralPath $record.Target -PathType Container)) {
-            throw "Payload promotion did not complete: $($record.Target)"
-        }
-        Assert-PhysicalTree $record.Target
-        Assert-ManifestMatch -Expected $record.ExpectedManifest -Actual @(Get-ContentManifest -Root $record.Target) -Label "$($record.Client) $($record.Name) install"
-        if ($record.Kind -eq 'canonical') {
-            & $Python -B (Join-Path $record.Target 'scripts\query_api.py') ActiveModel --plugin ModelEngine --limit 1 | Out-Host
-            if ($LASTEXITCODE -ne 0) { throw "$($record.Client) canonical smoke test failed." }
-        }
-    }
-}
-catch {
-    $installError = $_
-    $rollbackErrors = @()
-    for ($recordIndex = $records.Count - 1; $recordIndex -ge 0; $recordIndex--) {
-        $record = $records[$recordIndex]
-        try {
-            if ($record.Promoted -and (Test-Path -LiteralPath $record.Target)) {
-                Remove-SafeTree -Path $record.Target -Parent $record.Root
-            }
-        }
-        catch {
-            $rollbackErrors += "$($record.Client) $($record.Name) cleanup failed: $($_.Exception.Message)"
-        }
-        try {
-            if ($record.HadTarget -and (Test-Path -LiteralPath $record.Backup)) {
-                if (Test-Path -LiteralPath $record.Target) {
-                    throw "Cannot restore backup because target exists: $($record.Target)"
+    try {
+        foreach ($record in $records) {
+            $record.ExpectedManifest = @(Get-ContentManifest -Root $record.Source)
+            Copy-Payload -Source $record.Source -Destination $record.Stage
+            Assert-PhysicalTree $record.Stage
+            Assert-ManifestMatch -Expected $record.ExpectedManifest -Actual @(Get-ContentManifest -Root $record.Stage) -Label "$($record.Client) $($record.Name) stage"
+            if ($record.Kind -eq 'canonical') {
+                & $Python -B (Join-Path $record.Stage 'scripts\validate_kit.py') $record.Stage | Out-Host
+                if ($LASTEXITCODE -ne 0) { throw "$($record.Client) staged canonical validation failed." }
+                $nestedWrappers = Join-Path $record.Stage 'skill-wrappers'
+                Assert-DirectChild -Child $nestedWrappers -Parent $record.Stage
+                Remove-SafeTree -Path $nestedWrappers -Parent $record.Stage
+                if (Test-Path -LiteralPath $nestedWrappers) {
+                    throw "$($record.Client) canonical wrapper deduplication failed."
                 }
-                Move-Item -LiteralPath $record.Backup -Destination $record.Target
+                $record.ExpectedManifest = @(Get-ContentManifest -Root $record.Stage)
             }
         }
-        catch {
-            $rollbackErrors += "$($record.Client) $($record.Name) restore failed: $($_.Exception.Message)"
+
+        foreach ($record in $records) {
+            if (Test-Path -LiteralPath $record.Backup) {
+                throw "Refusing to overwrite an existing backup: $($record.Backup)"
+            }
+            if (Test-Path -LiteralPath $record.Target) {
+                if (Test-ReparsePoint $record.Target) { throw "Existing target is a reparse point: $($record.Target)" }
+                if (-not (Test-Path -LiteralPath $record.Target -PathType Container)) {
+                    throw "Existing target is not a directory: $($record.Target)"
+                }
+                Assert-PhysicalTree $record.Target
+                [System.IO.Directory]::Move($record.Target, $record.Backup)
+                $record.HadTarget = $true
+                if ((Test-Path -LiteralPath $record.Target) -or -not (Test-Path -LiteralPath $record.Backup -PathType Container)) {
+                    throw "Target backup did not complete: $($record.Target)"
+                }
+            }
+        }
+
+        foreach ($record in $records) {
+            if (Test-Path -LiteralPath $record.Target) {
+                throw "Target appeared during transaction: $($record.Target)"
+            }
+            [System.IO.Directory]::Move($record.Stage, $record.Target)
+            $record.Promoted = $true
+            if (-not (Test-Path -LiteralPath $record.Target -PathType Container)) {
+                throw "Payload promotion did not complete: $($record.Target)"
+            }
+            Assert-PhysicalTree $record.Target
+            Assert-ManifestMatch -Expected $record.ExpectedManifest -Actual @(Get-ContentManifest -Root $record.Target) -Label "$($record.Client) $($record.Name) install"
+            if ($record.Kind -eq 'canonical') {
+                & $Python -B (Join-Path $record.Target 'scripts\query_api.py') ActiveModel --plugin ModelEngine --limit 1 | Out-Host
+                if ($LASTEXITCODE -ne 0) { throw "$($record.Client) canonical smoke test failed." }
+            }
         }
     }
-    if ($rollbackErrors.Count) {
-        $details = $rollbackErrors -join '; '
-        throw [InvalidOperationException]::new("Installation failed: $($installError.Exception.Message). Rollback errors: $details", $installError.Exception)
+    catch {
+        $installError = $_
+        $rollbackErrors = @()
+        for ($recordIndex = $records.Count - 1; $recordIndex -ge 0; $recordIndex--) {
+            $record = $records[$recordIndex]
+            try {
+                if ($record.Promoted -and (Test-Path -LiteralPath $record.Target)) {
+                    Assert-ManifestMatch -Expected $record.ExpectedManifest -Actual @(Get-ContentManifest -Root $record.Target) -Label "$($record.Client) $($record.Name) rollback ownership"
+                    Remove-SafeTree -Path $record.Target -Parent $record.Root
+                }
+            }
+            catch {
+                $rollbackErrors += "$($record.Client) $($record.Name) cleanup failed: $($_.Exception.Message)"
+            }
+            try {
+                if ($record.HadTarget -and (Test-Path -LiteralPath $record.Backup)) {
+                    if (Test-Path -LiteralPath $record.Target) {
+                        throw "Cannot restore backup because target exists: $($record.Target)"
+                    }
+                    [System.IO.Directory]::Move($record.Backup, $record.Target)
+                }
+            }
+            catch {
+                $rollbackErrors += "$($record.Client) $($record.Name) restore failed: $($_.Exception.Message)"
+            }
+        }
+        if ($rollbackErrors.Count) {
+            $details = $rollbackErrors -join '; '
+            throw [InvalidOperationException]::new("Installation failed: $($installError.Exception.Message). Rollback errors: $details", $installError.Exception)
+        }
+        $PSCmdlet.ThrowTerminatingError($installError)
     }
-    $PSCmdlet.ThrowTerminatingError($installError)
+    finally {
+        for ($index = $containers.Count - 1; $index -ge 0; $index--) {
+            $container = $containers[$index]
+            if (Test-Path -LiteralPath $container) {
+                Remove-SafeTree -Path $container -Parent (Split-Path -Parent $container)
+            }
+        }
+    }
+
+    foreach ($record in $records) {
+        $backupText = if ($record.HadTarget) { "; backup=$($record.Backup)" } else { '' }
+        Write-Output "$($record.Client) $($record.Kind): installed physical copy at $($record.Target)$backupText"
+    }
+    Write-Output "Legacy targets preserved: $($preservedLegacyTargets -join '; ')"
 }
 finally {
-    for ($index = $containers.Count - 1; $index -ge 0; $index--) {
-        $container = $containers[$index]
-        if (Test-Path -LiteralPath $container) {
-            Remove-SafeTree -Path $container -Parent (Split-Path -Parent $container)
-        }
-    }
+    Exit-InstallLocks -Locks $installLocks
 }
-
-foreach ($record in $records) {
-    $backupText = if ($record.HadTarget) { "; backup=$($record.Backup)" } else { '' }
-    Write-Output "$($record.Client) $($record.Kind): installed physical copy at $($record.Target)$backupText"
-}
-Write-Output "Legacy targets preserved: $(Join-Path $codexRoot $LegacySkillName); $(Join-Path $claudeRoot $LegacySkillName)"

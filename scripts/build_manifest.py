@@ -13,7 +13,7 @@ from typing import Any
 
 SCHEMA_VERSION = 2
 KIT_NAME = "minecraftkit"
-KIT_VERSION = "2.0.0"
+KIT_VERSION = "2.1.0"
 RESEARCH_DATE = "2026-07-15"
 INSTALL_TARGETS = {
     "codex": {
@@ -35,6 +35,7 @@ TRACKED = (
     "data/feature-catalog.json",
     "data/addon-ideas.json",
     "data/minecraft-domain-catalog.json",
+    "data/wiki-content.json",
     "data/minecraft-version-catalog.json",
     "data/minecraft-release-capabilities.json",
     "data/github-source-catalog.json",
@@ -42,12 +43,21 @@ TRACKED = (
     "web/data/manifest.js",
     "web/data/insights.js",
     "web/data/ecosystem.js",
+    "web/data/wiki.js",
     "web/index.html",
     "web/styles.css",
     "web/ecosystem.html",
     "web/ecosystem.css",
     "web/ecosystem-app.js",
     "web/ecosystem-renderers.js",
+    "web/wiki.html",
+    "web/wiki.css",
+    "web/wiki-app.js",
+    "docs/plugin-engineering-handbook.md",
+    "scripts/install-global.ps1",
+    "scripts/install-from-github.ps1",
+    "tests/test_install_layout.py",
+    "tests/test_github_bootstrap_installer.py",
 )
 
 

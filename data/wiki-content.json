@@ -1,0 +1,551 @@
+{
+  "schema_version": 1,
+  "product": {
+    "name": "Salyyy Minecraft Kit",
+    "author": "SalyVn",
+    "alias": "Salyyy",
+    "version": "2.1.0"
+  },
+  "ui": {
+    "vi": {
+      "skip": "Bỏ qua đến nội dung chính",
+      "brand_home": "Trang chủ wiki Salyyy Minecraft Kit",
+      "primary_nav_label": "Mục wiki",
+      "wiki_summary_label": "Tóm tắt wiki",
+      "controls_label": "Tìm kiếm và lọc tuyến trong wiki",
+      "eyebrow": "Cẩm nang kỹ thuật Minecraft • ngoại tuyến",
+      "hero_title": "Xây plugin có bằng chứng, không đoán mò.",
+      "hero_copy": "Mười tuyến chuyên môn, quy trình sản xuất plugin và bộ cài cho Codex lẫn Claude — chạy hoàn toàn bằng tệp cục bộ.",
+      "author_by": "Thiết kế bởi",
+      "routes_count": "tuyến kỹ thuật",
+      "languages_count": "ngôn ngữ",
+      "offline_label": "không cần mạng khi đọc",
+      "nav_routes": "Tuyến mc:*",
+      "nav_handbook": "Cẩm nang",
+      "nav_install": "Cài đặt",
+      "language_label": "Ngôn ngữ",
+      "language_vi": "VI",
+      "language_en": "EN",
+      "search_label": "Tìm trong wiki",
+      "search_placeholder": "Tìm route, Gradle, Folia, SQL, shader…",
+      "search_hint": "Nhấn / để tìm",
+      "route_filter_label": "Lọc theo tuyến",
+      "all_routes": "Tất cả tuyến",
+      "route_section_title": "Bản đồ tuyến chuyên môn",
+      "route_section_copy": "Chọn đúng ranh giới trước, rồi ghép các tuyến phụ khi tính năng thật sự cắt qua nhiều lớp.",
+      "handbook_title": "Sổ tay sản xuất plugin",
+      "handbook_copy": "Những hợp đồng nền tảng từ mã nguồn đến phát hành.",
+      "install_title": "Cài từ GitHub",
+      "install_copy": "Ba chế độ cài gọi cùng một entry point trên nhánh main. Hãy đọc script trước khi chạy trong môi trường nhạy cảm.",
+      "what": "Làm gì",
+      "when": "Khi nào dùng",
+      "inputs": "Đầu vào cần chốt",
+      "workflow": "Quy trình",
+      "outputs": "Đầu ra",
+      "guardrails": "Hàng rào an toàn",
+      "examples": "Prompt mẫu",
+      "copy": "Sao chép",
+      "copied": "Đã sao chép",
+      "copy_failed": "Không thể sao chép tự động",
+      "open_route": "Mở tuyến",
+      "close_route": "Đóng chi tiết",
+      "no_results": "Không có nội dung phù hợp. Hãy thử từ khóa rộng hơn.",
+      "results_status": "kết quả",
+      "offline_note": "Wiki này không tải CDN, font, dữ liệu hay script từ xa khi mở. Liên kết mạng chỉ xuất hiện bên trong lệnh cài do bạn chủ động chạy.",
+      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.0",
+      "footer_boundary": "Khả năng tương thích luôn phụ thuộc phiên bản; kit không cam kết hỗ trợ phổ quát."
+    },
+    "en": {
+      "skip": "Skip to main content",
+      "brand_home": "Salyyy Minecraft Kit wiki home",
+      "primary_nav_label": "Wiki sections",
+      "wiki_summary_label": "Wiki summary",
+      "controls_label": "Wiki search and route filters",
+      "eyebrow": "Minecraft engineering handbook • offline",
+      "hero_title": "Build plugins from evidence, not guesses.",
+      "hero_copy": "Ten focused routes, a production plugin workflow, and installers for Codex and Claude — entirely local at reading time.",
+      "author_by": "Designed by",
+      "routes_count": "engineering routes",
+      "languages_count": "languages",
+      "offline_label": "network-free reading",
+      "nav_routes": "mc:* routes",
+      "nav_handbook": "Handbook",
+      "nav_install": "Install",
+      "language_label": "Language",
+      "language_vi": "VI",
+      "language_en": "EN",
+      "search_label": "Search the wiki",
+      "search_placeholder": "Search routes, Gradle, Folia, SQL, shaders…",
+      "search_hint": "Press / to search",
+      "route_filter_label": "Filter by route",
+      "all_routes": "All routes",
+      "route_section_title": "Focused route map",
+      "route_section_copy": "Choose the smallest boundary first, then add secondary routes only when the feature truly crosses layers.",
+      "handbook_title": "Plugin production handbook",
+      "handbook_copy": "The core contracts from source code through publishing.",
+      "install_title": "Install from GitHub",
+      "install_copy": "All three modes call one entry point on main. Inspect the script before running it in a sensitive environment.",
+      "what": "What it does",
+      "when": "When to use it",
+      "inputs": "Inputs to resolve",
+      "workflow": "Workflow",
+      "outputs": "Outputs",
+      "guardrails": "Guardrails",
+      "examples": "Example prompts",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copy_failed": "Automatic copy unavailable",
+      "open_route": "Open route",
+      "close_route": "Close details",
+      "no_results": "Nothing matches. Try a broader search term.",
+      "results_status": "results",
+      "offline_note": "This wiki loads no remote CDN, font, data, or script. A network URL appears only inside an install command that you choose to run.",
+      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.0",
+      "footer_boundary": "Compatibility is always version-scoped; the kit makes no universal support claim."
+    }
+  },
+  "routes": [
+    {
+      "id": "build",
+      "route": "mc:build",
+      "keywords": ["build", "plugin", "kotlin", "java", "gradle", "yaml", "json", "release", "ci"],
+      "content": {
+        "vi": {
+          "title": "Dựng plugin & bàn giao",
+          "what": "Biến yêu cầu thành một plugin Kotlin hoặc Java có cấu trúc, build được, cấu hình được, kiểm thử được và sẵn sàng đóng gói.",
+          "when": ["Khởi tạo plugin mới hoặc tái cấu trúc dự án rời rạc.", "Cần nối thiết kế từ một tuyến mc:* vào Gradle, descriptor, tài nguyên và quy trình phát hành."],
+          "inputs": ["Minecraft, Java, Paper/Purpur/Folia và API phụ thuộc ở phiên bản chính xác.", "Kotlin hay Java, Gradle Kotlin DSL hay Groovy DSL, namespace, tên plugin và chính sách tương thích.", "Lệnh, quyền, cấu hình YAML/JSON, mô hình dữ liệu và mục tiêu đóng gói."],
+          "workflow": ["Chốt hợp đồng nền tảng và tuyến chuyên môn chính.", "Thiết kế module, package, lifecycle và ownership trước khi viết handler.", "Khóa toolchain/dependency, tạo descriptor và schema cấu hình.", "Build sạch, chạy kiểm thử, rà JAR và lập ghi chú phát hành."],
+          "outputs": ["Cây dự án và mã nguồn có ranh giới rõ.", "Gradle wrapper/build script, plugin descriptor, tài nguyên mặc định và checklist QA/phát hành.", "Kế hoạch xác minh theo đúng runtime; không phải tuyên bố tương thích chung."],
+          "guardrails": ["Không nhúng secret, credential hoặc dữ liệu người chơi vào source/tài nguyên.", "Không block main thread bằng I/O; Folia phải dùng scheduler theo ownership.", "Không bịa API hay tuyên bố mọi phiên bản đều chạy; đánh dấu phần chưa xác minh."],
+          "examples": ["/mc:build Dựng plugin Paper 1.21.x bằng Kotlin, Gradle Kotlin DSL, có /home và lưu SQLite bất đồng bộ.", "/mc:build Chuyển plugin Java hiện tại sang Folia, giữ API công khai và tạo checklist release SemVer."]
+        },
+        "en": {
+          "title": "Plugin build & delivery",
+          "what": "Turns a requirement into a structured Kotlin or Java plugin that builds, configures, tests, and packages cleanly.",
+          "when": ["Starting a plugin or rescuing an unstructured project.", "Connecting an mc:* domain design to Gradle, descriptors, resources, QA, and release work."],
+          "inputs": ["Exact Minecraft, Java, Paper/Purpur/Folia, and dependency versions.", "Kotlin or Java, Gradle DSL, namespace, plugin identity, and compatibility policy.", "Commands, permissions, YAML/JSON configuration, data model, and package target."],
+          "workflow": ["Resolve the platform contract and primary domain route.", "Design modules, packages, lifecycle, and ownership before handlers.", "Pin toolchains/dependencies, then add descriptors and configuration schemas.", "Run a clean build, tests, JAR inspection, and release review."],
+          "outputs": ["A project tree and source boundaries that can be maintained.", "Gradle wrapper/build logic, plugin descriptor, default resources, and QA/release checklist.", "An exact-runtime validation plan rather than a blanket compatibility claim."],
+          "guardrails": ["Never embed secrets, credentials, or player data in source or resources.", "Never block the main thread with I/O; Folia work must use ownership-aware scheduling.", "Do not invent APIs or claim every version works; label unverified behavior."],
+          "examples": ["/mc:build Build a Kotlin Paper 1.21.x plugin with Gradle Kotlin DSL, /home, and async SQLite persistence.", "/mc:build Migrate this Java plugin to Folia, preserve its public API, and produce a SemVer release checklist."]
+        }
+      }
+    },
+    {
+      "id": "client",
+      "route": "mc:client",
+      "keywords": ["client", "projection", "fake entity", "hologram", "geyser", "camera", "mod"],
+      "content": {
+        "vi": {
+          "title": "Client & phép chiếu",
+          "what": "Thiết kế client mod hoặc hình ảnh do server chiếu riêng cho từng người xem như fake entity, block, hologram và camera.",
+          "when": ["Tính năng cần renderer/client mod thật sự.", "Server muốn tạo trải nghiệm trực quan cho vanilla client hoặc client Bedrock qua lớp dịch."],
+          "inputs": ["Java hay Bedrock client, phiên bản server/proxy và có bắt buộc cài mod hay không.", "Ai sở hữu state, ai nhìn thấy projection, giới hạn tương tác và fallback."],
+          "workflow": ["Tách state có thẩm quyền ở server khỏi hình ảnh theo viewer.", "Mô hình hóa join, respawn, đổi world, tracking, cập nhật và despawn.", "Đo băng thông/packet rate và thử client đại diện."],
+          "outputs": ["Kiến trúc client/server hoặc projection có lifecycle rõ.", "Ma trận client hỗ trợ, hành vi giảm cấp và kế hoạch test."],
+          "guardrails": ["Không tin click hay payload gửi từ client; server phải xác thực lại.", "Luôn cleanup theo viewer và không hứa Bedrock hiển thị giống Java.", "Không dùng projection để giám sát ẩn hoặc lừa nhập dữ liệu."],
+          "examples": ["/mc:client Thiết kế hologram theo người xem cho Paper, không yêu cầu mod và có fallback Geyser.", "/mc:client Tạo camera cinematic bằng client mod; chỉ rõ sync, thoát sớm và khôi phục state."]
+        },
+        "en": {
+          "title": "Client & projection",
+          "what": "Designs client mods or server-driven per-viewer visuals such as fake entities, blocks, holograms, and cameras.",
+          "when": ["A feature genuinely needs a renderer or installed client mod.", "A server needs a visual experience for vanilla clients or Bedrock clients behind translation."],
+          "inputs": ["Java or Bedrock client, exact server/proxy version, and whether a mod is required.", "State owner, viewer set, interaction limits, and fallback behavior."],
+          "workflow": ["Separate server-authoritative state from per-viewer presentation.", "Model join, respawn, world change, tracking, updates, and despawn.", "Budget packet traffic and test representative clients."],
+          "outputs": ["A client/server or projection architecture with explicit lifecycle.", "A client support matrix, degradation behavior, and validation plan."],
+          "guardrails": ["Treat every client click and payload as untrusted; validate on the server.", "Clean up per viewer and never promise identical Bedrock rendering.", "Do not build covert monitoring or deceptive input collection."],
+          "examples": ["/mc:client Design per-player Paper holograms with no required mod and a Geyser fallback.", "/mc:client Build a client-mod cinematic camera flow with synchronization, early exit, and state restoration."]
+        }
+      }
+    },
+    {
+      "id": "core",
+      "route": "mc:core",
+      "keywords": ["core", "version", "paper", "purpur", "folia", "fabric", "forge", "velocity", "java"],
+      "content": {
+        "vi": {
+          "title": "Nền tảng & phiên bản",
+          "what": "Chốt hợp đồng Minecraft cốt lõi: edition, version, Java, server fork, loader, proxy, API và ranh giới tương thích.",
+          "when": ["Bắt đầu mọi bài toán phụ thuộc phiên bản/nền tảng.", "Di chuyển Paper, Purpur, Folia, Fabric, Forge/NeoForge, Velocity hoặc nhiều runtime."],
+          "inputs": ["Edition và phiên bản Minecraft chính xác; Java runtime/toolchain.", "Server/client/proxy, fork hoặc loader, dependency đã pin và yêu cầu client."],
+          "workflow": ["Tra catalog phiên bản/nguồn đã pin thay vì nhớ máy móc.", "Ưu tiên API công khai và tách nhánh theo capability.", "Xác minh bằng compile tối thiểu và runtime mục tiêu."],
+          "outputs": ["Bảng hợp đồng nền tảng và route phụ cần gọi.", "Ranh giới tương thích, phương án giảm cấp và kế hoạch xác minh."],
+          "guardrails": ["Không đồng nhất Paper, Purpur và Folia; scheduler/lifecycle có thể khác.", "Không coi latest, supported và tested là cùng một sự thật.", "Giữ claim quan trọng gắn với version/commit cụ thể."],
+          "examples": ["/mc:core So sánh hợp đồng scheduler cho plugin chạy Paper và Folia ở phiên bản tôi cung cấp.", "/mc:core Lập ma trận Java, proxy và server cho mạng Velocity + Paper hiện tại."]
+        },
+        "en": {
+          "title": "Platforms & versions",
+          "what": "Resolves the core Minecraft contract: edition, version, Java, server fork, loader, proxy, API, and compatibility boundary.",
+          "when": ["Beginning any platform- or version-sensitive task.", "Migrating across Paper, Purpur, Folia, Fabric, Forge/NeoForge, Velocity, or multiple runtimes."],
+          "inputs": ["Exact Minecraft edition/version and Java runtime/toolchain.", "Server/client/proxy, fork or loader, pinned dependencies, and client requirements."],
+          "workflow": ["Query pinned version/source catalogs instead of relying on memory.", "Prefer public APIs and branch by real capability.", "Verify with a minimal compile and the target runtime."],
+          "outputs": ["A platform contract and any secondary routes needed.", "Compatibility boundaries, degradation choices, and a validation plan."],
+          "guardrails": ["Do not collapse Paper, Purpur, and Folia into one runtime; scheduler/lifecycle contracts differ.", "Do not treat latest, supported, and tested as synonyms.", "Attach material claims to exact versions or commits."],
+          "examples": ["/mc:core Compare scheduler contracts for my supplied Paper and Folia versions.", "/mc:core Produce a Java, proxy, and server matrix for this Velocity + Paper network."]
+        }
+      }
+    },
+    {
+      "id": "dialog",
+      "route": "mc:dialog",
+      "keywords": ["dialog", "input", "button", "click", "menu", "server links", "fallback"],
+      "content": {
+        "vi": {
+          "title": "Dialog & hành động client",
+          "what": "Thiết kế dialog native, input, action button, click payload và fallback trung thực cho client không hỗ trợ.",
+          "when": ["Dùng hệ thống dialog của phiên bản Minecraft mục tiêu.", "Thay menu/chat flow bằng giao diện có đăng ký và hành động rõ."],
+          "inputs": ["Minecraft/Paper version, chế độ đăng ký và namespaced key.", "Body, input, action, after-action, quyền và client fallback."],
+          "workflow": ["Xác minh capability native ở đúng phiên bản.", "Định nghĩa schema input/action và state transition.", "Kiểm tra quyền, replay, payload lỗi và client cũ."],
+          "outputs": ["Sơ đồ dialog/action và payload contract.", "Fallback có cùng ý nghĩa, giới hạn retry và test matrix."],
+          "guardrails": ["Mọi input/click từ client đều không đáng tin; xác thực permission và context.", "Giới hạn replay/rate và không thu credential.", "Giữ nhãn experimental nếu upstream còn experimental."],
+          "examples": ["/mc:dialog Thiết kế dialog chọn kit có xác nhận, permission và fallback inventory GUI.", "/mc:dialog Debug action payload bị replay sau reconnect trên Paper phiên bản đã pin."]
+        },
+        "en": {
+          "title": "Dialogs & client actions",
+          "what": "Designs native dialogs, inputs, action buttons, click payloads, and honest fallbacks for unsupported clients.",
+          "when": ["Using the dialog system available in an exact Minecraft release.", "Replacing a menu/chat flow with registered UI and explicit actions."],
+          "inputs": ["Minecraft/Paper version, registration mode, and namespaced keys.", "Body, inputs, actions, after-action behavior, authorization, and fallback clients."],
+          "workflow": ["Verify the native capability on the target version.", "Define input/action schemas and state transitions.", "Test authorization, replay, malformed payloads, and older clients."],
+          "outputs": ["A dialog/action map and payload contract.", "A semantically equivalent fallback, retry limits, and test matrix."],
+          "guardrails": ["Treat client input/clicks as untrusted; recheck permission and context.", "Rate-limit replay and never collect credentials.", "Preserve upstream experimental labels while they apply."],
+          "examples": ["/mc:dialog Design a kit picker with confirmation, permissions, and an inventory-GUI fallback.", "/mc:dialog Debug an action payload replayed after reconnect on my pinned Paper release."]
+        }
+      }
+    },
+    {
+      "id": "model",
+      "route": "mc:model",
+      "keywords": ["model", "blockbench", "animation", "bone", "rig", "geckolib", "modelengine"],
+      "content": {
+        "vi": {
+          "title": "Model & animation",
+          "what": "Chọn pipeline Blockbench/2D/3D, rig, bone, animation, exporter và runtime trước khi tạo asset.",
+          "when": ["Tạo mob/vật phẩm/đạo cụ có model và animation.", "Tích hợp ModelEngine, GeckoLib/AzureLib hoặc runtime tùy biến."],
+          "inputs": ["Edition/version, server-only hay client mod, exporter và runtime đã pin.", "Hệ tọa độ, pivot, bone, texture, controller, hitbox và identifier."],
+          "workflow": ["Chọn runtime rồi mới khóa authoring format.", "Lập mapping bone/animation/identifier xuyên suốt asset và code.", "Test transform, culling, interpolation, hitbox và cleanup viewer."],
+          "outputs": ["Hợp đồng asset-to-runtime và sơ đồ rig/controller.", "Danh sách file/identifier, fallback visual và test scene."],
+          "guardrails": ["Không sao chép asset độc quyền hoặc giả định exporter tương thích mọi runtime.", "Hitbox và gameplay state vẫn do server quản lý.", "Pin phiên bản plugin/runtime và kiểm tra giới hạn renderer."],
+          "examples": ["/mc:model Thiết kế pipeline boss Blockbench sang ModelEngine với bone hitbox và fallback.", "/mc:model Sửa animation bị lệch pivot khi chuyển exporter; cho tôi test scene tối thiểu."]
+        },
+        "en": {
+          "title": "Models & animation",
+          "what": "Chooses a Blockbench/2D/3D pipeline, rig, bones, animation, exporter, and runtime before asset production.",
+          "when": ["Building modeled and animated mobs, items, or props.", "Integrating ModelEngine, GeckoLib/AzureLib, or a custom runtime."],
+          "inputs": ["Edition/version, server-only or client-mod target, exporter, and pinned runtime.", "Coordinates, pivots, bones, textures, controllers, hitboxes, and identifiers."],
+          "workflow": ["Choose the runtime before locking the authoring format.", "Map bones, animations, and identifiers across assets and code.", "Test transforms, culling, interpolation, hitboxes, and viewer cleanup."],
+          "outputs": ["An asset-to-runtime contract and rig/controller map.", "File/identifier inventory, fallback visuals, and a test scene."],
+          "guardrails": ["Do not copy proprietary assets or assume an exporter works across every runtime.", "Keep hitboxes and gameplay state server-authoritative.", "Pin plugin/runtime versions and test renderer limits."],
+          "examples": ["/mc:model Design a Blockbench-to-ModelEngine boss pipeline with bone hitboxes and fallback visuals.", "/mc:model Fix a pivot offset introduced by an exporter and give me a minimal validation scene."]
+        }
+      }
+    },
+    {
+      "id": "nms",
+      "route": "mc:nms",
+      "keywords": ["nms", "mapping", "mojmap", "paperweight", "reflection", "internals", "userdev"],
+      "content": {
+        "vi": {
+          "title": "NMS & mappings",
+          "what": "Cô lập Minecraft internals, mapping namespace, paperweight/userdev, reflection và module theo version khi API ổn định không đủ.",
+          "when": ["Đã chứng minh API công khai hoặc packet wrapper không cung cấp capability.", "Cần migrate code nội bộ qua version/mapping khác."],
+          "inputs": ["Runtime, Java, build tool và mapping namespace chính xác.", "Capability tối thiểu, signature đã xác minh và danh sách version thực sự hỗ trợ."],
+          "workflow": ["Tìm đường API ổn định trước.", "Cô lập adapter/version module và fail closed khi signature lạ.", "Compile + runtime test từng version hỗ trợ."],
+          "outputs": ["Adapter nhỏ với ranh giới mapping rõ.", "Ma trận signature/version, failure mode và kế hoạch loại bỏ NMS."],
+          "guardrails": ["Không redistribute binary/code Mojang hoặc body decompile.", "Không reflection scan mù hay fallback sang signature gần giống.", "Unknown version phải bị từ chối rõ ràng."],
+          "examples": ["/mc:nms Chứng minh có cần NMS cho capability này trên Paper đã pin, rồi thiết kế adapter tối thiểu.", "/mc:nms Migrate adapter Mojmap qua version mới và fail closed khi signature đổi."]
+        },
+        "en": {
+          "title": "NMS & mappings",
+          "what": "Isolates Minecraft internals, mapping namespaces, paperweight/userdev, reflection, and version modules when stable APIs are insufficient.",
+          "when": ["A public API or packet wrapper has been shown not to provide the capability.", "Migrating internal code across versions or mappings."],
+          "inputs": ["Exact runtime, Java, build tooling, and mapping namespace.", "Smallest required capability, verified signatures, and genuinely supported versions."],
+          "workflow": ["Prove the stable API route first.", "Isolate an adapter/version module and fail closed on unknown signatures.", "Compile and runtime-test each supported version."],
+          "outputs": ["A small adapter with an explicit mapping boundary.", "A signature/version matrix, failure mode, and NMS retirement path."],
+          "guardrails": ["Never redistribute Mojang binaries, source, or decompiled method bodies.", "Avoid blind reflection scans and near-signature fallbacks.", "Reject unknown versions explicitly."],
+          "examples": ["/mc:nms Prove whether this pinned Paper capability needs NMS, then design the smallest adapter.", "/mc:nms Migrate this Mojmap adapter and fail closed when its signature changes."]
+        }
+      }
+    },
+    {
+      "id": "pack",
+      "route": "mc:pack",
+      "keywords": ["pack", "resource pack", "data pack", "texture", "font", "sound", "atlas", "json"],
+      "content": {
+        "vi": {
+          "title": "Resource & data pack",
+          "what": "Thiết kế, migrate và kiểm tra resource/data pack: format, namespace, JSON reference, atlas, model, font, sound và delivery.",
+          "when": ["Thêm asset client hoặc dữ liệu vanilla có version contract.", "Pack lỗi sau upgrade, merge hoặc cache client."],
+          "inputs": ["Edition/version và loại resource hay data pack.", "Pack format, namespace, priority, URL/hash delivery và quyền asset."],
+          "workflow": ["Xác minh format/version và chuẩn hóa path/case.", "Kiểm tra toàn bộ JSON reference và merge priority.", "Test reload, clean cache, accept/decline và fallback."],
+          "outputs": ["Cây pack hợp lệ và migration map.", "Manifest delivery/hash, báo cáo reference lỗi và fallback assets."],
+          "guardrails": ["Không phát hành asset Mojang/vendor không được phép.", "URL tải pack phải HTTPS, hash đúng bytes và có xử lý từ chối.", "Không dùng cache cũ làm bằng chứng pack mới hoạt động."],
+          "examples": ["/mc:pack Migrate resource pack này sang version mục tiêu và kiểm tra mọi model/atlas reference.", "/mc:pack Thiết kế delivery có SHA-1, prompt từ chối và fallback không pack."]
+        },
+        "en": {
+          "title": "Resource & data packs",
+          "what": "Designs, migrates, and validates resource/data packs: formats, namespaces, JSON references, atlases, models, fonts, sounds, and delivery.",
+          "when": ["Adding client assets or versioned vanilla data.", "A pack breaks after an upgrade, merge, or client-cache change."],
+          "inputs": ["Edition/version and resource- versus data-pack scope.", "Pack formats, namespace, priority, delivery URL/hash, and asset rights."],
+          "workflow": ["Verify format/version and normalize paths/case.", "Validate every JSON reference and merge priority.", "Test reload, clean cache, acceptance/decline, and fallback."],
+          "outputs": ["A valid pack tree and migration map.", "Delivery/hash manifest, broken-reference report, and fallback assets."],
+          "guardrails": ["Never publish unauthorized Mojang or vendor assets.", "Use HTTPS delivery, hash the exact bytes, and handle decline paths.", "Do not mistake stale cache success for a valid new pack."],
+          "examples": ["/mc:pack Migrate this resource pack to my target release and validate every model/atlas reference.", "/mc:pack Design SHA-1 delivery with decline handling and a no-pack fallback."]
+        }
+      }
+    },
+    {
+      "id": "protocol",
+      "route": "mc:protocol",
+      "keywords": ["protocol", "packet", "codec", "protocollib", "packetevents", "viaversion", "network"],
+      "content": {
+        "vi": {
+          "title": "Packet & protocol",
+          "what": "Phân tích wire state/direction, packet, codec, wrapper và lớp dịch ProtocolLib/PacketEvents/ViaVersion.",
+          "when": ["Tạo hoặc debug hành vi dưới lớp API server.", "Hỗ trợ nhiều protocol/client hoặc xử lý custom payload."],
+          "inputs": ["Client/server version, protocol number, connection state và direction.", "Library revision, registry dependency, ordering, bounds và translation layer."],
+          "workflow": ["Pin contract wire trước khi đọc/ghi packet.", "Ưu tiên typed wrapper/codec thay cho numeric ID.", "Kiểm tra event-loop ownership, order, malformed/bounded payload và disconnect."],
+          "outputs": ["Sơ đồ packet flow và codec contract.", "Version matrix, validation bounds, cleanup và degradation plan."],
+          "guardrails": ["Không tạo exploit/crash payload, đánh cắp session hay bypass anti-cheat.", "Không block event loop hoặc giữ buffer sau lifecycle.", "Server xác thực mọi custom payload và identifier."],
+          "examples": ["/mc:protocol Debug packet entity metadata theo đúng state/direction cho client và server đã pin.", "/mc:protocol Thiết kế custom payload có bounds, rate limit và fallback ViaVersion."]
+        },
+        "en": {
+          "title": "Packets & protocols",
+          "what": "Analyzes wire states/directions, packets, codecs, wrappers, and ProtocolLib/PacketEvents/ViaVersion translation layers.",
+          "when": ["Building or debugging behavior below the server API.", "Supporting multiple protocols/clients or custom payloads."],
+          "inputs": ["Client/server version, protocol number, connection state, and direction.", "Library revision, registry dependencies, ordering, bounds, and translation layers."],
+          "workflow": ["Pin the wire contract before reading or writing packets.", "Prefer typed wrappers/codecs to numeric IDs.", "Test event-loop ownership, ordering, malformed/bounded payloads, and disconnects."],
+          "outputs": ["A packet-flow map and codec contract.", "A version matrix, validation bounds, cleanup, and degradation plan."],
+          "guardrails": ["Do not build exploit/crash payloads, session theft, or anti-cheat bypasses.", "Never block an event loop or retain buffers past lifecycle.", "Validate every custom payload and identifier on the server."],
+          "examples": ["/mc:protocol Debug entity-metadata packets with exact state/direction for my pinned client and server.", "/mc:protocol Design a bounded, rate-limited custom payload with ViaVersion fallback behavior."]
+        }
+      }
+    },
+    {
+      "id": "rpg",
+      "route": "mc:rpg",
+      "keywords": ["rpg", "combat", "stat", "skill", "loot", "quest", "dungeon", "mmoitems", "mythicmobs"],
+      "content": {
+        "vi": {
+          "title": "Hệ thống RPG",
+          "what": "Thiết kế stats, combat, skill, item, class, loot, quest, dungeon và tích hợp plugin dựa trên symbol catalog đã xác minh.",
+          "when": ["Xây gameplay RPG có state/lifecycle phức tạp.", "Cần tích hợp API chính xác của các plugin trong catalog sâu."],
+          "inputs": ["Server/plugin version và feature contract.", "State owner, event order, persistence, scheduler, permission/economy và degradation."],
+          "workflow": ["Query type/member chính xác thay vì đoán API.", "Tách VERIFIED_BYTECODE/DERIVED_SOURCE khỏi ORIGINAL_DESIGN.", "Mô hình hóa abuse, reload, logout, death, rollback và test balance."],
+          "outputs": ["Kiến trúc gameplay và state machine.", "Integration adapters có bằng chứng, schema lưu trữ và test matrix."],
+          "guardrails": ["Server quyết định damage, reward, cooldown và inventory mutation.", "Không gọi API plugin nếu dependency/version chưa xác minh.", "I/O bất đồng bộ nhưng mutation Bukkit/Paper quay về scheduler đúng."],
+          "examples": ["/mc:rpg Thiết kế boss dungeon dùng MythicMobs + ModelEngine, tách rõ route model/pack.", "/mc:rpg Tra symbol MMOItems cho custom stat rồi đề xuất adapter có fallback khi plugin thiếu."]
+        },
+        "en": {
+          "title": "RPG systems",
+          "what": "Designs stats, combat, skills, items, classes, loot, quests, dungeons, and plugin integrations from verified symbol evidence.",
+          "when": ["Building stateful RPG gameplay.", "Integrating exact APIs from the kit's deep plugin catalog."],
+          "inputs": ["Server/plugin versions and feature contract.", "State ownership, event order, persistence, scheduler, permission/economy, and degradation."],
+          "workflow": ["Query exact types/members instead of guessing APIs.", "Separate VERIFIED_BYTECODE/DERIVED_SOURCE from ORIGINAL_DESIGN.", "Model abuse, reload, logout, death, rollback, and balance tests."],
+          "outputs": ["A gameplay architecture and state machine.", "Evidence-backed integration adapters, persistence schema, and test matrix."],
+          "guardrails": ["Keep damage, rewards, cooldowns, and inventory mutation server-authoritative.", "Do not call a plugin API before dependency/version verification.", "Run I/O asynchronously, then return Bukkit/Paper mutation to the correct scheduler."],
+          "examples": ["/mc:rpg Design a MythicMobs + ModelEngine dungeon boss and separate model/pack dependencies.", "/mc:rpg Query MMOItems symbols for a custom stat and design a missing-plugin fallback adapter."]
+        }
+      }
+    },
+    {
+      "id": "shader",
+      "route": "mc:shader",
+      "keywords": ["shader", "glsl", "iris", "sodium", "canvas", "veil", "render", "gpu"],
+      "content": {
+        "vi": {
+          "title": "Shader & rendering",
+          "what": "Thiết kế/debug core shader vanilla, GLSL, render pipeline, Iris shader pack và mod renderer như Sodium/Canvas/Veil.",
+          "when": ["Tạo hiệu ứng GPU hoặc sửa artifact/render conflict.", "Cần chọn đúng contract giữa pack override và API mod renderer."],
+          "inputs": ["Minecraft version, loader/renderer, GPU target và pack stack.", "Render stage, program, attribute, uniform, sampler, framebuffer và state."],
+          "workflow": ["Phân loại pipeline trước khi viết GLSL.", "Xác minh contract program/resource theo version.", "Compile, capture lỗi, test nhiều GPU/setting/conflict và fallback."],
+          "outputs": ["Sơ đồ render pass và shader interface.", "GLSL/resource layout, profile hiệu năng và fallback visual."],
+          "guardrails": ["Core shader contract là version-specific, không phải API ổn định.", "Giới hạn allocation/overdraw và phục hồi GPU state.", "Không tuyên bố mọi GPU/driver/pack đều tương thích nếu chưa test."],
+          "examples": ["/mc:shader Debug core shader bị hỏng sau khi nâng version; xác định uniform contract và fallback.", "/mc:shader Thiết kế hiệu ứng Veil có budget GPU và đường tắt khi shader compile thất bại."]
+        },
+        "en": {
+          "title": "Shaders & rendering",
+          "what": "Designs and debugs vanilla core shaders, GLSL, render pipelines, Iris shader packs, and render mods such as Sodium/Canvas/Veil.",
+          "when": ["Creating GPU effects or resolving rendering artifacts/conflicts.", "Choosing the correct contract between pack overrides and a mod renderer API."],
+          "inputs": ["Minecraft version, loader/renderer, target GPUs, and pack stack.", "Render stage, program, attributes, uniforms, samplers, framebuffer, and state."],
+          "workflow": ["Classify the pipeline before writing GLSL.", "Verify program/resource contracts for the exact version.", "Compile, capture errors, test representative GPUs/settings/conflicts, and provide fallback."],
+          "outputs": ["A render-pass map and shader interface.", "GLSL/resource layout, performance profile, and fallback visuals."],
+          "guardrails": ["Core shader contracts are version-specific, not stable APIs.", "Budget allocations/overdraw and restore GPU state.", "Do not claim every GPU, driver, or pack works without testing."],
+          "examples": ["/mc:shader Debug a core shader after an upgrade; resolve its uniform contract and fallback.", "/mc:shader Design a Veil effect with a GPU budget and a path for shader compile failure."]
+        }
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "id": "kit-value",
+      "keywords": ["value", "offline", "evidence", "catalog", "sources", "versions"],
+      "content": {
+        "vi": {
+          "title": "Giá trị của kit",
+          "summary": "Một router kỹ thuật có bằng chứng, không phải kho snippet hứa chạy mọi nơi.",
+          "points": ["10 tuyến tách rõ platform, build, protocol, NMS, client, dialog, pack, model, shader và RPG.", "103 nguồn GitHub công khai được review/pin, 901 bản ghi version Mojang và catalog RPG sâu để tra symbol chính xác.", "Đọc và query ngoại tuyến; claim phân loại VERIFIED_UPSTREAM, VERIFIED_BYTECODE, DERIVED_SOURCE, ORIGINAL_DESIGN hoặc UNVERIFIED.", "Kit giúp thu hẹp rủi ro và tạo kế hoạch kiểm chứng; không thay thế compile/runtime test trên target của bạn."]
+        },
+        "en": {
+          "title": "What the kit gives you",
+          "summary": "An evidence-backed engineering router, not a snippet dump that promises to work everywhere.",
+          "points": ["10 routes separate platform, build, protocol, NMS, client, dialog, pack, model, shader, and RPG concerns.", "103 reviewed pinned public GitHub sources, 901 Mojang version records, and a deep RPG catalog support exact symbol lookup.", "Reading and queries are offline; claims are labeled VERIFIED_UPSTREAM, VERIFIED_BYTECODE, DERIVED_SOURCE, ORIGINAL_DESIGN, or UNVERIFIED.", "The kit narrows risk and produces a validation plan; it does not replace compile/runtime tests on your target."]
+        }
+      }
+    },
+    {
+      "id": "languages",
+      "keywords": ["kotlin", "java", "coroutine", "jvm", "api"],
+      "content": {
+        "vi": {
+          "title": "Kotlin & Java",
+          "summary": "Cả hai đều chạy trên JVM; chọn theo đội ngũ, API surface và chi phí vận hành.",
+          "points": ["Pin Java toolchain đúng với runtime; không dựa vào JDK trên máy build một cách ngầm định.", "Kotlin: giới hạn runtime/shading, dùng null-safety rõ và quản coroutine theo lifecycle plugin.", "Java: ưu tiên type bất biến, API nhỏ, package boundary rõ và tránh reflection không cần thiết.", "API public cần cân nhắc Java interoperability, binary compatibility và thread annotation/documentation."]
+        },
+        "en": {
+          "title": "Kotlin & Java",
+          "summary": "Both target the JVM; choose by team fluency, API surface, and operational cost.",
+          "points": ["Pin the Java toolchain required by the runtime; never inherit a build-machine JDK accidentally.", "Kotlin: control runtime/shading size, use explicit nullability, and bind coroutines to plugin lifecycle.", "Java: favor immutable types, small APIs, clear package boundaries, and minimal reflection.", "Public APIs need deliberate Java interop, binary compatibility, and documented thread contracts."]
+        }
+      }
+    },
+    {
+      "id": "gradle",
+      "keywords": ["gradle", "wrapper", "toolchain", "dependency", "shadow", "reproducible"],
+      "content": {
+        "vi": {
+          "title": "Gradle & dependency",
+          "summary": "Build tái lập bắt đầu từ wrapper, repository và version được pin.",
+          "points": ["Commit Gradle wrapper; khai báo toolchain và encoding; khóa plugin/dependency version.", "Dùng compileOnly cho API do server cung cấp; shade/relocate thư viện thật sự cần đóng gói.", "Giữ repository tối thiểu và xác minh nguồn artifact; không kéo snapshot vô tình.", "CI chạy clean build, test và kiểm tra nội dung JAR để phát hiện duplicate/secret/asset thừa."]
+        },
+        "en": {
+          "title": "Gradle & dependencies",
+          "summary": "Reproducible builds start with a pinned wrapper, repositories, and versions.",
+          "points": ["Commit the Gradle wrapper; declare toolchains/encoding; pin plugin and dependency versions.", "Use compileOnly for server-provided APIs; shade and relocate only libraries that must ship.", "Keep repositories minimal and verify artifact provenance; avoid accidental snapshots.", "CI runs a clean build, tests, and JAR-content inspection for duplicates, secrets, and stray assets."]
+        }
+      }
+    },
+    {
+      "id": "configuration",
+      "keywords": ["yaml", "json", "config", "schema", "migration", "validation"],
+      "content": {
+        "vi": {
+          "title": "YAML, JSON & cấu hình",
+          "summary": "Cấu hình là input không đáng tin và cần schema, default, version lẫn migration.",
+          "points": ["YAML phù hợp quản trị thủ công; JSON phù hợp exchange/asset schema — không ép một format cho mọi việc.", "Parse sang model typed, kiểm tra range/enum/namespaced key và báo lỗi theo path.", "Không ghi đè file người dùng khi reload; migrate có backup và version marker.", "Không lưu token/password trong default config hoặc log giá trị nhạy cảm."]
+        },
+        "en": {
+          "title": "YAML, JSON & configuration",
+          "summary": "Configuration is untrusted input and needs a schema, defaults, versions, and migrations.",
+          "points": ["YAML suits operator editing; JSON suits interchange and asset schemas—do not force one format everywhere.", "Parse into typed models, validate ranges/enums/namespaced keys, and report errors by path.", "Do not overwrite user files on reload; migrations need backups and version markers.", "Never place tokens/passwords in defaults or log sensitive values."]
+        }
+      }
+    },
+    {
+      "id": "platforms",
+      "keywords": ["paper", "purpur", "folia", "scheduler", "thread", "region"],
+      "content": {
+        "vi": {
+          "title": "Paper, Purpur & Folia",
+          "summary": "Cùng họ API không có nghĩa cùng thread/lifecycle contract.",
+          "points": ["Paper là baseline thường gặp; Purpur thêm hành vi/config riêng, không mặc định capability Purpur tồn tại trên Paper.", "Folia yêu cầu global/region/entity scheduler đúng ownership; không dùng một main-thread giả định toàn server.", "Cô lập adapter capability, phát hiện runtime rõ và fail với thông báo có ích.", "Test join/teleport/chunk unload/reload/disable vì đó là nơi ownership và cleanup dễ vỡ."]
+        },
+        "en": {
+          "title": "Paper, Purpur & Folia",
+          "summary": "A shared API family does not imply one thread or lifecycle contract.",
+          "points": ["Paper is a common baseline; Purpur adds behavior/configuration that must not be assumed on Paper.", "Folia requires the correct global/region/entity scheduler and ownership; there is no single-server-thread assumption.", "Isolate capability adapters, detect runtimes explicitly, and fail with actionable messages.", "Test join, teleport, chunk unload, reload, and disable—the common ownership/cleanup fault lines."]
+        }
+      }
+    },
+    {
+      "id": "persistence",
+      "keywords": ["database", "sql", "sqlite", "mysql", "postgresql", "async", "external", "pool"],
+      "content": {
+        "vi": {
+          "title": "Database, SQL & dịch vụ ngoài",
+          "summary": "I/O phải bất đồng bộ, có timeout, backpressure và ranh giới mutation rõ.",
+          "points": ["Dùng prepared statement, migration tuần tự, transaction cho invariant và index theo query thật.", "SQLite phù hợp một process; MySQL/PostgreSQL cần pool có giới hạn, timeout và health/failure policy.", "Không gọi Bukkit/Paper API từ worker thread; chuyển kết quả về scheduler đúng ownership.", "Dịch vụ ngoài cần retry có jitter, circuit/budget, idempotency và không log credential hay PII."]
+        },
+        "en": {
+          "title": "Databases, SQL & external services",
+          "summary": "I/O must be asynchronous, bounded by timeouts/backpressure, and separated from game-state mutation.",
+          "points": ["Use prepared statements, ordered migrations, transactions for invariants, and indexes justified by real queries.", "SQLite fits one process; MySQL/PostgreSQL need bounded pools, timeouts, and health/failure policy.", "Never call Bukkit/Paper APIs from an I/O worker; return results to the ownership-correct scheduler.", "External services need jittered retry, a circuit/budget, idempotency, and no credential or PII logging."]
+        }
+      }
+    },
+    {
+      "id": "versioning",
+      "keywords": ["semver", "version", "api", "migration", "changelog", "deprecation"],
+      "content": {
+        "vi": {
+          "title": "SemVer & hợp đồng công khai",
+          "summary": "Version plugin, API, config và data schema là bốn trục cần theo dõi riêng.",
+          "points": ["MAJOR cho breaking public contract, MINOR cho capability tương thích ngược, PATCH cho fix tương thích.", "Minecraft/runtime support matrix không tự suy ra từ SemVer của plugin.", "Deprecation cần replacement, thời hạn và test; migration config/data phải idempotent.", "Release notes nêu rõ tested versions, minimum Java, dependency và thao tác nâng cấp."]
+        },
+        "en": {
+          "title": "SemVer & public contracts",
+          "summary": "Plugin, API, configuration, and data-schema versions are four separate axes.",
+          "points": ["Use MAJOR for breaking public contracts, MINOR for backward-compatible capability, and PATCH for compatible fixes.", "A plugin SemVer does not imply a Minecraft/runtime support matrix.", "Deprecations need a replacement, removal horizon, and tests; config/data migrations must be idempotent.", "Release notes state tested versions, minimum Java, dependencies, and upgrade actions."]
+        }
+      }
+    },
+    {
+      "id": "quality",
+      "keywords": ["qa", "test", "security", "performance", "profiling", "permissions", "validation"],
+      "content": {
+        "vi": {
+          "title": "QA, bảo mật & hiệu năng",
+          "summary": "Đúng chức năng chưa đủ: phải chịu được input xấu, lifecycle xấu và tải thật.",
+          "points": ["Test unit cho logic thuần; integration/runtime cho scheduler, event, serialization và dependency thật.", "Xác thực permission, ownership, range, rate và replay ở server; secret không vào repo/log.", "Profile tick time, allocation, query latency và packet rate trước khi tối ưu.", "Test failure: DB mất, dependency thiếu, config hỏng, reload, disconnect, chunk unload và shutdown."]
+        },
+        "en": {
+          "title": "QA, security & performance",
+          "summary": "Functional success is not enough; the plugin must survive hostile input, lifecycle faults, and real load.",
+          "points": ["Use unit tests for pure logic and integration/runtime tests for schedulers, events, serialization, and real dependencies.", "Validate permissions, ownership, ranges, rates, and replay on the server; keep secrets out of repos/logs.", "Profile tick time, allocations, query latency, and packet rate before optimizing.", "Test failure paths: lost database, missing dependency, bad config, reload, disconnect, chunk unload, and shutdown."]
+        }
+      }
+    },
+    {
+      "id": "publishing",
+      "keywords": ["publish", "release", "jar", "checksum", "license", "documentation", "support"],
+      "content": {
+        "vi": {
+          "title": "Đóng gói & phát hành",
+          "summary": "Artifact tốt phải truy vết được, có checksum, license và hướng dẫn vận hành trung thực.",
+          "points": ["Build từ tag sạch; ghi commit/version vào metadata; công bố SHA-256 cho JAR/ZIP.", "Rà license của dependency và asset; không đóng gói binary Mojang, secret hoặc file dev.", "Tài liệu gồm install, config, permissions, commands, dependency, backup/migration và rollback.", "Chỉ công bố tested/support matrix đã xác minh; duy trì kênh báo lỗi kèm log đã redaction."]
+        },
+        "en": {
+          "title": "Packaging & publishing",
+          "summary": "A good artifact is traceable and ships with checksums, licensing, and honest operations guidance.",
+          "points": ["Build from a clean tag; record commit/version metadata; publish SHA-256 for JARs/ZIPs.", "Review dependency/asset licenses; exclude Mojang binaries, secrets, and development files.", "Document install, configuration, permissions, commands, dependencies, backup/migration, and rollback.", "Publish only verified tested/support matrices and accept bug reports with redacted logs."]
+        }
+      }
+    }
+  ],
+  "installers": [
+    {
+      "target": "codex",
+      "command": "& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/SalyyS1/minecraftkit/main/scripts/install-from-github.ps1'))) -Target codex",
+      "content": {
+        "vi": {"title": "Chỉ Codex", "description": "Cài core và 10 route skill vào thư mục kỹ năng Codex."},
+        "en": {"title": "Codex only", "description": "Install the core and 10 route skills into the Codex skill location."}
+      }
+    },
+    {
+      "target": "claude",
+      "command": "& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/SalyyS1/minecraftkit/main/scripts/install-from-github.ps1'))) -Target claude",
+      "content": {
+        "vi": {"title": "Chỉ Claude", "description": "Cài core, 10 route skill và command /mc:* cho Claude."},
+        "en": {"title": "Claude only", "description": "Install the core, 10 route skills, and /mc:* commands for Claude."}
+      }
+    },
+    {
+      "target": "both",
+      "command": "& ([scriptblock]::Create((Invoke-RestMethod 'https://raw.githubusercontent.com/SalyyS1/minecraftkit/main/scripts/install-from-github.ps1'))) -Target both",
+      "content": {
+        "vi": {"title": "Codex + Claude", "description": "Cài đồng thời hai bộ đích bằng cùng gói release đã xác minh."},
+        "en": {"title": "Codex + Claude", "description": "Install both target sets from the same verified release package."}
+      }
+    }
+  ]
+}

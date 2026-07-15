@@ -17,7 +17,7 @@ from sync_github_sources import validate_snapshot as validate_github_snapshot
 
 ASSIGNMENT = "window.MinecraftKitEcosystem="
 DOMAIN_IDS = {
-    "client", "core", "dialog", "model", "nms", "pack", "protocol", "rpg", "shader",
+    "build", "client", "core", "dialog", "model", "nms", "pack", "protocol", "rpg", "shader",
 }
 INGESTION_POLICIES = {"derive", "index", "link-only", "metadata-only"}
 PRIORITIES = {"P0", "P1", "P2"}
@@ -68,7 +68,7 @@ def validate_domains(document: Any) -> list[dict[str, Any]]:
             raise ValueError(f"domain keywords are invalid: {domain_id}")
         ids.append(domain_id)
     if set(ids) != DOMAIN_IDS or len(ids) != len(set(ids)):
-        raise ValueError("domain catalog must contain the nine unique MinecraftKit domains")
+        raise ValueError("domain catalog must contain the ten unique MinecraftKit domains")
     return domains
 
 

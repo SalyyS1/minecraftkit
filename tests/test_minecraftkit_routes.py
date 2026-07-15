@@ -29,7 +29,8 @@ class MinecraftKitRouteTests(unittest.TestCase):
     def test_domain_catalog_drives_wrappers_commands_and_references(self) -> None:
         domains = self.catalog["domains"]
         self.assertEqual(self.catalog["schema_version"], 1)
-        self.assertEqual(len(domains), 9)
+        self.assertEqual(len(domains), 10)
+        self.assertIn("build", {item["id"] for item in domains})
         self.assertEqual([item["id"] for item in domains], sorted(item["id"] for item in domains))
 
         for item in domains:
@@ -72,6 +73,25 @@ class MinecraftKitRouteTests(unittest.TestCase):
             "UNVERIFIED",
         ):
             self.assertIn(evidence_class, text)
+
+    def test_salyvn_author_identity_is_part_of_the_canonical_kit(self) -> None:
+        for relative in ("README.md", "SKILL.md", "NOTICE.md"):
+            with self.subTest(path=relative):
+                text = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertIn("SalyVn / Salyyy", text)
+
+    def test_build_reference_separates_paper_versions_and_shadow_artifacts(self) -> None:
+        gradle = (ROOT / "references" / "kotlin-java-gradle.md").read_text(encoding="utf-8")
+        build = (ROOT / "references" / "plugin-build-and-shipping.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "docs" / "plugin-engineering-handbook.md").read_text(encoding="utf-8")
+        for text in (gradle, handbook):
+            self.assertIn("paperApiDependencyVersion", text)
+            self.assertIn("paperDescriptorApiVersion", text)
+            self.assertNotIn('gradleProperty("paperApiVersion")', text)
+        self.assertIn("api-version: '${paperDescriptorApiVersion}'", build)
+        self.assertIn("api-version: '${paperDescriptorApiVersion}'", handbook)
+        self.assertIn('archiveClassifier.set("")', gradle)
+        self.assertIn("tasks.jar { enabled = false }", gradle)
 
 
 if __name__ == "__main__":

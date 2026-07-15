@@ -20,7 +20,7 @@ def write_json(path: Path, payload: object) -> bytes:
 
 
 def domain_catalog() -> dict:
-    ids = ["client", "core", "dialog", "model", "nms", "pack", "protocol", "rpg", "shader"]
+    ids = ["build", "client", "core", "dialog", "model", "nms", "pack", "protocol", "rpg", "shader"]
     return {
         "schema_version": 1,
         "domains": [
@@ -231,7 +231,7 @@ class EcosystemWebRenderTests(unittest.TestCase):
             self.assertTrue(first_bytes.startswith(prefix))
             payload = json.loads(first_bytes[len(prefix):-2])
             self.assertEqual(payload["summary"]["sourceCount"], 2)
-            self.assertEqual(len(payload["domains"]), 9)
+            self.assertEqual(len(payload["domains"]), 10)
             self.assertEqual(payload["versions"]["versionCount"], 4)
             self.assertEqual(payload["releaseCapabilities"]["releases"][0]["protocol"], 776)
             self.assertEqual(payload["sources"][0]["github"]["default_branch_head"]["sha"], "1" * 40)
@@ -274,6 +274,8 @@ class EcosystemWebRenderTests(unittest.TestCase):
         self.assertIn('href="index.html"', html)
         self.assertIn('src="data/ecosystem.js"', html)
         self.assertIn('src="ecosystem-renderers.js"', html)
+        self.assertIn('All ten domains', html)
+        self.assertIn('id="metric-domain-count">10</dd>', html)
         self.assertIn('aria-live="polite"', html)
         self.assertIn('prefers-reduced-motion: reduce', css)
         self.assertIn("44px", css)

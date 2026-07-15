@@ -1,5 +1,5 @@
 {
-  "catalog_sha256": "711f48c324e8cec1b8f2e05d2420ec74ccfea9d23e1bf2be04f8f6c0fa2ff333",
+  "catalog_sha256": "5fa117c5fe8955e26423b0e68b674294ad9ae6f98bca86f4729698d8c5a5be26",
   "retrieved_at": "2026-07-15T05:45:00+00:00",
   "schema_version": 1,
   "source_count": 103,
@@ -1397,6 +1397,7 @@
     {
       "docs_url": "https://docs.fabricmc.net/develop/loom/",
       "domains": [
+        "build",
         "core",
         "nms"
       ],
@@ -1620,6 +1621,7 @@
     {
       "docs_url": "https://docs.papermc.io/paper/dev/folia-support/",
       "domains": [
+        "build",
         "core"
       ],
       "github": {
@@ -1732,6 +1734,7 @@
     {
       "docs_url": "https://docs.minecraftforge.net/en/latest/gettingstarted/",
       "domains": [
+        "build",
         "core",
         "nms"
       ],
@@ -2694,6 +2697,7 @@
     {
       "docs_url": "https://docs.papermc.io/paper/",
       "domains": [
+        "build",
         "client",
         "core",
         "dialog",
@@ -2735,6 +2739,7 @@
     {
       "docs_url": "https://docs.papermc.io/",
       "domains": [
+        "build",
         "client",
         "core",
         "dialog",
@@ -2774,6 +2779,7 @@
     {
       "docs_url": "https://docs.papermc.io/paper/dev/userdev/",
       "domains": [
+        "build",
         "core",
         "nms"
       ],

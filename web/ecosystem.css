@@ -234,7 +234,8 @@ kbd {
   justify-content: center;
 }
 
-.atlas-nav button {
+.atlas-nav button,
+.atlas-nav a {
   min-width: 132px;
   min-height: var(--control);
   border: 0;
@@ -244,14 +245,17 @@ kbd {
   color: var(--muted);
   font-family: var(--font-display);
   font-weight: 650;
+  text-align: center;
+  text-decoration: none;
   transition: background-color var(--fast) ease, color var(--fast) ease;
 }
 
-.atlas-nav button:first-child {
+.atlas-nav > :first-child {
   border-left: 1px solid var(--line);
 }
 
 .atlas-nav button:hover,
+.atlas-nav a:hover,
 .atlas-nav button[aria-current="page"] {
   background: var(--panel-strong);
   color: var(--ink);
@@ -1198,7 +1202,8 @@ td:last-child {
     justify-content: flex-start;
   }
 
-  .atlas-nav button {
+  .atlas-nav button,
+  .atlas-nav a {
     flex: 1 0 150px;
   }
 
@@ -1278,7 +1283,8 @@ td:last-child {
     overflow-x: hidden;
   }
 
-  .atlas-nav button {
+  .atlas-nav button,
+  .atlas-nav a {
     min-width: 0;
     flex: 1 1 33.333%;
     padding-inline: 8px;

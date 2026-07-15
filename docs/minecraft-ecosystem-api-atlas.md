@@ -4,6 +4,17 @@ This atlas routes high-value public API families across MinecraftKit. The exact 
 
 The entries below are navigation surfaces, not copied source and not a promise of cross-version compatibility.
 
+## Plugin Build And Shipping APIs
+
+- Gradle Wrapper, Kotlin DSL, JVM toolchains, dependency configurations, locking, verification, test tasks, reproducible archives, and publishing tasks.
+- Kotlin/JVM typed compiler options and deliberate Kotlin/Java mixed-source boundaries.
+- Paper `plugin.yml`/`paper-plugin.yml`, runtime `libraries`, `compileOnly` APIs, paperweight-userdev, and exact-version development bundles.
+- Configuration/data contracts for YAML/YML and JSON: schema validation, migrations, defaults, atomic writes, and operator-safe diagnostics.
+- Storage contracts for external PostgreSQL/MySQL services or operator-owned SQLite files: pools, migrations, prepared statements, transactions, timeouts, backups, and scheduler handoff.
+- GitHub Releases, Hangar, Modrinth, and Spigot publication surfaces with SemVer, immutable checksummed artifacts, compatibility matrices, notices, and secret-scoped CI.
+
+Use [`/mc:build`](../commands/mc/build.md) and the [plugin engineering handbook](plugin-engineering-handbook.md) for the end-to-end workflow.
+
 ## Core Platforms
 
 ### Paper, Folia, Purpur, Bukkit and Spigot

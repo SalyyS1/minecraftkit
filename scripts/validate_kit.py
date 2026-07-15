@@ -22,6 +22,7 @@ from build_manifest import (
     build as build_release_manifest,
 )
 from render_ecosystem_web import build_payload as build_ecosystem_payload
+from render_wiki_web import validate as validate_wiki_document
 from validate_minecraftkit_catalogs import validate_minecraftkit
 
 
@@ -36,10 +37,11 @@ REQUIRED = (
     "docs/professional-engineering-patterns.md", "docs/rpg-feature-catalog.md",
     "docs/original-addon-blueprints.md", "docs/agentkit-skill-design.md",
     "docs/codex-claude-compatibility.md", "docs/research-methodology.md",
-    "docs/minecraft-ecosystem-api-atlas.md",
+    "docs/minecraft-ecosystem-api-atlas.md", "docs/plugin-engineering-handbook.md",
     "web/index.html", "web/styles.css", "web/app.js", "web/data/manifest.js", "web/data/insights.js",
     "web/ecosystem.html", "web/ecosystem.css", "web/ecosystem-app.js",
     "web/ecosystem-renderers.js", "web/data/ecosystem.js",
+    "web/wiki.html", "web/wiki.css", "web/wiki-app.js", "web/data/wiki.js", "data/wiki-content.json",
     "references/api-lookup.md", "references/architecture-review.md",
     "references/source-analysis-and-regeneration.md", "references/rpg-feature-design.md",
     "references/addon-blueprint.md", "references/compatibility-and-safety.md",
@@ -48,16 +50,21 @@ REQUIRED = (
     "references/nms-and-mappings.md", "references/shaders-and-rendering.md",
     "references/dialogs-and-client-actions.md", "references/client-and-projection.md",
     "references/resource-and-data-packs.md", "references/models-and-animation.md",
-    "references/upstream-source-catalog.md",
+    "references/upstream-source-catalog.md", "references/plugin-build-and-shipping.md",
+    "references/kotlin-java-gradle.md", "references/database-config-and-runtime.md",
+    "references/release-publishing-checklist.md",
     "commands/mc/core.md", "commands/mc/rpg.md", "commands/mc/shader.md",
     "commands/mc/dialog.md", "commands/mc/client.md", "commands/mc/pack.md",
-    "commands/mc/model.md", "commands/mc/protocol.md", "commands/mc/nms.md",
+    "commands/mc/model.md", "commands/mc/protocol.md", "commands/mc/nms.md", "commands/mc/build.md",
     "skill-wrappers/mc-core/SKILL.md", "skill-wrappers/mc-rpg/SKILL.md",
     "skill-wrappers/mc-shader/SKILL.md", "skill-wrappers/mc-dialog/SKILL.md",
     "skill-wrappers/mc-client/SKILL.md", "skill-wrappers/mc-pack/SKILL.md",
     "skill-wrappers/mc-model/SKILL.md", "skill-wrappers/mc-protocol/SKILL.md",
-    "skill-wrappers/mc-nms/SKILL.md",
+    "skill-wrappers/mc-nms/SKILL.md", "skill-wrappers/mc-build/SKILL.md",
     "scripts/render_ecosystem_web.py", "tests/test_render_ecosystem_web.py",
+    "scripts/render_wiki_web.py", "tests/test_render_wiki_web.py",
+    "scripts/install-global.ps1", "scripts/install-from-github.ps1",
+    "tests/test_install_layout.py", "tests/test_github_bootstrap_installer.py",
     "tests/evals.json",
 )
 
@@ -371,11 +378,12 @@ def validate(root: Path) -> list[str]:
         web_manifest = parse_assignment(root / "web/data/manifest.js", "window.MinecraftRPGManifest=")
         web_insights = parse_assignment(root / "web/data/insights.js", "window.MinecraftRPGInsights=")
         web_ecosystem = parse_assignment(root / "web/data/ecosystem.js", "window.MinecraftKitEcosystem=")
+        web_wiki = parse_assignment(root / "web/data/wiki.js", "window.SalyyyMinecraftKitWiki=")
         if len(web_manifest.get("plugins", [])) != 10 or not web_manifest.get("insightsFile"):
             errors.append("web manifest is incomplete")
         if web_insights.get("stats", {}).get("totalMembers") != 41887:
             errors.append("web insight counts do not reconcile")
-        if len(web_ecosystem.get("domains", [])) != 9:
+        if len(web_ecosystem.get("domains", [])) != 10:
             errors.append("ecosystem web domain count does not reconcile")
         if len(web_ecosystem.get("sources", [])) != 103:
             errors.append("ecosystem web source count does not reconcile")
@@ -396,6 +404,11 @@ def validate(root: Path) -> list[str]:
         )
         if not strictly_equal(web_ecosystem, expected_ecosystem):
             errors.append("ecosystem web payload is stale or differs from its source catalogs")
+        expected_wiki = validate_wiki_document(strict_json(root / "data/wiki-content.json"))
+        if not strictly_equal(web_wiki, expected_wiki):
+            errors.append("wiki web payload is stale or differs from its source catalog")
+        if len(web_wiki.get("routes", [])) != 10 or len(web_wiki.get("installers", [])) != 3:
+            errors.append("wiki route or installer count does not reconcile")
         for plugin in web_manifest.get("plugins", []):
             plugin_path = safe_posix_descendant(root / "web", plugin["file"])
             if not plugin_path.is_file():
@@ -407,10 +420,14 @@ def validate(root: Path) -> list[str]:
         for name in (
             "index.html", "styles.css", "app.js", "ecosystem.html",
             "ecosystem.css", "ecosystem-app.js", "ecosystem-renderers.js",
+            "wiki.html", "wiki.css", "wiki-app.js",
         )
     )
     if re.search(r"https?://|\bfetch\s*\(", web_text, re.IGNORECASE):
         errors.append("offline web contains a remote URL or fetch call")
+    wiki_runtime = (root / "web/wiki-app.js").read_text(encoding="utf-8")
+    if re.search(r"innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(", wiki_runtime):
+        errors.append("wiki runtime contains an unsafe DOM or evaluation sink")
 
     errors.extend(validate_minecraftkit(root))
 
@@ -440,7 +457,7 @@ def main() -> int:
             print(f"- {error}")
         return 1
     print("MinecraftKit validation: PASS")
-    print("9 domains; 10 deep RPG plugins; 4,947 plugin-owned types; 41,887 members; 965 API shards")
+    print("10 domains; 10 deep RPG plugins; 4,947 plugin-owned types; 41,887 members; 965 API shards")
     return 0
 
 

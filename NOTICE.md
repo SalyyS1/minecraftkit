@@ -1,6 +1,6 @@
 # Notice, Provenance, And Limits
 
-MinecraftKit is an independent research and engineering artifact. Minecraft, plugin, mod, library, and product names and trademarks belong to their owners.
+Salyyy Minecraft Kit is authored and maintained under the nametag **SalyVn / Salyyy**. MinecraftKit is an independent research and engineering artifact. Minecraft, plugin, mod, library, and product names and trademarks belong to their owners.
 
 The kit contains factual metadata, public API symbol indexes, original summaries, architecture research, compatibility warnings, and independently designed feature compositions. It deliberately excludes:
 
