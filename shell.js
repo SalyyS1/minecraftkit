@@ -25,12 +25,43 @@
     image.alt = "";
     brand.append(image, document.createTextNode("Salyyy Minecraft Kit"));
     nav.append(brand);
+    if (page === "wiki") {
+      [
+        { href: "#routes", label: "Hướng dẫn" },
+        { href: "#handbook", label: "Kinh nghiệm" },
+        { href: "#install", label: "Cài đặt" }
+      ].forEach(function (item) {
+        var sectionLink = make("a", "mk-global-link mk-section-link", item.label);
+        sectionLink.href = item.href;
+        sectionLink.addEventListener("click", function (event) {
+          event.preventDefault();
+          var target = document.querySelector(item.href);
+          if (target) { target.scrollIntoView({ behavior: "smooth", block: "start" }); }
+        });
+        nav.append(sectionLink);
+      });
+    }
     pages.forEach(function (item) {
       var link = make("a", "mk-global-link", item.label);
       link.href = item.href;
       if (item.id === page) { link.setAttribute("aria-current", "page"); }
       nav.append(link);
     });
+    if (page === "wiki") {
+      ["vi", "en"].forEach(function (language) {
+        var button = make("button", "mk-language-button", language.toUpperCase());
+        button.type = "button";
+        button.setAttribute("aria-pressed", String(language === "vi"));
+        button.addEventListener("click", function () {
+          var source = document.querySelector('[data-language="' + language + '"]');
+          if (source) { source.click(); }
+          nav.querySelectorAll(".mk-language-button").forEach(function (candidate) {
+            candidate.setAttribute("aria-pressed", String(candidate === button));
+          });
+        });
+        nav.append(button);
+      });
+    }
     document.body.insertBefore(nav, document.body.firstElementChild);
   }
 
@@ -47,9 +78,10 @@
     main.parentNode.insertBefore(intro, main);
   }
 
-  function showLoader(firstVisit) {
+  function showLoader(firstVisit, continuation) {
     var loader = make("div", "mk-loader");
     if (!firstVisit) { loader.classList.add("is-quick"); }
+    if (continuation) { loader.classList.add("is-continuation"); }
     loader.setAttribute("role", "status");
     loader.setAttribute("aria-label", "Loading Salyyy Minecraft Kit");
     var mark = make("div", "mk-loader-mark");
@@ -63,11 +95,12 @@
     window.setTimeout(function () {
       loader.classList.add("is-leaving");
       window.setTimeout(function () { loader.remove(); }, 420);
-    }, firstVisit ? 1420 : 360);
+    }, firstVisit ? 1600 : (continuation ? 190 : 440));
   }
 
   function addLoader() {
     var firstVisit = true;
+    var continuation = false;
     try {
       firstVisit = !window.localStorage.getItem("salyyy-minecraft-kit-loader-seen");
       if (firstVisit) { window.localStorage.setItem("salyyy-minecraft-kit-loader-seen", "1"); }
@@ -75,7 +108,13 @@
       // Private browsing or file:// policies may deny storage; keep the loader functional.
       firstVisit = false;
     }
-    showLoader(firstVisit);
+    try {
+      continuation = window.sessionStorage.getItem("salyyy-minecraft-kit-transition") === "1";
+      window.sessionStorage.removeItem("salyyy-minecraft-kit-transition");
+    } catch (error) {
+      continuation = false;
+    }
+    showLoader(firstVisit && !continuation, continuation);
   }
 
   function handleInternalLinks() {
@@ -87,9 +126,10 @@
       var target = new URL(link.href, window.location.href);
       if (target.pathname === window.location.pathname) { return; }
       event.preventDefault();
+      try { window.sessionStorage.setItem("salyyy-minecraft-kit-transition", "1"); } catch (error) {}
       document.documentElement.classList.add("mk-page-leaving");
-      showLoader(false);
-      window.setTimeout(function () { window.location.assign(target.href); }, 360);
+      showLoader(false, false);
+      window.setTimeout(function () { window.location.assign(target.href); }, 440);
     });
   }
 
