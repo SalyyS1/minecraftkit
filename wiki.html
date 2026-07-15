@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Offline bilingual engineering wiki for Salyyy Minecraft Kit by SalyVn / Salyyy.">
+  <title>Salyyy Minecraft Kit v2.1.0 | Offline Wiki</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2306141b'/%3E%3Cpath d='M14 14h36v36H14z' fill='none' stroke='%2352edc5' stroke-width='4'/%3E%3Cpath d='M22 40V24h6l4 7 4-7h6v16h-5V31l-5 8-5-8v9z' fill='%2383f7dc'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="wiki.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content" data-i18n="skip">Bỏ qua đến nội dung chính</a>
+
+  <header class="site-header">
+    <a class="brand" href="#" aria-label="Trang chủ wiki Salyyy Minecraft Kit" data-i18n-aria-label="brand_home">
+      <span class="brand-mark" aria-hidden="true"><span>SK</span><i></i></span>
+      <span class="brand-copy">
+        <strong>Salyyy Minecraft Kit</strong>
+        <small>v2.1.0 / OFFLINE WIKI</small>
+      </span>
+    </a>
+    <nav class="primary-nav" aria-label="Mục wiki" data-i18n-aria-label="primary_nav_label">
+      <a href="#routes" data-i18n="nav_routes">Tuyến mc:*</a>
+      <a href="#handbook" data-i18n="nav_handbook">Cẩm nang</a>
+      <a href="#install" data-i18n="nav_install">Cài đặt</a>
+    </nav>
+    <div class="language-switch" role="group" aria-labelledby="language-label">
+      <span id="language-label" data-i18n="language_label">Ngôn ngữ</span>
+      <button type="button" data-language="vi" aria-pressed="true">VI</button>
+      <button type="button" data-language="en" aria-pressed="false">EN</button>
+    </div>
+  </header>
+
+  <main id="main-content" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow" data-i18n="eyebrow">Cẩm nang kỹ thuật Minecraft • ngoại tuyến</p>
+        <h1 id="hero-title" data-i18n="hero_title">Xây plugin có bằng chứng, không đoán mò.</h1>
+        <p class="hero-lede" data-i18n="hero_copy">Mười tuyến chuyên môn, quy trình sản xuất plugin và bộ cài cho Codex lẫn Claude.</p>
+        <p class="author-line"><span data-i18n="author_by">Thiết kế bởi</span> <strong>SalyVn</strong> <span class="author-alias">/ Salyyy</span></p>
+      </div>
+      <dl class="hero-metrics" aria-label="Tóm tắt wiki" data-i18n-aria-label="wiki_summary_label">
+        <div><dt>10</dt><dd data-i18n="routes_count">tuyến kỹ thuật</dd></div>
+        <div><dt>02</dt><dd data-i18n="languages_count">ngôn ngữ</dd></div>
+        <div><dt>00</dt><dd data-i18n="offline_label">không cần mạng khi đọc</dd></div>
+      </dl>
+      <div class="hero-signal" aria-hidden="true">
+        <span>ROUTE::RESOLVE</span><span>EVIDENCE::PIN</span><span>OUTPUT::VERIFY</span>
+      </div>
+    </section>
+
+    <section class="control-deck" aria-label="Tìm kiếm và lọc tuyến trong wiki" data-i18n-aria-label="controls_label">
+      <div class="search-field">
+        <label for="wiki-search" data-i18n="search_label">Tìm trong wiki</label>
+        <div class="input-shell">
+          <span aria-hidden="true">/</span>
+          <input id="wiki-search" type="search" autocomplete="off" spellcheck="false">
+          <kbd data-i18n="search_hint">Nhấn / để tìm</kbd>
+        </div>
+      </div>
+      <div class="filter-field">
+        <label for="route-filter" data-i18n="route_filter_label">Lọc theo tuyến</label>
+        <select id="route-filter"></select>
+      </div>
+      <p id="result-status" class="result-status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="routes" class="content-section route-section" aria-labelledby="routes-title">
+      <div class="section-heading">
+        <div><span class="section-number">01</span><p class="eyebrow">ROUTE MATRIX</p></div>
+        <div>
+          <h2 id="routes-title" data-i18n="route_section_title">Bản đồ tuyến chuyên môn</h2>
+          <p data-i18n="route_section_copy">Chọn đúng ranh giới trước, rồi ghép các tuyến phụ khi thật sự cần.</p>
+        </div>
+      </div>
+      <div id="route-grid" class="route-grid"></div>
+    </section>
+
+    <section id="handbook" class="content-section handbook-section" aria-labelledby="handbook-title">
+      <div class="section-heading">
+        <div><span class="section-number">02</span><p class="eyebrow">SHIP SYSTEMS</p></div>
+        <div>
+          <h2 id="handbook-title" data-i18n="handbook_title">Sổ tay sản xuất plugin</h2>
+          <p data-i18n="handbook_copy">Những hợp đồng nền tảng từ mã nguồn đến phát hành.</p>
+        </div>
+      </div>
+      <div id="chapter-grid" class="chapter-grid"></div>
+    </section>
+
+    <section id="install" class="content-section install-section" aria-labelledby="install-title">
+      <div class="section-heading">
+        <div><span class="section-number">03</span><p class="eyebrow">BOOTSTRAP</p></div>
+        <div>
+          <h2 id="install-title" data-i18n="install_title">Cài từ GitHub</h2>
+          <p data-i18n="install_copy">Ba chế độ cài gọi cùng một entry point trên nhánh main.</p>
+        </div>
+      </div>
+      <div id="installer-grid" class="installer-grid"></div>
+      <p class="offline-note" data-i18n="offline_note">Wiki này không tải tài nguyên từ xa khi mở.</p>
+    </section>
+
+    <section id="empty-state" class="empty-state" hidden aria-live="polite">
+      <span aria-hidden="true">{ 0 }</span>
+      <p data-i18n="no_results">Không có nội dung phù hợp.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p data-i18n="footer_identity">SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.0</p>
+    <p data-i18n="footer_boundary">Khả năng tương thích luôn phụ thuộc phiên bản.</p>
+  </footer>
+
+  <dialog id="route-dialog" class="route-dialog" aria-labelledby="dialog-route-title">
+    <div id="route-detail" class="route-detail"></div>
+  </dialog>
+
+  <noscript><p class="noscript-message">JavaScript is required to browse the local wiki payload. No network connection is used.</p></noscript>
+  <div id="live-status" class="visually-hidden" role="status" aria-live="polite"></div>
+  <script src="data/wiki.js"></script>
+  <script src="wiki-app.js"></script>
+</body>
+</html>
