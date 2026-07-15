@@ -9,6 +9,8 @@
   --mk-line: rgba(104, 219, 232, 0.3);
 }
 
+body[data-page] { padding-top: 84px; }
+
 body[data-page="ecosystem"] {
   --ink: #e9fbf7;
   --muted: #9abdbd;
@@ -58,20 +60,22 @@ body::before {
 }
 
 .mk-global-nav {
-  position: sticky;
-  z-index: 25;
-  top: 0;
+  position: fixed;
+  z-index: 80;
+  top: 12px;
+  left: 50%;
   display: flex;
   align-items: center;
   gap: 9px;
   width: min(100% - 32px, 1380px);
   min-height: 58px;
-  margin: 16px auto 0;
+  margin: 0;
   padding: 7px 9px;
   border: 1px solid rgba(167, 139, 250, 0.42);
   background: linear-gradient(100deg, rgba(18, 15, 42, 0.86), rgba(3, 16, 22, 0.86) 48%, rgba(21, 37, 55, 0.86));
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(18px);
+  transform: translateX(-50%);
 }
 
 .mk-global-brand {
@@ -109,6 +113,23 @@ body::before {
   text-decoration: none;
   text-transform: uppercase;
   transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+
+.mk-language-button {
+  min-width: 38px;
+  min-height: 38px;
+  border: 1px solid rgba(104, 219, 232, 0.34);
+  color: #9abdbd;
+  background: transparent;
+  font: 700 0.66rem/1 "Cascadia Code", Consolas, monospace;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.mk-language-button[aria-pressed="true"],
+.mk-language-button:hover {
+  border-color: var(--mk-aqua);
+  color: #07131c;
+  background: var(--mk-aqua);
 }
 
 .mk-global-link:hover,
@@ -208,17 +229,23 @@ body::before {
 .mk-loader.is-quick img { width: 52px; height: 52px; margin-bottom: 9px; }
 .mk-loader.is-quick h1 { font-size: clamp(1.8rem, 6vw, 3.2rem); }
 .mk-loader.is-quick small { margin-top: 8px; }
+.mk-loader.is-continuation .mk-loader-mark { opacity: 0.82; transform: scale(0.96); }
+.mk-loader.is-continuation .mk-loader-lines::before,
+.mk-loader.is-continuation .mk-loader-lines::after { animation-duration: 220ms; }
 
 /* The global navigation owns the only visual logo; older page headers keep their text, not a second glyph. */
 .brand-mark, .wordmark-code, .brand-rune { display: none !important; }
+body[data-page="wiki"] .site-header { display: none; }
 
 @keyframes mk-line-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes mk-mark-in { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 760px) {
-  .mk-global-nav { position: relative; width: min(100% - 24px, 1380px); flex-wrap: wrap; margin-top: 12px; }
+  body[data-page] { padding-top: 0; }
+  .mk-global-nav { position: relative; top: auto; left: auto; width: min(100% - 24px, 1380px); flex-wrap: wrap; margin: 12px auto 0; transform: none; }
   .mk-global-brand { width: 100%; }
   .mk-global-link { flex: 1 1 0; padding-inline: 8px; font-size: 0.65rem; }
+  .mk-section-link { display: none; }
   .mk-launcher { grid-template-columns: 1fr; }
   .mk-page-intro { width: min(100% - 24px, 1380px); padding: 24px 20px; }
 }

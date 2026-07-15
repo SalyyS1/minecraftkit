@@ -179,15 +179,16 @@
 
   function renderInstallers() {
     var visible = data.installers.filter(function (installer) {
-      return matches(local(installer), [installer.target, installer.command, "install powershell github"]);
+      return matches(local(installer), [installer.target, "npx minecraftkit install"]);
     });
     var cards = visible.map(function (installer) {
       var content = local(installer);
       var card = element("article", "installer-card");
       card.append(element("span", "target-label", "TARGET::" + installer.target));
       card.append(element("h3", "", content.title), element("p", "", content.description));
+      var npmCommand = "npx minecraftkit install --target " + installer.target;
       var command = element("pre", "command-block");
-      command.append(element("code", "", installer.command), copyButton(installer.command));
+      command.append(element("code", "", npmCommand), copyButton(npmCommand));
       card.append(command);
       return card;
     });
