@@ -47,16 +47,9 @@
     main.parentNode.insertBefore(intro, main);
   }
 
-  function addLoader() {
-    var firstVisit = true;
-    try {
-      firstVisit = !window.localStorage.getItem("salyyy-minecraft-kit-loader-seen");
-      if (firstVisit) { window.localStorage.setItem("salyyy-minecraft-kit-loader-seen", "1"); }
-    } catch (error) {
-      // Private browsing or file:// policies may deny storage; keep the loader functional.
-      firstVisit = false;
-    }
+  function showLoader(firstVisit) {
     var loader = make("div", "mk-loader");
+    if (!firstVisit) { loader.classList.add("is-quick"); }
     loader.setAttribute("role", "status");
     loader.setAttribute("aria-label", "Loading Salyyy Minecraft Kit");
     var mark = make("div", "mk-loader-mark");
@@ -69,8 +62,20 @@
     document.body.append(loader);
     window.setTimeout(function () {
       loader.classList.add("is-leaving");
-      window.setTimeout(function () { loader.remove(); }, firstVisit ? 480 : 180);
-    }, firstVisit ? 980 : 80);
+      window.setTimeout(function () { loader.remove(); }, 420);
+    }, firstVisit ? 1420 : 360);
+  }
+
+  function addLoader() {
+    var firstVisit = true;
+    try {
+      firstVisit = !window.localStorage.getItem("salyyy-minecraft-kit-loader-seen");
+      if (firstVisit) { window.localStorage.setItem("salyyy-minecraft-kit-loader-seen", "1"); }
+    } catch (error) {
+      // Private browsing or file:// policies may deny storage; keep the loader functional.
+      firstVisit = false;
+    }
+    showLoader(firstVisit);
   }
 
   function handleInternalLinks() {
@@ -79,7 +84,12 @@
       if (!link || link.target || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
       var href = link.getAttribute("href");
       if (!href || !/^(?:wiki\.html|ecosystem\.html|index\.html)(?:$|[?#])/.test(href)) { return; }
+      var target = new URL(link.href, window.location.href);
+      if (target.pathname === window.location.pathname) { return; }
+      event.preventDefault();
       document.documentElement.classList.add("mk-page-leaving");
+      showLoader(false);
+      window.setTimeout(function () { window.location.assign(target.href); }, 360);
     });
   }
 

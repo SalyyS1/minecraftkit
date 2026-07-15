@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "minecraftkit",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
@@ -145,8 +145,8 @@
       "sha256": "4f01ad57a72be1c67ff8739bb1f3e99903a0d33c9a3462164d90c374eb6c8d08"
     },
     "data/wiki-content.json": {
-      "bytes": 51372,
-      "sha256": "00d686a535984eb02a4dbcbacca236b487b44608e3e2e5ae45bca39a29e6b898"
+      "bytes": 52066,
+      "sha256": "9fd8f9d13460898420a400e8429f8642990d1e8717349003c8c40391a902f2e3"
     },
     "data/minecraft-version-catalog.json": {
       "bytes": 323457,
@@ -177,8 +177,8 @@
       "sha256": "4eb2eb5f8408a70c94ce9f01d89d3cd9d0fba9f8d09f1886d7bd77e4bd5ff8f8"
     },
     "web/data/wiki.js": {
-      "bytes": 45732,
-      "sha256": "7954b3dab957186ee0ed7c042a1ecd3581107a8b81a8d0a47252b0b8f64ac216"
+      "bytes": 46378,
+      "sha256": "9103c334db62abff23bfb5f098b297d720f3aec3bbdf7e7d935f744f72733574"
     },
     "web/index.html": {
       "bytes": 10067,
@@ -205,16 +205,16 @@
       "sha256": "8d51b1ce5f08a61f36bb198661b2c222d18eb289bcf525d39b6f73cbe728eb1c"
     },
     "web/wiki.html": {
-      "bytes": 7594,
-      "sha256": "0e29d35dd205c0e7ab1508796777cde17f06a4967031b63aea2cdf29ce0de529"
+      "bytes": 8324,
+      "sha256": "0bdeabea2730b74be3c8bf0e4a2bd3de23fc7f222065ca6f0eaedeecd15e2b7e"
     },
     "web/wiki.css": {
-      "bytes": 18520,
-      "sha256": "982eb61aed43ecbeac8f841c5d03782b4198148cf75224507c7f254918154d80"
+      "bytes": 19589,
+      "sha256": "801cbcb539454aee6ae8b1b5b2afb895143f55fc8488607362cc4341c8089936"
     },
     "web/wiki-app.js": {
-      "bytes": 12267,
-      "sha256": "f99e7a43e21dc6bb74562f4014d01932afcb1be8af9eeedc8b86fe4c658974dc"
+      "bytes": 12453,
+      "sha256": "3456220173a7614dea99234751a7519d3be20be78881d8b49fbec4cb8918b3fc"
     },
     "docs/plugin-engineering-handbook.md": {
       "bytes": 20980,
@@ -234,7 +234,7 @@
     },
     "tests/test_github_bootstrap_installer.py": {
       "bytes": 16614,
-      "sha256": "b07619ad89a3c5d366bf67b4a22d2efaef362a72c606300f2e7662179830bb1a"
+      "sha256": "bcc5284292e2ad6034ad3ee9bc1fb93fb7c7cba5aefca230d2aff306486be954"
     }
   },
   "install_targets": {

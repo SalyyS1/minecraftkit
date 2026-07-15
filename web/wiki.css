@@ -250,6 +250,14 @@ main { padding: 28px 32px 80px; }
 .chapter-card li::before { content: ""; position: absolute; top: 0.67em; left: 0; width: 7px; height: 1px; background: var(--aqua); }
 
 .installer-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.npm-install-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, 0.9fr); gap: 24px; align-items: center; margin-bottom: 14px; padding: 28px; border: 1px solid #8d7cf4; background: linear-gradient(120deg, rgba(86, 68, 156, 0.28), rgba(13, 42, 51, 0.94) 52%, rgba(198, 121, 182, 0.18)); }
+.npm-install-card h3 { margin-top: 18px; font-size: clamp(1.75rem, 3vw, 2.8rem); }
+.npm-install-card > div > p { margin-top: 10px; color: #c7d8dc; }
+.npm-command-wrap { position: relative; padding: 18px 116px 18px 18px; border: 1px solid rgba(245, 199, 110, 0.58); background: rgba(3, 12, 17, 0.78); }
+.npm-command-wrap code { color: #f8dda4; font: 700 0.87rem/1.5 var(--mono); overflow-wrap: anywhere; }
+.npm-command-wrap .copy-button { top: 8px; right: 8px; bottom: auto; border-color: #f5c76e; background: #f5c76e; color: #1d1522; }
+.npm-command-wrap .copy-button:hover { color: #f5c76e; background: transparent; }
+.npm-install-note { grid-column: 1 / -1; margin: 0; color: #b5c7cc; font-size: 0.88rem; }
 .installer-card { position: relative; display: grid; grid-template-rows: auto auto 1fr auto; min-height: 355px; padding: 27px; border: 1px solid var(--line-bright); background: linear-gradient(145deg, var(--panel), #07181e); }
 .target-label { justify-self: start; padding: 5px 9px; border: 1px solid var(--aqua); color: var(--aqua); font: 700 0.66rem/1 var(--mono); letter-spacing: 0.09em; text-transform: uppercase; }
 .installer-card h3 { margin-top: 24px; font-size: 1.8rem; }
@@ -317,6 +325,7 @@ main { padding: 28px 32px 80px; }
   .route-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .route-card { min-height: 250px; padding: 20px; }
   .chapter-grid, .installer-grid { grid-template-columns: 1fr; }
+  .npm-install-card { grid-template-columns: 1fr; }
   .chapter-card { min-height: 0; }
   .site-footer { flex-direction: column; padding-inline: 16px; }
   .route-detail { padding: 23px; }

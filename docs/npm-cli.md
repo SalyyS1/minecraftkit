@@ -44,4 +44,4 @@ npm run pack:dry-run
 
 ## Published package
 
-`minecraftkit@2.2.0` is public on [npm](https://www.npmjs.com/package/minecraftkit). The package remains intentionally `UNLICENSED`; publication does not grant rights beyond the repository's existing notice. Upstream-derived research remains subject to [NOTICE.md](../NOTICE.md).
+`minecraftkit@2.2.1` is public on [npm](https://www.npmjs.com/package/minecraftkit). The package remains intentionally `UNLICENSED`; publication does not grant rights beyond the repository's existing notice. Upstream-derived research remains subject to [NOTICE.md](../NOTICE.md).

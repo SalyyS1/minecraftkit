@@ -5,7 +5,7 @@ import { runCli } from "../lib/cli.js";
 test("install forwards the selected target to the verified bootstrap", () => {
   const output = [];
   let received;
-  const code = runCli(["install", "claude", "--dry-run", "--version", "2.2.0"], {
+  const code = runCli(["install", "claude", "--dry-run", "--version", "2.2.1"], {
     output: (line) => output.push(line),
     error: () => assert.fail("installer should not report an error"),
     runInstaller: (options) => { received = options; return { code: 0 }; }
@@ -13,7 +13,7 @@ test("install forwards the selected target to the verified bootstrap", () => {
 
   assert.equal(code, 0);
   assert.deepEqual(received, {
-    command: "install", target: "claude", dryRun: true, json: false, releaseVersion: "2.2.0"
+    command: "install", target: "claude", dryRun: true, json: false, releaseVersion: "2.2.1"
   });
   assert.match(output[0], /Planning MinecraftKit/);
 });

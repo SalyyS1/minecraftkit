@@ -7,8 +7,8 @@ test("install defaults to both targets", () => {
 });
 
 test("install accepts positional target and safe options", () => {
-  assert.deepEqual(parseCliArguments(["install", "claude", "--dry-run", "--version", "2.2.0"]), {
-    command: "install", target: "claude", dryRun: true, json: false, releaseVersion: "2.2.0"
+  assert.deepEqual(parseCliArguments(["install", "claude", "--dry-run", "--version", "2.2.1"]), {
+    command: "install", target: "claude", dryRun: true, json: false, releaseVersion: "2.2.1"
   });
 });
 

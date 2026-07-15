@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="description" content="Offline bilingual engineering wiki for Salyyy Minecraft Kit by SalyVn / Salyyy.">
-  <title>Salyyy Minecraft Kit v2.2.0 | Offline Wiki</title>
+  <title>Salyyy Minecraft Kit v2.2.1 | Offline Wiki</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2306141b'/%3E%3Cpath d='M14 14h36v36H14z' fill='none' stroke='%2352edc5' stroke-width='4'/%3E%3Cpath d='M22 40V24h6l4 7 4-7h6v16h-5V31l-5 8-5-8v9z' fill='%2383f7dc'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="wiki.css">
   <link rel="stylesheet" href="shell.css">
@@ -19,7 +19,7 @@
       <span class="brand-mark" aria-hidden="true"><span>SK</span><i></i></span>
       <span class="brand-copy">
         <strong>Salyyy Minecraft Kit</strong>
-        <small>v2.2.0 / OFFLINE WIKI</small>
+        <small>v2.2.1 / OFFLINE WIKI</small>
       </span>
     </a>
     <nav class="primary-nav" aria-label="Mục wiki" data-i18n-aria-label="primary_nav_label">
@@ -116,6 +116,18 @@
           <p data-i18n="install_copy">Ba chế độ cài gọi cùng một entry point trên nhánh main.</p>
         </div>
       </div>
+      <article class="npm-install-card">
+        <div>
+          <span class="target-label">NPM / RECOMMENDED</span>
+          <h3 data-i18n="npm_install_title">Cài nhanh với npm</h3>
+          <p data-i18n="npm_install_copy">Một lệnh để cài Kit cho cả Codex và Claude.</p>
+        </div>
+        <div class="npm-command-wrap">
+          <code>npx minecraftkit install --target both</code>
+          <button type="button" class="copy-button" data-copy-command="npx minecraftkit install --target both" data-i18n="copy">Sao chép</button>
+        </div>
+        <p class="npm-install-note" data-i18n="npm_install_note">Muốn dùng lệnh ở mọi thư mục? Chạy npm install -g minecraftkit.</p>
+      </article>
       <div id="installer-grid" class="installer-grid"></div>
       <p class="offline-note" data-i18n="offline_note">Wiki này không tải tài nguyên từ xa khi mở.</p>
     </section>
@@ -127,7 +139,7 @@
   </main>
 
   <footer class="site-footer">
-    <p data-i18n="footer_identity">SalyVn / Salyyy • Salyyy Minecraft Kit v2.2.0</p>
+    <p data-i18n="footer_identity">SalyVn / Salyyy • Salyyy Minecraft Kit v2.2.1</p>
     <p data-i18n="footer_boundary">Khả năng tương thích luôn phụ thuộc phiên bản.</p>
   </footer>
 

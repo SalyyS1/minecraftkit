@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "scripts" / "install-from-github.ps1"
-VERSION = "2.2.0"
+VERSION = "2.2.1"
 ARCHIVE_NAME = f"minecraftkit-{VERSION}.zip"
 
 

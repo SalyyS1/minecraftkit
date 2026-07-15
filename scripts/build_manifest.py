@@ -13,7 +13,7 @@ from typing import Any
 
 SCHEMA_VERSION = 2
 KIT_NAME = "minecraftkit"
-KIT_VERSION = "2.2.0"
+KIT_VERSION = "2.2.1"
 RESEARCH_DATE = "2026-07-15"
 INSTALL_TARGETS = {
     "codex": {
