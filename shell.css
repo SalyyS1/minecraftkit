@@ -1,0 +1,212 @@
+:root {
+  --mk-aqua: #52edc5;
+  --mk-cyan: #68dbe8;
+  --mk-ink: #030c11;
+  --mk-surface: #081b22;
+  --mk-line: rgba(104, 219, 232, 0.3);
+}
+
+body[data-page="ecosystem"] {
+  --ink: #e9fbf7;
+  --muted: #9abdbd;
+  --dim: #6e9998;
+  --canvas: #06141b;
+  --canvas-raised: #081b22;
+  --panel: #0a2028;
+  --panel-strong: #0d2a33;
+  --line: #20505a;
+  --line-strong: #2f7480;
+  --mineral: #52edc5;
+  --mineral-dark: #123842;
+  --copper: #68dbe8;
+  --copper-dark: #12323b;
+  --focus: #83f7dc;
+}
+
+body[data-page="api"] {
+  --color-canvas: #06141b;
+  --color-panel: #0a2028;
+  --color-panel-muted: #0d2a33;
+  --color-panel-strong: #123842;
+  --color-line: #20505a;
+  --color-line-strong: #2f7480;
+  --color-ink: #e9fbf7;
+  --color-muted: #9abdbd;
+  --color-accent: #52edc5;
+  --color-accent-hover: #83f7dc;
+  --color-accent-soft: rgba(82, 237, 197, 0.16);
+  --color-accent-ink: #e9fbf7;
+  --color-success: #52edc5;
+  --color-error: #ff9b9b;
+  --color-focus: #83f7dc;
+  --color-disabled: #16323a;
+}
+
+body::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(82, 237, 197, 0.12), transparent 24rem),
+    radial-gradient(circle at 6% 45%, rgba(104, 219, 232, 0.08), transparent 26rem);
+}
+
+.mk-global-nav {
+  position: sticky;
+  z-index: 25;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: min(100% - 32px, 1380px);
+  min-height: 58px;
+  margin: 16px auto 0;
+  padding: 7px 9px;
+  border: 1px solid var(--mk-line);
+  background: rgba(3, 16, 22, 0.82);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(18px);
+}
+
+.mk-global-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin-right: auto;
+  color: #e9fbf7;
+  font-family: "Bahnschrift SemiCondensed", "Cascadia Code", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.mk-global-brand img {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(82, 237, 197, 0.65);
+  object-fit: cover;
+}
+
+.mk-global-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 8px 13px;
+  border: 1px solid transparent;
+  color: #9abdbd;
+  font: 700 0.72rem/1 "Cascadia Code", Consolas, monospace;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 180ms ease, border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+
+.mk-global-link:hover,
+.mk-global-link:focus-visible,
+.mk-global-link[aria-current="page"] {
+  border-color: rgba(82, 237, 197, 0.64);
+  color: var(--mk-aqua);
+  background: rgba(82, 237, 197, 0.09);
+  transform: translateY(-1px);
+}
+
+.mk-launcher {
+  display: grid;
+  grid-template-columns: 1.16fr repeat(2, minmax(0, 0.92fr));
+  gap: 14px;
+  margin-top: 26px;
+}
+
+.mk-launcher-card {
+  position: relative;
+  display: grid;
+  align-content: end;
+  min-height: 240px;
+  padding: 26px;
+  overflow: hidden;
+  border: 1px solid var(--mk-line);
+  color: #e9fbf7;
+  background: linear-gradient(145deg, rgba(13, 48, 55, 0.98), rgba(3, 14, 18, 0.96));
+  text-decoration: none;
+  transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+}
+
+.mk-launcher-card::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  opacity: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(82, 237, 197, 0.18), transparent 70%);
+  transform: translateX(-85%);
+  transition: opacity 220ms ease, transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.mk-launcher-card:hover {
+  z-index: 1;
+  border-color: var(--mk-aqua);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.3);
+  transform: translateY(-5px);
+}
+
+.mk-launcher-card:hover::before { opacity: 1; transform: translateX(85%); }
+.mk-launcher-card > * { position: relative; z-index: 1; }
+.mk-launcher-card strong { display: block; margin-top: 11px; font: 700 clamp(1.55rem, 3vw, 2.6rem)/1 "Bahnschrift SemiCondensed", sans-serif; }
+.mk-launcher-card p { max-width: 42ch; margin-top: 12px; color: #b9d9d6; }
+.mk-launcher-kicker { color: var(--mk-aqua); font: 700 0.69rem/1 "Cascadia Code", Consolas, monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+
+.mk-page-intro {
+  width: min(100% - 32px, 1380px);
+  margin: 22px auto 0;
+  padding: 27px 30px;
+  border: 1px solid var(--mk-line);
+  color: #e9fbf7;
+  background: linear-gradient(112deg, rgba(8, 31, 39, 0.98), rgba(4, 17, 23, 0.93));
+}
+
+.mk-page-intro p { margin: 0; color: #9abdbd; font: 700 0.72rem/1.4 "Cascadia Code", Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+.mk-page-intro h1 { max-width: 20ch; margin: 10px 0 0; font-family: "Bahnschrift SemiCondensed", "Cascadia Code", sans-serif; font-size: clamp(2.1rem, 5vw, 4.8rem); line-height: 0.97; letter-spacing: -0.04em; }
+
+.mk-loader {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #e9fbf7;
+  background: #02090d;
+  transition: opacity 420ms ease, visibility 420ms ease;
+}
+
+.mk-loader.is-leaving { opacity: 0; visibility: hidden; }
+.mk-loader-mark { position: relative; display: grid; justify-items: center; width: min(92vw, 730px); padding: 46px 20px; }
+.mk-loader-lines { position: absolute; top: 50%; right: 0; left: 0; height: 1px; background: rgba(104, 219, 232, 0.18); overflow: hidden; }
+.mk-loader-lines::before,
+.mk-loader-lines::after { position: absolute; top: 0; width: 50%; height: 1px; content: ""; background: var(--mk-aqua); box-shadow: 0 0 18px var(--mk-aqua); animation: mk-line-in 750ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.mk-loader-lines::before { left: 0; transform-origin: right; }
+.mk-loader-lines::after { right: 0; transform-origin: left; }
+.mk-loader img { width: 86px; height: 86px; margin-bottom: 14px; border: 1px solid var(--mk-aqua); object-fit: cover; opacity: 0; animation: mk-mark-in 460ms 440ms ease forwards; }
+.mk-loader h1 { position: relative; margin: 0; color: #e9fbf7; font: 800 clamp(2.3rem, 8vw, 5.8rem)/0.9 "Bahnschrift SemiCondensed", "Cascadia Code", sans-serif; letter-spacing: -0.055em; text-align: center; opacity: 0; animation: mk-mark-in 440ms 390ms ease forwards; }
+.mk-loader small { position: relative; margin-top: 13px; color: var(--mk-aqua); font: 700 0.68rem/1 "Cascadia Code", Consolas, monospace; letter-spacing: 0.27em; opacity: 0; animation: mk-mark-in 440ms 590ms ease forwards; text-transform: uppercase; }
+
+@keyframes mk-line-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes mk-mark-in { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 760px) {
+  .mk-global-nav { position: relative; width: min(100% - 24px, 1380px); flex-wrap: wrap; margin-top: 12px; }
+  .mk-global-brand { width: 100%; }
+  .mk-global-link { flex: 1 1 0; padding-inline: 8px; font-size: 0.65rem; }
+  .mk-launcher { grid-template-columns: 1fr; }
+  .mk-page-intro { width: min(100% - 24px, 1380px); padding: 24px 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mk-global-link, .mk-launcher-card, .mk-launcher-card::before, .mk-loader { transition: none; }
+  .mk-loader-lines::before, .mk-loader-lines::after, .mk-loader img, .mk-loader h1, .mk-loader small { animation: none; opacity: 1; transform: none; }
+}
