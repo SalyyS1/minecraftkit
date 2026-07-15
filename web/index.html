@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Offline API reference and addon planning workspace for Minecraft RPG plugin developers.">
+  <title>MinecraftRPG Kit | Offline API Workstation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to workspace</a>
+
+  <header class="app-header">
+    <div class="brand-lockup" aria-label="MinecraftRPG Kit">
+      <span class="brand-rune" aria-hidden="true">M::RPG</span>
+      <div>
+        <p class="brand-name">MinecraftRPG Kit</p>
+        <p class="brand-subtitle">Offline API workstation</p>
+      </div>
+    </div>
+
+    <nav class="primary-nav" aria-label="Workspace views">
+      <button class="nav-button is-active" type="button" data-view="api" aria-current="page">API Explorer</button>
+      <button class="nav-button" type="button" data-view="overview">Overview</button>
+      <button class="nav-button" type="button" data-view="architecture">Architecture</button>
+      <button class="nav-button" type="button" data-view="features">Features</button>
+      <button class="nav-button" type="button" data-view="addons">Addon Lab</button>
+    </nav>
+
+    <div class="header-counts" aria-label="Published API totals">
+      <span><strong>5,345</strong> types</span>
+      <span><strong>41,887</strong> members</span>
+    </div>
+  </header>
+
+  <main id="main-content" class="app-main" tabindex="-1">
+    <section class="coverage-strip" aria-labelledby="coverage-title">
+      <h1 id="coverage-title" class="visually-hidden">Minecraft RPG API coverage</h1>
+      <div class="metric-cell">
+        <span class="metric-value" id="metric-plugins">10</span>
+        <span class="metric-label">plugin datasets</span>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-value" id="metric-types">5,345</span>
+        <span class="metric-label">published types</span>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-value" id="metric-members">41,887</span>
+        <span class="metric-label">published members</span>
+      </div>
+      <div class="metric-cell">
+        <span class="metric-value">0</span>
+        <span class="metric-label">parse errors</span>
+      </div>
+    </section>
+
+    <section class="rune-section" aria-labelledby="rune-title">
+      <div class="section-heading-row">
+        <div>
+          <h2 id="rune-title">Dependency rune rail</h2>
+          <p>Select a plugin node to load only its local API shard.</p>
+        </div>
+        <p id="rail-context" class="rail-context" aria-live="polite">Loading local manifest.</p>
+      </div>
+      <div id="plugin-rail" class="plugin-rail" aria-label="Plugin datasets" aria-busy="true">
+        <p class="rail-placeholder">Reading data/manifest.js from this folder.</p>
+      </div>
+    </section>
+
+    <section class="workspace-shell" aria-label="API intelligence workspace">
+      <div class="workspace-bar">
+        <div>
+          <span class="workspace-label">Active dataset</span>
+          <strong id="active-plugin-name">Waiting for manifest</strong>
+        </div>
+        <label class="plugin-picker-label" for="plugin-select">Plugin</label>
+        <select id="plugin-select" class="plugin-picker" disabled>
+          <option>Loading manifest</option>
+        </select>
+        <span id="dataset-state" class="dataset-state" role="status" aria-live="polite">Idle</span>
+      </div>
+
+      <section id="panel-api" class="view-panel" data-view-panel="api" aria-labelledby="api-title">
+        <div class="panel-heading">
+          <div>
+            <h2 id="api-title">API Explorer</h2>
+            <p>Search public and protected bytecode symbols from the selected plugin.</p>
+          </div>
+          <p class="shortcut-copy"><kbd>/</kbd> focuses search</p>
+        </div>
+
+        <form id="api-filter-form" class="filter-form" role="search">
+          <div class="field field-search">
+            <label for="api-search">Search symbols</label>
+            <input id="api-search" name="query" type="search" autocomplete="off" spellcheck="false" placeholder="Type, member, package, return type" disabled>
+          </div>
+          <div class="field">
+            <label for="scope-filter">Scope</label>
+            <select id="scope-filter" name="scope" disabled>
+              <option value="all">All symbols</option>
+              <option value="type">Types only</option>
+              <option value="member">Members only</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="origin-filter">Origin</label>
+            <select id="origin-filter" name="origin" disabled>
+              <option value="plugin-owned">Plugin-owned</option>
+              <option value="all">All namespace records</option>
+              <option value="bundled-third-party">Bundled third-party</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="kind-filter">Kind</label>
+            <select id="kind-filter" name="kind" disabled>
+              <option value="all">Any kind</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="package-filter">Package</label>
+            <select id="package-filter" name="package" disabled>
+              <option value="all">All packages</option>
+            </select>
+          </div>
+          <label class="check-control" for="deprecated-filter">
+            <input id="deprecated-filter" name="deprecated" type="checkbox" checked disabled>
+            <span>Show deprecated</span>
+          </label>
+        </form>
+
+        <div class="result-summary">
+          <p id="result-count" aria-live="polite">Load a plugin to inspect symbols.</p>
+          <p id="page-range">No result range</p>
+        </div>
+
+        <div class="api-workbench">
+          <div class="result-pane" aria-labelledby="result-pane-title">
+            <h3 id="result-pane-title" class="visually-hidden">API search results</h3>
+            <div id="symbol-list" class="symbol-list" role="list" aria-label="API symbols" aria-busy="true">
+              <div class="empty-state">
+                <strong>Preparing local index</strong>
+                <span>The selected shard will appear here.</span>
+              </div>
+            </div>
+            <div class="pagination" aria-label="Search result pages">
+              <button id="page-previous" type="button" disabled>Previous</button>
+              <span id="page-status">Page 0 of 0</span>
+              <button id="page-next" type="button" disabled>Next</button>
+              <label for="page-size">Rows</label>
+              <select id="page-size" disabled>
+                <option value="24">24</option>
+                <option value="48">48</option>
+                <option value="96">96</option>
+              </select>
+            </div>
+          </div>
+
+          <article id="symbol-detail" class="symbol-detail" aria-labelledby="detail-title" aria-live="polite">
+            <div class="detail-empty">
+              <span class="detail-rune" aria-hidden="true">{ }</span>
+              <h3 id="detail-title">Select a symbol</h3>
+              <p>Type metadata, signatures, inheritance, and source paths appear here.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="panel-overview" class="view-panel insight-panel" data-view-panel="overview" aria-labelledby="overview-heading" hidden>
+        <div id="overview-content" class="insight-content">
+          <h2 id="overview-heading">Plugin overview</h2>
+          <p>Curated context will appear after the manifest loads.</p>
+        </div>
+      </section>
+
+      <section id="panel-architecture" class="view-panel insight-panel" data-view-panel="architecture" aria-labelledby="architecture-heading" hidden>
+        <div id="architecture-content" class="insight-content">
+          <h2 id="architecture-heading">Architecture map</h2>
+          <p>Data flow and extension boundaries will appear here.</p>
+        </div>
+      </section>
+
+      <section id="panel-features" class="view-panel insight-panel" data-view-panel="features" aria-labelledby="features-heading" hidden>
+        <div id="features-content" class="insight-content">
+          <h2 id="features-heading">Feature inventory</h2>
+          <p>Feature groups will appear after a plugin is selected.</p>
+        </div>
+      </section>
+
+      <section id="panel-addons" class="view-panel insight-panel" data-view-panel="addons" aria-labelledby="addons-heading" hidden>
+        <div id="addons-content" class="insight-content">
+          <h2 id="addons-heading">Addon Lab</h2>
+          <p>Original cross-plugin addon concepts will appear here.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <p>Local files only. No server, network request, or external asset required.</p>
+    <p id="footer-dataset">Dataset manifest pending.</p>
+  </footer>
+
+  <noscript>
+    <p class="noscript-message">JavaScript is required to index the local API shard. No network connection is used.</p>
+  </noscript>
+
+  <div id="live-status" class="visually-hidden" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>

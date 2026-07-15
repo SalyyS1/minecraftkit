@@ -1,0 +1,294 @@
+{
+  "schema_version": 1,
+  "evidence_model": ["VERIFIED_BYTECODE", "DERIVED_SOURCE", "ORIGINAL_DESIGN", "UNVERIFIED"],
+  "plugins": [
+    {
+      "id": "coretools",
+      "name": "CoreTools",
+      "version": "1.4.2",
+      "family": "MMO and utility",
+      "max_class_major": 65,
+      "role": "Configuration-driven RPG automation host with scripting, variables, stations, shops, auction, economy, profile data, and multi-provider items.",
+      "architecture": "A broad Bukkit composition root creates feature managers, then DelayedHooks activates optional integrations. Configured event names produce mutable Context objects that flow through condition, targeter, mechanic, and ScriptQueue factories.",
+      "api_boundaries": [
+        "CoreTools singleton and manager getters are semi-public, not a separately versioned API",
+        "Context, Condition, Mechanic, targeters, and ScriptQueue form the scripting surface",
+        "MultiSourceItemCreator.add registers external item resolvers",
+        "PlayerDataLoadedEvent, VariableEvent, StationConfirmEvent, and StationItemEvent expose transitions"
+      ],
+      "capabilities": ["script DSL", "variables", "stations", "shops", "auction", "economy", "private drops", "profile modules", "multi-source items"],
+      "patterns": ["factory-driven DSL", "delayed optional hooks", "provider fan-in", "feature managers"],
+      "risks": [
+        "Semi-public singleton access creates reload and order coupling",
+        "Decompiled save paths contain suspicious UUID reference comparisons and need runtime confirmation",
+        "Script discovery assumes safe directory traversal and should not be copied without stronger guards"
+      ],
+      "evidence": [
+        "ranet/coretools/CoreTools.java:78-240",
+        "ranet/coretools/hooks/DelayedHooks.java:33-190",
+        "ranet/coretools/scripts/casting/queue/ScriptQueue.java:20-106",
+        "ranet/coretools/util/items/creator/MultiSourceItemCreator.java:17-79"
+      ]
+    },
+    {
+      "id": "mmocore",
+      "name": "MMOCore",
+      "version": "1.13.1 snapshot 59",
+      "family": "MMO",
+      "max_class_major": 55,
+      "role": "Character progression platform for classes, skills, attributes, professions, quests, social groups, resources, loot, and waypoints.",
+      "architecture": "onLoad registers definitions before onEnable resolves data and integrations. PlayerData is the aggregate root; stable-ID registries and MMOLoader factories turn configuration into extensible domain objects.",
+      "api_boundaries": [
+        "MMOCoreAPI for player, party, and skill operations",
+        "MMOCoreRegister and MMOLoadManager for registered objects and config loaders",
+        "PlayerData and ExperienceObject for progression state",
+        "PartyModule, GuildModule, and QuestModule for external system adapters",
+        "Class, XP, resource, skill, loot, and item-unlock events"
+      ],
+      "capabilities": ["classes", "skills", "attributes", "professions", "quests", "parties", "guilds", "skill trees", "resources", "experience", "waypoints"],
+      "patterns": ["two-phase load", "typed registries", "aggregate root", "social provider adapters", "event-first transitions"],
+      "risks": [
+        "Some formula behavior inferred from decompilation appears to use current rather than requested level",
+        "Mutable singleton managers should be wrapped behind addon-owned adapters",
+        "Bukkit mutations must stay on the correct scheduler"
+      ],
+      "evidence": [
+        "net/Indyuce/mmocore/MMOCore.java:89-293",
+        "net/Indyuce/mmocore/api/MMOCoreAPI.java:25-68",
+        "net/Indyuce/mmocore/api/player/PlayerData.java:94-1278",
+        "net/Indyuce/mmocore/manager/MMOLoadManager.java:27-53"
+      ]
+    },
+    {
+      "id": "mmoinventory",
+      "name": "MMOInventory",
+      "version": "2.0 snapshot 32",
+      "family": "MMO",
+      "max_class_major": 55,
+      "role": "Custom equipment inventory layouts, slot restrictions, player inventory data, and equip/use/death interaction.",
+      "architecture": "InventoryManager owns configured layouts, RestrictionManager parses slot rules, and provider-backed player data switches between compact serialized and live inventory representations. Events bridge changes into MMOItems equipment resolution.",
+      "api_boundaries": [
+        "InventoryManager and inventory/slot models",
+        "RestrictionManager registration before enable/freeze",
+        "InventoryProvider and PlayerData storage access",
+        "InventoryUpdateEvent, ItemEquipEvent, and PlayerInteractCustomSlotsEvent",
+        "Legacy RPGInventory compatibility shim"
+      ],
+      "capabilities": ["custom slots", "layout registry", "slot restrictions", "equip events", "inventory persistence", "legacy compatibility"],
+      "patterns": ["provider abstraction", "event bridge", "compact/live representations", "pre-enable registry"],
+      "risks": [
+        "The nominal MMOInventoryAPI wrapper is empty; effective contracts are managers, models, and events",
+        "Removed or renumbered slots need migration before old serialized data is loaded",
+        "Slot and item restrictions exist at separate layers and must both be enforced"
+      ],
+      "evidence": [
+        "net/Indyuce/inventory/MMOInventory.java:26-77",
+        "net/Indyuce/inventory/manager/InventoryManager.java:53-196",
+        "net/Indyuce/inventory/manager/RestrictionManager.java:28-60",
+        "net/Indyuce/inventory/player/CustomInventoryData.java:61-165"
+      ]
+    },
+    {
+      "id": "mmoitems",
+      "name": "MMOItems",
+      "version": "6.10.1 snapshot 59",
+      "family": "MMO",
+      "max_class_major": 55,
+      "role": "Data-driven item platform for item types, templates, stats, randomized generation, crafting, upgrades, gems, sets, tiers, drops, and custom blocks.",
+      "architecture": "Type plus template configuration becomes an MMOItemTemplate and MMOItemBuilder, then stat data, modifiers, tier, and level are applied before ItemStackBuilder emits NBT, lore, and events. Equipment updates are buffered before derived effects are recomputed.",
+      "api_boundaries": [
+        "StatManager and ItemStat contracts",
+        "TypeManager, TemplateManager, MMOItemTemplate, and MMOItemBuilder",
+        "CraftingManager ingredient/output/condition/trigger registration",
+        "PlayerInventoryManager and InventorySupplier",
+        "Build, lore, crafting, equip, gem, repair, reforge, upgrade, and durability events"
+      ],
+      "capabilities": ["item stats", "templates", "random rolls", "modifiers", "crafting", "upgrades", "gems", "sets", "tiers", "equipment effects"],
+      "patterns": ["stat strategy objects", "builder pipeline", "stable IDs", "buffered recomputation", "event-rich lifecycle"],
+      "risks": [
+        "Per-stat build failures may yield partially built items, which is unsafe for economy-critical flows",
+        "Effective tier fallback and the builder's exposed tier may differ in this snapshot",
+        "Custom stats and types must register in the correct lifecycle window"
+      ],
+      "evidence": [
+        "net/Indyuce/mmoitems/MMOItems.java:84-400",
+        "net/Indyuce/mmoitems/api/item/template/MMOItemTemplate.java:94-214",
+        "net/Indyuce/mmoitems/api/item/build/MMOItemBuilder.java:41-171",
+        "net/Indyuce/mmoitems/inventory/InventoryResolver.java:52-300"
+      ]
+    },
+    {
+      "id": "mmoprofiles",
+      "name": "MMOProfiles",
+      "version": "1.2 snapshot 29",
+      "family": "MMO",
+      "max_class_major": 55,
+      "role": "Multiple character profiles with vanilla state snapshots, plugin-owned data modules, placeholders, and proxy handoff.",
+      "architecture": "ProfileProvider is registered through Bukkit Services. A pending profile transition waits for registered ProfileDataModule participants, validates the snapshot, applies state, and emits selected/unload events. Velocity and Bukkit exchange a profile request envelope.",
+      "api_boundaries": [
+        "ProfileProvider Bukkit service",
+        "ProfileDataModule and pending lifecycle events",
+        "PlayerProfile and ProfileList models",
+        "PlaceholderProcessor",
+        "Create, remove, pending, select, autosave, unload, and proxy-selection events"
+      ],
+      "capabilities": ["character slots", "state snapshots", "module synchronization", "profile placeholders", "proxy transfer", "SQL/YAML persistence"],
+      "patterns": ["service provider", "module completion barrier", "profile aggregate", "proxy adapter"],
+      "risks": [
+        "A module that never validates can stall a profile transition; addon modules should complete in finally and add diagnostics",
+        "Create-event cancellation behavior is suspicious in this decompile and requires runtime verification",
+        "Profile identity and addon state must be keyed by stable UUID/profile IDs, not display text"
+      ],
+      "evidence": [
+        "fr/phoenixdevt/mmoprofiles/bukkit/MMOProfiles.java:47-177",
+        "fr/phoenixdevt/profiles/ProfileProvider.java:8-20",
+        "fr/phoenixdevt/profiles/event/PendingProfileEvent.java:15-65",
+        "fr/phoenixdevt/mmoprofiles/velocity/RequestHandler.java:30-125"
+      ]
+    },
+    {
+      "id": "modelengine",
+      "name": "ModelEngine",
+      "version": "R4.1.0",
+      "family": "Rendering and models",
+      "max_class_major": 69,
+      "role": "Packet/NMS-backed entity models, bones, animation, VFX, hitboxes, mounts, screens, model import, visibility, culling, and persistence callbacks.",
+      "architecture": "ModelEngineAPI is installed during load. BaseEntity, ModeledEntity, ActiveModel, and bone behavior managers form the model aggregate. Registries supply blueprints, behaviors, animation handlers, keyframes, scripts, mounts, and pivots while DualTicker coordinates phased work.",
+      "api_boundaries": [
+        "ModelEngineAPI facade",
+        "ModeledEntity, ActiveModel, ModelBlueprint, ModelBone, and behavior contracts",
+        "AnimationHandler and state/priority handler registries",
+        "RegisterBehaviorParserEvent and model lifecycle events",
+        "PlatformScheduler and NMSHandler, with NMS treated as volatile"
+      ],
+      "capabilities": ["models", "bones", "animations", "VFX", "dynamic hitboxes", "mounts", "screens", "LOD", "per-viewer visibility", "Blockbench import"],
+      "patterns": ["facade plus interfaces", "registry-driven behaviors", "phased ticker", "scheduler adapter", "renderer injection"],
+      "risks": [
+        "Static facade calls are lifecycle-sensitive",
+        "Late behavior registration can miss cached serialization setup",
+        "NMS/network APIs and cross-thread model state are high-risk integration boundaries"
+      ],
+      "evidence": [
+        "com/ticxo/modelengine/core/ModelEngine.java:115-166",
+        "com/ticxo/modelengine/api/ModelEngineAPI.java:142-309",
+        "com/ticxo/modelengine/api/model/ModeledEntity.java:89-125",
+        "com/ticxo/modelengine/api/model/ActiveModel.java:44-190"
+      ]
+    },
+    {
+      "id": "mythiccrucible",
+      "name": "MythicCrucible",
+      "version": "5.13.0-SNAPSHOT",
+      "family": "Mythic",
+      "max_class_major": 65,
+      "role": "Mythic item traits, furniture, custom blocks, armor, equippables, recipes, augments, sets, world generation, and resource-pack generation/deployment.",
+      "architecture": "LuminePlugin lifecycle binds reloadable managers and Mythic components. ItemManager wraps Mythic items with a recursion guard, performs second-pass resolution, and dispatches generation events. PackGenerationManager composes generated and external assets before deployment.",
+      "api_boundaries": [
+        "MythicCrucibleProvider and furniture-focused MythicCrucibleAPI",
+        "ItemManager and feature submanagers are semi-public",
+        "Craft, pack, and furniture lifecycle events",
+        "Mythic mechanics, conditions, targeters, and placeholders"
+      ],
+      "capabilities": ["item traits", "furniture", "custom blocks", "recipes", "armor", "sets", "durability", "bags", "resource packs", "world generation"],
+      "patterns": ["two-pass resolution", "reload transaction", "component DSL", "explicit placement result", "pack pipeline"],
+      "risks": [
+        "The explicit API is narrow; manager getters are more version-sensitive",
+        "Writable provider state may remain stale across unsupported hot reloads",
+        "Pack generation and Bukkit world operations need scheduler discipline"
+      ],
+      "evidence": [
+        "io/lumine/mythiccrucible/MythicCrucible.java:67-296",
+        "io/lumine/mythiccrucible/api/MythicCrucibleAPI.java:8-30",
+        "io/lumine/mythiccrucible/items/ItemManager.java:84-282",
+        "io/lumine/mythiccrucible/generation/PackGenerationManager.java:185-555"
+      ]
+    },
+    {
+      "id": "mythicdungeons",
+      "name": "MythicDungeons",
+      "version": "2.0.1-SNAPSHOT",
+      "family": "Mythic",
+      "max_class_major": 65,
+      "role": "Classic, continuous, and procedural dungeon instances with rooms, queues, parties, conditions, triggers, functions, rewards, spectators, and moving blocks.",
+      "architecture": "A Bukkit composition root registers dungeon/layout types and graph elements, validates queue requirements, creates isolated instances, evaluates trigger-condition-function graphs, emits lifecycle events, restores players, and disposes generated worlds. Procedural Layout implementations place weighted room connectors under bounds constraints.",
+      "api_boundaries": [
+        "MythicDungeonsService from Bukkit ServicesManager",
+        "DungeonFunction, DungeonTrigger, and TriggerCondition extension bases",
+        "Dungeon/layout/type and instance-listener registration",
+        "Dungeon, room, loot, trigger, player, and party events",
+        "Semi-public AbstractDungeon, AbstractInstance, Layout, and manager objects"
+      ],
+      "capabilities": ["instances", "procedural rooms", "queues", "ready checks", "parties", "difficulty", "loot", "checkpoints", "spectators", "trigger graphs"],
+      "patterns": ["service boundary", "composite graph", "explicit instance states", "annotation registry", "disposal lifecycle"],
+      "risks": [
+        "Two service booleans appear to report false after successful actions in decompiled flow",
+        "IDungeonParty.hasPlayer appears to use UUID reference equality",
+        "Mutable manager views and recursive generated-world deletion demand strict path and lifecycle isolation"
+      ],
+      "evidence": [
+        "net/playavalon/mythicdungeons/MythicDungeons.java:205-1280",
+        "net/playavalon/mythicdungeons/api/MythicDungeonsService.java:14-54",
+        "net/playavalon/mythicdungeons/api/party/IDungeonParty.java:14-78",
+        "net/playavalon/mythicdungeons/api/parents/elements/DungeonFunction.java:35-198"
+      ]
+    },
+    {
+      "id": "mythicenchants",
+      "name": "MythicEnchants",
+      "version": "5.13.1",
+      "family": "Mythic",
+      "max_class_major": 69,
+      "role": "Data-driven native/custom enchant definitions, datapack output, custom enchanting, reagents, anvil/grindstone behavior, trigger skills, and runtime addons.",
+      "architecture": "YAML definitions populate enchant and tag registries plus native datapack output. Runtime listeners resolve equipment and event triggers, fire cancellable Mench events, then dispatch Mythic skills. AddonManager loads isolated addon jars through AddonContext.",
+      "api_boundaries": [
+        "MythicEnchantsAPI for query, apply, remove, register, tags, offers, and validity",
+        "EnchantmentDefinition builder and EnchantmentRegistry",
+        "MythicEnchantsAddon and AddonContext",
+        "Apply, remove, prepare-offer, and skill-trigger events",
+        "Mythic mechanics, conditions, targeting helpers, and 39 trigger families"
+      ],
+      "capabilities": ["custom enchants", "native datapacks", "enchant offers", "reagents", "anvil", "grindstone", "trigger skills", "addon jars"],
+      "patterns": ["definition builder", "tag registry", "event-before-skill", "isolated addon context", "scheduler adapter"],
+      "risks": [
+        "Late API registration alone does not add the enchant to Bukkit's native registry",
+        "Addon api-version is parsed but lifecycle registrations may not be fully tracked for reload cleanup",
+        "Configured storage options and actual YAML stores need runtime validation"
+      ],
+      "evidence": [
+        "com/stelliusstudio/mythicenchants/MythicEnchants.java:90-297",
+        "com/stelliusstudio/mythicenchants/api/MythicEnchantsAPI.java:28-355",
+        "com/stelliusstudio/mythicenchants/enchantment/EnchantmentDefinition.java:11-296",
+        "com/stelliusstudio/mythicenchants/addon/AddonManager.java:20-145"
+      ]
+    },
+    {
+      "id": "mythicrpg",
+      "name": "MythicRPG",
+      "version": "0.0.1-SNAPSHOT",
+      "family": "Mythic",
+      "max_class_major": 65,
+      "role": "Profiles, archetypes, talents, points, experience, spells, resources, casting UI, death rules, waystones, parties, friends, shared rewards, and economy.",
+      "architecture": "LuminePlugin lifecycle loads config-driven domain definitions and binds managers. MythicRPGAPI exposes immutable DTO views and opens live ProfileSession wrappers. JSON or SQL repositories persist profile state with versioned SQL migrations.",
+      "api_boundaries": [
+        "MythicRPGProvider and the 92-operation MythicRPGAPI",
+        "ProfileSession for player-bound operations",
+        "Immutable archetype, profile, party, point, spell, friend, and waystone DTOs",
+        "Progression, spell, talent, profile, reagent, and archetype events",
+        "Mythic mechanics, conditions, targeters, and manager registries"
+      ],
+      "capabilities": ["profiles", "archetypes", "talents", "points", "experience", "spells", "resources", "waystones", "parties", "friends", "economy"],
+      "patterns": ["provider plus immutable views", "bound session", "repository driver", "versioned migration", "config-driven domain"],
+      "risks": [
+        "The explicit API operates on loaded/live profiles and is not a general offline mutation API",
+        "Two loaded events expose cancellation methods without implementing Bukkit Cancellable",
+        "Snapshot version and broad aliases require exact-artifact consumer tests"
+      ],
+      "evidence": [
+        "io/lumine/mythicrpg/MythicRPG.java:48-233",
+        "io/lumine/mythicrpg/api/MythicRPGAPI.java:23-207",
+        "io/lumine/mythicrpg/api/ProfileSession.java:18-154",
+        "io/lumine/mythicrpg/storage/StorageDriver.java:5-31"
+      ]
+    }
+  ]
+}

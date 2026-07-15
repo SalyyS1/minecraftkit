@@ -1,0 +1,126 @@
+{
+  "plugins": [
+    {
+      "bundled_third_party_members": 1617,
+      "bundled_third_party_types": 207,
+      "excluded_non_public_types": 852,
+      "owned_class_entries": 1826,
+      "parse_errors": [],
+      "plugin": "CoreTools",
+      "plugin_owned_members": 4429,
+      "plugin_owned_types": 767,
+      "published_members": 6046,
+      "published_types": 974
+    },
+    {
+      "bundled_third_party_members": 86,
+      "bundled_third_party_types": 25,
+      "excluded_non_public_types": 81,
+      "owned_class_entries": 661,
+      "parse_errors": [],
+      "plugin": "MMOCore",
+      "plugin_owned_members": 3497,
+      "plugin_owned_types": 555,
+      "published_members": 3583,
+      "published_types": 580
+    },
+    {
+      "bundled_third_party_members": 0,
+      "bundled_third_party_types": 0,
+      "excluded_non_public_types": 3,
+      "owned_class_entries": 70,
+      "parse_errors": [],
+      "plugin": "MMOInventory",
+      "plugin_owned_members": 397,
+      "plugin_owned_types": 67,
+      "published_members": 397,
+      "published_types": 67
+    },
+    {
+      "bundled_third_party_members": 0,
+      "bundled_third_party_types": 0,
+      "excluded_non_public_types": 27,
+      "owned_class_entries": 683,
+      "parse_errors": [],
+      "plugin": "MMOItems",
+      "plugin_owned_members": 4644,
+      "plugin_owned_types": 656,
+      "published_members": 4644,
+      "published_types": 656
+    },
+    {
+      "bundled_third_party_members": 586,
+      "bundled_third_party_types": 73,
+      "excluded_non_public_types": 158,
+      "owned_class_entries": 311,
+      "parse_errors": [],
+      "plugin": "MMOProfiles",
+      "plugin_owned_members": 642,
+      "plugin_owned_types": 80,
+      "published_members": 1228,
+      "published_types": 153
+    },
+    {
+      "bundled_third_party_members": 0,
+      "bundled_third_party_types": 0,
+      "excluded_non_public_types": 271,
+      "owned_class_entries": 1386,
+      "parse_errors": [],
+      "plugin": "ModelEngine",
+      "plugin_owned_members": 11881,
+      "plugin_owned_types": 1115,
+      "published_members": 11881,
+      "published_types": 1115
+    },
+    {
+      "bundled_third_party_members": 42,
+      "bundled_third_party_types": 14,
+      "excluded_non_public_types": 64,
+      "owned_class_entries": 624,
+      "parse_errors": [],
+      "plugin": "MythicCrucible",
+      "plugin_owned_members": 4378,
+      "plugin_owned_types": 546,
+      "published_members": 4420,
+      "published_types": 560
+    },
+    {
+      "bundled_third_party_members": 273,
+      "bundled_third_party_types": 69,
+      "excluded_non_public_types": 345,
+      "owned_class_entries": 782,
+      "parse_errors": [],
+      "plugin": "MythicDungeons",
+      "plugin_owned_members": 3624,
+      "plugin_owned_types": 368,
+      "published_members": 3897,
+      "published_types": 437
+    },
+    {
+      "bundled_third_party_members": 0,
+      "bundled_third_party_types": 0,
+      "excluded_non_public_types": 55,
+      "owned_class_entries": 288,
+      "parse_errors": [],
+      "plugin": "MythicEnchants",
+      "plugin_owned_members": 1213,
+      "plugin_owned_types": 233,
+      "published_members": 1213,
+      "published_types": 233
+    },
+    {
+      "bundled_third_party_members": 21,
+      "bundled_third_party_types": 10,
+      "excluded_non_public_types": 32,
+      "owned_class_entries": 602,
+      "parse_errors": [],
+      "plugin": "MythicRPG",
+      "plugin_owned_members": 4557,
+      "plugin_owned_types": 560,
+      "published_members": 4578,
+      "published_types": 570
+    }
+  ],
+  "schema_version": 1,
+  "unexplained_errors": 0
+}

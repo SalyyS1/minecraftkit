@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "novelty_note": "Every entry is ORIGINAL_DESIGN: reviewed plugins supply primitives, but the end-to-end behavior was not identified in the reviewed artifacts.",
+  "ideas": [
+    {
+      "id": "adaptive-raid-director",
+      "title": "Adaptive Raid Director",
+      "maturity": "build-ready",
+      "plugins": ["MythicDungeons", "MMOCore", "MythicRPG", "MMOItems", "MythicEnchants"],
+      "primitives": ["dungeon queue/difficulty/status events", "party and archetype levels", "equipment templates/tiers", "enchant levels", "loot generation"],
+      "new_behavior": "Compute a bounded party-power snapshot at queue lock, select encounter budgets and rewards, then learn from failure streaks without changing difficulty mid-run.",
+      "authoritative_state": "Addon-owned RaidPlan keyed by immutable dungeon run UUID; input snapshot is immutable and the dungeon instance only receives a projection.",
+      "flow": [
+        "Queue becomes ready and locks roster/profile IDs",
+        "Read progression and equipment through adapters on the server thread",
+        "Normalize power, role coverage, recent failures, and gear saturation",
+        "Select a signed RaidPlan from admin-defined bounds",
+        "Create instance and publish variables/mob/reward budgets",
+        "Journal completion or failure exactly once and update the next-run signal"
+      ],
+      "failure_modes": ["missing optional plugin falls back to configured baseline", "roster change invalidates plan before instance creation", "unknown API result never raises difficulty", "reward journal prevents duplicate grants"],
+      "validation": ["deterministic scoring unit tests", "party-change race test", "consumer compile against exact artifacts", "restart before reward grant", "load test with simultaneous queues"]
+    },
+    {
+      "id": "profile-seasonal-relic-board",
+      "title": "Profile-bound Seasonal Relic Board",
+      "maturity": "build-ready",
+      "plugins": ["MMOProfiles", "MMOInventory", "MMOItems", "MMOCore"],
+      "primitives": ["ProfileDataModule", "pending/select/unload events", "custom inventory slots", "item sets and stats", "skill-tree unlocks"],
+      "new_behavior": "Each character owns a versioned seasonal relic board whose slot graph and bonuses migrate safely between seasons without leaking items across profiles.",
+      "authoritative_state": "Addon repository keyed by account UUID plus profile UUID plus season ID; MMOInventory is a live projection only.",
+      "flow": [
+        "Register a profile data module and current slot-layout schema",
+        "Load and migrate relic IDs while the profile is pending",
+        "Populate custom slots only after validation succeeds",
+        "Buffer equipment changes and recompute one bonus snapshot",
+        "Persist on slot mutation and profile unload with idempotent revision",
+        "At season rollover, archive old board and apply explicit carry rules"
+      ],
+      "failure_modes": ["module validates in finally with degraded empty board", "unknown slot IDs move items to recovery escrow", "profile switch cancels stale writes by revision", "missing MMOItems definition preserves opaque item ID for recovery"],
+      "validation": ["two-profile isolation", "old-layout migration", "disconnect during pending load", "season rollover", "duplicate event storm and retry"]
+    },
+    {
+      "id": "reward-escrow-recovery",
+      "title": "Dungeon Reward Escrow And Recovery",
+      "maturity": "build-ready",
+      "plugins": ["MythicDungeons", "MMOProfiles", "MMOItems", "MythicEnchants", "CoreTools"],
+      "primitives": ["loot/end/leave/dispose events", "profile identity", "item build metadata", "soulbound/recovery semantics", "private drops and variables"],
+      "new_behavior": "Hold generated rewards in an append-only escrow until clean instance disposal, then grant exactly once or recover after crash/death/profile switch.",
+      "authoritative_state": "Transactional addon ledger with run UUID, reward UUID, profile UUID, serialized safe item descriptor, and state PENDING/COMMITTED/CLAIMED/VOID.",
+      "flow": [
+        "Intercept generated loot and replace direct grant with escrow descriptors",
+        "Commit escrow after the dungeon outcome is final",
+        "On clean disposal, claim rewards under an idempotency key",
+        "On restart, reconcile committed but unclaimed entries",
+        "Deliver through inventory, mailbox/private drop, or admin recovery queue",
+        "Emit an audit event for every state transition"
+      ],
+      "failure_modes": ["database unavailable blocks final grant but keeps escrow", "profile mismatch defers delivery", "full inventory uses recovery channel", "duplicate callbacks see already-claimed state"],
+      "validation": ["kill server at every transition", "duplicate end/dispose events", "full inventory", "profile switch", "database retry and audit reconciliation"]
+    },
+    {
+      "id": "reactive-anatomy-boss",
+      "title": "Reactive Anatomy Boss",
+      "maturity": "build-ready",
+      "plugins": ["ModelEngine", "MythicDungeons", "MythicCrucible", "MMOCore"],
+      "primitives": ["named bones and sub-hitboxes", "bone transforms and model events", "dungeon variables/triggers", "item and armor visuals", "combat skills/resources"],
+      "new_behavior": "Named limbs have authoritative health pools; breaking a limb removes attacks, changes movement/animation, detaches equipment, and unlocks encounter routes.",
+      "authoritative_state": "Addon BossAnatomy aggregate keyed by encounter UUID; ModelEngine hitboxes and bones are projections of limb state.",
+      "flow": [
+        "Bind configured logical limbs to verified model bone IDs at spawn",
+        "Translate sub-hitbox damage into a guarded limb transaction",
+        "Publish pre-break event, commit health, and emit post-break event",
+        "Switch animation state and disable associated Mythic skills",
+        "Update dungeon variables/doors and spawn optional VFX/loot",
+        "Dispose tick tasks and hitbox mappings with the instance"
+      ],
+      "failure_modes": ["missing bone disables that limb mechanic only", "model unload never deletes gameplay state", "duplicate damage uses transaction sequence", "unsupported NMS degrades to ordinary boss hitbox"],
+      "validation": ["bone mapping validator", "simultaneous lethal hits", "model reload", "instance disposal", "reduced-effects client mode"]
+    },
+    {
+      "id": "item-provenance-ledger",
+      "title": "Item Provenance Ledger",
+      "maturity": "build-ready",
+      "plugins": ["MMOItems", "MythicCrucible", "MythicEnchants", "CoreTools", "MMOProfiles"],
+      "primitives": ["build/reforge/upgrade/enchant/craft events", "stat history", "station attribution", "profile identity", "item NBT IDs"],
+      "new_behavior": "Issue each high-value item a stable provenance ID and append signed lifecycle facts so staff can detect cloning, impossible transitions, or cross-profile leakage.",
+      "authoritative_state": "Append-only addon ledger; item metadata stores only opaque ID and current revision, never the audit truth.",
+      "flow": [
+        "Issue ID during an authorized creation event",
+        "Append parent IDs, template, profile, station, and transition hash",
+        "On upgrade/reforge/enchant, validate expected revision then append",
+        "On inventory/profile boundary, compare item revision with ledger",
+        "Quarantine conflicts without destroying evidence",
+        "Expose staff search and reconciliation reports"
+      ],
+      "failure_modes": ["ledger outage fails closed only for configured high-value tiers", "legacy items enter explicit adoption flow", "duplicate events are idempotent by event UUID", "metadata stripping triggers quarantine/recovery"],
+      "validation": ["clone simulation", "concurrent reforge", "profile transfer", "legacy adoption", "ledger restore and signature rotation"]
+    },
+    {
+      "id": "crafting-research-tree",
+      "title": "Crafting Research Tree",
+      "maturity": "concept",
+      "plugins": ["MMOItems", "MythicCrucible", "MMOCore", "MythicRPG"],
+      "primitives": ["craft conditions/triggers", "recipes", "professions/skill trees", "talents/points"],
+      "new_behavior": "Unlock recipe families through experimentation and research nodes, with first-discovery XP and previewable prerequisites."
+    },
+    {
+      "id": "dynamic-affix-economy",
+      "title": "Dynamic Affix Economy",
+      "maturity": "concept",
+      "plugins": ["MMOItems", "CoreTools"],
+      "primitives": ["modifiers and capacity", "item history", "auction/stations/economy/variables"],
+      "new_behavior": "Use measured market demand to price reforging and adjust future affix supply inside admin-defined bounds without editing base templates."
+    },
+    {
+      "id": "party-synergy-relics",
+      "title": "Party Synergy Relics",
+      "maturity": "concept",
+      "plugins": ["MMOCore", "MythicRPG", "MMOItems", "MMOInventory"],
+      "primitives": ["party roles", "inventory suppliers", "set bonuses", "accessory slots"],
+      "new_behavior": "Relics activate composition bonuses from nearby party roles and recompute once per roster/equipment transaction."
+    },
+    {
+      "id": "waypoint-caravan-contracts",
+      "title": "Waypoint Caravan Contracts",
+      "maturity": "concept",
+      "plugins": ["MMOCore", "MythicRPG", "CoreTools"],
+      "primitives": ["waypoints", "quests", "scripts", "shops", "private drops"],
+      "new_behavior": "Generate timed trade routes whose cargo value, ambushes, and destination prices respond to server activity."
+    },
+    {
+      "id": "cross-server-expedition-character",
+      "title": "Cross-server Expedition Character",
+      "maturity": "concept",
+      "plugins": ["MMOProfiles", "MMOCore", "MMOInventory", "MMOItems"],
+      "primitives": ["proxy profile handoff", "profile modules", "progression and inventory state"],
+      "new_behavior": "Create a temporary expedition profile, transfer it across a cluster, then merge only whitelisted rewards into the home character."
+    },
+    {
+      "id": "death-insurance-recovery-hunt",
+      "title": "Death Insurance And Recovery Hunt",
+      "maturity": "concept",
+      "plugins": ["MMOInventory", "MMOCore", "CoreTools", "MythicDungeons"],
+      "primitives": ["death behavior", "economy", "private drops", "dungeon instances"],
+      "new_behavior": "Insured items return through escrow while uninsured losses become owner-bound recovery encounters rather than instant deletion."
+    },
+    {
+      "id": "balance-telemetry-advisor",
+      "title": "Privacy-light Balance Telemetry Advisor",
+      "maturity": "concept",
+      "plugins": ["MMOCore", "MMOItems", "MythicDungeons", "MythicRPG"],
+      "primitives": ["XP/resource/item/equip/craft/dungeon events", "definition registries"],
+      "new_behavior": "Aggregate anonymous balance signals and produce review suggestions without automatically editing production configuration."
+    },
+    {
+      "id": "contextual-resource-hud",
+      "title": "Contextual Resource HUD",
+      "maturity": "concept",
+      "plugins": ["MMOCore", "MythicRPG", "CoreTools", "ModelEngine"],
+      "primitives": ["resource updates", "script context", "bindings", "model screens"],
+      "new_behavior": "Switch accessible HUD panels by class, combat state, held item, station, and current objective."
+    },
+    {
+      "id": "account-legacy-character-mastery",
+      "title": "Account Legacy, Character Mastery",
+      "maturity": "concept",
+      "plugins": ["MMOProfiles", "MMOCore", "MythicRPG", "CoreTools"],
+      "primitives": ["profile lists/modules", "professions/talents", "variables"],
+      "new_behavior": "Split account-wide unlocks from profile-local mastery with explicit inheritance, respec, and migration rules."
+    },
+    {
+      "id": "relic-evolution",
+      "title": "Relic Evolution",
+      "maturity": "concept",
+      "plugins": ["MythicCrucible", "MythicEnchants", "MythicRPG", "ModelEngine"],
+      "primitives": ["upgrade/lore events", "enchant application", "XP/points", "item bones"],
+      "new_behavior": "A relic branches from dungeon feats, unlocks namespaced enchants, and changes lore/model form at milestones."
+    },
+    {
+      "id": "furniture-puzzle-runtime",
+      "title": "Furniture Puzzle Runtime",
+      "maturity": "concept",
+      "plugins": ["MythicCrucible", "MythicDungeons", "ModelEngine"],
+      "primitives": ["furniture place/rotate/state", "dungeon variables/doors", "interaction hitboxes"],
+      "new_behavior": "Treat instance-scoped furniture orientation and state as a validated puzzle graph that opens room routes."
+    },
+    {
+      "id": "waystone-conquest-network",
+      "title": "Waystone Conquest Network",
+      "maturity": "concept",
+      "plugins": ["MythicRPG", "MythicDungeons", "MythicCrucible"],
+      "primitives": ["waystone state", "dungeon completion", "physical furniture"],
+      "new_behavior": "Dungeon clears activate physical waystones and unlock a persistent, contestable travel graph."
+    },
+    {
+      "id": "enchantment-trials",
+      "title": "Enchantment Trials",
+      "maturity": "concept",
+      "plugins": ["MythicEnchants", "MythicDungeons", "MythicRPG"],
+      "primitives": ["offers/reagents/triggers", "room functions/rewards", "talents"],
+      "new_behavior": "Trial constraints alter the next enchant offer and award a bounded guaranteed result or talent branch."
+    },
+    {
+      "id": "spellbound-enchants",
+      "title": "Spellbound Enchants",
+      "maturity": "concept",
+      "plugins": ["MythicEnchants", "MythicRPG"],
+      "primitives": ["skill-trigger event", "spells/resources/cooldowns"],
+      "new_behavior": "An enchant casts a learned RPG spell through a shared cooldown/reagent transaction with recursion and PvP guards."
+    },
+    {
+      "id": "procedural-party-synergy-layout",
+      "title": "Procedural Party-synergy Layout",
+      "maturity": "concept",
+      "plugins": ["MythicDungeons", "MMOCore", "MythicRPG"],
+      "primitives": ["custom Layout", "party and archetype APIs"],
+      "new_behavior": "Weight room connectors by role composition and inject compensating challenges for missing capabilities."
+    },
+    {
+      "id": "party-loot-contract",
+      "title": "Party Loot Contract",
+      "maturity": "concept",
+      "plugins": ["MythicRPG", "MythicDungeons", "MythicEnchants", "MMOItems"],
+      "primitives": ["shared loot modes", "party/reward events", "rarity/tags/tiers"],
+      "new_behavior": "Players choose need/greed/round-robin rules per run; typed rules route rewards into an auditable ledger."
+    },
+    {
+      "id": "living-strongholds",
+      "title": "Living Strongholds",
+      "maturity": "concept",
+      "plugins": ["MythicCrucible", "MythicDungeons", "MythicRPG", "ModelEngine"],
+      "primitives": ["custom blocks/furniture/worldgen", "dungeon graphs", "party ownership", "models"],
+      "new_behavior": "Player groups build persistent strongholds that can instantiate as attackable dungeons with evolving defenses."
+    },
+    {
+      "id": "seasonal-affix-engine",
+      "title": "Seasonal Affix Engine",
+      "maturity": "concept",
+      "plugins": ["MythicDungeons", "MythicEnchants", "MythicMobs"],
+      "primitives": ["status/variables/difficulty", "enchant tags", "Mythic mechanics"],
+      "new_behavior": "Rotate deterministic weekly encounter and loot affixes with preview, audit, and rollback support."
+    },
+    {
+      "id": "accessibility-casting-layer",
+      "title": "Accessibility Casting Layer",
+      "maturity": "concept",
+      "plugins": ["MythicRPG", "MythicCrucible", "MythicEnchants", "ModelEngine"],
+      "primitives": ["bindings/quickcaster", "lore/models", "input triggers", "per-viewer rendering"],
+      "new_behavior": "Offer alternate input profiles, readable cooldown cues, high-contrast state, and one-handed casting without changing balance."
+    },
+    {
+      "id": "player-visible-phase-skins",
+      "title": "Audience-specific Phase Skins",
+      "maturity": "concept",
+      "plugins": ["ModelEngine", "MMOProfiles", "MMOCore"],
+      "primitives": ["glow audience and renderer state", "profiles", "party data"],
+      "new_behavior": "Different parties or quest phases see different visual boss states while sharing one authoritative encounter entity."
+    },
+    {
+      "id": "root-motion-traversal",
+      "title": "Root-motion Dungeon Traversal",
+      "maturity": "concept",
+      "plugins": ["ModelEngine", "MythicDungeons"],
+      "primitives": ["root motion", "checkpoints", "room collision and triggers"],
+      "new_behavior": "Validated animation motion drives vaulting, finishers, and trap traversal while the server remains authoritative."
+    },
+    {
+      "id": "living-ui-familiar",
+      "title": "Living UI Familiar",
+      "maturity": "concept",
+      "plugins": ["ModelEngine", "MMOProfiles", "MMOCore", "MythicRPG"],
+      "primitives": ["screen/widgets", "modeled entity", "profile and quest/progression state"],
+      "new_behavior": "A companion model becomes a context-aware quest, profile, and progression navigator with accessible fallback menus."
+    },
+    {
+      "id": "adaptive-model-governor",
+      "title": "Adaptive Model Detail Governor",
+      "maturity": "concept",
+      "plugins": ["ModelEngine"],
+      "primitives": ["LOD", "culling", "viewer state", "scheduler/ticker metrics"],
+      "new_behavior": "Allocate a per-viewer visual budget from measured load while preserving hitbox and gameplay state."
+    },
+    {
+      "id": "spectral-replay-ghosts",
+      "title": "Spectral Replay Ghosts",
+      "maturity": "concept",
+      "plugins": ["ModelEngine", "MythicDungeons"],
+      "primitives": ["saved transforms", "VFX", "tick phases", "run lifecycle"],
+      "new_behavior": "Record privacy-safe transform streams and replay previous dungeon runs as non-interactive coaching ghosts."
+    },
+    {
+      "id": "mount-talent-system",
+      "title": "Mount Talent System",
+      "maturity": "concept",
+      "plugins": ["ModelEngine", "MMOCore", "MythicRPG"],
+      "primitives": ["mount controller registry", "skills/talents", "profile progression"],
+      "new_behavior": "Unlock versioned movement controllers and mount abilities per character with safe dismount and downgrade behavior."
+    }
+  ]
+}

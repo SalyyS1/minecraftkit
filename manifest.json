@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "name": "minecraft-rpg-kit",
+  "version": "1.0.0",
+  "research_date": "2026-07-15",
+  "catalog": {
+    "plugin_count": 10,
+    "plugin_owned_types": 4947,
+    "plugin_owned_members": 39262,
+    "all_namespace_types": 5345,
+    "all_namespace_members": 41887,
+    "parse_errors": 0,
+    "addon_ideas": 30,
+    "decompiled_files_inventoried": 11490
+  },
+  "plugins": [
+    {
+      "name": "CoreTools",
+      "version": "1.4.2",
+      "max_class_major": 65,
+      "plugin_owned_types": 767,
+      "plugin_owned_members": 4429,
+      "bundled_third_party_types": 207,
+      "bundled_third_party_members": 1617
+    },
+    {
+      "name": "MMOCore",
+      "version": "1.13.1 snapshot 59",
+      "max_class_major": 55,
+      "plugin_owned_types": 555,
+      "plugin_owned_members": 3497,
+      "bundled_third_party_types": 25,
+      "bundled_third_party_members": 86
+    },
+    {
+      "name": "MMOInventory",
+      "version": "2.0 snapshot 32",
+      "max_class_major": 55,
+      "plugin_owned_types": 67,
+      "plugin_owned_members": 397,
+      "bundled_third_party_types": 0,
+      "bundled_third_party_members": 0
+    },
+    {
+      "name": "MMOItems",
+      "version": "6.10.1 snapshot 59",
+      "max_class_major": 55,
+      "plugin_owned_types": 656,
+      "plugin_owned_members": 4644,
+      "bundled_third_party_types": 0,
+      "bundled_third_party_members": 0
+    },
+    {
+      "name": "MMOProfiles",
+      "version": "1.2 snapshot 29",
+      "max_class_major": 55,
+      "plugin_owned_types": 80,
+      "plugin_owned_members": 642,
+      "bundled_third_party_types": 73,
+      "bundled_third_party_members": 586
+    },
+    {
+      "name": "ModelEngine",
+      "version": "R4.1.0",
+      "max_class_major": 69,
+      "plugin_owned_types": 1115,
+      "plugin_owned_members": 11881,
+      "bundled_third_party_types": 0,
+      "bundled_third_party_members": 0
+    },
+    {
+      "name": "MythicCrucible",
+      "version": "5.13.0-SNAPSHOT",
+      "max_class_major": 65,
+      "plugin_owned_types": 546,
+      "plugin_owned_members": 4378,
+      "bundled_third_party_types": 14,
+      "bundled_third_party_members": 42
+    },
+    {
+      "name": "MythicDungeons",
+      "version": "2.0.1-SNAPSHOT",
+      "max_class_major": 65,
+      "plugin_owned_types": 368,
+      "plugin_owned_members": 3624,
+      "bundled_third_party_types": 69,
+      "bundled_third_party_members": 273
+    },
+    {
+      "name": "MythicEnchants",
+      "version": "5.13.1",
+      "max_class_major": 69,
+      "plugin_owned_types": 233,
+      "plugin_owned_members": 1213,
+      "bundled_third_party_types": 0,
+      "bundled_third_party_members": 0
+    },
+    {
+      "name": "MythicRPG",
+      "version": "0.0.1-SNAPSHOT",
+      "max_class_major": 65,
+      "plugin_owned_types": 560,
+      "plugin_owned_members": 4557,
+      "bundled_third_party_types": 10,
+      "bundled_third_party_members": 21
+    }
+  ],
+  "artifacts": {
+    "data/source-inventory.json": {
+      "bytes": 2410538,
+      "sha256": "146c6cfe9feb4a5ccaa7cd5f936bd605f06230a54356924c60c9541e41a5f415"
+    },
+    "data/api-index.json": {
+      "bytes": 39997103,
+      "sha256": "d090d7b8f2cbaf0c0eab4aeb007493b4401106ad0c38c79eb37aeb8c70b62b90"
+    },
+    "data/api-coverage.json": {
+      "bytes": 3610,
+      "sha256": "8adcfb0c4bf688fe19447fd74d06388a9b3a5ec7c3fb71c136f07cdb79ee8348"
+    },
+    "data/docs-manifest.json": {
+      "bytes": 176438,
+      "sha256": "fab41c89eefb8e7c0dc411fea0d47ff7748a5a7f6a40d921060e696f535d66ac"
+    },
+    "data/plugin-insights.json": {
+      "bytes": 18686,
+      "sha256": "fdba9d7d33ac966d40fd57bdcd6481535e7b27316edd520d05e2303d6aaf6329"
+    },
+    "data/feature-catalog.json": {
+      "bytes": 8211,
+      "sha256": "3040382f620e3e1c825611f407b64f2aa498830fe594b61dcacf91f8c921f13a"
+    },
+    "data/addon-ideas.json": {
+      "bytes": 18400,
+      "sha256": "c72db5bc64d522570e8c0302317d64b490261f8f9078c59132d8a3e525ec4014"
+    },
+    "web/data/manifest.js": {
+      "bytes": 2117,
+      "sha256": "f2c44436cb33c8724bbb772121f8b5fbf57d7ed848ccd396a3224c9a724cc8be"
+    },
+    "web/data/insights.js": {
+      "bytes": 47760,
+      "sha256": "e734a34f06014d1523b0e94a076e62691a6aea2af87b34b3785796799de51583"
+    }
+  },
+  "install_targets": {
+    "codex": "$HOME/.agents/skills/minecraft-rpg-kit",
+    "claude": "$HOME/.claude/skills/minecraft-rpg-kit"
+  }
+}

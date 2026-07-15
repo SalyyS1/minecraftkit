@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "positive_triggers": [
+    "Find the ModelEngine ActiveModel API and explain its lifecycle.",
+    "Which MMOItems event should I use after an item is built?",
+    "Design a profile-safe custom equipment board with MMOProfiles and MMOInventory.",
+    "Review the MythicDungeons instance disposal architecture.",
+    "List MythicEnchants methods that apply an enchantment.",
+    "Create an original Minecraft RPG addon using Crucible furniture and dungeon doors.",
+    "Compare MMOCore PlayerData with MythicRPG ProfileSession.",
+    "How should a ModelEngine behavior parser be registered safely?",
+    "Search the CoreTools scripting API for item targeters.",
+    "Plan exactly-once dungeon rewards across MMOItems and profiles."
+  ],
+  "negative_triggers": [
+    "Fix this generic Python CSV parser.",
+    "Write a landing page headline for a bakery.",
+    "Explain Java HashMap iteration order.",
+    "Create a React weather card.",
+    "Summarize this unrelated PDF.",
+    "Help me configure PostgreSQL replication.",
+    "Generate a watercolor landscape.",
+    "Review an iOS SwiftUI settings screen.",
+    "Calculate compound interest for five years.",
+    "Set up a GitHub Actions lint workflow for a Go project."
+  ]
+}

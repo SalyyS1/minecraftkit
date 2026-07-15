@@ -1,0 +1,4850 @@
+{
+  "plugins": {
+    "CoreTools": [
+      {
+        "file": "ranet-coretools-f45d02572ff4-part-01.md",
+        "package": "ranet.coretools",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-commands-1c50dfaecfbf-part-01.md",
+        "package": "ranet.coretools.commands",
+        "types": 22
+      },
+      {
+        "file": "ranet-coretools-data-abf05f79a3b7-part-01.md",
+        "package": "ranet.coretools.data",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-data-converters-c7bd3095b3ab-part-01.md",
+        "package": "ranet.coretools.data.converters",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-data-mysql-54789350f841-part-01.md",
+        "package": "ranet.coretools.data.mysql",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-data-redis-99839ae56ad2-part-01.md",
+        "package": "ranet.coretools.data.redis",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-data-redis-pubsubs-8693f2d38f86-part-01.md",
+        "package": "ranet.coretools.data.redis.pubsubs",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-data-sqlite-b2c17be097ae-part-01.md",
+        "package": "ranet.coretools.data.sqlite",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-data-sync-72a115967b6a-part-01.md",
+        "package": "ranet.coretools.data.sync",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-data-triggers-0dff6e380c9e-part-01.md",
+        "package": "ranet.coretools.data.triggers",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-data-triggers-profiles-a70ef2718a8e-part-01.md",
+        "package": "ranet.coretools.data.triggers.profiles",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-events-319b35f78197-part-01.md",
+        "package": "ranet.coretools.events",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-afd9a8ef8b57-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-actions-efd463bbcd3e-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse.actions",
+        "types": 21
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-bridges-ab8321863b74-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse.bridges",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-data-397e172ea815-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse.data",
+        "types": 12
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-schedulers-025b2c242e6a-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse.schedulers",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-sql-3ad04a34a2fb-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse.sql",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-sql-mysql-96e645888f18-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse.sql.mysql",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-sql-sqlite-ab2d9d8f7fc8-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse.sql.sqlite",
+        "types": 8
+      },
+      {
+        "file": "ranet-coretools-features-auctionhouse-utils-c1666737d936-part-01.md",
+        "package": "ranet.coretools.features.auctionhouse.utils",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-features-coreitems-55efe5f04f16-part-01.md",
+        "package": "ranet.coretools.features.coreitems",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-features-economy-d1ae4133b5a9-part-01.md",
+        "package": "ranet.coretools.features.economy",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-features-economy-physical-11076870d17f-part-01.md",
+        "package": "ranet.coretools.features.economy.physical",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-features-economy-triggers-ede0718c1247-part-01.md",
+        "package": "ranet.coretools.features.economy.triggers",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-features-eventmanager-5d7db287a2be-part-01.md",
+        "package": "ranet.coretools.features.eventmanager",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-features-hologram-9b722ba0b931-part-01.md",
+        "package": "ranet.coretools.features.hologram",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-features-itemreplacer-b1ea1ed33662-part-01.md",
+        "package": "ranet.coretools.features.itemreplacer",
+        "types": 8
+      },
+      {
+        "file": "ranet-coretools-features-itemreplacer-triggers-f3e0cec260cf-part-01.md",
+        "package": "ranet.coretools.features.itemreplacer.triggers",
+        "types": 16
+      },
+      {
+        "file": "ranet-coretools-features-menu-d050d6022b41-part-01.md",
+        "package": "ranet.coretools.features.menu",
+        "types": 8
+      },
+      {
+        "file": "ranet-coretools-features-others-fefe94926d21-part-01.md",
+        "package": "ranet.coretools.features.others",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-features-permission-6b82ebefff90-part-01.md",
+        "package": "ranet.coretools.features.permission",
+        "types": 8
+      },
+      {
+        "file": "ranet-coretools-features-playervaults-6f8504eb5ece-part-01.md",
+        "package": "ranet.coretools.features.playervaults",
+        "types": 9
+      },
+      {
+        "file": "ranet-coretools-features-privatedrop-1a22f8a7c13f-part-01.md",
+        "package": "ranet.coretools.features.privatedrop",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-features-privatedrop-triggers-0654f45bacea-part-01.md",
+        "package": "ranet.coretools.features.privatedrop.triggers",
+        "types": 35
+      },
+      {
+        "file": "ranet-coretools-features-respawn-1075a8d1cd7a-part-01.md",
+        "package": "ranet.coretools.features.respawn",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-features-respawn-events-f35f29d15c8e-part-01.md",
+        "package": "ranet.coretools.features.respawn.events",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-features-scheduler-1eb73e364339-part-01.md",
+        "package": "ranet.coretools.features.scheduler",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-features-shop-5bf388191e78-part-01.md",
+        "package": "ranet.coretools.features.shop",
+        "types": 11
+      },
+      {
+        "file": "ranet-coretools-features-shop-objs-e4ea3e387512-part-01.md",
+        "package": "ranet.coretools.features.shop.objs",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-features-shop-utils-c00fdd03cf5a-part-01.md",
+        "package": "ranet.coretools.features.shop.utils",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-features-stations-e18f368230f3-part-01.md",
+        "package": "ranet.coretools.features.stations",
+        "types": 13
+      },
+      {
+        "file": "ranet-coretools-features-stations-deconstruct-1acb3786c8e6-part-01.md",
+        "package": "ranet.coretools.features.stations.deconstruct",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-features-stations-gemstone-c2f7ad10b944-part-01.md",
+        "package": "ranet.coretools.features.stations.gemstone",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-features-stations-identification-b62d9c14a026-part-01.md",
+        "package": "ranet.coretools.features.stations.identification",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-features-stations-merge-cf2e525a04b7-part-01.md",
+        "package": "ranet.coretools.features.stations.merge",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-features-stations-modifiers-5f0bf996c988-part-01.md",
+        "package": "ranet.coretools.features.stations.modifiers",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-features-stations-parse-2609ca0e06e9-part-01.md",
+        "package": "ranet.coretools.features.stations.parse",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-features-stations-parse-lore-945a07884864-part-01.md",
+        "package": "ranet.coretools.features.stations.parse.lore",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-features-stations-reforge-219de5595d26-part-01.md",
+        "package": "ranet.coretools.features.stations.reforge",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-features-stations-repair-88a85710bd5b-part-01.md",
+        "package": "ranet.coretools.features.stations.repair",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-features-stations-reroll-68bced822ebb-part-01.md",
+        "package": "ranet.coretools.features.stations.reroll",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-features-stations-selling-3f4f1c11ff8b-part-01.md",
+        "package": "ranet.coretools.features.stations.selling",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-features-stations-transmog-7c50cfba0f5c-part-01.md",
+        "package": "ranet.coretools.features.stations.transmog",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-features-stations-upgrading-5db7ff34ed4d-part-01.md",
+        "package": "ranet.coretools.features.stations.upgrading",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-features-unicode-81c8773e35da-part-01.md",
+        "package": "ranet.coretools.features.unicode",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-features-vanillahud-81f528340702-part-01.md",
+        "package": "ranet.coretools.features.vanillahud",
+        "types": 9
+      },
+      {
+        "file": "ranet-coretools-features-variables-430418eac7a2-part-01.md",
+        "package": "ranet.coretools.features.variables",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-features-variables-utils-47649e013f92-part-01.md",
+        "package": "ranet.coretools.features.variables.utils",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-features-wardrobe-308a4b518032-part-01.md",
+        "package": "ranet.coretools.features.wardrobe",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-hooks-ab7b6180de61-part-01.md",
+        "package": "ranet.coretools.hooks",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-hooks-mmoitems-stats-ef9dd6c96a0a-part-01.md",
+        "package": "ranet.coretools.hooks.mmoitems.stats",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-libs-anvilgui-ee3ad274e382-part-01.md",
+        "package": "ranet.coretools.libs.anvilgui",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-libs-anvilgui-version-f1f5f8af2820-part-01.md",
+        "package": "ranet.coretools.libs.anvilgui.version",
+        "types": 29
+      },
+      {
+        "file": "ranet-coretools-libs-anvilgui-version-f1f5f8af2820-part-02.md",
+        "package": "ranet.coretools.libs.anvilgui.version",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-libs-anvilgui-version-special-fd0b5d07eb1d-part-01.md",
+        "package": "ranet.coretools.libs.anvilgui.version.special",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-libs-bstats-daf280f8e86b-part-01.md",
+        "package": "ranet.coretools.libs.bstats",
+        "types": 12
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-70fbc5680b9f-part-01.md",
+        "package": "ranet.coretools.libs.google.gson",
+        "types": 30
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-annotations-bb6b7465e2e8-part-01.md",
+        "package": "ranet.coretools.libs.google.gson.annotations",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-internal-f7a2d186d295-part-01.md",
+        "package": "ranet.coretools.libs.google.gson.internal",
+        "types": 18
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-internal-bind-58aa68298e63-part-01.md",
+        "package": "ranet.coretools.libs.google.gson.internal.bind",
+        "types": 15
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-internal-bind-util-0a225d8a5555-part-01.md",
+        "package": "ranet.coretools.libs.google.gson.internal.bind.util",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-internal-reflect-5c8340d9b07d-part-01.md",
+        "package": "ranet.coretools.libs.google.gson.internal.reflect",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-internal-sql-1a88135abf4a-part-01.md",
+        "package": "ranet.coretools.libs.google.gson.internal.sql",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-reflect-fd35898e267d-part-01.md",
+        "package": "ranet.coretools.libs.google.gson.reflect",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-libs-google-gson-stream-6ff4f400009f-part-01.md",
+        "package": "ranet.coretools.libs.google.gson.stream",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-libs-redempt-crunch-e5a3f04c2fd2-part-01.md",
+        "package": "ranet.coretools.libs.redempt.crunch",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-libs-redempt-crunch-data-275d50a36e0b-part-01.md",
+        "package": "ranet.coretools.libs.redempt.crunch.data",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-libs-redempt-crunch-exceptions-bd79038bf8eb-part-01.md",
+        "package": "ranet.coretools.libs.redempt.crunch.exceptions",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-libs-redempt-crunch-functional-ad9592ac7954-part-01.md",
+        "package": "ranet.coretools.libs.redempt.crunch.functional",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-libs-redempt-crunch-token-71341b711bc0-part-01.md",
+        "package": "ranet.coretools.libs.redempt.crunch.token",
+        "types": 10
+      },
+      {
+        "file": "ranet-coretools-libs-signgui-491ec7ec5769-part-01.md",
+        "package": "ranet.coretools.libs.signgui",
+        "types": 8
+      },
+      {
+        "file": "ranet-coretools-libs-signgui-exception-e5a3a7cdd94e-part-01.md",
+        "package": "ranet.coretools.libs.signgui.exception",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-libs-signgui-version-3c464ca8c210-part-01.md",
+        "package": "ranet.coretools.libs.signgui.version",
+        "types": 38
+      },
+      {
+        "file": "ranet-coretools-managers-commands-53977b8157be-part-01.md",
+        "package": "ranet.coretools.managers.commands",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-managers-inventory-021f36aea197-part-01.md",
+        "package": "ranet.coretools.managers.inventory",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-scripts-abde7af7d250-part-01.md",
+        "package": "ranet.coretools.scripts",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-scripts-casting-9a87740d5a04-part-01.md",
+        "package": "ranet.coretools.scripts.casting",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-scripts-casting-configparsers-ce5f374013b2-part-01.md",
+        "package": "ranet.coretools.scripts.casting.configparsers",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-scripts-casting-extra-c597994a029f-part-01.md",
+        "package": "ranet.coretools.scripts.casting.extra",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-scripts-casting-queue-5bd96a0adc6f-part-01.md",
+        "package": "ranet.coretools.scripts.casting.queue",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-scripts-conditions-120890076eea-part-01.md",
+        "package": "ranet.coretools.scripts.conditions",
+        "types": 20
+      },
+      {
+        "file": "ranet-coretools-scripts-mechanics-646022d47a7c-part-01.md",
+        "package": "ranet.coretools.scripts.mechanics",
+        "types": 39
+      },
+      {
+        "file": "ranet-coretools-scripts-mechanics-inventory-8ef50e6f07b9-part-01.md",
+        "package": "ranet.coretools.scripts.mechanics.inventory",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-scripts-mechanics-set-fb554fb94ad1-part-01.md",
+        "package": "ranet.coretools.scripts.mechanics.set",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-scripts-targeters-c91d627dcf57-part-01.md",
+        "package": "ranet.coretools.scripts.targeters",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-scripts-targeters-entity-8700a4097e31-part-01.md",
+        "package": "ranet.coretools.scripts.targeters.entity",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-scripts-targeters-location-484e85e194b2-part-01.md",
+        "package": "ranet.coretools.scripts.targeters.location",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-util-de8486581efb-part-01.md",
+        "package": "ranet.coretools.util",
+        "types": 16
+      },
+      {
+        "file": "ranet-coretools-util-economy-7556cb99ad43-part-01.md",
+        "package": "ranet.coretools.util.economy",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-util-file-26e7d7199eab-part-01.md",
+        "package": "ranet.coretools.util.file",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-util-inventory-c74e3eb5c6a6-part-01.md",
+        "package": "ranet.coretools.util.inventory",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-util-items-1cde82987a57-part-01.md",
+        "package": "ranet.coretools.util.items",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-util-items-serializers-f7286bf7b43c-part-01.md",
+        "package": "ranet.coretools.util.items.Serializers",
+        "types": 14
+      },
+      {
+        "file": "ranet-coretools-util-items-utils-e4e78323cd6b-part-01.md",
+        "package": "ranet.coretools.util.items.Utils",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-util-items-creator-d82affbb3d65-part-01.md",
+        "package": "ranet.coretools.util.items.creator",
+        "types": 12
+      },
+      {
+        "file": "ranet-coretools-util-items-msi-1336c4b5cdfd-part-01.md",
+        "package": "ranet.coretools.util.items.msi",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-util-messages-db1a6650efb0-part-01.md",
+        "package": "ranet.coretools.util.messages",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-util-parse-561ae37b1747-part-01.md",
+        "package": "ranet.coretools.util.parse",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-util-parse-enums-fa1383eac096-part-01.md",
+        "package": "ranet.coretools.util.parse.enums",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-util-playerinput-21a855b51076-part-01.md",
+        "package": "ranet.coretools.util.playerinput",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-util-weigh-5ab65a3a9d5e-part-01.md",
+        "package": "ranet.coretools.util.weigh",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-velocity-1756a7bde5c5-part-01.md",
+        "package": "ranet.coretools.velocity",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-version-de4ed8c9882a-part-01.md",
+        "package": "ranet.coretools.version",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-6c5d782efe22-part-01.md",
+        "package": "ranet.coretools.version.wrapper",
+        "types": 10
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-coretools-df67e6c358c3-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.coretools",
+        "types": 3
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-crucible-4809680941d2-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.crucible",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-griefprevention-0850198a08da-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.griefprevention",
+        "types": 1
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-itemsadder-cdcadffca84f-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.itemsadder",
+        "types": 11
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-jobsreborn-870530b9d08a-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.jobsreborn",
+        "types": 6
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-mcmmo-ad6c9fe064e2-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.mcmmo",
+        "types": 17
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-mmocore-bacee5a3339d-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.mmocore",
+        "types": 8
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-mmoitems-3cf886cc9c33-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.mmoitems",
+        "types": 11
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-mmoprofiles-38ee6100995b-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.mmoprofiles",
+        "types": 4
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-mythicdungeons-35f40e8b4348-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.mythicdungeons",
+        "types": 9
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-mythiclib-932478d80028-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.mythiclib",
+        "types": 2
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-mythicmobs-e13f1ea051d3-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.mythicmobs",
+        "types": 5
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-reviveme-afe5636d9948-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.reviveme",
+        "types": 7
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-server-05391af00ef9-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.server",
+        "types": 50
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-server-05391af00ef9-part-02.md",
+        "package": "ranet.coretools.version.wrapper.events.server",
+        "types": 50
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-server-05391af00ef9-part-03.md",
+        "package": "ranet.coretools.version.wrapper.events.server",
+        "types": 21
+      },
+      {
+        "file": "ranet-coretools-version-wrapper-events-wgregionevents-c7a23f0382d7-part-01.md",
+        "package": "ranet.coretools.version.wrapper.events.wgregionevents",
+        "types": 4
+      }
+    ],
+    "MMOCore": [
+      {
+        "file": "net-indyuce-mmocore-629d24e1d81c-part-01.md",
+        "package": "net.Indyuce.mmocore",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-0f349eb2b8c9-part-01.md",
+        "package": "net.Indyuce.mmocore.api",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-api-block-19982e6002dc-part-01.md",
+        "package": "net.Indyuce.mmocore.api.block",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmocore-api-eco-1b576419353d-part-01.md",
+        "package": "net.Indyuce.mmocore.api.eco",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-api-event-4db93ad8d5a5-part-01.md",
+        "package": "net.Indyuce.mmocore.api.event",
+        "types": 19
+      },
+      {
+        "file": "net-indyuce-mmocore-api-event-social-91b9e66a0b0e-part-01.md",
+        "package": "net.Indyuce.mmocore.api.event.social",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-event-unlocking-c156a3714c06-part-01.md",
+        "package": "net.Indyuce.mmocore.api.event.unlocking",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-api-load-4986b9ce33a9-part-01.md",
+        "package": "net.Indyuce.mmocore.api.load",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-player-2275b9cd4064-part-01.md",
+        "package": "net.Indyuce.mmocore.api.player",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-player-attribute-0c28d7f52b93-part-01.md",
+        "package": "net.Indyuce.mmocore.api.player.attribute",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-api-player-profess-be0d08e4f66e-part-01.md",
+        "package": "net.Indyuce.mmocore.api.player.profess",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-api-player-profess-event-4ce272d7b25a-part-01.md",
+        "package": "net.Indyuce.mmocore.api.player.profess.event",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-player-profess-event-trigger-2e709ab7d5d0-part-01.md",
+        "package": "net.Indyuce.mmocore.api.player.profess.event.trigger",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmocore-api-player-profess-resource-65b298e8f4c7-part-01.md",
+        "package": "net.Indyuce.mmocore.api.player.profess.resource",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-api-player-social-cdc338cbff42-part-01.md",
+        "package": "net.Indyuce.mmocore.api.player.social",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-player-stats-accaa19c036e-part-01.md",
+        "package": "net.Indyuce.mmocore.api.player.stats",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-quest-e41697d1f1d8-part-01.md",
+        "package": "net.Indyuce.mmocore.api.quest",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-api-quest-objective-a7d57e166243-part-01.md",
+        "package": "net.Indyuce.mmocore.api.quest.objective",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmocore-api-quest-trigger-d757879927c6-part-01.md",
+        "package": "net.Indyuce.mmocore.api.quest.trigger",
+        "types": 17
+      },
+      {
+        "file": "net-indyuce-mmocore-api-quest-trigger-api-fb6d9acf204d-part-01.md",
+        "package": "net.Indyuce.mmocore.api.quest.trigger.api",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-util-ec9e35c6a9ad-part-01.md",
+        "package": "net.Indyuce.mmocore.api.util",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-api-util-input-f62cd146db51-part-01.md",
+        "package": "net.Indyuce.mmocore.api.util.input",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-api-util-math-f4568df2aade-part-01.md",
+        "package": "net.Indyuce.mmocore.api.util.math",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-api-util-math-format-44f0a3b8a6ea-part-01.md",
+        "package": "net.Indyuce.mmocore.api.util.math.format",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-api-util-math-formula-ba14355738a6-part-01.md",
+        "package": "net.Indyuce.mmocore.api.util.math.formula",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-command-7fa3e593b3d2-part-01.md",
+        "package": "net.Indyuce.mmocore.command",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-7567be3c203f-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin",
+        "types": 14
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-22ef8d7a15f8-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-admin-9b5cea95c1f5-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.admin",
+        "types": 19
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-admin-reset-4fa42b47fc9a-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.admin.reset",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-booster-8ff2992c4763-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.booster",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-cast-9282e1fd8e55-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.cast",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-clazz-720d9732284c-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.clazz",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-debug-28219518ab1e-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.debug",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-quest-cfd4f892d060-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.quest",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-skill-f7c3cfb66907-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.skill",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-skilltree-e3866bfac2f7-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.skilltree",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-slot-c3ede99a89a4-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.slot",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-command-builtin-mmocore-waypoint-d2f8019a2fd1-part-01.md",
+        "package": "net.Indyuce.mmocore.command.builtin.mmocore.waypoint",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-da7af847412e-part-01.md",
+        "package": "net.Indyuce.mmocore.comp",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-citizens-5a5dbd8a86ae-part-01.md",
+        "package": "net.Indyuce.mmocore.comp.citizens",
+        "types": 7
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-mythicmobs-fd82d47ad588-part-01.md",
+        "package": "net.Indyuce.mmocore.comp.mythicmobs",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-mythicmobs-load-3c91c19c82e3-part-01.md",
+        "package": "net.Indyuce.mmocore.comp.mythicmobs.load",
+        "types": 10
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-placeholder-5b87d393b2dd-part-01.md",
+        "package": "net.Indyuce.mmocore.comp.placeholder",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-profile-4d124e747177-part-01.md",
+        "package": "net.Indyuce.mmocore.comp.profile",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-region-e346ee7cd9f0-part-01.md",
+        "package": "net.Indyuce.mmocore.comp.region",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-region-pvpmode-db4c8912a0c6-part-01.md",
+        "package": "net.Indyuce.mmocore.comp.region.pvpmode",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-comp-vault-8f548dd1b833-part-01.md",
+        "package": "net.Indyuce.mmocore.comp.vault",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-experience-16044d8c2c97-part-01.md",
+        "package": "net.Indyuce.mmocore.experience",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmocore-experience-curve-243c28ffc245-part-01.md",
+        "package": "net.Indyuce.mmocore.experience.curve",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-experience-dispenser-304a8ccb2c45-part-01.md",
+        "package": "net.Indyuce.mmocore.experience.dispenser",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-experience-droptable-b1db4162e5e5-part-01.md",
+        "package": "net.Indyuce.mmocore.experience.droptable",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-experience-source-8912eec9ef95-part-01.md",
+        "package": "net.Indyuce.mmocore.experience.source",
+        "types": 22
+      },
+      {
+        "file": "net-indyuce-mmocore-experience-source-type-558a7aba89cb-part-01.md",
+        "package": "net.Indyuce.mmocore.experience.source.type",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-gui-31ff24a57ce8-part-01.md",
+        "package": "net.Indyuce.mmocore.gui",
+        "types": 41
+      },
+      {
+        "file": "net-indyuce-mmocore-gui-eco-bb897e1abc6a-part-01.md",
+        "package": "net.Indyuce.mmocore.gui.eco",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-gui-skilltree-00dad7cf25df-part-01.md",
+        "package": "net.Indyuce.mmocore.gui.skilltree",
+        "types": 12
+      },
+      {
+        "file": "net-indyuce-mmocore-gui-social-friend-aea36db0eb50-part-01.md",
+        "package": "net.Indyuce.mmocore.gui.social.friend",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-gui-social-guild-8ae3b4bc13ec-part-01.md",
+        "package": "net.Indyuce.mmocore.gui.social.guild",
+        "types": 16
+      },
+      {
+        "file": "net-indyuce-mmocore-gui-social-party-e129fb7ce55c-part-01.md",
+        "package": "net.Indyuce.mmocore.gui.social.party",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmocore-guild-f0efa8c1e65e-part-01.md",
+        "package": "net.Indyuce.mmocore.guild",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-guild-compat-f8888f1760a1-part-01.md",
+        "package": "net.Indyuce.mmocore.guild.compat",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-guild-provided-8e12c05152c5-part-01.md",
+        "package": "net.Indyuce.mmocore.guild.provided",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-listener-322a1820483e-part-01.md",
+        "package": "net.Indyuce.mmocore.listener",
+        "types": 8
+      },
+      {
+        "file": "net-indyuce-mmocore-listener-event-047019d32ada-part-01.md",
+        "package": "net.Indyuce.mmocore.listener.event",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-listener-option-8caa198c681f-part-01.md",
+        "package": "net.Indyuce.mmocore.listener.option",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-listener-profession-ee449e3ec246-part-01.md",
+        "package": "net.Indyuce.mmocore.listener.profession",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-loot-5b514f975681-part-01.md",
+        "package": "net.Indyuce.mmocore.loot",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-loot-chest-1bbc27bd0997-part-01.md",
+        "package": "net.Indyuce.mmocore.loot.chest",
+        "types": 8
+      },
+      {
+        "file": "net-indyuce-mmocore-loot-chest-condition-051e920d383f-part-01.md",
+        "package": "net.Indyuce.mmocore.loot.chest.condition",
+        "types": 10
+      },
+      {
+        "file": "net-indyuce-mmocore-loot-chest-particle-4df333f40ba1-part-01.md",
+        "package": "net.Indyuce.mmocore.loot.chest.particle",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-loot-droptable-562b5fd2af9f-part-01.md",
+        "package": "net.Indyuce.mmocore.loot.droptable",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-loot-droptable-dropitem-f61fb948667d-part-01.md",
+        "package": "net.Indyuce.mmocore.loot.droptable.dropitem",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-loot-fishing-9dd8522e9b86-part-01.md",
+        "package": "net.Indyuce.mmocore.loot.fishing",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-manager-d8534246872e-part-01.md",
+        "package": "net.Indyuce.mmocore.manager",
+        "types": 19
+      },
+      {
+        "file": "net-indyuce-mmocore-manager-data-e31f3159c404-part-01.md",
+        "package": "net.Indyuce.mmocore.manager.data",
+        "types": 7
+      },
+      {
+        "file": "net-indyuce-mmocore-manager-data-sql-a52e58d78a66-part-01.md",
+        "package": "net.Indyuce.mmocore.manager.data.sql",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-manager-data-yaml-51dae20a7625-part-01.md",
+        "package": "net.Indyuce.mmocore.manager.data.yaml",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-manager-profession-893ca9ed22a7-part-01.md",
+        "package": "net.Indyuce.mmocore.manager.profession",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmocore-manager-registry-4055eaa23f4b-part-01.md",
+        "package": "net.Indyuce.mmocore.manager.registry",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-manager-social-3904abbe03ad-part-01.md",
+        "package": "net.Indyuce.mmocore.manager.social",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-paperlib-424c48644dc4-part-01.md",
+        "package": "net.Indyuce.mmocore.paperlib",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-paperlib-environments-5c6f0c828649-part-01.md",
+        "package": "net.Indyuce.mmocore.paperlib.environments",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-paperlib-features-asyncchunks-1a9a79e9b903-part-01.md",
+        "package": "net.Indyuce.mmocore.paperlib.features.asyncchunks",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-paperlib-features-asyncteleport-fd4db384caa1-part-01.md",
+        "package": "net.Indyuce.mmocore.paperlib.features.asyncteleport",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-paperlib-features-bedspawnlocation-98c8d704c457-part-01.md",
+        "package": "net.Indyuce.mmocore.paperlib.features.bedspawnlocation",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-paperlib-features-blockstatesnapshot-2ffb9c845883-part-01.md",
+        "package": "net.Indyuce.mmocore.paperlib.features.blockstatesnapshot",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-paperlib-features-chunkisgenerated-4df5f3ff4770-part-01.md",
+        "package": "net.Indyuce.mmocore.paperlib.features.chunkisgenerated",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-party-9eba83faed0b-part-01.md",
+        "package": "net.Indyuce.mmocore.party",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-party-compat-d03573d92081-part-01.md",
+        "package": "net.Indyuce.mmocore.party.compat",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmocore-party-provided-43d532b98f05-part-01.md",
+        "package": "net.Indyuce.mmocore.party.provided",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-player-7400ecb86d47-part-01.md",
+        "package": "net.Indyuce.mmocore.player",
+        "types": 8
+      },
+      {
+        "file": "net-indyuce-mmocore-player-stats-17a82366647e-part-01.md",
+        "package": "net.Indyuce.mmocore.player.stats",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-quest-0790cf107163-part-01.md",
+        "package": "net.Indyuce.mmocore.quest",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-quest-compat-31606f6afe23-part-01.md",
+        "package": "net.Indyuce.mmocore.quest.compat",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-quest-provided-2f835b20c66f-part-01.md",
+        "package": "net.Indyuce.mmocore.quest.provided",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-script-mechanic-87ca24b23306-part-01.md",
+        "package": "net.Indyuce.mmocore.script.mechanic",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmocore-script-trigger-0958e2a2c9b6-part-01.md",
+        "package": "net.Indyuce.mmocore.script.trigger",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-skill-58bd075f1eb8-part-01.md",
+        "package": "net.Indyuce.mmocore.skill",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-skill-binding-65525cb95370-part-01.md",
+        "package": "net.Indyuce.mmocore.skill.binding",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmocore-skill-cast-150df03d6852-part-01.md",
+        "package": "net.Indyuce.mmocore.skill.cast",
+        "types": 7
+      },
+      {
+        "file": "net-indyuce-mmocore-skill-cast-handler-c69c5f12b64b-part-01.md",
+        "package": "net.Indyuce.mmocore.skill.cast.handler",
+        "types": 8
+      },
+      {
+        "file": "net-indyuce-mmocore-skill-list-ff28142e6693-part-01.md",
+        "package": "net.Indyuce.mmocore.skill.list",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmocore-skill-trigger-f738f4f5b951-part-01.md",
+        "package": "net.Indyuce.mmocore.skill.trigger",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmocore-skilltree-c1e3633a8aee-part-01.md",
+        "package": "net.Indyuce.mmocore.skilltree",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-skilltree-display-4f8771806988-part-01.md",
+        "package": "net.Indyuce.mmocore.skilltree.display",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmocore-skilltree-tree-5cc1d57ba35f-part-01.md",
+        "package": "net.Indyuce.mmocore.skilltree.tree",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmocore-util-194f05ed62e2-part-01.md",
+        "package": "net.Indyuce.mmocore.util",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmocore-util-formula-5484d714c3fc-part-01.md",
+        "package": "net.Indyuce.mmocore.util.formula",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmocore-util-item-c5fb21206607-part-01.md",
+        "package": "net.Indyuce.mmocore.util.item",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmocore-waypoint-9b6033cdcb0d-part-01.md",
+        "package": "net.Indyuce.mmocore.waypoint",
+        "types": 4
+      }
+    ],
+    "MMOInventory": [
+      {
+        "file": "net-indyuce-inventory-25facc7e9036-part-01.md",
+        "package": "net.Indyuce.inventory",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-inventory-api-c0a1e2945d28-part-01.md",
+        "package": "net.Indyuce.inventory.api",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-inventory-api-event-e41998f521d3-part-01.md",
+        "package": "net.Indyuce.inventory.api.event",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-inventory-command-af73d1099732-part-01.md",
+        "package": "net.Indyuce.inventory.command",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-inventory-compat-9285fd91fdf7-part-01.md",
+        "package": "net.Indyuce.inventory.compat",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-inventory-compat-mmoitems-810eb1537069-part-01.md",
+        "package": "net.Indyuce.inventory.compat.mmoitems",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-inventory-gui-0a707a1bb21a-part-01.md",
+        "package": "net.Indyuce.inventory.gui",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-inventory-inventory-b5c9ce7d23c9-part-01.md",
+        "package": "net.Indyuce.inventory.inventory",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-inventory-inventory-provider-d7b6da906513-part-01.md",
+        "package": "net.Indyuce.inventory.inventory.provider",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-inventory-inventory-slot-a5f21b37edf0-part-01.md",
+        "package": "net.Indyuce.inventory.inventory.slot",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-inventory-inventory-slot-restriction-8e3fbed5ce7b-part-01.md",
+        "package": "net.Indyuce.inventory.inventory.slot.restriction",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-inventory-inventory-util-4ac7747732b0-part-01.md",
+        "package": "net.Indyuce.inventory.inventory.util",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-inventory-listener-788de8c9636f-part-01.md",
+        "package": "net.Indyuce.inventory.listener",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-inventory-manager-203e8c0d9a3f-part-01.md",
+        "package": "net.Indyuce.inventory.manager",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-inventory-manager-data-05004c75f768-part-01.md",
+        "package": "net.Indyuce.inventory.manager.data",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-inventory-manager-data-sql-54487b31ecbb-part-01.md",
+        "package": "net.Indyuce.inventory.manager.data.sql",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-inventory-manager-data-yaml-7c2c4819247a-part-01.md",
+        "package": "net.Indyuce.inventory.manager.data.yaml",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-inventory-player-db5dbb3488f3-part-01.md",
+        "package": "net.Indyuce.inventory.player",
+        "types": 8
+      },
+      {
+        "file": "net-indyuce-inventory-util-23843b3058d8-part-01.md",
+        "package": "net.Indyuce.inventory.util",
+        "types": 6
+      }
+    ],
+    "MMOItems": [
+      {
+        "file": "net-indyuce-mmoitems-e2ab55e58453-part-01.md",
+        "package": "net.Indyuce.mmoitems",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-f8070c143aff-part-01.md",
+        "package": "net.Indyuce.mmoitems.api",
+        "types": 12
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-block-a9a836c10348-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.block",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-crafting-0b33f00ae992-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.crafting",
+        "types": 24
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-crafting-condition-650251c14322-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.crafting.condition",
+        "types": 10
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-crafting-ingredient-5e010e90e0fe-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.crafting.ingredient",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-crafting-ingredient-inventory-16a7f4984f59-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.crafting.ingredient.inventory",
+        "types": 8
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-crafting-output-9026b6c1efbf-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.crafting.output",
+        "types": 7
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-crafting-recipe-656144d1ec2f-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.crafting.recipe",
+        "types": 8
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-crafting-trigger-b8f8d31eee53-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.crafting.trigger",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-droptable-da0786a49375-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.droptable",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-droptable-item-ff9111df44d8-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.droptable.item",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-edition-cefebdec4a68-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.edition",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-edition-input-494afc08a94f-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.edition.input",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-event-27c1d03ed84c-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.event",
+        "types": 13
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-event-inventory-aaa8360bdedc-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.event.inventory",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-event-item-3dd8263e6214-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.event.item",
+        "types": 14
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-interaction-bfd3200a6e26-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.interaction",
+        "types": 11
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-interaction-projectile-40e764f4c9cc-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.interaction.projectile",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-interaction-util-b2717401af3c-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.interaction.util",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-interaction-weapon-2da776e4ee64-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.interaction.weapon",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-interaction-weapon-untargeted-2acbc369c856-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.interaction.weapon.untargeted",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-interaction-weapon-untargeted-lute-12e968ca045b-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.interaction.weapon.untargeted.lute",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-item-8f2c8d35613d-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.item",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-item-build-da4d3406975f-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.item.build",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-item-mmoitem-c4ff0153ba46-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.item.mmoitem",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-item-template-eea2d9b11e76-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.item.template",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-item-template-explorer-9f31fd411827-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.item.template.explorer",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-item-util-559a8187c0f7-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.item.util",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-item-util-identify-146f0be93844-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.item.util.identify",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-player-c72a34b45a13-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.player",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-player-inventory-bade70dd45dd-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.player.inventory",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-recipe-workbench-ingredients-9be2cdaa91f0-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.recipe.workbench.ingredients",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-util-9e5c343ac3b4-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.util",
+        "types": 10
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-util-message-de95ea3654fb-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.util.message",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-api-world-938a603a1dfa-part-01.md",
+        "package": "net.Indyuce.mmoitems.api.world",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-command-ad4110c91dd6-part-01.md",
+        "package": "net.Indyuce.mmoitems.command",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmoitems-command-mmoitems-5574bce40666-part-01.md",
+        "package": "net.Indyuce.mmoitems.command.mmoitems",
+        "types": 18
+      },
+      {
+        "file": "net-indyuce-mmoitems-command-mmoitems-debug-c261e39760c5-part-01.md",
+        "package": "net.Indyuce.mmoitems.command.mmoitems.debug",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmoitems-command-mmoitems-item-b8ed6ea1bf14-part-01.md",
+        "package": "net.Indyuce.mmoitems.command.mmoitems.item",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmoitems-command-mmoitems-list-e8ccb5eee24e-part-01.md",
+        "package": "net.Indyuce.mmoitems.command.mmoitems.list",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-command-mmoitems-stations-4fc120a6e758-part-01.md",
+        "package": "net.Indyuce.mmoitems.command.mmoitems.stations",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-command-mmoitems-update-71fbce5651ea-part-01.md",
+        "package": "net.Indyuce.mmoitems.command.mmoitems.update",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-b997821e73ec-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-eco-4e6ee3d51865-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.eco",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-enchants-7a69ef2c6d1d-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.enchants",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-enchants-advanced-enchants-3a7c4013f3d5-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.enchants.advanced_enchants",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mmocore-c767c5033c5c-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mmocore",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mmocore-crafting-ddf095c984e2-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mmocore.crafting",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mmocore-load-63df4c98ddd6-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mmocore.load",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mmocore-stat-b457d0418c33-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mmocore.stat",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mmoinventory-00060cccbfd1-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mmoinventory",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mmoinventory-stat-5451f3f3179d-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mmoinventory.stat",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mythicmobs-585f8a6bef3e-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mythicmobs",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mythicmobs-crafting-decac8f5b52c-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mythicmobs.crafting",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mythicmobs-mechanics-4ee940f18015-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mythicmobs.mechanics",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-mythicmobs-stat-6d648f4aae19-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.mythicmobs.stat",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-placeholders-ed9e0bb7cade-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.placeholders",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-comp-rpg-f8965e0dad79-part-01.md",
+        "package": "net.Indyuce.mmoitems.comp.rpg",
+        "types": 16
+      },
+      {
+        "file": "net-indyuce-mmoitems-gui-5dcdd15df439-part-01.md",
+        "package": "net.Indyuce.mmoitems.gui",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-gui-edition-86311651441c-part-01.md",
+        "package": "net.Indyuce.mmoitems.gui.edition",
+        "types": 11
+      },
+      {
+        "file": "net-indyuce-mmoitems-gui-edition-recipe-5d2565855411-part-01.md",
+        "package": "net.Indyuce.mmoitems.gui.edition.recipe",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-gui-edition-recipe-button-8264a02e6916-part-01.md",
+        "package": "net.Indyuce.mmoitems.gui.edition.recipe.button",
+        "types": 9
+      },
+      {
+        "file": "net-indyuce-mmoitems-gui-edition-recipe-button-type-a3d192c1ee84-part-01.md",
+        "package": "net.Indyuce.mmoitems.gui.edition.recipe.button.type",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-gui-edition-recipe-gui-50ffbde5cff7-part-01.md",
+        "package": "net.Indyuce.mmoitems.gui.edition.recipe.gui",
+        "types": 7
+      },
+      {
+        "file": "net-indyuce-mmoitems-gui-edition-recipe-registry-6c68bed63434-part-01.md",
+        "package": "net.Indyuce.mmoitems.gui.edition.recipe.registry",
+        "types": 7
+      },
+      {
+        "file": "net-indyuce-mmoitems-gui-edition-recipe-registry-burninglegacy-8bc16b5111b2-part-01.md",
+        "package": "net.Indyuce.mmoitems.gui.edition.recipe.registry.burninglegacy",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-inventory-6bff142e1c40-part-01.md",
+        "package": "net.Indyuce.mmoitems.inventory",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmoitems-inventory-provided-2fae92ed5f14-part-01.md",
+        "package": "net.Indyuce.mmoitems.inventory.provided",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-item-build-e75e99a21965-part-01.md",
+        "package": "net.Indyuce.mmoitems.item.build",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-listener-9b083f0c6330-part-01.md",
+        "package": "net.Indyuce.mmoitems.listener",
+        "types": 11
+      },
+      {
+        "file": "net-indyuce-mmoitems-listener-option-4fcde4c093cc-part-01.md",
+        "package": "net.Indyuce.mmoitems.listener.option",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-listener-reforging-e7d2204e3277-part-01.md",
+        "package": "net.Indyuce.mmoitems.listener.reforging",
+        "types": 12
+      },
+      {
+        "file": "net-indyuce-mmoitems-manager-2f51e8dd555f-part-01.md",
+        "package": "net.Indyuce.mmoitems.manager",
+        "types": 21
+      },
+      {
+        "file": "net-indyuce-mmoitems-manager-data-6197a04959fb-part-01.md",
+        "package": "net.Indyuce.mmoitems.manager.data",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-paper-0fc66233043a-part-01.md",
+        "package": "net.Indyuce.mmoitems.paper",
+        "types": 4
+      },
+      {
+        "file": "net-indyuce-mmoitems-reforge-52e58eb9ed3d-part-01.md",
+        "package": "net.Indyuce.mmoitems.reforge",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-server-b87455f12eb3-part-01.md",
+        "package": "net.Indyuce.mmoitems.server",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-skill-05cf641e8438-part-01.md",
+        "package": "net.Indyuce.mmoitems.skill",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-skill-custom-condition-23dd6cfdf1f5-part-01.md",
+        "package": "net.Indyuce.mmoitems.skill.custom.condition",
+        "types": 5
+      },
+      {
+        "file": "net-indyuce-mmoitems-skill-custom-mechanic-1db28cee0f47-part-01.md",
+        "package": "net.Indyuce.mmoitems.skill.custom.mechanic",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-3db180114e93-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat",
+        "types": 39
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-3db180114e93-part-02.md",
+        "package": "net.Indyuce.mmoitems.stat",
+        "types": 38
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-3db180114e93-part-03.md",
+        "package": "net.Indyuce.mmoitems.stat",
+        "types": 40
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-3db180114e93-part-04.md",
+        "package": "net.Indyuce.mmoitems.stat",
+        "types": 12
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-annotation-89e8a485545a-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.annotation",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-block-e2bb21a070b2-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.block",
+        "types": 6
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-category-c4ef331264d3-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.category",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-component-ea2cf6b97570-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.component",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-component-type-f9cfbcb32fa8-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.component.type",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-data-df8023e06b46-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.data",
+        "types": 28
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-data-dynamic-0833d1bc1ac3-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.data.dynamic",
+        "types": 1
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-data-random-9b086452cfad-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.data.random",
+        "types": 11
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-data-type-efca6451128b-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.data.type",
+        "types": 3
+      },
+      {
+        "file": "net-indyuce-mmoitems-stat-type-00c198dc2ae6-part-01.md",
+        "package": "net.Indyuce.mmoitems.stat.type",
+        "types": 22
+      },
+      {
+        "file": "net-indyuce-mmoitems-tooltip-b9b684a24e34-part-01.md",
+        "package": "net.Indyuce.mmoitems.tooltip",
+        "types": 2
+      },
+      {
+        "file": "net-indyuce-mmoitems-util-d85742100448-part-01.md",
+        "package": "net.Indyuce.mmoitems.util",
+        "types": 9
+      }
+    ],
+    "MMOProfiles": [
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-b7cfab06d156-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-command-49eb23fe64db-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.command",
+        "types": 5
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-command-mmoprofiles-d5317aac1fe8-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.command.mmoprofiles",
+        "types": 4
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-command-mmoprofiles-eco-d67c40060519-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.command.mmoprofiles.eco",
+        "types": 5
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-compat-60ea8f3cc50d-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.compat",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-compat-accountshook-bffa51e92399-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.compat.accountshook",
+        "types": 2
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-compat-permission-8bd950abbe33-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.compat.permission",
+        "types": 4
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-compat-placeholder-924515b43cf2-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.compat.placeholder",
+        "types": 2
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-economy-a9ef6b50f2bd-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.economy",
+        "types": 2
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-gui-54ffce025e04-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.gui",
+        "types": 4
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-listener-75ba72d25b57-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.listener",
+        "types": 3
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-listener-spawn-b8574e4e5263-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.listener.spawn",
+        "types": 3
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-manager-9a76ce568532-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.manager",
+        "types": 2
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-manager-data-27ef456870cb-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.manager.data",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-manager-data-json-e46441d849d4-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.manager.data.json",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-manager-data-sql-fbfe9de04fad-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.manager.data.sql",
+        "types": 2
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-profile-52a060c6a11a-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.profile",
+        "types": 2
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-profile-data-7b9eedfe1045-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.profile.data",
+        "types": 4
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-profile-data-inventory-aebf2ee7cf4e-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.profile.data.inventory",
+        "types": 3
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-profile-data-json-440ce991277a-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.profile.data.json",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-profile-placeholder-4a03950eade8-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.profile.placeholder",
+        "types": 2
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-proxy-be7726685802-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.proxy",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-bukkit-utils-4243e81b4a64-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.bukkit.utils",
+        "types": 7
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-9905701c8647-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson",
+        "types": 28
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-annotations-be009494ae52-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson.annotations",
+        "types": 5
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-internal-2051c5bd2723-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson.internal",
+        "types": 16
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-internal-bind-728c1e109515-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson.internal.bind",
+        "types": 16
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-internal-bind-util-c8d1f7c6fcc8-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson.internal.bind.util",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-internal-reflect-5150b1f15081-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson.internal.reflect",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-internal-sql-9f4614d661f0-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson.internal.sql",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-reflect-ccfc5c95163e-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson.reflect",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-gson-stream-67af9111ac1f-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.gson.stream",
+        "types": 4
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-player-756351a3390c-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.player",
+        "types": 1
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-request-5362b3f86c05-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.request",
+        "types": 8
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-shared-utils-41da4d5c194a-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.shared.utils",
+        "types": 2
+      },
+      {
+        "file": "fr-phoenixdevt-mmoprofiles-velocity-7897f691d745-part-01.md",
+        "package": "fr.phoenixdevt.mmoprofiles.velocity",
+        "types": 7
+      }
+    ],
+    "ModelEngine": [
+      {
+        "file": "com-ticxo-modelengine-api-81c4fa555a40-part-01.md",
+        "package": "com.ticxo.modelengine.api",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-6fdb60139210-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-handler-837d8d6b8775-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation.handler",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-interpolator-d7c90fd804b3-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation.interpolator",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-keyframe-27993cec0d37-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation.keyframe",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-keyframe-data-e190954131c8-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation.keyframe.data",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-keyframe-type-350fe934f4b1-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation.keyframe.type",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-property-2364ee57888e-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation.property",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-rootmotion-7255457d7ab1-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation.rootmotion",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-api-animation-script-7ee6fec9c16d-part-01.md",
+        "package": "com.ticxo.modelengine.api.animation.script",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-command-7d33f4e23e51-part-01.md",
+        "package": "com.ticxo.modelengine.api.command",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-api-entity-1e684dce9eda-part-01.md",
+        "package": "com.ticxo.modelengine.api.entity",
+        "types": 10
+      },
+      {
+        "file": "com-ticxo-modelengine-api-entity-cull-884892a7e5e3-part-01.md",
+        "package": "com.ticxo.modelengine.api.entity.cull",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-entity-data-e56bf6d984f3-part-01.md",
+        "package": "com.ticxo.modelengine.api.entity.data",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-error-280b0e296b59-part-01.md",
+        "package": "com.ticxo.modelengine.api.error",
+        "types": 23
+      },
+      {
+        "file": "com-ticxo-modelengine-api-events-d639460c4dba-part-01.md",
+        "package": "com.ticxo.modelengine.api.events",
+        "types": 14
+      },
+      {
+        "file": "com-ticxo-modelengine-api-generator-f36335348819-part-01.md",
+        "package": "com.ticxo.modelengine.api.generator",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-api-generator-assets-5d7cce7aa837-part-01.md",
+        "package": "com.ticxo.modelengine.api.generator.assets",
+        "types": 28
+      },
+      {
+        "file": "com-ticxo-modelengine-api-generator-blueprint-2e27ed83db67-part-01.md",
+        "package": "com.ticxo.modelengine.api.generator.blueprint",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-generator-parser-d02355535ee1-part-01.md",
+        "package": "com.ticxo.modelengine.api.generator.parser",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-api-generator-parser-blockbench-ca94a5d69bb7-part-01.md",
+        "package": "com.ticxo.modelengine.api.generator.parser.blockbench",
+        "types": 19
+      },
+      {
+        "file": "com-ticxo-modelengine-api-generator-skin-c75d6b202af3-part-01.md",
+        "package": "com.ticxo.modelengine.api.generator.skin",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-api-interaction-c7f046e6fc57-part-01.md",
+        "package": "com.ticxo.modelengine.api.interaction",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-lod-155cc2e7765a-part-01.md",
+        "package": "com.ticxo.modelengine.api.lod",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-api-menu-c64a6f82d030-part-01.md",
+        "package": "com.ticxo.modelengine.api.menu",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-d77aa9d299e8-part-01.md",
+        "package": "com.ticxo.modelengine.api.model",
+        "types": 8
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-bone-d3793fbd7e58-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.bone",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-bone-behavior-3237f54ad7ca-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.bone.behavior",
+        "types": 11
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-bone-manager-c932262a230f-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.bone.manager",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-bone-render-d8ea330c998b-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.bone.render",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-bone-render-renderer-e375c614af6f-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.bone.render.renderer",
+        "types": 14
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-bone-type-1936578ceeb7-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.bone.type",
+        "types": 15
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-limb-74204ed948ab-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.limb",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-operation-3f02a5517b25-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.operation",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-api-model-render-cb1fd3c33f25-part-01.md",
+        "package": "com.ticxo.modelengine.api.model.render",
+        "types": 8
+      },
+      {
+        "file": "com-ticxo-modelengine-api-mount-35e5e18ba6c6-part-01.md",
+        "package": "com.ticxo.modelengine.api.mount",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-mount-controller-be105b867cb8-part-01.md",
+        "package": "com.ticxo.modelengine.api.mount.controller",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-mount-controller-impl-1d73480ac785-part-01.md",
+        "package": "com.ticxo.modelengine.api.mount.controller.impl",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-api-nms-b3faed402740-part-01.md",
+        "package": "com.ticxo.modelengine.api.nms",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-nms-entity-ae100996239d-part-01.md",
+        "package": "com.ticxo.modelengine.api.nms.entity",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-api-nms-entity-wrapper-4964eeb6526f-part-01.md",
+        "package": "com.ticxo.modelengine.api.nms.entity.wrapper",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-nms-impl-4fd5bbe144a5-part-01.md",
+        "package": "com.ticxo.modelengine.api.nms.impl",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-api-nms-network-635fdfc9af53-part-01.md",
+        "package": "com.ticxo.modelengine.api.nms.network",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-api-nms-ui-a772e654964a-part-01.md",
+        "package": "com.ticxo.modelengine.api.nms.ui",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-4de282108157-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils",
+        "types": 14
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-callback-349987c23044-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.callback",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-config-47812373b3b3-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.config",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-data-4f183571c21b-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.data",
+        "types": 17
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-data-interpolator-7151d55d6abf-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.data.interpolator",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-data-io-f0553bd65680-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.data.io",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-data-tracker-384ed8ace1ba-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.data.tracker",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-logger-5754183c2706-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.logger",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-math-f4cf35eda9fd-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.math",
+        "types": 10
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-meta-181b2cf6f82c-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.meta",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-promise-182da6f0d24a-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.promise",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-registry-55b00baf98ba-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.registry",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-resourcepack-96d9c6e614b8-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.resourcepack",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-scheduling-a43f1b95282d-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.scheduling",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-state-5e1880ae4641-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.state",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-utils-ticker-686b43de96ec-part-01.md",
+        "package": "com.ticxo.modelengine.api.utils.ticker",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-api-vfx-272ad1579cef-part-01.md",
+        "package": "com.ticxo.modelengine.api.vfx",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-api-vfx-render-da993a0eef70-part-01.md",
+        "package": "com.ticxo.modelengine.api.vfx.render",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-core-de66b37aaa81-part-01.md",
+        "package": "com.ticxo.modelengine.core",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core-animation-handler-f45eb58a1381-part-01.md",
+        "package": "com.ticxo.modelengine.core.animation.handler",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-core-animation-script-a06c4258edf1-part-01.md",
+        "package": "com.ticxo.modelengine.core.animation.script",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core-citizens-c5b56a10d46f-part-01.md",
+        "package": "com.ticxo.modelengine.core.citizens",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-core-command-c4a24d3db681-part-01.md",
+        "package": "com.ticxo.modelengine.core.command",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core-command-sub-e8b0d1f324b8-part-01.md",
+        "package": "com.ticxo.modelengine.core.command.sub",
+        "types": 10
+      },
+      {
+        "file": "com-ticxo-modelengine-core-data-85d437207740-part-01.md",
+        "package": "com.ticxo.modelengine.core.data",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-core-generator-6edc1ce35e94-part-01.md",
+        "package": "com.ticxo.modelengine.core.generator",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-core-generator-atlas-ad98a43b49db-part-01.md",
+        "package": "com.ticxo.modelengine.core.generator.atlas",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-core-generator-java-20314be7c143-part-01.md",
+        "package": "com.ticxo.modelengine.core.generator.java",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core-generator-parser-blockbench-84a47fe8fd83-part-01.md",
+        "package": "com.ticxo.modelengine.core.generator.parser.blockbench",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core-generator-parser-blockbench-json-3fb7f00591e1-part-01.md",
+        "package": "com.ticxo.modelengine.core.generator.parser.blockbench.json",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core-generator-processed-ec1e125fd42f-part-01.md",
+        "package": "com.ticxo.modelengine.core.generator.processed",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-core-generator-skin-21a18b0bb1e9-part-01.md",
+        "package": "com.ticxo.modelengine.core.generator.skin",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-core-generator-util-6adae3deeacd-part-01.md",
+        "package": "com.ticxo.modelengine.core.generator.util",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-core-javasupport-feccdc3dc079-part-01.md",
+        "package": "com.ticxo.modelengine.core.javasupport",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core-libsdisguises-8349aa4db165-part-01.md",
+        "package": "com.ticxo.modelengine.core.libsdisguises",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core-listener-0839198d56ed-part-01.md",
+        "package": "com.ticxo.modelengine.core.listener",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-core-menu-f79cb73ff2aa-part-01.md",
+        "package": "com.ticxo.modelengine.core.menu",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core-menu-screen-513e7b78af0b-part-01.md",
+        "package": "com.ticxo.modelengine.core.menu.screen",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-core-menu-widget-770a8149eea0-part-01.md",
+        "package": "com.ticxo.modelengine.core.menu.widget",
+        "types": 8
+      },
+      {
+        "file": "com-ticxo-modelengine-core-menu-widget-page-ee35fee41d2d-part-01.md",
+        "package": "com.ticxo.modelengine.core.menu.widget.page",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core-misc-862cd712e3b4-part-01.md",
+        "package": "com.ticxo.modelengine.core.misc",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core-model-4315122741b7-part-01.md",
+        "package": "com.ticxo.modelengine.core.model",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-core-model-bone-d600d360ef86-part-01.md",
+        "package": "com.ticxo.modelengine.core.model.bone",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core-model-bone-behavior-c85e241226e4-part-01.md",
+        "package": "com.ticxo.modelengine.core.model.bone.behavior",
+        "types": 14
+      },
+      {
+        "file": "com-ticxo-modelengine-core-model-bone-manager-56bbc686f2de-part-01.md",
+        "package": "com.ticxo.modelengine.core.model.bone.manager",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-core-model-bone-render-0a53c4c90ffd-part-01.md",
+        "package": "com.ticxo.modelengine.core.model.bone.render",
+        "types": 14
+      },
+      {
+        "file": "com-ticxo-modelengine-core-model-render-8a0ad9661a35-part-01.md",
+        "package": "com.ticxo.modelengine.core.model.render",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-core-vfx-f72a37daadeb-part-01.md",
+        "package": "com.ticxo.modelengine.core.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core-vfx-render-856bdbcdbbac-part-01.md",
+        "package": "com.ticxo.modelengine.core.vfx.render",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-d5f7b12b1adb-part-01.md",
+        "package": "com.ticxo.modelengine.core21",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-4fd14fbf3caf-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-animation-1ddb11a3a574-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.animation",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-compatibility-c22b777824da-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.compatibility",
+        "types": 9
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-conditions-d17cdd5e2ef5-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.conditions",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-bone-90225e7a6544-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.bone",
+        "types": 12
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-controller-8e1eeef9cc80-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.controller",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-disguise-0c9e441d9a2a-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.disguise",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-entity-030683087765-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.entity",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-hitbox-1a383acb20b8-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-item-1edd3a7f1ea5-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.item",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-leash-d4260a77739e-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.leash",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-model-fe2f2fba78ca-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.model",
+        "types": 12
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-mounting-d77e44727eee-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.mounting",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-nametag-52252c0be903-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.nametag",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-mechanics-vfx-251751c129db-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.mechanics.vfx",
+        "types": 12
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-placeholders-8438ee4bad43-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.placeholders",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-targeters-5a8d164c7686-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.targeters",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-core21-mythic-utils-6e8718062863-part-01.md",
+        "package": "com.ticxo.modelengine.core21.mythic.utils",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-core25-9220d5d1b14d-part-01.md",
+        "package": "com.ticxo.modelengine.core25",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-b05e54eb4ea5-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-entity-4e80fe3f1813-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.entity",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-entity-controller-efaa0a48d72c-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-entity-hitbox-95317f0169b9-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-entity-navigation-bd6a3d98f547-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-network-7bb809bdef30-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-network-patch-2e6d1f672567-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-network-utils-34215f2cfd83-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-parser-behavior-c37b5b8c8d6d-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-parser-model-3dd57a8d6184-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-19-r3-parser-vfx-dbf2926fa2a3-part-01.md",
+        "package": "com.ticxo.modelengine.v1_19_R3.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-8e5adc33b8a1-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-entity-7ed25da71745-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.entity",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-entity-controller-dff59adf962a-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-entity-hitbox-4de6871a390e-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-entity-navigation-98f3b3f51d51-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-network-6eef12d02389-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-network-patch-819f3bb9a24e-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-network-utils-61070c8b6e0b-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-parser-behavior-c55572ce1922-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-parser-model-15c5f358b10c-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r1-parser-vfx-34ebd45c6fb0-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R1.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-4c81ea667fcd-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-entity-b9e9f256caa6-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.entity",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-entity-controller-83e4f15ec8b2-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-entity-hitbox-3fbaba35b0b8-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-entity-navigation-d9f7b4214389-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-network-a2c61b881634-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-network-patch-91be41037652-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-network-utils-10f612a23834-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-parser-behavior-b127c05305bb-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-parser-model-7e880d7aa994-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r2-parser-vfx-3664b79e959d-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R2.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-9d7e47a3facb-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-entity-5e75e78f2fba-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.entity",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-entity-controller-d561aaac6d98-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-entity-hitbox-7feae250ee03-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-entity-navigation-1671e3f2b739-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-network-eb1305a614fe-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-network-patch-330b64d118b8-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-network-utils-43d2051e7ee0-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-parser-behavior-c10384147d89-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-parser-model-6fd05b32a05e-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-parser-vfx-6a32900fa940-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r3-ui-d7eed700c3fe-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R3.ui",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-3d0baab0a1b0-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-entity-ad494512d43f-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-entity-controller-aa9e70d936f2-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-entity-hitbox-b29e2cf03a59-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-entity-navigation-4afb28c189d4-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-network-f98e421f39ac-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-network-patch-4fd1929248b8-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-network-utils-edc22bc6c133-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-parser-behavior-a7c4f972ea6d-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-parser-model-59588e265078-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-20-r4-parser-vfx-4eb83250c036-part-01.md",
+        "package": "com.ticxo.modelengine.v1_20_R4.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-c1b988ccc1a6-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-entity-0687734f4c2c-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-entity-controller-bbfac782e656-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-entity-hitbox-620e9d691860-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-entity-navigation-17857a17381c-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-network-ca96bbcecdf7-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-network-patch-fc66836f28e9-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-network-utils-e77b367b952f-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-parser-behavior-e013576fca54-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-parser-model-f24ad38d0848-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r1-parser-vfx-8950e98ca0bb-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R1.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-0da4a458a179-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-entity-1890f8682039-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-entity-controller-ee5018b7e093-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-entity-hitbox-3396a59152c7-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-entity-navigation-03c2eef9f62e-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-network-99cbb59efaf6-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-network-patch-41d1b62096f3-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-network-utils-2a8c4bc74d94-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-parser-behavior-e14ce11c0f63-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-parser-model-dcb03cc159a5-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r2-parser-vfx-d8dfc836b997-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R2.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-a69a8638c5d2-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-entity-47ed9c185b2e-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-entity-controller-6fca432df13a-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-entity-hitbox-3f950ff1198f-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-entity-navigation-a9fbb5ef62cf-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-network-edbb8f016da3-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-network-patch-228995848e90-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-network-utils-adeb668dff06-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-parser-behavior-b6bbf098623b-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-parser-model-af3386a37c1f-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r3-parser-vfx-fb84b4cc1990-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R3.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-23ee7cc22b18-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-entity-b96d24bf6102-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-entity-controller-d1462d84ddf5-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-entity-hitbox-13aa97d9bc30-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-entity-navigation-43733579e2af-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-network-d542bef99141-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-network-patch-ea0130280ba8-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-network-utils-4b0a0f3d5678-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-parser-behavior-48cd5fe6d834-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-parser-model-c03c71b83a4e-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r4-parser-vfx-2c81caa03d16-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R4.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-09db3e871286-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-entity-16173e0b8998-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-entity-controller-2f08cbed13c3-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-entity-hitbox-384fd6468f17-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-entity-navigation-7d84cf62a57a-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-network-2162e36b6c59-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-network-patch-718ac4f46a51-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-network-utils-12974ac9fb5b-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-parser-behavior-f0ab6e2f829e-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-parser-model-8e09ad7dbba2-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r5-parser-vfx-e193694701b5-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R5.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-fc970b49c29e-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-entity-6137d4555de7-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-entity-controller-068882cfc38b-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-entity-hitbox-fa7a7bb1be3b-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-entity-navigation-7ed29af5933b-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-network-24a3620ecff3-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-network-patch-edf993926483-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-network-utils-dcb81b4bd3dd-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-parser-behavior-6f41e524c051-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-parser-model-636614fba881-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r6-parser-vfx-325db227f2c7-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R6.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-9de553bb7370-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-entity-9fbd4a6e3ac2-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-entity-controller-7b241a06c419-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-entity-hitbox-a1a1b2401829-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-entity-navigation-7e64bab07c06-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-network-dd51f6f735fa-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-network-patch-fb24c705b612-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.network.patch",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-network-utils-22efa95cbb75-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-parser-behavior-0e69c6f1ce38-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-parser-model-c2f721df68e8-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v1-21-r7-parser-vfx-ff0ec8d4dc6b-part-01.md",
+        "package": "com.ticxo.modelengine.v1_21_R7.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-d1b2a0da9102-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-entity-d521dd0ef960-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-entity-controller-c675f30b5048-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-entity-hitbox-518cb2a60869-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-entity-navigation-0d637b242e60-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-network-bf0c2967dfa8-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-network-patch-e92713f29a63-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.network.patch",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-network-utils-3f8390b56517-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-parser-behavior-0e8e1f7cf734-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-parser-model-7e7f061b017e-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-1-parser-vfx-e28db24897b9-part-01.md",
+        "package": "com.ticxo.modelengine.v26_1.parser.vfx",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-ec0ee41c9d34-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-entity-d3325057f695-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.entity",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-entity-controller-e6a0091931b6-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.entity.controller",
+        "types": 3
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-entity-hitbox-8a55358513b8-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.entity.hitbox",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-entity-navigation-e6f88b5fbd3e-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.entity.navigation",
+        "types": 5
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-network-dcd18fd9bf57-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.network",
+        "types": 2
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-network-patch-42fb7cfa4c65-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.network.patch",
+        "types": 4
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-network-utils-15f624aa60ea-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.network.utils",
+        "types": 7
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-parser-behavior-672b7943fec5-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.parser.behavior",
+        "types": 6
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-parser-model-3d7d855a57ba-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.parser.model",
+        "types": 1
+      },
+      {
+        "file": "com-ticxo-modelengine-v26-2-parser-vfx-0630cdeff9c8-part-01.md",
+        "package": "com.ticxo.modelengine.v26_2.parser.vfx",
+        "types": 1
+      }
+    ],
+    "MythicCrucible": [
+      {
+        "file": "io-lumine-mythiccrucible-13a9d0144e4d-part-01.md",
+        "package": "io.lumine.mythiccrucible",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-api-eed8f943133a-part-01.md",
+        "package": "io.lumine.mythiccrucible.api",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-clocks-7c58e04f46e0-part-01.md",
+        "package": "io.lumine.mythiccrucible.clocks",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-commands-8bc5ccff19f2-part-01.md",
+        "package": "io.lumine.mythiccrucible.commands",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythiccrucible-commands-furniture-1d1167fe9a8d-part-01.md",
+        "package": "io.lumine.mythiccrucible.commands.furniture",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-commands-generation-6b8533e5da6d-part-01.md",
+        "package": "io.lumine.mythiccrucible.commands.generation",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-commands-items-6390903434c8-part-01.md",
+        "package": "io.lumine.mythiccrucible.commands.items",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-compat-bfde4b33db44-part-01.md",
+        "package": "io.lumine.mythiccrucible.compat",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythiccrucible-config-80465a034536-part-01.md",
+        "package": "io.lumine.mythiccrucible.config",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-constants-c05742f6fc60-part-01.md",
+        "package": "io.lumine.mythiccrucible.constants",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-drops-9504871095dd-part-01.md",
+        "package": "io.lumine.mythiccrucible.drops",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-drops-lootgen-05839c6fcc9c-part-01.md",
+        "package": "io.lumine.mythiccrucible.drops.lootgen",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-drops-vault-e3cb12d6f5dc-part-01.md",
+        "package": "io.lumine.mythiccrucible.drops.vault",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-events-585ccfdaa80e-part-01.md",
+        "package": "io.lumine.mythiccrucible.events",
+        "types": 8
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-599d07914e70-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation",
+        "types": 19
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-armor-0f263feed6cd-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.armor",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-armor-optifine-2508e0484c7d-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.armor.optifine",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-armor-trims-aff0f48e87ee-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.armor.trims",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-blockbench-814545618aec-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.blockbench",
+        "types": 20
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-deploy-f52511d4c19a-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.deploy",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-deploy-v1-21-5-c058a8c802c2-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.deploy.v1_21_5",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-generators-43b812a2eff5-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.generators",
+        "types": 12
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-items-fb775ce9f54f-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.items",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-serialization-f008f593aa70-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.serialization",
+        "types": 35
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-serialization-items-ba4ea5dc18d6-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.serialization.items",
+        "types": 13
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-serialization-items-special-1d2524845745-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.serialization.items.special",
+        "types": 13
+      },
+      {
+        "file": "io-lumine-mythiccrucible-generation-serialization-items-tints-ad49ec2df3f7-part-01.md",
+        "package": "io.lumine.mythiccrucible.generation.serialization.items.tints",
+        "types": 8
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-05d871628064-part-01.md",
+        "package": "io.lumine.mythiccrucible.items",
+        "types": 11
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-ammo-e92ecd635fe4-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.ammo",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-armor-72cd7892744b-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.armor",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-augments-3c5e3ce899bb-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.augments",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-bags-2aa81693e5fd-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.bags",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-blocks-b0208ef78652-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.blocks",
+        "types": 13
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-blocks-sapling-5370c3b3c2c6-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.blocks.sapling",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-bows-0f58cf099319-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.bows",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-brush-2776b79284e1-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.brush",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-durability-76ee16f4552f-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.durability",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-equippables-4a2e63c9bec1-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.equippables",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-fonts-5dd1965853b2-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.fonts",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-furniture-7cce389d49a4-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.furniture",
+        "types": 12
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-furniture-culling-50a86f256ce0-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.furniture.culling",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-furniture-types-c34e38680fc0-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.furniture.types",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-hats-fdae63b83b5a-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.hats",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-jukebox-3170eb51878b-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.jukebox",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-lore-b0631e5ddb13-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.lore",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-lore-lines-2812733d89ca-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.lore.lines",
+        "types": 10
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-menus-3e7fd31cec5d-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.menus",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-menus-functions-buttons-e89ab6b020ad-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.menus.functions.buttons",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-paintings-6e3e7af11865-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.paintings",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-fa39931ac633-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes",
+        "types": 10
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-better-85ea9b9b833c-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.better",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-brewing-29a3769fde5f-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.brewing",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-crafting-ingredients-4cd631f15c46-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.crafting.ingredients",
+        "types": 8
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-crafting-outputs-f5a7bf51e39b-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.crafting.outputs",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-crafting-recipes-a639cd500a1a-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.crafting.recipes",
+        "types": 10
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-crafting-recipes-vmp-bc98403e77d6-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.crafting.recipes.vmp",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-crafting-uifilters-1a2a71f0a647-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.crafting.uifilters",
+        "types": 7
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-crafting-uimanager-3e3ba6948886-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.crafting.uimanager",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-crafting-util-13bd77ddc524-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.crafting.util",
+        "types": 12
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-discovery-344dd38e5a11-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.discovery",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-transmute-c36078f1197c-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.transmute",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-recipes-types-9261ba89b2ec-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.recipes.types",
+        "types": 12
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-sets-4f7a0b514bd8-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.sets",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-tooltips-37dac30eda6d-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.tooltips",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-updating-d99e375e5e89-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.updating",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-items-upgrades-437ddc19c338-part-01.md",
+        "package": "io.lumine.mythiccrucible.items.upgrades",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-menus-488e011d468b-part-01.md",
+        "package": "io.lumine.mythiccrucible.menus",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-menus-furniture-2e2368ba17ac-part-01.md",
+        "package": "io.lumine.mythiccrucible.menus.furniture",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-metrics-489f154f149d-part-01.md",
+        "package": "io.lumine.mythiccrucible.metrics",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-metrics-bukkit-0dd0891a2386-part-01.md",
+        "package": "io.lumine.mythiccrucible.metrics.bukkit",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-metrics-charts-cd33ee714cdd-part-01.md",
+        "package": "io.lumine.mythiccrucible.metrics.charts",
+        "types": 8
+      },
+      {
+        "file": "io-lumine-mythiccrucible-metrics-config-156525831052-part-01.md",
+        "package": "io.lumine.mythiccrucible.metrics.config",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-metrics-json-6658b5180a56-part-01.md",
+        "package": "io.lumine.mythiccrucible.metrics.json",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-profiles-bc1dafbc1c34-part-01.md",
+        "package": "io.lumine.mythiccrucible.profiles",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-171034f7b665-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-conditions-edccd69bb240-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.conditions",
+        "types": 15
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-conditions-furniture-8ebc951606cd-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.conditions.furniture",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-conditions-items-467f85eaa691-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.conditions.items",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-conditions-nbt-66ab8aa184f9-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.conditions.nbt",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-mechanics-4b0eaf4c5ffb-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.mechanics",
+        "types": 31
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-mechanics-durability-e83f4cb05be5-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.mechanics.durability",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-mechanics-furniture-bf249ee9f715-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.mechanics.furniture",
+        "types": 11
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-mechanics-nbt-7ef7fd6fb5a3-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.mechanics.nbt",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-placeholders-a87c9959471b-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.placeholders",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-placeholders-all-a73d6a736d76-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.placeholders.all",
+        "types": 43
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-placeholders-papi-3ea07c1a451b-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.placeholders.papi",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-stats-f2d63e82e1b6-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.stats",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-targeters-8ed46118eae7-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.targeters",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-skills-util-eb28d43fb38f-part-01.md",
+        "package": "io.lumine.mythiccrucible.skills.util",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-utils-00ef10e7aa35-part-01.md",
+        "package": "io.lumine.mythiccrucible.utils",
+        "types": 11
+      },
+      {
+        "file": "io-lumine-mythiccrucible-utils-blocks-ed8468450b03-part-01.md",
+        "package": "io.lumine.mythiccrucible.utils.blocks",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythiccrucible-utils-blocks-states-2c6549d7715e-part-01.md",
+        "package": "io.lumine.mythiccrucible.utils.blocks.states",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythiccrucible-utils-converters-itemsadder-51e79b912da3-part-01.md",
+        "package": "io.lumine.mythiccrucible.utils.converters.itemsadder",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-utils-converters-nexo-1e14ab79c481-part-01.md",
+        "package": "io.lumine.mythiccrucible.utils.converters.nexo",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-utils-converters-oraxen-06fe98c06e82-part-01.md",
+        "package": "io.lumine.mythiccrucible.utils.converters.oraxen",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythiccrucible-utils-pack-d46e8f2e2afa-part-01.md",
+        "package": "io.lumine.mythiccrucible.utils.pack",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-worldgen-21e338b9c209-part-01.md",
+        "package": "io.lumine.mythiccrucible.worldgen",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythiccrucible-worldgen-furniture-9e72a797f91e-part-01.md",
+        "package": "io.lumine.mythiccrucible.worldgen.furniture",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythiccrucible-worldgen-schematics-d3afbfcfe383-part-01.md",
+        "package": "io.lumine.mythiccrucible.worldgen.schematics",
+        "types": 1
+      }
+    ],
+    "MythicDungeons": [
+      {
+        "file": "net-playavalon-mythicdungeons-2f2c134c4e66-part-01.md",
+        "package": "net.playavalon.mythicdungeons",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-b84444568bcd-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-annotations-e5dc43fd1b5a-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.annotations",
+        "types": 6
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-blocks-caceb2eef55d-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.blocks",
+        "types": 5
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-chunkgenerators-1696e45aac91-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.chunkgenerators",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-config-b0d9d984883c-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.config",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-events-dungeon-8d4f328f136e-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.events.dungeon",
+        "types": 13
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-events-dungeon-rooms-3325bdcaf86f-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.events.dungeon.rooms",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-events-party-03f22e80247f-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.events.party",
+        "types": 6
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-exceptions-3c189d362cc8-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.exceptions",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-generation-6ca9c0319610-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.generation",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-generation-layout-6ca792e81530-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.generation.layout",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-generation-rooms-8d115146a590-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.generation.rooms",
+        "types": 9
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-parents-3500e0eb29c4-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.parents",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-parents-dungeons-9a96f57405c3-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.parents.dungeons",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-parents-elements-ff426b838728-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.parents.elements",
+        "types": 6
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-parents-instances-ffe797d2ec36-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.parents.instances",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-party-9fa9427edef0-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.party",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-api-queue-2ba39844f22a-part-01.md",
+        "package": "net.playavalon.mythicdungeons.api.queue",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-avngui-55ee79d5e58e-part-01.md",
+        "package": "net.playavalon.mythicdungeons.avngui",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-avngui-gui-15b4ab710f4c-part-01.md",
+        "package": "net.playavalon.mythicdungeons.avngui.GUI",
+        "types": 5
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-avngui-gui-actions-153adabe37fd-part-01.md",
+        "package": "net.playavalon.mythicdungeons.avngui.GUI.Actions",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-avngui-gui-buttons-4bb6e0daa1c2-part-01.md",
+        "package": "net.playavalon.mythicdungeons.avngui.GUI.Buttons",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-avngui-utility-79c5b2716edc-part-01.md",
+        "package": "net.playavalon.mythicdungeons.avngui.Utility",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-bstats-2db876c954d3-part-01.md",
+        "package": "net.playavalon.mythicdungeons.bstats",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-bstats-bukkit-94bef3194604-part-01.md",
+        "package": "net.playavalon.mythicdungeons.bstats.bukkit",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-bstats-charts-115956b76118-part-01.md",
+        "package": "net.playavalon.mythicdungeons.bstats.charts",
+        "types": 8
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-bstats-config-7d97e29c45b1-part-01.md",
+        "package": "net.playavalon.mythicdungeons.bstats.config",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-bstats-json-f049c887ba84-part-01.md",
+        "package": "net.playavalon.mythicdungeons.bstats.json",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-commands-c2f9eb0a8008-part-01.md",
+        "package": "net.playavalon.mythicdungeons.commands",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-commands-dungeon-8c8bddbf392d-part-01.md",
+        "package": "net.playavalon.mythicdungeons.commands.dungeon",
+        "types": 6
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-commands-party-fa2b4531e223-part-01.md",
+        "package": "net.playavalon.mythicdungeons.commands.party",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-compatibility-b0916a830237-part-01.md",
+        "package": "net.playavalon.mythicdungeons.compatibility",
+        "types": 8
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-compatibility-betonquest-events-44bec2185722-part-01.md",
+        "package": "net.playavalon.mythicdungeons.compatibility.betonquest.events",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-compatibility-betonquest-objectives-f41af2b131a8-part-01.md",
+        "package": "net.playavalon.mythicdungeons.compatibility.betonquest.objectives",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-compatibility-citizens-af915f1c4009-part-01.md",
+        "package": "net.playavalon.mythicdungeons.compatibility.citizens",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-conditions-d54c035a3b3a-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.conditions",
+        "types": 11
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-dungeontypes-b31c452c6df2-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.dungeontypes",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-functions-fe8b75263d19-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.functions",
+        "types": 31
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-functions-meta-b039dbed491d-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.functions.meta",
+        "types": 6
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-functions-rewards-c96fa0200e2c-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.functions.rewards",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-functions-rooms-63903f221b81-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.functions.rooms",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-functions-variables-112afa96cda9-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.functions.variables",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-instancetypes-edit-e9615a6e4f50-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.instancetypes.edit",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-instancetypes-play-141820d1c4f3-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.instancetypes.play",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-rewards-d03712b26fc1-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.rewards",
+        "types": 5
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-triggers-1c4b9eff473e-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.triggers",
+        "types": 13
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-triggers-gates-c902d67364e4-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.triggers.gates",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-triggers-rooms-b64f649e7bc1-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.triggers.rooms",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-dungeons-variables-022aba1bbf0f-part-01.md",
+        "package": "net.playavalon.mythicdungeons.dungeons.variables",
+        "types": 5
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-gui-13bf91533d0e-part-01.md",
+        "package": "net.playavalon.mythicdungeons.gui",
+        "types": 7
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-listeners-3a8a31079992-part-01.md",
+        "package": "net.playavalon.mythicdungeons.listeners",
+        "types": 8
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-listeners-dungeonlisteners-a8109c052884-part-01.md",
+        "package": "net.playavalon.mythicdungeons.listeners.dungeonlisteners",
+        "types": 5
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-listeners-partylisteners-c2d7bb05579e-part-01.md",
+        "package": "net.playavalon.mythicdungeons.listeners.partylisteners",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-managers-85b465d81a37-part-01.md",
+        "package": "net.playavalon.mythicdungeons.managers",
+        "types": 17
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-menu-194f3c1f0fea-part-01.md",
+        "package": "net.playavalon.mythicdungeons.menu",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-menu-menuitems-758025f5d86d-part-01.md",
+        "package": "net.playavalon.mythicdungeons.menu.menuitems",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-mythic-41f166d6e6a0-part-01.md",
+        "package": "net.playavalon.mythicdungeons.mythic",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-mythic-conditions-c5798d683b50-part-01.md",
+        "package": "net.playavalon.mythicdungeons.mythic.conditions",
+        "types": 34
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-mythic-mechanics-6ada83a7faa6-part-01.md",
+        "package": "net.playavalon.mythicdungeons.mythic.mechanics",
+        "types": 13
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-mythic-placeholders-85aee96dd312-part-01.md",
+        "package": "net.playavalon.mythicdungeons.mythic.placeholders",
+        "types": 23
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-mythic-targeters-ee8f00ffd1cc-part-01.md",
+        "package": "net.playavalon.mythicdungeons.mythic.targeters",
+        "types": 8
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-mythic-triggers-9b5b6ecc79ce-part-01.md",
+        "package": "net.playavalon.mythicdungeons.mythic.triggers",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-794f0c381ba3-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis",
+        "types": 6
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-instantiator-8d01d940d26d-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.instantiator",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-instantiator-android-1af80bd0b28a-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.instantiator.android",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-instantiator-annotations-6f08803e70e1-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.instantiator.annotations",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-instantiator-basic-485385cbbc50-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.instantiator.basic",
+        "types": 9
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-instantiator-gcj-0b95fe98793f-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.instantiator.gcj",
+        "types": 3
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-instantiator-perc-76dab6d16de9-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.instantiator.perc",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-instantiator-sun-37f60d9a9ab7-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.instantiator.sun",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-instantiator-util-00b0c0102859-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.instantiator.util",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-objenesis-strategy-8485b07318c5-part-01.md",
+        "package": "net.playavalon.mythicdungeons.objenesis.strategy",
+        "types": 6
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-player-31af465e1ecd-part-01.md",
+        "package": "net.playavalon.mythicdungeons.player",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-player-party-a2eade7b058c-part-01.md",
+        "package": "net.playavalon.mythicdungeons.player.party",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-player-party-partyfinder-bdfa336c4b45-part-01.md",
+        "package": "net.playavalon.mythicdungeons.player.party.partyfinder",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-player-party-partysystem-9065563a3a3d-part-01.md",
+        "package": "net.playavalon.mythicdungeons.player.party.partysystem",
+        "types": 1
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-utility-2479f83f6096-part-01.md",
+        "package": "net.playavalon.mythicdungeons.utility",
+        "types": 9
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-utility-collections-834efc1e90dc-part-01.md",
+        "package": "net.playavalon.mythicdungeons.utility.collections",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-utility-helpers-f46b3036c485-part-01.md",
+        "package": "net.playavalon.mythicdungeons.utility.helpers",
+        "types": 26
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-utility-numbers-45ee320b1ac6-part-01.md",
+        "package": "net.playavalon.mythicdungeons.utility.numbers",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-utility-regionhandler-b2a7374858ca-part-01.md",
+        "package": "net.playavalon.mythicdungeons.utility.regionhandler",
+        "types": 2
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-utility-tasks-cc7b892de744-part-01.md",
+        "package": "net.playavalon.mythicdungeons.utility.tasks",
+        "types": 4
+      },
+      {
+        "file": "net-playavalon-mythicdungeons-v26-1-122ea75a7f7c-part-01.md",
+        "package": "net.playavalon.mythicdungeons.v26_1",
+        "types": 1
+      }
+    ],
+    "MythicEnchants": [
+      {
+        "file": "com-stelliusstudio-mythicenchants-1c638eb715eb-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants",
+        "types": 1
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-addon-f54e45e38ed2-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.addon",
+        "types": 1
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-api-38b4335b9035-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.api",
+        "types": 1
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-api-addon-74c965cb4afc-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.api.addon",
+        "types": 3
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-api-event-c372e2c34923-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.api.event",
+        "types": 7
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-cleanup-89a3aaa4e0c5-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.cleanup",
+        "types": 2
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-command-a3f6c1cbd4bf-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.command",
+        "types": 2
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-command-commands-21c496df820b-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.command.commands",
+        "types": 10
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-condition-87f089282b21-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.condition",
+        "types": 19
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-config-6508607c95bc-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.config",
+        "types": 2
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-datapack-b6b641cfecc7-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.datapack",
+        "types": 4
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-datapack-tags-3cd137090c92-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.datapack.tags",
+        "types": 7
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-enchanting-9372d445c142-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.enchanting",
+        "types": 23
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-enchantment-57b7f8a18094-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.enchantment",
+        "types": 14
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-enchantment-tag-0fd9ec2c1bd2-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.enchantment.tag",
+        "types": 2
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-listener-61c46e41fe76-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.listener",
+        "types": 15
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-math-87152fef40fc-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.math",
+        "types": 2
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-mechanic-9c9ccd514cf5-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.mechanic",
+        "types": 45
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-mechanic-9c9ccd514cf5-part-02.md",
+        "package": "com.stelliusstudio.mythicenchants.mechanic",
+        "types": 12
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-mob-51497fff5b6d-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.mob",
+        "types": 2
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-placeholder-b137c7485045-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.placeholder",
+        "types": 4
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-skill-26bc42ea3500-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.skill",
+        "types": 1
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-targeting-76abd8df2be3-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.targeting",
+        "types": 7
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-trigger-6170361aec3a-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.trigger",
+        "types": 3
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-trigger-triggers-ff390983a492-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.trigger.triggers",
+        "types": 39
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-util-ea6eded4a210-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.util",
+        "types": 2
+      },
+      {
+        "file": "com-stelliusstudio-mythicenchants-util-scheduler-6de59123e8a8-part-01.md",
+        "package": "com.stelliusstudio.mythicenchants.util.scheduler",
+        "types": 3
+      }
+    ],
+    "MythicRPG": [
+      {
+        "file": "io-lumine-mythicrpg-b405e72d50ad-part-01.md",
+        "package": "io.lumine.mythicrpg",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-api-25fbadb44926-part-01.md",
+        "package": "io.lumine.mythicrpg.api",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-api-model-b7c932a118b8-part-01.md",
+        "package": "io.lumine.mythicrpg.api.model",
+        "types": 10
+      },
+      {
+        "file": "io-lumine-mythicrpg-api-storage-sql-a9bb55c339b9-part-01.md",
+        "package": "io.lumine.mythicrpg.api.storage.sql",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-archetypes-c3716c835714-part-01.md",
+        "package": "io.lumine.mythicrpg.archetypes",
+        "types": 8
+      },
+      {
+        "file": "io-lumine-mythicrpg-archetypes-talents-6dfc3173ed92-part-01.md",
+        "package": "io.lumine.mythicrpg.archetypes.talents",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythicrpg-archetypes-talents-components-79aae13dfb97-part-01.md",
+        "package": "io.lumine.mythicrpg.archetypes.talents.components",
+        "types": 8
+      },
+      {
+        "file": "io-lumine-mythicrpg-archetypes-talents-modifiers-edf4cc21b002-part-01.md",
+        "package": "io.lumine.mythicrpg.archetypes.talents.modifiers",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-c4023afc85a7-part-01.md",
+        "package": "io.lumine.mythicrpg.commands",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-257d47c762d8-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-archetypes-2e9978fb22e2-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.archetypes",
+        "types": 11
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-death-78a0feec8378-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.death",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-experience-2bcffa40b8cf-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.experience",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-menus-5513ff593fbc-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.menus",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-points-ce681cd50561-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.points",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-profiles-54ae77219f00-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.profiles",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-spells-92e5ec6fcfde-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.spells",
+        "types": 7
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-talents-4989a6678e07-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.talents",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-admin-utils-d02c65b7e5c0-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.admin.utils",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-archetypes-eac07f927bf9-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.archetypes",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-friends-69b80436b5ad-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.friends",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-guilds-57a8c0deb164-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.guilds",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-parties-c10628530b7a-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.parties",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-spells-dd20950dcd31-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.spells",
+        "types": 7
+      },
+      {
+        "file": "io-lumine-mythicrpg-commands-waypoints-c557c9337e6f-part-01.md",
+        "package": "io.lumine.mythicrpg.commands.waypoints",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-compat-de94412a0902-part-01.md",
+        "package": "io.lumine.mythicrpg.compat",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-config-addc4df10f6a-part-01.md",
+        "package": "io.lumine.mythicrpg.config",
+        "types": 8
+      },
+      {
+        "file": "io-lumine-mythicrpg-constants-c248c51423f8-part-01.md",
+        "package": "io.lumine.mythicrpg.constants",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-death-36050204357e-part-01.md",
+        "package": "io.lumine.mythicrpg.death",
+        "types": 15
+      },
+      {
+        "file": "io-lumine-mythicrpg-economy-4921c9084ab5-part-01.md",
+        "package": "io.lumine.mythicrpg.economy",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythicrpg-events-48f38bce4b50-part-01.md",
+        "package": "io.lumine.mythicrpg.events",
+        "types": 20
+      },
+      {
+        "file": "io-lumine-mythicrpg-experience-7ac7ec381fac-part-01.md",
+        "package": "io.lumine.mythicrpg.experience",
+        "types": 12
+      },
+      {
+        "file": "io-lumine-mythicrpg-experience-curves-e24bc05969c1-part-01.md",
+        "package": "io.lumine.mythicrpg.experience.curves",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-experience-sources-4899951e6c5f-part-01.md",
+        "package": "io.lumine.mythicrpg.experience.sources",
+        "types": 20
+      },
+      {
+        "file": "io-lumine-mythicrpg-experience-sources-listeners-bc63c92ae6b8-part-01.md",
+        "package": "io.lumine.mythicrpg.experience.sources.listeners",
+        "types": 17
+      },
+      {
+        "file": "io-lumine-mythicrpg-guilds-6282ec52d1ca-part-01.md",
+        "package": "io.lumine.mythicrpg.guilds",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-logging-53e5bb365372-part-01.md",
+        "package": "io.lumine.mythicrpg.logging",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-menus-c7af9f23d3f0-part-01.md",
+        "package": "io.lumine.mythicrpg.menus",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-menus-character-7dcb5bdc9dd1-part-01.md",
+        "package": "io.lumine.mythicrpg.menus.character",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-menus-functions-buttons-70be16de011f-part-01.md",
+        "package": "io.lumine.mythicrpg.menus.functions.buttons",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythicrpg-menus-functions-databinding-0ab8c41223d8-part-01.md",
+        "package": "io.lumine.mythicrpg.menus.functions.databinding",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-menus-spells-6f8c251384cb-part-01.md",
+        "package": "io.lumine.mythicrpg.menus.spells",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythicrpg-menus-tooltips-talents-687b1bea5b8e-part-01.md",
+        "package": "io.lumine.mythicrpg.menus.tooltips.talents",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythicrpg-metrics-5f99d69776ed-part-01.md",
+        "package": "io.lumine.mythicrpg.metrics",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-metrics-bukkit-14877246588d-part-01.md",
+        "package": "io.lumine.mythicrpg.metrics.bukkit",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythicrpg-placeholders-d989211467b5-part-01.md",
+        "package": "io.lumine.mythicrpg.placeholders",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythicrpg-placeholders-mythic-2d72ed8f8379-part-01.md",
+        "package": "io.lumine.mythicrpg.placeholders.mythic",
+        "types": 25
+      },
+      {
+        "file": "io-lumine-mythicrpg-placeholders-papi-365e4a13ef15-part-01.md",
+        "package": "io.lumine.mythicrpg.placeholders.papi",
+        "types": 32
+      },
+      {
+        "file": "io-lumine-mythicrpg-points-21ad51c0f72b-part-01.md",
+        "package": "io.lumine.mythicrpg.points",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-profiles-cc6d7e9f8e81-part-01.md",
+        "package": "io.lumine.mythicrpg.profiles",
+        "types": 12
+      },
+      {
+        "file": "io-lumine-mythicrpg-profiles-casting-a4ac62495b71-part-01.md",
+        "package": "io.lumine.mythicrpg.profiles.casting",
+        "types": 18
+      },
+      {
+        "file": "io-lumine-mythicrpg-profiles-casting-bar-5a700438b010-part-01.md",
+        "package": "io.lumine.mythicrpg.profiles.casting.bar",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-profiles-casting-bar-types-26fd15b135a1-part-01.md",
+        "package": "io.lumine.mythicrpg.profiles.casting.bar.types",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-profiles-casting-combo-98f9c3f31684-part-01.md",
+        "package": "io.lumine.mythicrpg.profiles.casting.combo",
+        "types": 7
+      },
+      {
+        "file": "io-lumine-mythicrpg-profiles-casting-dance-7196f868d6b7-part-01.md",
+        "package": "io.lumine.mythicrpg.profiles.casting.dance",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-profiles-casting-overlay-4a4d312a6d32-part-01.md",
+        "package": "io.lumine.mythicrpg.profiles.casting.overlay",
+        "types": 11
+      },
+      {
+        "file": "io-lumine-mythicrpg-profiles-inventory-4a1a63a70bc0-part-01.md",
+        "package": "io.lumine.mythicrpg.profiles.inventory",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-e97bd18c10c9-part-01.md",
+        "package": "io.lumine.mythicrpg.skills",
+        "types": 12
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-commands-functions-447039ead4b1-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.commands.functions",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-conditions-cda3c694e688-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.conditions",
+        "types": 15
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-drops-6cdf29fea57a-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.drops",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-learning-signs-51c364446ac9-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.learning.signs",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-learning-tomes-8587b076042e-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.learning.tomes",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-mechanics-2e1f4f1230dc-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.mechanics",
+        "types": 21
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-modifiers-c6bf0fb4dce8-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.modifiers",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-reagents-6de02b9058b0-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.reagents",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-reagents-hardcoded-f27dcab59cd3-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.reagents.hardcoded",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-stats-aa7a8be3f7de-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.stats",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-skills-targeters-afd066086732-part-01.md",
+        "package": "io.lumine.mythicrpg.skills.targeters",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythicrpg-social-44dbca916ff7-part-01.md",
+        "package": "io.lumine.mythicrpg.social",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythicrpg-social-conditions-f7258aa6bd18-part-01.md",
+        "package": "io.lumine.mythicrpg.social.conditions",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythicrpg-social-friends-d08bdf2e74d0-part-01.md",
+        "package": "io.lumine.mythicrpg.social.friends",
+        "types": 7
+      },
+      {
+        "file": "io-lumine-mythicrpg-social-mechanics-7b204ad0c4b8-part-01.md",
+        "package": "io.lumine.mythicrpg.social.mechanics",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythicrpg-social-menus-195b0850b64b-part-01.md",
+        "package": "io.lumine.mythicrpg.social.menus",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythicrpg-social-party-77ad77a31531-part-01.md",
+        "package": "io.lumine.mythicrpg.social.party",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythicrpg-social-targeters-0f696800e5fe-part-01.md",
+        "package": "io.lumine.mythicrpg.social.targeters",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythicrpg-sql-e805e7ad54c5-part-01.md",
+        "package": "io.lumine.mythicrpg.sql",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-storage-8225f499cecb-part-01.md",
+        "package": "io.lumine.mythicrpg.storage",
+        "types": 1
+      },
+      {
+        "file": "io-lumine-mythicrpg-storage-sql-613fe4ad4d48-part-01.md",
+        "package": "io.lumine.mythicrpg.storage.sql",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-storage-sql-jooq-67aeb0bc0ac9-part-01.md",
+        "package": "io.lumine.mythicrpg.storage.sql.jooq",
+        "types": 5
+      },
+      {
+        "file": "io-lumine-mythicrpg-storage-sql-jooq-tables-fe5213c08263-part-01.md",
+        "package": "io.lumine.mythicrpg.storage.sql.jooq.tables",
+        "types": 15
+      },
+      {
+        "file": "io-lumine-mythicrpg-storage-sql-jooq-tables-fe5213c08263-part-02.md",
+        "package": "io.lumine.mythicrpg.storage.sql.jooq.tables",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythicrpg-storage-sql-jooq-tables-records-ba8c81019075-part-01.md",
+        "package": "io.lumine.mythicrpg.storage.sql.jooq.tables.records",
+        "types": 10
+      },
+      {
+        "file": "io-lumine-mythicrpg-storage-sql-migration-788149f7892f-part-01.md",
+        "package": "io.lumine.mythicrpg.storage.sql.migration",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-storage-sql-migration-versions-4e443ceee420-part-01.md",
+        "package": "io.lumine.mythicrpg.storage.sql.migration.versions",
+        "types": 6
+      },
+      {
+        "file": "io-lumine-mythicrpg-utils-json-a8c7ee845962-part-01.md",
+        "package": "io.lumine.mythicrpg.utils.json",
+        "types": 2
+      },
+      {
+        "file": "io-lumine-mythicrpg-waypoints-a664df8366bf-part-01.md",
+        "package": "io.lumine.mythicrpg.waypoints",
+        "types": 12
+      },
+      {
+        "file": "io-lumine-mythicrpg-waypoints-conditions-2f6b446b7622-part-01.md",
+        "package": "io.lumine.mythicrpg.waypoints.conditions",
+        "types": 4
+      },
+      {
+        "file": "io-lumine-mythicrpg-waypoints-events-3ecd1fcdd54e-part-01.md",
+        "package": "io.lumine.mythicrpg.waypoints.events",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-waypoints-mechanics-c5df1124ab1f-part-01.md",
+        "package": "io.lumine.mythicrpg.waypoints.mechanics",
+        "types": 9
+      },
+      {
+        "file": "io-lumine-mythicrpg-waypoints-menus-3d41cfb44f6a-part-01.md",
+        "package": "io.lumine.mythicrpg.waypoints.menus",
+        "types": 3
+      },
+      {
+        "file": "io-lumine-mythicrpg-waypoints-triggers-c499f4187d9c-part-01.md",
+        "package": "io.lumine.mythicrpg.waypoints.triggers",
+        "types": 1
+      }
+    ]
+  },
+  "schema_version": 1
+}
