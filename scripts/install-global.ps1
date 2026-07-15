@@ -1,14 +1,20 @@
 [CmdletBinding()]
 param(
-    [string]$SourceRoot = (Split-Path -Parent $PSScriptRoot),
+    [string]$SourceRoot,
     [string]$CodexSkillsRoot = (Join-Path $HOME '.agents\skills'),
     [string]$ClaudeSkillsRoot = (Join-Path $HOME '.claude\skills'),
-    [string]$Python = 'python'
+    [string]$ClaudeCommandsRoot = (Join-Path $HOME '.claude\commands'),
+    [string]$Python = 'python',
+    [switch]$PlanOnly
 )
 
 $ErrorActionPreference = 'Stop'
-$SkillName = 'minecraft-rpg-kit'
-$ExcludedDirectories = @('dist', '__pycache__', '.git', '.gitignore', '.gitattributes')
+if ([string]::IsNullOrWhiteSpace($SourceRoot)) {
+    $SourceRoot = Split-Path -Parent $PSScriptRoot
+}
+$CanonicalSkillName = 'minecraftkit'
+$LegacySkillName = 'minecraft-rpg-kit'
+$ExcludedNames = @('dist', '__pycache__', '.git', '.gitignore', '.gitattributes')
 
 function Get-FullPath {
     param([Parameter(Mandatory)][string]$Path)
@@ -75,8 +81,21 @@ function Assert-DirectChild {
     }
 }
 
+function Assert-SafeName {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$Label
+    )
+    if ($Name -cnotmatch '^[a-z0-9]+(?:-[a-z0-9]+)*$') {
+        throw "Unsafe $Label name: $Name"
+    }
+}
+
 function Assert-PhysicalTree {
     param([Parameter(Mandatory)][string]$Root)
+    if (-not (Test-Path -LiteralPath $Root -PathType Container)) {
+        throw "Payload directory does not exist: $Root"
+    }
     if (Test-ReparsePoint $Root) { throw "Reparse-point root is not allowed: $Root" }
     foreach ($item in Get-ChildItem -LiteralPath $Root -Recurse -Force) {
         if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
@@ -93,9 +112,12 @@ function Get-PayloadFiles {
             Where-Object {
                 $relative = Get-RelativePath -Root $fullRoot -Path $_.FullName
                 $parts = $relative -split '[\\/]'
-                -not ($parts | Where-Object { $ExcludedDirectories -contains $_ }) -and
+                -not ($parts | Where-Object { $ExcludedNames -contains $_ }) -and
                 $_.Extension -ne '.pyc' -and
-                -not ($parts | Where-Object { $_ -like '.api-stage-*' -or $_ -like '.web-stage-*' })
+                -not ($parts | Where-Object {
+                    $_ -like '.api-stage-*' -or $_ -like '.web-stage-*' -or
+                    $_ -like '.minecraftkit-stage-*' -or $_ -like '.minecraftkit-commands-stage-*'
+                })
             } |
             Sort-Object FullName
     )
@@ -108,32 +130,28 @@ function Copy-Payload {
     )
     $sourcePath = Get-FullPath $Source
     $files = @(Get-PayloadFiles $sourcePath)
+    if (-not $files.Count) { throw "Payload has no files: $sourcePath" }
     foreach ($file in $files) {
         $relative = Get-RelativePath -Root $sourcePath -Path $file.FullName
         $candidate = Join-Path $Destination $relative
         if ((Get-FullPath $candidate).Length -ge 240) {
-            throw "Destination path exceeds conservative Windows limit; choose a shorter skill root: $candidate"
+            throw "Destination path exceeds conservative Windows limit; choose a shorter install root: $candidate"
         }
     }
     New-Item -ItemType Directory -Path $Destination -Force | Out-Null
     foreach ($file in $files) {
         $relative = Get-RelativePath -Root $sourcePath -Path $file.FullName
         $target = Join-Path $Destination $relative
-        $targetParent = Split-Path -Parent $target
-        New-Item -ItemType Directory -Path $targetParent -Force | Out-Null
+        New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
         Copy-Item -LiteralPath $file.FullName -Destination $target -Force
     }
 }
 
 function Get-ContentManifest {
-    param(
-        [Parameter(Mandatory)][string]$Root,
-        [switch]$ApplySourceFilter
-    )
+    param([Parameter(Mandatory)][string]$Root)
     $fullRoot = Get-FullPath $Root
-    $files = if ($ApplySourceFilter) { Get-PayloadFiles $fullRoot } else { @(Get-ChildItem -LiteralPath $fullRoot -Recurse -File -Force | Sort-Object FullName) }
     return @(
-        foreach ($file in $files) {
+        foreach ($file in @(Get-PayloadFiles $fullRoot)) {
             $relative = (Get-RelativePath -Root $fullRoot -Path $file.FullName).Replace('\', '/')
             $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
             "$relative|$($file.Length)|$hash"
@@ -147,9 +165,9 @@ function Assert-ManifestMatch {
         [Parameter(Mandatory)][string[]]$Actual,
         [Parameter(Mandatory)][string]$Label
     )
-    $expectedText = $Expected -join "`n"
-    $actualText = $Actual -join "`n"
-    if ($expectedText -cne $actualText) { throw "Payload hash mismatch: $Label" }
+    if (($Expected -join "`n") -cne ($Actual -join "`n")) {
+        throw "Payload hash mismatch: $Label"
+    }
 }
 
 function Remove-SafeTree {
@@ -160,96 +178,241 @@ function Remove-SafeTree {
     if (-not (Test-Path -LiteralPath $Path)) { return }
     Assert-DirectChild -Child $Path -Parent $Parent
     if (Test-ReparsePoint $Path) { throw "Refusing to delete reparse point: $Path" }
+    if (Test-Path -LiteralPath $Path -PathType Container) { Assert-PhysicalTree $Path }
     Remove-Item -LiteralPath $Path -Recurse -Force
+}
+
+function Get-DomainDefinitions {
+    param([Parameter(Mandatory)][string]$Root)
+    $catalogPath = Join-Path $Root 'data\minecraft-domain-catalog.json'
+    if (-not (Test-Path -LiteralPath $catalogPath -PathType Leaf)) {
+        throw "Minecraft domain catalog is missing: $catalogPath"
+    }
+    $catalog = Get-Content -LiteralPath $catalogPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $domains = @($catalog.domains)
+    if ($catalog.schema_version -ne 1 -or $domains.Count -ne 9) {
+        throw 'Minecraft domain catalog must contain exactly nine schema-v1 domains.'
+    }
+    $definitions = @()
+    $seenIds = @{}
+    $seenDirectories = @{}
+    foreach ($domain in $domains) {
+        $id = [string]$domain.id
+        $directory = [string]$domain.skill_directory
+        $route = [string]$domain.route
+        Assert-SafeName -Name $id -Label 'domain'
+        Assert-SafeName -Name $directory -Label 'skill directory'
+        if ($route -cne "mc:$id" -or $directory -cne "mc-$id") {
+            throw "Domain route/directory mismatch for $id"
+        }
+        if ($seenIds.ContainsKey($id) -or $seenDirectories.ContainsKey($directory)) {
+            throw "Duplicate Minecraft domain install name: $id / $directory"
+        }
+        $seenIds[$id] = $true
+        $seenDirectories[$directory] = $true
+        $definitions += [pscustomobject]@{ Id = $id; Directory = $directory; Route = $route }
+    }
+    return @($definitions | Sort-Object Id)
+}
+
+function New-InstallRecord {
+    param(
+        [Parameter(Mandatory)][string]$Client,
+        [Parameter(Mandatory)][string]$Kind,
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$Source,
+        [Parameter(Mandatory)][string]$Root,
+        [Parameter(Mandatory)][string]$Container,
+        [Parameter(Mandatory)][string]$Stamp,
+        [Parameter(Mandatory)][string]$Transaction
+    )
+    Assert-SafeName -Name $Name -Label 'target'
+    $target = Join-Path $Root $Name
+    $stage = Join-Path $Container $Name
+    $backup = Join-Path $Root "$Name.backup-$Stamp-$Transaction"
+    Assert-DirectChild -Child $target -Parent $Root
+    Assert-DirectChild -Child $stage -Parent $Container
+    Assert-DirectChild -Child $backup -Parent $Root
+    return [pscustomobject]@{
+        Client = $Client
+        Kind = $Kind
+        Name = $Name
+        Source = (Get-FullPath $Source)
+        Root = (Get-FullPath $Root)
+        Container = (Get-FullPath $Container)
+        Stage = (Get-FullPath $stage)
+        Target = (Get-FullPath $target)
+        Backup = (Get-FullPath $backup)
+        ExpectedManifest = @()
+        HadTarget = $false
+        Promoted = $false
+    }
 }
 
 $source = Get-FullPath $SourceRoot
 if (-not (Test-Path -LiteralPath (Join-Path $source 'SKILL.md') -PathType Leaf)) {
-    throw "Invalid MinecraftRPG Kit source: $source"
+    throw "Invalid MinecraftKit source: $source"
 }
 Assert-NoReparseAncestors $source
 Assert-PhysicalTree $source
 
-$roots = @((Get-FullPath $CodexSkillsRoot), (Get-FullPath $ClaudeSkillsRoot))
-if (Test-PathsOverlap -First $roots[0] -Second $roots[1]) {
-    throw 'Codex and Claude skill roots must be disjoint physical directories.'
-}
-foreach ($root in $roots) {
-    if (Test-PathsOverlap -First $source -Second $root) {
-        throw "The canonical source and skill roots must be disjoint: $source; $root"
+$codexRoot = Get-FullPath $CodexSkillsRoot
+$claudeRoot = Get-FullPath $ClaudeSkillsRoot
+$commandsRoot = Get-FullPath $ClaudeCommandsRoot
+$destinationRoots = @($codexRoot, $claudeRoot, $commandsRoot)
+for ($first = 0; $first -lt $destinationRoots.Count; $first++) {
+    if (Test-PathsOverlap -First $source -Second $destinationRoots[$first]) {
+        throw "The canonical source and destination roots must be disjoint: $source; $($destinationRoots[$first])"
+    }
+    Assert-NoReparseAncestors $destinationRoots[$first]
+    for ($second = $first + 1; $second -lt $destinationRoots.Count; $second++) {
+        if (Test-PathsOverlap -First $destinationRoots[$first] -Second $destinationRoots[$second]) {
+            throw "Install roots must be disjoint physical directories: $($destinationRoots[$first]); $($destinationRoots[$second])"
+        }
     }
 }
-foreach ($root in $roots) {
+
+$domains = @(Get-DomainDefinitions -Root $source)
+$wrappersSource = Join-Path $source 'skill-wrappers'
+$commandsSource = Join-Path $source 'commands\mc'
+Assert-PhysicalTree $wrappersSource
+Assert-PhysicalTree $commandsSource
+foreach ($domain in $domains) {
+    $wrapper = Join-Path $wrappersSource $domain.Directory
+    $command = Join-Path $commandsSource "$($domain.Id).md"
+    Assert-DirectChild -Child $wrapper -Parent $wrappersSource
+    Assert-DirectChild -Child $command -Parent $commandsSource
+    if (-not (Test-Path -LiteralPath (Join-Path $wrapper 'SKILL.md') -PathType Leaf)) {
+        throw "Skill wrapper is missing SKILL.md: $wrapper"
+    }
+    if (-not (Test-Path -LiteralPath $command -PathType Leaf)) {
+        throw "Claude command is missing: $command"
+    }
+}
+
+$transaction = [guid]::NewGuid().ToString('N')
+$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+$codexContainer = Join-Path $codexRoot ".minecraftkit-stage-$transaction"
+$claudeContainer = Join-Path $claudeRoot ".minecraftkit-stage-$transaction"
+$commandsContainer = Join-Path $commandsRoot ".minecraftkit-commands-stage-$transaction"
+Assert-DirectChild -Child $codexContainer -Parent $codexRoot
+Assert-DirectChild -Child $claudeContainer -Parent $claudeRoot
+Assert-DirectChild -Child $commandsContainer -Parent $commandsRoot
+
+$records = @(
+    New-InstallRecord -Client 'Codex' -Kind 'canonical' -Name $CanonicalSkillName -Source $source -Root $codexRoot -Container $codexContainer -Stamp $stamp -Transaction $transaction
+    New-InstallRecord -Client 'Claude' -Kind 'canonical' -Name $CanonicalSkillName -Source $source -Root $claudeRoot -Container $claudeContainer -Stamp $stamp -Transaction $transaction
+)
+foreach ($domain in $domains) {
+    $wrapperSource = Join-Path $wrappersSource $domain.Directory
+    $records += New-InstallRecord -Client 'Codex' -Kind 'wrapper' -Name $domain.Directory -Source $wrapperSource -Root $codexRoot -Container $codexContainer -Stamp $stamp -Transaction $transaction
+    $records += New-InstallRecord -Client 'Claude' -Kind 'wrapper' -Name $domain.Directory -Source $wrapperSource -Root $claudeRoot -Container $claudeContainer -Stamp $stamp -Transaction $transaction
+}
+$records += New-InstallRecord -Client 'Claude' -Kind 'commands' -Name 'mc' -Source $commandsSource -Root $commandsRoot -Container $commandsContainer -Stamp $stamp -Transaction $transaction
+
+if ($PlanOnly) {
+    $installs = @(
+        foreach ($record in $records) {
+            [ordered]@{
+                client = $record.Client
+                kind = $record.Kind
+                name = $record.Name
+                source = $record.Source
+                target = $record.Target
+                backup = $record.Backup
+            }
+        }
+    )
+    [ordered]@{
+        schemaVersion = 1
+        canonicalSkill = $CanonicalSkillName
+        installs = $installs
+        preservedLegacyTargets = @(
+            (Join-Path $codexRoot $LegacySkillName),
+            (Join-Path $claudeRoot $LegacySkillName)
+        )
+    } | ConvertTo-Json -Depth 5
+    return
+}
+
+foreach ($root in $destinationRoots) {
     New-Item -ItemType Directory -Path $root -Force | Out-Null
     Assert-NoReparseAncestors $root
 }
-
-$sourceManifest = @(Get-ContentManifest -Root $source -ApplySourceFilter)
-$transaction = [guid]::NewGuid().ToString('N')
-$stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$records = @()
+$containers = @($codexContainer, $claudeContainer, $commandsContainer)
+foreach ($container in $containers) {
+    if (Test-Path -LiteralPath $container) {
+        throw "Transaction staging path already exists: $container"
+    }
+}
 
 try {
-    for ($index = 0; $index -lt $roots.Count; $index++) {
-        $client = if ($index -eq 0) { 'Codex' } else { 'Claude' }
-        $root = $roots[$index]
-        $container = Join-Path $root ".minecraft-rpg-kit-stage-$transaction"
-        $stage = Join-Path $container $SkillName
-        $target = Join-Path $root $SkillName
-        $backup = Join-Path $root "$SkillName.backup-$stamp-$transaction"
-        Assert-DirectChild -Child $container -Parent $root
-        Assert-DirectChild -Child $target -Parent $root
-        Assert-DirectChild -Child $backup -Parent $root
-        $record = [pscustomobject]@{
-            Client = $client; Root = $root; Container = $container; Stage = $stage;
-            Target = $target; Backup = $backup; HadTarget = $false; Promoted = $false
+    foreach ($record in $records) {
+        $record.ExpectedManifest = @(Get-ContentManifest -Root $record.Source)
+        Copy-Payload -Source $record.Source -Destination $record.Stage
+        Assert-PhysicalTree $record.Stage
+        Assert-ManifestMatch -Expected $record.ExpectedManifest -Actual @(Get-ContentManifest -Root $record.Stage) -Label "$($record.Client) $($record.Name) stage"
+        if ($record.Kind -eq 'canonical') {
+            & $Python -B (Join-Path $record.Stage 'scripts\validate_kit.py') $record.Stage | Out-Host
+            if ($LASTEXITCODE -ne 0) { throw "$($record.Client) staged canonical validation failed." }
         }
-        $records += $record
-        if (Test-Path -LiteralPath $container) { Remove-SafeTree -Path $container -Parent $root }
-        Copy-Payload -Source $source -Destination $stage
-        Assert-PhysicalTree $stage
-        & $Python -B (Join-Path $stage 'scripts\validate_kit.py') $stage
-        if ($LASTEXITCODE -ne 0) { throw "$client staged validation failed." }
-        $stageManifest = @(Get-ContentManifest -Root $stage)
-        Assert-ManifestMatch -Expected $sourceManifest -Actual $stageManifest -Label "$client stage"
+    }
+
+    foreach ($record in $records) {
+        if (Test-Path -LiteralPath $record.Backup) {
+            throw "Refusing to overwrite an existing backup: $($record.Backup)"
+        }
+        if (Test-Path -LiteralPath $record.Target) {
+            if (Test-ReparsePoint $record.Target) { throw "Existing target is a reparse point: $($record.Target)" }
+            if (Test-Path -LiteralPath $record.Target -PathType Container) { Assert-PhysicalTree $record.Target }
+            $record.HadTarget = $true
+            Move-Item -LiteralPath $record.Target -Destination $record.Backup
+            if ((Test-Path -LiteralPath $record.Target) -or -not (Test-Path -LiteralPath $record.Backup)) {
+                throw "Target backup did not complete: $($record.Target)"
+            }
+        }
     }
 
     foreach ($record in $records) {
         if (Test-Path -LiteralPath $record.Target) {
-            if (Test-ReparsePoint $record.Target) { throw "Existing target is a reparse point: $($record.Target)" }
-            Move-Item -LiteralPath $record.Target -Destination $record.Backup
-            $record.HadTarget = $true
+            throw "Target appeared during transaction: $($record.Target)"
         }
-    }
-    foreach ($record in $records) {
-        Move-Item -LiteralPath $record.Stage -Destination $record.Target
         $record.Promoted = $true
+        Move-Item -LiteralPath $record.Stage -Destination $record.Target
+        if (-not (Test-Path -LiteralPath $record.Target -PathType Container)) {
+            throw "Payload promotion did not complete: $($record.Target)"
+        }
         Assert-PhysicalTree $record.Target
-        $installedManifest = @(Get-ContentManifest -Root $record.Target)
-        Assert-ManifestMatch -Expected $sourceManifest -Actual $installedManifest -Label "$($record.Client) install"
-        & $Python -B (Join-Path $record.Target 'scripts\query_api.py') ActiveModel --plugin ModelEngine --limit 1 | Out-Host
-        if ($LASTEXITCODE -ne 0) { throw "$($record.Client) API smoke test failed." }
+        Assert-ManifestMatch -Expected $record.ExpectedManifest -Actual @(Get-ContentManifest -Root $record.Target) -Label "$($record.Client) $($record.Name) install"
+        if ($record.Kind -eq 'canonical') {
+            & $Python -B (Join-Path $record.Target 'scripts\query_api.py') ActiveModel --plugin ModelEngine --limit 1 | Out-Host
+            if ($LASTEXITCODE -ne 0) { throw "$($record.Client) canonical smoke test failed." }
+        }
     }
 }
 catch {
     $installError = $_
     $rollbackErrors = @()
-    foreach ($record in $records) {
+    for ($recordIndex = $records.Count - 1; $recordIndex -ge 0; $recordIndex--) {
+        $record = $records[$recordIndex]
         try {
             if ($record.Promoted -and (Test-Path -LiteralPath $record.Target)) {
                 Remove-SafeTree -Path $record.Target -Parent $record.Root
             }
         }
         catch {
-            $rollbackErrors += "$($record.Client) target cleanup failed: $($_.Exception.Message)"
+            $rollbackErrors += "$($record.Client) $($record.Name) cleanup failed: $($_.Exception.Message)"
         }
         try {
             if ($record.HadTarget -and (Test-Path -LiteralPath $record.Backup)) {
+                if (Test-Path -LiteralPath $record.Target) {
+                    throw "Cannot restore backup because target exists: $($record.Target)"
+                }
                 Move-Item -LiteralPath $record.Backup -Destination $record.Target
             }
         }
         catch {
-            $rollbackErrors += "$($record.Client) backup restore failed: $($_.Exception.Message)"
+            $rollbackErrors += "$($record.Client) $($record.Name) restore failed: $($_.Exception.Message)"
         }
     }
     if ($rollbackErrors.Count) {
@@ -259,14 +422,16 @@ catch {
     $PSCmdlet.ThrowTerminatingError($installError)
 }
 finally {
-    foreach ($record in $records) {
-        if (Test-Path -LiteralPath $record.Container) {
-            Remove-SafeTree -Path $record.Container -Parent $record.Root
+    for ($index = $containers.Count - 1; $index -ge 0; $index--) {
+        $container = $containers[$index]
+        if (Test-Path -LiteralPath $container) {
+            Remove-SafeTree -Path $container -Parent (Split-Path -Parent $container)
         }
     }
 }
 
 foreach ($record in $records) {
     $backupText = if ($record.HadTarget) { "; backup=$($record.Backup)" } else { '' }
-    Write-Output "$($record.Client): installed physical copy at $($record.Target)$backupText"
+    Write-Output "$($record.Client) $($record.Kind): installed physical copy at $($record.Target)$backupText"
 }
+Write-Output "Legacy targets preserved: $(Join-Path $codexRoot $LegacySkillName); $(Join-Path $claudeRoot $LegacySkillName)"

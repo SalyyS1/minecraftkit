@@ -249,6 +249,16 @@ p {
   color: var(--color-panel);
 }
 
+.atlas-entry-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-ink);
+  text-decoration: none;
+  box-shadow: inset var(--line) 0 var(--color-line);
+}
+
 .header-counts {
   display: flex;
   align-items: center;

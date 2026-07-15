@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
-  "name": "minecraft-rpg-kit",
-  "version": "1.0.0",
+  "schema_version": 2,
+  "name": "minecraftkit",
+  "version": "2.0.0",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
@@ -11,7 +11,13 @@
     "all_namespace_members": 41887,
     "parse_errors": 0,
     "addon_ideas": 30,
-    "decompiled_files_inventoried": 11490
+    "decompiled_files_inventoried": 11490,
+    "minecraft_domains": 9,
+    "upstream_sources": 103,
+    "minecraft_versions": 901,
+    "latest_minecraft_release": "26.2",
+    "latest_minecraft_snapshot": "26.3-snapshot-3",
+    "profiled_minecraft_releases": 1
   },
   "plugins": [
     {
@@ -134,6 +140,26 @@
       "bytes": 18400,
       "sha256": "c72db5bc64d522570e8c0302317d64b490261f8f9078c59132d8a3e525ec4014"
     },
+    "data/minecraft-domain-catalog.json": {
+      "bytes": 3354,
+      "sha256": "a052b3aeab7de6fbf9e8bb743aa95fdd925959bc8560dcce7ac3b5d9526b8819"
+    },
+    "data/minecraft-version-catalog.json": {
+      "bytes": 323457,
+      "sha256": "de602ee1eef2c37d6d4055ab77b7fb3205843f1df978e31bdbeaabadfd2ee2a7"
+    },
+    "data/minecraft-release-capabilities.json": {
+      "bytes": 1336,
+      "sha256": "d2ea4a13149bb07641c7e5dcb6ae9fd92f7edb008a3b305eb9864a0b753522e5"
+    },
+    "data/github-source-catalog.json": {
+      "bytes": 41752,
+      "sha256": "711f48c324e8cec1b8f2e05d2420ec74ccfea9d23e1bf2be04f8f6c0fa2ff333"
+    },
+    "data/github-source-snapshot.json": {
+      "bytes": 144585,
+      "sha256": "16e4751260ae7a9949d2b403d7cd593795bec924fee9945b15e4d452b1fdaf5f"
+    },
     "web/data/manifest.js": {
       "bytes": 2117,
       "sha256": "f2c44436cb33c8724bbb772121f8b5fbf57d7ed848ccd396a3224c9a724cc8be"
@@ -141,10 +167,45 @@
     "web/data/insights.js": {
       "bytes": 47760,
       "sha256": "e734a34f06014d1523b0e94a076e62691a6aea2af87b34b3785796799de51583"
+    },
+    "web/data/ecosystem.js": {
+      "bytes": 374000,
+      "sha256": "43b8355c762e5a0af84bc45aa06d2f9bf7b905aa6f66117a8d1c1efc41d3b69c"
+    },
+    "web/index.html": {
+      "bytes": 9522,
+      "sha256": "d1b29541118a6e83e2ad560fad99660432eba4937540d568e8c54949c1cba30e"
+    },
+    "web/styles.css": {
+      "bytes": 23865,
+      "sha256": "ee4ef80ff9662d82e926eeca44adc2e938012db949ba8a42c4ad29475e8f2e44"
+    },
+    "web/ecosystem.html": {
+      "bytes": 10616,
+      "sha256": "cf7451ced448dcae203bb718768521b98e458e21534ec1ad0985e377130e1614"
+    },
+    "web/ecosystem.css": {
+      "bytes": 25036,
+      "sha256": "1fafc62e41923da4aaa25f9e9cc7c026b70f6e52870a4d93b974188be55d73a0"
+    },
+    "web/ecosystem-app.js": {
+      "bytes": 13826,
+      "sha256": "8b341650755e83f19658a1a4b87e7e218011e32374b7c4e6dd5ba10a724522fe"
+    },
+    "web/ecosystem-renderers.js": {
+      "bytes": 17710,
+      "sha256": "8d51b1ce5f08a61f36bb198661b2c222d18eb289bcf525d39b6f73cbe728eb1c"
     }
   },
   "install_targets": {
-    "codex": "$HOME/.agents/skills/minecraft-rpg-kit",
-    "claude": "$HOME/.claude/skills/minecraft-rpg-kit"
+    "codex": {
+      "core": "$HOME/.agents/skills/minecraftkit",
+      "routes": "$HOME/.agents/skills/mc-*"
+    },
+    "claude": {
+      "core": "$HOME/.claude/skills/minecraftkit",
+      "routes": "$HOME/.claude/skills/mc-*",
+      "commands": "$HOME/.claude/commands/mc"
+    }
   }
 }

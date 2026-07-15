@@ -1,3 +1,3 @@
 interface:
-  display_name: "Minecraft RPG Kit"
-  short_description: "Query and design with verified Minecraft RPG APIs"
+  display_name: "MinecraftKit"
+  short_description: "Minecraft APIs, versions, packets, rendering, packs, models, and RPG"

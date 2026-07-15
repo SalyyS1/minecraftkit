@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-07-15T05:22:11+00:00",
+  "releases": [
+    {
+      "id": "26.2",
+      "evidence_class": "verified-upstream-artifact-inventory",
+      "client_sha1": "2dc72797acbc1b63fc16a11c4ac393605f453754",
+      "protocol": 776,
+      "java_major": 25,
+      "resource_pack": {
+        "major": 88,
+        "minor": 0
+      },
+      "data_pack": {
+        "major": 107,
+        "minor": 1
+      },
+      "vanilla_inventory": {
+        "core_shader_files": 61,
+        "include_shader_files": 9,
+        "post_shader_files": 10,
+        "item_geometry_entries": 1271,
+        "item_definition_entries": 1537,
+        "built_in_dialog_ids": [
+          "custom_options",
+          "quick_actions",
+          "server_links"
+        ],
+        "built_in_font_json_files": 7,
+        "observed_font_provider_kinds": [
+          "bitmap",
+          "reference",
+          "space"
+        ]
+      },
+      "provenance": {
+        "version_metadata_url": "https://piston-meta.mojang.com/v1/packages/c8eb00be8a1f9fb9adf70ee415b7e1f746b636e8/26.2.json",
+        "method": "Read-only in-memory client artifact inventory; no game file persisted or redistributed.",
+        "restrictions": "Counts, paths, discriminators, class names, and original summaries only; no Mojang source or assets."
+      }
+    }
+  ]
+}

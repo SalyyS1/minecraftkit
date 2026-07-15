@@ -28,13 +28,13 @@ The local line distribution ranged from 6 to 902, with median 133 and p90 365. L
 - **Scripts** perform deterministic operations without loading implementation into prompt context.
 - **References** load focused context on demand; **assets** are copied/used in output.
 
-MinecraftRPG Kit installs only a skill. It does not add global hooks, rules, agents, MCP servers, or client configuration.
+MinecraftKit installs one canonical skill plus nine focused sibling skills. Claude additionally receives static `/mc:*` command files. It does not add global hooks, rules, agents, MCP servers, or client configuration.
 
 ## Effective Skill Anatomy
 
 ### Discovery layer
 
-Use only `name` and `description` in common frontmatter. The description must say what the skill does and when it should trigger, including plugin aliases. Folder and declared name are both `minecraft-rpg-kit`.
+Use only `name` and `description` in common skill frontmatter. The canonical name is `minecraftkit`; focused installed skill names are `mc-core`, `mc-rpg`, `mc-shader`, `mc-dialog`, `mc-client`, `mc-pack`, `mc-model`, `mc-protocol`, and `mc-nms`. Claude exposes the corresponding `/mc:core` through `/mc:nms` slash routes. Descriptions carry domain trigger vocabulary so Codex/Claude can auto-route without a slash command.
 
 ### Procedural root
 
@@ -42,7 +42,7 @@ Use only `name` and `description` in common frontmatter. The description must sa
 
 ### One-level references
 
-Every operational reference is directly linked from `SKILL.md`:
+Every domain reference is directly linked from the canonical `SKILL.md`. Thin wrappers load their one domain reference from the sibling core. The original RPG operational references remain one level away:
 
 - API lookup;
 - architecture review;
@@ -57,19 +57,21 @@ No workflow depends on a reference that can only be discovered from another refe
 
 ### Deterministic scripts
 
-Large JVM metadata remains in files, not prompt context. Scripts inventory inputs, extract class metadata, render shards, query symbols, validate contracts, package, and install hard copies. Paths resolve from the skill root or explicit CLI arguments, not a client-only environment variable.
+Large JVM/upstream/version metadata remains in files, not prompt context. Scripts inventory inputs, extract class metadata, render shards, query RPG symbols or reviewed sources, validate contracts, package, sync allowlisted metadata, and install hard copies. Paths resolve from the skill root or explicit CLI arguments, not a client-only environment variable.
 
 ## Design Decisions For This Kit
 
 | Concern | Decision | Reason |
 |---|---|---|
 | API volume | shard by plugin/package; query through script | 40 MB raw index is too large for agent context |
-| fact versus inference | four confidence labels | avoids presenting decompile behavior as a binary guarantee |
+| fact versus inference | five evidence labels, including `VERIFIED_UPSTREAM` | separates canonical upstream evidence from bytecode and inference |
 | embedded libraries | retain but mark `bundled-third-party` | preserves physical catalog while preventing authorship misattribution |
 | plugin versions | store artifact-specific version and hashes | snapshots and NMS are not universal contracts |
 | source material | no bodies/JARs/assets in kit | factual interoperability research only |
 | cross-client behavior | common frontmatter and relative resources | one canonical payload works for Codex and Claude |
-| global installation | two physical copies with hash comparison | no junction coupling; drift becomes detectable |
+| routing scale | one canonical core plus nine sibling wrappers | broad trigger coverage without loading the encyclopedia |
+| slash commands | Claude `commands/mc/*.md`; rich descriptions for Codex auto-routing | works with each client's native discovery model |
+| global installation | 21-target transaction with hash comparison and rollback | no junction coupling; drift and partial installs become detectable |
 | web delivery | static `file://` explorer, no network | portable and privacy-preserving |
 
 ## Anti-patterns Avoided
@@ -102,7 +104,9 @@ Validation covers:
 - deterministic render and inventory output;
 - overlap, traversal, symlink/junction, strict JSON, and console encoding failures;
 - offline web data registration and complete counts;
-- hard-copy install manifests and no reparse points.
+- domain catalog alignment across root skill, wrappers, commands and references;
+- 103 source identities/commit pins and 901-version reconciliation;
+- hard-copy install manifests, rollback, overlap guards and no reparse points.
 
 ## Source Guidance
 

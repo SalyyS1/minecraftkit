@@ -1,6 +1,13 @@
-# MinecraftRPG Kit Documentation
+# MinecraftKit Documentation
 
-This kit separates bytecode facts, source-derived architecture, and original design ideas. Start with the smallest document that answers the task.
+MinecraftKit separates upstream facts, bytecode facts, source-derived architecture, and original design ideas. Start with the smallest document that answers the task.
+
+## Ecosystem Snapshot
+
+- 103 reviewed GitHub sources pinned to canonical identity and commit SHA.
+- 901 official Mojang Java Edition version records in manifest order.
+- 9 focused routes across core, RPG, shaders, dialogs, clients, packs, models, protocols, and NMS.
+- Static ecosystem/source/version atlas plus the original deep RPG API explorer.
 
 ## Catalog Snapshot
 
@@ -15,6 +22,7 @@ This kit separates bytecode facts, source-derived architecture, and original des
 
 | Need | Document |
 |---|---|
+| Route public Minecraft platform/plugin APIs | [Minecraft ecosystem API atlas](minecraft-ecosystem-api-atlas.md) |
 | Browse every extracted symbol | [Complete API catalog](api/index.md) |
 | Understand architecture and logic | [Plugin architecture and logic](plugin-architecture-and-logic.md) |
 | Reuse professional engineering patterns | [Professional engineering patterns](professional-engineering-patterns.md) |
@@ -24,13 +32,14 @@ This kit separates bytecode facts, source-derived architecture, and original des
 | Install for Codex and Claude | [Codex and Claude compatibility](codex-claude-compatibility.md) |
 | Audit provenance and limitations | [Research methodology](research-methodology.md) |
 
-For fast symbol lookup, run `python scripts/query_api.py <terms>`. Agents should not load the 40 MB API index into context.
+For upstream lookup, run `python scripts/query_sources.py <terms> --domain <route>`. For exact supplied RPG symbols, run `python scripts/query_api.py <terms>`. Agents should not load the 40 MB RPG API index into context.
 
 ## Confidence Labels
 
+- `VERIFIED_UPSTREAM`: exact pinned canonical project/source/document evidence.
 - `VERIFIED_BYTECODE`: direct JVM metadata from the supplied artifact.
 - `DERIVED_SOURCE`: behavior inferred from decompiled source and cited paths.
 - `ORIGINAL_DESIGN`: a new composition produced by this kit.
 - `UNVERIFIED`: runtime or version-sensitive claim that needs an empirical test.
 
-The kit contains no plugin JAR, class file, method body, or proprietary asset.
+The kit contains no Minecraft/plugin JAR, class file, decompiled method body, or proprietary asset.

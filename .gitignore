@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+dist/
 .api-stage-*/
 .web-stage-*/
 .docs-manifest-stage-*

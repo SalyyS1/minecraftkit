@@ -21,21 +21,43 @@ from build_manifest import (
     TRACKED,
     build as build_release_manifest,
 )
+from render_ecosystem_web import build_payload as build_ecosystem_payload
+from validate_minecraftkit_catalogs import validate_minecraftkit
 
 
 REQUIRED = (
     "SKILL.md", "README.md", "NOTICE.md", "manifest.json", "agents/openai.yaml",
     "data/api-index.json", "data/api-coverage.json", "data/docs-manifest.json",
     "data/source-inventory.json", "data/plugin-insights.json", "data/feature-catalog.json", "data/addon-ideas.json",
+    "data/minecraft-domain-catalog.json", "data/minecraft-version-catalog.json",
+    "data/minecraft-release-capabilities.json",
+    "data/github-source-catalog.json", "data/github-source-snapshot.json",
     "docs/index.md", "docs/api/index.md", "docs/plugin-architecture-and-logic.md",
     "docs/professional-engineering-patterns.md", "docs/rpg-feature-catalog.md",
     "docs/original-addon-blueprints.md", "docs/agentkit-skill-design.md",
     "docs/codex-claude-compatibility.md", "docs/research-methodology.md",
+    "docs/minecraft-ecosystem-api-atlas.md",
     "web/index.html", "web/styles.css", "web/app.js", "web/data/manifest.js", "web/data/insights.js",
+    "web/ecosystem.html", "web/ecosystem.css", "web/ecosystem-app.js",
+    "web/ecosystem-renderers.js", "web/data/ecosystem.js",
     "references/api-lookup.md", "references/architecture-review.md",
     "references/source-analysis-and-regeneration.md", "references/rpg-feature-design.md",
     "references/addon-blueprint.md", "references/compatibility-and-safety.md",
     "references/plugin-routing-index.md", "references/client-compatibility.md",
+    "references/core-platforms-and-versions.md", "references/packets-and-protocols.md",
+    "references/nms-and-mappings.md", "references/shaders-and-rendering.md",
+    "references/dialogs-and-client-actions.md", "references/client-and-projection.md",
+    "references/resource-and-data-packs.md", "references/models-and-animation.md",
+    "references/upstream-source-catalog.md",
+    "commands/mc/core.md", "commands/mc/rpg.md", "commands/mc/shader.md",
+    "commands/mc/dialog.md", "commands/mc/client.md", "commands/mc/pack.md",
+    "commands/mc/model.md", "commands/mc/protocol.md", "commands/mc/nms.md",
+    "skill-wrappers/mc-core/SKILL.md", "skill-wrappers/mc-rpg/SKILL.md",
+    "skill-wrappers/mc-shader/SKILL.md", "skill-wrappers/mc-dialog/SKILL.md",
+    "skill-wrappers/mc-client/SKILL.md", "skill-wrappers/mc-pack/SKILL.md",
+    "skill-wrappers/mc-model/SKILL.md", "skill-wrappers/mc-protocol/SKILL.md",
+    "skill-wrappers/mc-nms/SKILL.md",
+    "scripts/render_ecosystem_web.py", "tests/test_render_ecosystem_web.py",
     "tests/evals.json",
 )
 
@@ -43,15 +65,17 @@ ALLOWED_TOP_LEVEL_FILES = {"SKILL.md", "README.md", "NOTICE.md", "manifest.json"
 ALLOWED_DIRECTORY_EXTENSIONS = {
     "agents": {".yaml"},
     "assets": set(),
+    "commands": {".md"},
     "data": {".json"},
     "docs": {".md"},
     "references": {".md"},
     "scripts": {".py", ".ps1"},
+    "skill-wrappers": {".md"},
     "tests": {".py", ".json"},
     "web": {".html", ".css", ".js"},
 }
 EXCLUDED_DIRECTORY_NAMES = {"dist", "__pycache__", ".git", ".gitignore", ".gitattributes"}
-EXCLUDED_DIRECTORY_PREFIXES = (".api-stage-", ".web-stage-", ".minecraft-rpg-kit-stage-")
+EXCLUDED_DIRECTORY_PREFIXES = (".api-stage-", ".web-stage-", ".minecraft-rpg-kit-stage-", ".minecraftkit-stage-")
 FORBIDDEN_SOURCE_EXTENSIONS = {".class", ".dex", ".groovy", ".jar", ".java", ".kt", ".kts", ".scala"}
 FORBIDDEN_SOURCE_DIRECTORIES = {"decomp", "decompiled", "decompiled-source", "decompiled-sources"}
 RELEASE_TOP_LEVEL_KEYS = {
@@ -233,8 +257,8 @@ def validate(root: Path) -> list[str]:
             errors.append("SKILL.md frontmatter must contain only name and description")
         if metadata.get("name") != root.name.lower() and root.name.lower() != "minecraftrpgkit":
             errors.append("skill folder/name mismatch")
-        if metadata.get("name") != "minecraft-rpg-kit":
-            errors.append("skill name must be minecraft-rpg-kit")
+        if metadata.get("name") != "minecraftkit":
+            errors.append("skill name must be minecraftkit")
         if not 1 <= len(metadata.get("description", "")) <= 1024:
             errors.append("skill description length must be 1..1024")
     except ValueError as error:
@@ -346,19 +370,49 @@ def validate(root: Path) -> list[str]:
     try:
         web_manifest = parse_assignment(root / "web/data/manifest.js", "window.MinecraftRPGManifest=")
         web_insights = parse_assignment(root / "web/data/insights.js", "window.MinecraftRPGInsights=")
+        web_ecosystem = parse_assignment(root / "web/data/ecosystem.js", "window.MinecraftKitEcosystem=")
         if len(web_manifest.get("plugins", [])) != 10 or not web_manifest.get("insightsFile"):
             errors.append("web manifest is incomplete")
         if web_insights.get("stats", {}).get("totalMembers") != 41887:
             errors.append("web insight counts do not reconcile")
+        if len(web_ecosystem.get("domains", [])) != 9:
+            errors.append("ecosystem web domain count does not reconcile")
+        if len(web_ecosystem.get("sources", [])) != 103:
+            errors.append("ecosystem web source count does not reconcile")
+        versions = web_ecosystem.get("versions", {})
+        if versions.get("versionCount") != 901 or len(versions.get("history", [])) != 901:
+            errors.append("ecosystem web version count does not reconcile")
+        release_capabilities = web_ecosystem.get("releaseCapabilities", {})
+        if len(release_capabilities.get("releases", [])) != 1 or release_capabilities["releases"][0].get("id") != "26.2":
+            errors.append("ecosystem web release capability profile does not reconcile")
+        expected_ecosystem = build_ecosystem_payload(
+            strict_json(root / "data/minecraft-domain-catalog.json"),
+            strict_json(root / "data/github-source-catalog.json"),
+            strict_json(root / "data/github-source-snapshot.json"),
+            strict_json(root / "data/minecraft-version-catalog.json"),
+            strict_json(root / "data/minecraft-release-capabilities.json"),
+            source_catalog_sha256=digest(root / "data/github-source-catalog.json"),
+            release_capabilities_sha256=digest(root / "data/minecraft-release-capabilities.json"),
+        )
+        if not strictly_equal(web_ecosystem, expected_ecosystem):
+            errors.append("ecosystem web payload is stale or differs from its source catalogs")
         for plugin in web_manifest.get("plugins", []):
             plugin_path = safe_posix_descendant(root / "web", plugin["file"])
             if not plugin_path.is_file():
                 errors.append(f"missing web plugin shard: {plugin['file']}")
     except (AttributeError, IndexError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
         errors.append(f"web data validation failed: {error}")
-    web_text = "\n".join((root / "web" / name).read_text(encoding="utf-8") for name in ("index.html", "styles.css", "app.js"))
+    web_text = "\n".join(
+        (root / "web" / name).read_text(encoding="utf-8")
+        for name in (
+            "index.html", "styles.css", "app.js", "ecosystem.html",
+            "ecosystem.css", "ecosystem-app.js", "ecosystem-renderers.js",
+        )
+    )
     if re.search(r"https?://|\bfetch\s*\(", web_text, re.IGNORECASE):
         errors.append("offline web contains a remote URL or fetch call")
+
+    errors.extend(validate_minecraftkit(root))
 
     try:
         expected_release = build_release_manifest(root)
@@ -381,12 +435,12 @@ def main() -> int:
     root = args.root.resolve()
     errors = validate(root)
     if errors:
-        print(f"MinecraftRPG Kit validation: FAIL ({len(errors)} issues)")
+        print(f"MinecraftKit validation: FAIL ({len(errors)} issues)")
         for error in errors:
             print(f"- {error}")
         return 1
-    print("MinecraftRPG Kit validation: PASS")
-    print("10 plugins; 4,947 plugin-owned types; 5,345 total types; 41,887 members; 965 API shards")
+    print("MinecraftKit validation: PASS")
+    print("9 domains; 10 deep RPG plugins; 4,947 plugin-owned types; 41,887 members; 965 API shards")
     return 0
 
 

@@ -1,4 +1,4 @@
-"""Build the deterministic top-level MinecraftRPG Kit release manifest."""
+"""Build the deterministic top-level MinecraftKit release manifest."""
 
 from __future__ import annotations
 
@@ -11,13 +11,20 @@ from pathlib import Path
 from typing import Any
 
 
-SCHEMA_VERSION = 1
-KIT_NAME = "minecraft-rpg-kit"
-KIT_VERSION = "1.0.0"
+SCHEMA_VERSION = 2
+KIT_NAME = "minecraftkit"
+KIT_VERSION = "2.0.0"
 RESEARCH_DATE = "2026-07-15"
 INSTALL_TARGETS = {
-    "codex": "$HOME/.agents/skills/minecraft-rpg-kit",
-    "claude": "$HOME/.claude/skills/minecraft-rpg-kit",
+    "codex": {
+        "core": "$HOME/.agents/skills/minecraftkit",
+        "routes": "$HOME/.agents/skills/mc-*",
+    },
+    "claude": {
+        "core": "$HOME/.claude/skills/minecraftkit",
+        "routes": "$HOME/.claude/skills/mc-*",
+        "commands": "$HOME/.claude/commands/mc",
+    },
 }
 TRACKED = (
     "data/source-inventory.json",
@@ -27,8 +34,20 @@ TRACKED = (
     "data/plugin-insights.json",
     "data/feature-catalog.json",
     "data/addon-ideas.json",
+    "data/minecraft-domain-catalog.json",
+    "data/minecraft-version-catalog.json",
+    "data/minecraft-release-capabilities.json",
+    "data/github-source-catalog.json",
+    "data/github-source-snapshot.json",
     "web/data/manifest.js",
     "web/data/insights.js",
+    "web/data/ecosystem.js",
+    "web/index.html",
+    "web/styles.css",
+    "web/ecosystem.html",
+    "web/ecosystem.css",
+    "web/ecosystem-app.js",
+    "web/ecosystem-renderers.js",
 )
 
 
@@ -65,6 +84,10 @@ def build(root: Path) -> dict[str, Any]:
     insights = {item["name"]: item for item in load(root / "data" / "plugin-insights.json")["plugins"]}
     source = load(root / "data" / "source-inventory.json")
     addons = load(root / "data" / "addon-ideas.json")["ideas"]
+    domains = load(root / "data" / "minecraft-domain-catalog.json")["domains"]
+    versions = load(root / "data" / "minecraft-version-catalog.json")
+    release_capabilities = load(root / "data" / "minecraft-release-capabilities.json")["releases"]
+    upstream_sources = load(root / "data" / "github-source-snapshot.json")
     artifacts = {}
     for relative in TRACKED:
         path = root / relative
@@ -97,6 +120,12 @@ def build(root: Path) -> dict[str, Any]:
             "parse_errors": sum(len(item["parse_errors"]) for item in coverage),
             "addon_ideas": len(addons),
             "decompiled_files_inventoried": source["decompiled_file_count"],
+            "minecraft_domains": len(domains),
+            "upstream_sources": upstream_sources["source_count"],
+            "minecraft_versions": versions["version_count"],
+            "latest_minecraft_release": versions["latest"]["release"],
+            "latest_minecraft_snapshot": versions["latest"]["snapshot"],
+            "profiled_minecraft_releases": len(release_capabilities),
         },
         "plugins": plugins,
         "artifacts": artifacts,

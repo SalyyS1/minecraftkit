@@ -1,58 +1,59 @@
 # Codex And Claude Compatibility
 
-MinecraftRPG Kit uses one canonical Agent Skills payload for both clients.
+MinecraftKit installs one canonical knowledge root plus nine thin route skills for both clients. Claude also receives path-based `/mc:*` command wrappers.
 
 ## Compatibility Matrix
 
 | Concern | Codex | Claude | Shared implementation |
 |---|---|---|---|
-| user skill root | `$HOME/.agents/skills` | `$HOME/.claude/skills` | install `minecraft-rpg-kit` as a physical directory |
-| required entry | `SKILL.md` | `SKILL.md` | one canonical file |
-| discovery metadata | `name`, `description` | `name`, `description` | only common keys in frontmatter |
-| progressive disclosure | metadata, body, resources | metadata, body, resources | root router plus direct references and scripts |
-| client UI metadata | optional `agents/openai.yaml` | safely ignored as a resource | does not change workflow |
-| client-specific agent format | TOML | Markdown/YAML | no bundled agent dependency |
-| path resolution | no common client env required | Claude has a skill-dir variable | scripts use `__file__` or explicit root |
-| reload/discovery | session/build dependent | existing root often refreshes | smoke test; restart only if discovery is stale |
+| canonical root | `$HOME/.agents/skills/minecraftkit` | `$HOME/.claude/skills/minecraftkit` | validated physical copy |
+| focused routes | `$HOME/.agents/skills/mc-*` | `$HOME/.claude/skills/mc-*` | nine sibling `SKILL.md` wrappers |
+| slash commands | auto-routing skill descriptions | `$HOME/.claude/commands/mc/*.md` | `/mc:core`, `/mc:rpg`, `/mc:shader`, etc. |
+| discovery metadata | `name`, `description` | `name`, `description` | only common frontmatter keys |
+| progressive disclosure | metadata, wrapper, shared references/data | same | wrappers locate sibling `minecraftkit` |
+| client UI metadata | optional `agents/openai.yaml` | ignored safely | does not change workflow |
+| path resolution | sibling core or source root | sibling core or source root | scripts use `__file__` or explicit root |
+
+The legacy `$HOME/.../minecraft-rpg-kit` targets are preserved during v2 installation; they are not silently replaced or deleted.
 
 ## Canonical Payload
 
-The project directory `MinecraftRPGKit` is the source of truth. Both global targets include functional docs, data, references, scripts, tests, and web files. They exclude `dist`, caches, temporary stage directories, and machine-specific install records.
+The project repository is the source of truth. Global targets are independent physical copies, never junctions/symlinks. The core includes docs, catalogs, references, scripts, tests and web files; route wrappers remain small enough for automatic discovery without loading the complete knowledge base.
 
-Junctions and symlinks are prohibited. Independent copies prevent one client from changing the other and make drift visible through content manifests.
+## Install Transaction
 
-## Install Contract
+`scripts/install-global.ps1`:
 
-1. Validate the canonical project kit.
-2. Create staging directories beside both final targets.
-3. Copy the filtered payload into both stages.
-4. Validate each stage and reject every reparse point.
-5. Back up an existing target with a timestamped sibling name.
-6. Promote both stages.
-7. Compare normalized SHA-256 file manifests with the canonical payload.
-8. On failure, remove only the invalid new target and restore its backup.
+1. Validates source paths, the nine-domain catalog and all source trees.
+2. Builds a 21-target plan: two cores, eighteen route wrappers and one Claude command directory.
+3. Stages every payload beside its final target.
+4. Validates both staged canonical cores and compares SHA-256 tree manifests for every payload.
+5. Moves existing targets to unique timestamp/transaction backups.
+6. Promotes all staged targets and rechecks physical trees/hashes.
+7. Rolls back promoted targets in reverse order and restores backups on any failure.
 
-The installer never writes Codex's `.system` directory and never modifies global hooks, rules, agents, MCP settings, or client configuration.
+It rejects overlapping roots, path escapes, unsafe names and reparse points. It never modifies `.system`, hooks, rules, MCP settings or unrelated client configuration.
+
+Preview without writes:
+
+```text
+powershell -ExecutionPolicy Bypass -File scripts/install-global.ps1 -PlanOnly
+```
 
 ## Discovery Smoke Test
 
-From each global target:
+From each installed canonical root:
 
 ```text
+python scripts/query_sources.py shader --domain shader --limit 1
 python scripts/query_api.py ActiveModel --plugin ModelEngine --limit 1
 python scripts/validate_kit.py .
 ```
 
-Then ask each client a positive trigger such as “Find the ModelEngine ActiveModel API and explain its lifecycle constraints.” Confirm that an unrelated task, such as editing a generic Python CSV script, does not invoke the RPG kit.
+Positive triggers should activate the narrow route: “debug this Iris shader” -> `mc:shader`; “design MMOItems stats” -> `mc:rpg`; “migrate this ProtocolLib packet” -> `mc:protocol`. A generic non-Minecraft task should not invoke the kit.
+
+Claude commands accept the task in `$ARGUMENTS`, activate the matching skill and preserve the same evidence/safety contract. Codex relies on the rich skill descriptions for auto-routing.
 
 ## Drift Detection
 
-The release manifest records hashes for the authoritative generated data and web indexes. During installation, the installer computes sorted SHA-256 content manifests in memory and requires each physical copy to match the filtered canonical payload. A changed global file is drift, not a new canonical version.
-
-## Official References
-
-- OpenAI Codex skill locations and structure: `https://learn.chatgpt.com/docs/build-skills.md`
-- Claude Code skill locations and open Agent Skills compatibility: `https://code.claude.com/docs/en/skills`
-- Agent Skills authoring guidance: `https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices`
-
-One local legacy document referred to `$CODEX_HOME/skills`; this kit follows the current official Codex root `$HOME/.agents/skills` and confirms it with an installation/discovery smoke test.
+The release manifest hashes authoritative catalogs and generated web indexes. Installation compares complete filtered payload manifests in memory. A changed global file is drift; edit the canonical repository and reinstall instead.

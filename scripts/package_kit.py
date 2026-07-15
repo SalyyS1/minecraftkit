@@ -1,4 +1,4 @@
-"""Create a deterministic MinecraftRPG Kit ZIP and SHA-256 checksum."""
+"""Create a deterministic MinecraftKit ZIP and SHA-256 checksum."""
 
 from __future__ import annotations
 
@@ -81,7 +81,7 @@ def _write_archive(path: Path, root: Path) -> None:
     with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as output:
         output.comment = b""
         for source in included_files(root):
-            relative = Path("minecraft-rpg-kit") / source.relative_to(root)
+            relative = Path("minecraftkit") / source.relative_to(root)
             info = zipfile.ZipInfo(relative.as_posix(), date_time=(1980, 1, 1, 0, 0, 0))
             info.create_system = 3
             info.create_version = 20
@@ -111,7 +111,7 @@ def main() -> int:
         raise ValueError("Validated manifest contains an unsafe package version")
     dist = root / "dist"
     dist.mkdir(parents=True, exist_ok=True)
-    archive = dist / f"minecraft-rpg-kit-{version}.zip"
+    archive = dist / f"minecraftkit-{version}.zip"
     checksum = archive.with_suffix(archive.suffix + ".sha256")
     for target in (archive, checksum):
         resolved = target.resolve()

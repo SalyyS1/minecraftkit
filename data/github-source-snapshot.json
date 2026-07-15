@@ -1,0 +1,4035 @@
+{
+  "catalog_sha256": "711f48c324e8cec1b8f2e05d2420ec74ccfea9d23e1bf2be04f8f6c0fa2ff333",
+  "retrieved_at": "2026-07-15T05:45:00+00:00",
+  "schema_version": 1,
+  "source_count": 103,
+  "sources": [
+    {
+      "docs_url": "https://docs.papermc.io/adventure/",
+      "domains": [
+        "core",
+        "dialog",
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/adventure",
+        "default_branch": "main/5",
+        "default_branch_head": {
+          "committed_at": "2026-06-27T09:33:31Z",
+          "sha": "ea93087fe9f58f0ac6009f909c5382b34ddcc4f2",
+          "url": "https://github.com/PaperMC/adventure/commit/ea93087fe9f58f0ac6009f909c5382b34ddcc4f2"
+        },
+        "description": "A user-interface library for Minecraft: Java Edition",
+        "fork": false,
+        "forks": 154,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-27T09:46:57Z",
+          "tag": "v5.2.0",
+          "url": "https://github.com/PaperMC/adventure/releases/tag/v5.2.0"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 134,
+        "pushed_at": "2026-06-27T09:46:42Z",
+        "stars": 880,
+        "url": "https://github.com/PaperMC/adventure"
+      },
+      "id": "adventure",
+      "ingestion_policy": "index",
+      "name": "Adventure",
+      "priority": "P0",
+      "rationale": "Cross-platform component, audience, dialog, resource-pack, serializer, and NBT APIs.",
+      "repository": "PaperMC/adventure"
+    },
+    {
+      "docs_url": "https://github.com/PaperMC/adventure-platform",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": true,
+        "canonical_repository": "PaperMC/adventure-platform",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-05-18T13:41:46Z",
+          "sha": "350b6822c0e4dd55a51e582ebe1d0792d060c31c",
+          "url": "https://github.com/PaperMC/adventure-platform/commit/350b6822c0e4dd55a51e582ebe1d0792d060c31c"
+        },
+        "description": "Adventure platform implementations",
+        "fork": false,
+        "forks": 51,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2025-07-30T01:00:00Z",
+          "tag": "v4.4.1",
+          "url": "https://github.com/PaperMC/adventure-platform/releases/tag/v4.4.1"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 45,
+        "pushed_at": "2026-05-18T13:41:46Z",
+        "stars": 210,
+        "url": "https://github.com/PaperMC/adventure-platform"
+      },
+      "id": "adventure-platform",
+      "ingestion_policy": "link-only",
+      "name": "Adventure Platform",
+      "priority": "P2",
+      "rationale": "Archived legacy platform adapters retained for historical routing only.",
+      "repository": "PaperMC/adventure-platform"
+    },
+    {
+      "docs_url": "https://github.com/PaperMC/adventure-platform-mod",
+      "domains": [
+        "client",
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/adventure-platform-mod",
+        "default_branch": "mc/26.2",
+        "default_branch_head": {
+          "committed_at": "2026-07-13T20:26:30Z",
+          "sha": "6291d6791fd526860d7d0a211b0bc39bebe6a99a",
+          "url": "https://github.com/PaperMC/adventure-platform-mod/commit/6291d6791fd526860d7d0a211b0bc39bebe6a99a"
+        },
+        "description": "An adapter for adventure to integrate with Fabric and NeoForge",
+        "fork": false,
+        "forks": 28,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-28T18:15:53Z",
+          "tag": "v7.1.0",
+          "url": "https://github.com/PaperMC/adventure-platform-mod/releases/tag/v7.1.0"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 8,
+        "pushed_at": "2026-07-13T20:26:37Z",
+        "stars": 77,
+        "url": "https://github.com/PaperMC/adventure-platform-mod"
+      },
+      "id": "adventure-platform-mod",
+      "ingestion_policy": "index",
+      "name": "Adventure Platform Mod",
+      "priority": "P1",
+      "rationale": "Near-native Adventure integration for version-pinned Fabric and NeoForge clients.",
+      "repository": "PaperMC/adventure-platform-mod"
+    },
+    {
+      "docs_url": "https://animated-java.dev/",
+      "domains": [
+        "model",
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Animated-Java/animated-java",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-07T14:47:41Z",
+          "sha": "a5fc548d2a53cc0887fa070db33ccfcef1cd3541",
+          "url": "https://github.com/Animated-Java/animated-java/commit/a5fc548d2a53cc0887fa070db33ccfcef1cd3541"
+        },
+        "description": "A Blockbench plugin that makes complex animation a breeze in Minecraft: Java Edition.",
+        "fork": false,
+        "forks": 52,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-07T14:52:32Z",
+          "tag": "v1.10.2",
+          "url": "https://github.com/Animated-Java/animated-java/releases/tag/v1.10.2"
+        },
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 47,
+        "pushed_at": "2026-07-07T14:52:32Z",
+        "stars": 294,
+        "url": "https://github.com/Animated-Java/animated-java"
+      },
+      "id": "animated-java",
+      "ingestion_policy": "index",
+      "name": "Animated Java",
+      "priority": "P0",
+      "rationale": "Blockbench exporter for display-entity animation and generated data/resource packs.",
+      "repository": "Animated-Java/animated-java"
+    },
+    {
+      "docs_url": "https://wiki.aurelium.dev/auraskills/",
+      "domains": [
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Archy-X/AuraSkills",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-06-27T02:30:56Z",
+          "sha": "14ecf86e90830d90d2dc078acbb3264cd98662fc",
+          "url": "https://github.com/Archy-X/AuraSkills/commit/14ecf86e90830d90d2dc078acbb3264cd98662fc"
+        },
+        "description": "The ultra-versatile RPG skills plugin",
+        "fork": false,
+        "forks": 145,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-04-06T21:14:56Z",
+          "tag": "2.3.12",
+          "url": "https://github.com/Archy-X/AuraSkills/releases/tag/2.3.12"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 90,
+        "pushed_at": "2026-07-14T08:56:29Z",
+        "stars": 342,
+        "url": "https://github.com/Archy-X/AuraSkills"
+      },
+      "id": "aura-skills",
+      "ingestion_policy": "index",
+      "name": "AuraSkills",
+      "priority": "P0",
+      "rationale": "Skills, stats, mana, abilities, XP, modifiers, rewards, profiles, events, and progression APIs.",
+      "repository": "Archy-X/AuraSkills"
+    },
+    {
+      "docs_url": "https://ci.codemc.org/job/AuthMe/job/AuthMeReloaded/javadoc/",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "AuthMe/AuthMeReloaded",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-06-27T18:42:36Z",
+          "sha": "2761f154401fa40a8d2d007701ba2ebcaa101f0d",
+          "url": "https://github.com/AuthMe/AuthMeReloaded/commit/2761f154401fa40a8d2d007701ba2ebcaa101f0d"
+        },
+        "description": "The best authentication plugin for the Bukkit/Spigot API!",
+        "fork": false,
+        "forks": 571,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-05-07T19:37:02Z",
+          "tag": "6.0.0",
+          "url": "https://github.com/AuthMe/AuthMeReloaded/releases/tag/6.0.0"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 51,
+        "pushed_at": "2026-07-03T19:59:55Z",
+        "stars": 859,
+        "url": "https://github.com/AuthMe/AuthMeReloaded"
+      },
+      "id": "authme-reloaded",
+      "ingestion_policy": "index",
+      "name": "AuthMeReloaded",
+      "priority": "P1",
+      "rationale": "Authentication/session, hash strategy, events, migration, command guards, proxy, and storage contracts.",
+      "repository": "AuthMe/AuthMeReloaded"
+    },
+    {
+      "docs_url": "https://github.com/neoforged/AutoRenamingTool",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "neoforged/AutoRenamingTool",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2025-12-24T01:14:25Z",
+          "sha": "3c04533abe5ae62564bf65ab0a910a2cf3d929f8",
+          "url": "https://github.com/neoforged/AutoRenamingTool/commit/3c04533abe5ae62564bf65ab0a910a2cf3d929f8"
+        },
+        "description": "Remapper/renamer of JAR files, with extensibility for other transformations",
+        "fork": false,
+        "forks": 10,
+        "latest_release": null,
+        "license": {
+          "key": "lgpl-2.1",
+          "name": "GNU Lesser General Public License v2.1",
+          "spdx_id": "LGPL-2.1"
+        },
+        "open_issues": 4,
+        "pushed_at": "2025-12-24T01:14:25Z",
+        "stars": 10,
+        "url": "https://github.com/neoforged/AutoRenamingTool"
+      },
+      "id": "auto-renaming-tool",
+      "ingestion_policy": "index",
+      "name": "AutoRenamingTool",
+      "priority": "P1",
+      "rationale": "Extensible JVM renaming and remapping tooling used in the NeoForge ecosystem.",
+      "repository": "neoforged/AutoRenamingTool"
+    },
+    {
+      "docs_url": "https://github.com/AzureDoom/AzureLib/wiki",
+      "domains": [
+        "client",
+        "model"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "AzureDoom/AzureLib",
+        "default_branch": "1.21.1",
+        "default_branch_head": {
+          "committed_at": "2026-07-04T05:13:04Z",
+          "sha": "1110559b375cecd9dec13a76337f1fb93d9def5f",
+          "url": "https://github.com/AzureDoom/AzureLib/commit/1110559b375cecd9dec13a76337f1fb93d9def5f"
+        },
+        "description": "Java Minecraft mod using Bedrock models to create custom models and animations for items, blocks, entities",
+        "fork": false,
+        "forks": 15,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2023-11-02T15:15:10Z",
+          "tag": "1.20.2-Fabric",
+          "url": "https://github.com/AzureDoom/AzureLib/releases/tag/1.20.2-Fabric"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 0,
+        "pushed_at": "2026-07-04T05:13:23Z",
+        "stars": 45,
+        "url": "https://github.com/AzureDoom/AzureLib"
+      },
+      "id": "azurelib",
+      "ingestion_policy": "index",
+      "name": "AzureLib",
+      "priority": "P1",
+      "rationale": "Loader-specific Bedrock-style animation engine with a distinct GeckoLib-derived API.",
+      "repository": "AzureDoom/AzureLib"
+    },
+    {
+      "docs_url": "https://beet.readthedocs.io/",
+      "domains": [
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "mcbeet/beet",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-08T05:12:43Z",
+          "sha": "d194ed40f8ac5854d5f8acc33ba1015c75b8850d",
+          "url": "https://github.com/mcbeet/beet/commit/d194ed40f8ac5854d5f8acc33ba1015c75b8850d"
+        },
+        "description": "The Minecraft pack development kit.",
+        "fork": false,
+        "forks": 24,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-08T05:12:46Z",
+          "tag": "mecha-v0.104.1",
+          "url": "https://github.com/mcbeet/beet/releases/tag/mecha-v0.104.1"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 28,
+        "pushed_at": "2026-07-08T05:12:45Z",
+        "stars": 286,
+        "url": "https://github.com/mcbeet/beet"
+      },
+      "id": "beet",
+      "ingestion_policy": "index",
+      "name": "beet",
+      "priority": "P1",
+      "rationale": "Python development and deterministic build toolkit for data and resource packs.",
+      "repository": "mcbeet/beet"
+    },
+    {
+      "docs_url": "https://docs.bentobox.world/",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "BentoBoxWorld/BentoBox",
+        "default_branch": "develop",
+        "default_branch_head": {
+          "committed_at": "2026-07-11T23:27:07Z",
+          "sha": "d5481ba0c672b6e2f60e241a04c776aa029a9796",
+          "url": "https://github.com/BentoBoxWorld/BentoBox/commit/d5481ba0c672b6e2f60e241a04c776aa029a9796"
+        },
+        "description": "Expandable Minecraft server plugin for island-type games like SkyBlock or AcidIsland.",
+        "fork": false,
+        "forks": 146,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-11T23:12:05Z",
+          "tag": "3.20.0",
+          "url": "https://github.com/BentoBoxWorld/BentoBox/releases/tag/3.20.0"
+        },
+        "license": {
+          "key": "epl-2.0",
+          "name": "Eclipse Public License 2.0",
+          "spdx_id": "EPL-2.0"
+        },
+        "open_issues": 123,
+        "pushed_at": "2026-07-12T21:46:18Z",
+        "stars": 404,
+        "url": "https://github.com/BentoBoxWorld/BentoBox"
+      },
+      "id": "bentobox",
+      "ingestion_policy": "index",
+      "name": "BentoBox",
+      "priority": "P1",
+      "rationale": "Addon lifecycle, islands, worlds, hooks, ranks, challenges, commands, persistence, and events.",
+      "repository": "BentoBoxWorld/BentoBox"
+    },
+    {
+      "docs_url": "https://betonquest.org/",
+      "domains": [
+        "dialog",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "BetonQuest/BetonQuest",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-10T17:27:36Z",
+          "sha": "e46d92d19e2fadf336f65baa3b8cd45ea1132c99",
+          "url": "https://github.com/BetonQuest/BetonQuest/commit/e46d92d19e2fadf336f65baa3b8cd45ea1132c99"
+        },
+        "description": "An advanced and powerful quest scripting plugin for Minecraft. Features built-in RPG style conversations and integration for over 40+ other plugins.",
+        "fork": false,
+        "forks": 177,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-24T14:05:11Z",
+          "tag": "v3.0.2",
+          "url": "https://github.com/BetonQuest/BetonQuest/releases/tag/v3.0.2"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 29,
+        "pushed_at": "2026-07-10T17:35:53Z",
+        "stars": 316,
+        "url": "https://github.com/BetonQuest/BetonQuest"
+      },
+      "id": "betonquest",
+      "ingestion_policy": "index",
+      "name": "BetonQuest",
+      "priority": "P0",
+      "rationale": "Declarative conversations, conditions, events, objectives, variables, packages, journals, and extension APIs.",
+      "repository": "BetonQuest/BetonQuest"
+    },
+    {
+      "docs_url": "https://www.blockbench.net/wiki/",
+      "domains": [
+        "model",
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "JannisX11/blockbench",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-04-25T20:27:24Z",
+          "sha": "8fe8d9d9568de8233d77cd592744acad495d46b0",
+          "url": "https://github.com/JannisX11/blockbench/commit/8fe8d9d9568de8233d77cd592744acad495d46b0"
+        },
+        "description": "Blockbench - A low poly 3D model editor",
+        "fork": false,
+        "forks": 454,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-04-25T20:53:15Z",
+          "tag": "v5.1.4",
+          "url": "https://github.com/JannisX11/blockbench/releases/tag/v5.1.4"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 712,
+        "pushed_at": "2026-07-07T21:49:20Z",
+        "stars": 5662,
+        "url": "https://github.com/JannisX11/blockbench"
+      },
+      "id": "blockbench",
+      "ingestion_policy": "index",
+      "name": "Blockbench",
+      "priority": "P0",
+      "rationale": "Canonical low-poly model, animation, codec, format, and plugin authoring application.",
+      "repository": "JannisX11/blockbench"
+    },
+    {
+      "docs_url": "https://www.blockbench.net/plugins/",
+      "domains": [
+        "model"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "JannisX11/blockbench-plugins",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T21:53:24Z",
+          "sha": "da56ec24051ffdfc3e66aa33a88004972a436591",
+          "url": "https://github.com/JannisX11/blockbench-plugins/commit/da56ec24051ffdfc3e66aa33a88004972a436591"
+        },
+        "description": "Blockbench plugin repository",
+        "fork": false,
+        "forks": 234,
+        "latest_release": null,
+        "license": null,
+        "open_issues": 162,
+        "pushed_at": "2026-07-12T21:53:25Z",
+        "stars": 173,
+        "url": "https://github.com/JannisX11/blockbench-plugins"
+      },
+      "id": "blockbench-plugins",
+      "ingestion_policy": "link-only",
+      "name": "Blockbench Plugins Registry",
+      "priority": "P1",
+      "rationale": "Official executable plugin registry; every plugin requires separate license and supply-chain review.",
+      "repository": "JannisX11/blockbench-plugins"
+    },
+    {
+      "docs_url": "https://bluemap.bluecolored.de/wiki/",
+      "domains": [
+        "client",
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "BlueMap-Minecraft/BlueMap",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-09T21:34:34Z",
+          "sha": "88690962e12cfaac28521f9a8fdf368a03d5f44e",
+          "url": "https://github.com/BlueMap-Minecraft/BlueMap/commit/88690962e12cfaac28521f9a8fdf368a03d5f44e"
+        },
+        "description": "A Minecraft mapping tool that creates 3D models of your Minecraft worlds and displays them in a web viewer.",
+        "fork": false,
+        "forks": 224,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-17T07:03:37Z",
+          "tag": "v5.22",
+          "url": "https://github.com/BlueMap-Minecraft/BlueMap/releases/tag/v5.22"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 23,
+        "pushed_at": "2026-07-09T21:34:38Z",
+        "stars": 2754,
+        "url": "https://github.com/BlueMap-Minecraft/BlueMap"
+      },
+      "id": "bluemap",
+      "ingestion_policy": "index",
+      "name": "BlueMap",
+      "priority": "P1",
+      "rationale": "Map, marker, world/render configuration, asset/web extension, storage, and live-update APIs.",
+      "repository": "BlueMap-Minecraft/BlueMap"
+    },
+    {
+      "docs_url": "https://github.com/Mojang/brigadier",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Mojang/brigadier",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2024-08-07T13:38:44Z",
+          "sha": "b5419b186e4882290a188d11d6e661d4f56bd8fd",
+          "url": "https://github.com/Mojang/brigadier/commit/b5419b186e4882290a188d11d6e661d4f56bd8fd"
+        },
+        "description": "Brigadier is a command parser & dispatcher, designed and developed for Minecraft: Java Edition.",
+        "fork": false,
+        "forks": 410,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2021-07-16T13:22:24Z",
+          "tag": "1.0.18",
+          "url": "https://github.com/Mojang/brigadier/releases/tag/1.0.18"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 83,
+        "pushed_at": "2024-08-15T19:29:48Z",
+        "stars": 3708,
+        "url": "https://github.com/Mojang/brigadier"
+      },
+      "id": "brigadier",
+      "ingestion_policy": "index",
+      "name": "Brigadier",
+      "priority": "P1",
+      "rationale": "Mojang command parser used by Minecraft and many platform command APIs.",
+      "repository": "Mojang/brigadier"
+    },
+    {
+      "docs_url": "https://github.com/Bukkit/Bukkit",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Bukkit/Bukkit",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2014-08-17T17:49:33Z",
+          "sha": "f210234e59275330f83b994e199c76f6abd41ee7",
+          "url": "https://github.com/Bukkit/Bukkit/commit/f210234e59275330f83b994e199c76f6abd41ee7"
+        },
+        "description": "The Minecraft Mod API",
+        "fork": false,
+        "forks": 1027,
+        "latest_release": null,
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 68,
+        "pushed_at": "2023-12-17T05:19:57Z",
+        "stars": 2469,
+        "url": "https://github.com/Bukkit/Bukkit"
+      },
+      "id": "bukkit-legacy",
+      "ingestion_policy": "link-only",
+      "name": "Bukkit Legacy",
+      "priority": "P2",
+      "rationale": "Historical Bukkit API identity; current Bukkit-derived facts come from maintained Spigot/Paper sources.",
+      "repository": "Bukkit/Bukkit"
+    },
+    {
+      "docs_url": "https://www.spigotmc.org/wiki/bungeecord/",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "SpigotMC/BungeeCord",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-06-30T22:03:52Z",
+          "sha": "edb28b4a173fc88a4ff10fed7f3c9dd8de8c895c",
+          "url": "https://github.com/SpigotMC/BungeeCord/commit/edb28b4a173fc88a4ff10fed7f3c9dd8de8c895c"
+        },
+        "description": "BungeeCord, the 6th in a generation of server portal suites. Efficiently proxies and maintains connections and transport between multiple Minecraft servers.",
+        "fork": false,
+        "forks": 1150,
+        "latest_release": null,
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 371,
+        "pushed_at": "2026-07-13T21:22:51Z",
+        "stars": 1717,
+        "url": "https://github.com/SpigotMC/BungeeCord"
+      },
+      "id": "bungeecord",
+      "ingestion_policy": "metadata-only",
+      "name": "BungeeCord",
+      "priority": "P0",
+      "rationale": "Canonical proxy and plugin API with a custom license and security-sensitive forwarding model.",
+      "repository": "SpigotMC/BungeeCord"
+    },
+    {
+      "docs_url": "https://github.com/vram-guild/canvas",
+      "domains": [
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "vram-guild/canvas",
+        "default_branch": "1.19",
+        "default_branch_head": {
+          "committed_at": "2023-06-11T10:45:07Z",
+          "sha": "9edb051bf3cba305623e6555c7d3ececb969b215",
+          "url": "https://github.com/vram-guild/canvas/commit/9edb051bf3cba305623e6555c7d3ececb969b215"
+        },
+        "description": "Shader-Based Minecraft Renderer for Fabric",
+        "fork": false,
+        "forks": 37,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2024-06-06T15:49:31Z",
+          "tag": "fabric-20.5.2698",
+          "url": "https://github.com/vram-guild/canvas/releases/tag/fabric-20.5.2698"
+        },
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 88,
+        "pushed_at": "2024-06-06T15:49:31Z",
+        "stars": 432,
+        "url": "https://github.com/vram-guild/canvas"
+      },
+      "id": "canvas",
+      "ingestion_policy": "index",
+      "name": "Canvas",
+      "priority": "P2",
+      "rationale": "Historical Fabric shader renderer and resource-pack material pipeline.",
+      "repository": "vram-guild/canvas"
+    },
+    {
+      "docs_url": "https://wiki.citizensnpcs.co/API",
+      "domains": [
+        "client",
+        "dialog",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "CitizensDev/Citizens2",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-13T19:25:53Z",
+          "sha": "0ff586c9a72fca060e662d18f7d84b9276b7236b",
+          "url": "https://github.com/CitizensDev/Citizens2/commit/0ff586c9a72fca060e662d18f7d84b9276b7236b"
+        },
+        "description": "Citizens - the premier plugin and API for creating server-side NPCs in Minecraft.",
+        "fork": false,
+        "forks": 375,
+        "latest_release": null,
+        "license": {
+          "key": "osl-3.0",
+          "name": "Open Software License 3.0",
+          "spdx_id": "OSL-3.0"
+        },
+        "open_issues": 15,
+        "pushed_at": "2026-07-13T19:25:53Z",
+        "stars": 717,
+        "url": "https://github.com/CitizensDev/Citizens2"
+      },
+      "id": "citizens",
+      "ingestion_policy": "index",
+      "name": "Citizens",
+      "priority": "P0",
+      "rationale": "NPC registries, traits, navigation, goals, metadata, speech, lifecycle, events, and persistence.",
+      "repository": "CitizensDev/Citizens2"
+    },
+    {
+      "docs_url": "https://cloud.incendo.org/",
+      "domains": [
+        "core",
+        "dialog"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Incendo/cloud",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2025-10-18T08:19:01Z",
+          "sha": "92576b7a470fe0fa5894f65e32e6323fc095f834",
+          "url": "https://github.com/Incendo/cloud/commit/92576b7a470fe0fa5894f65e32e6323fc095f834"
+        },
+        "description": "Command framework & dispatcher for the JVM",
+        "fork": false,
+        "forks": 59,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2024-08-24T21:21:56Z",
+          "tag": "2.0.0",
+          "url": "https://github.com/Incendo/cloud/releases/tag/2.0.0"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 44,
+        "pushed_at": "2026-07-12T15:37:04Z",
+        "stars": 533,
+        "url": "https://github.com/Incendo/cloud"
+      },
+      "id": "cloud",
+      "ingestion_policy": "index",
+      "name": "cloud",
+      "priority": "P0",
+      "rationale": "Typed command managers, parsers, contexts, suggestions, annotations, coordinators, and platform adapters.",
+      "repository": "Incendo/cloud"
+    },
+    {
+      "docs_url": "https://github.com/PaperMC/codebook",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/codebook",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-06-02T19:21:31Z",
+          "sha": "5aae581849eee857217a53e707873c09c37fec10",
+          "url": "https://github.com/PaperMC/codebook/commit/5aae581849eee857217a53e707873c09c37fec10"
+        },
+        "description": "Library for handling jar remaping logic for PaperMC",
+        "fork": false,
+        "forks": 1,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-02T17:15:30Z",
+          "tag": "v2.0.0",
+          "url": "https://github.com/PaperMC/codebook/releases/tag/v2.0.0"
+        },
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 25,
+        "pushed_at": "2026-07-12T18:42:07Z",
+        "stars": 22,
+        "url": "https://github.com/PaperMC/codebook"
+      },
+      "id": "codebook",
+      "ingestion_policy": "metadata-only",
+      "name": "Codebook",
+      "priority": "P1",
+      "rationale": "PaperMC remapping pipeline tooling; capability metadata is safer than source mirroring.",
+      "repository": "PaperMC/codebook"
+    },
+    {
+      "docs_url": "https://commandapi.jorel.dev/",
+      "domains": [
+        "core",
+        "dialog"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "CommandAPI/CommandAPI",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-04-02T09:41:41Z",
+          "sha": "e9c681280dcea485172872e80de3189bfdd20d7e",
+          "url": "https://github.com/CommandAPI/CommandAPI/commit/e9c681280dcea485172872e80de3189bfdd20d7e"
+        },
+        "description": "A Bukkit/Spigot API for the command UI introduced in Minecraft 1.13",
+        "fork": false,
+        "forks": 78,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-04-01T23:05:55Z",
+          "tag": "11.2.0",
+          "url": "https://github.com/CommandAPI/CommandAPI/releases/tag/11.2.0"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 52,
+        "pushed_at": "2026-07-05T20:28:12Z",
+        "stars": 647,
+        "url": "https://github.com/CommandAPI/CommandAPI"
+      },
+      "id": "commandapi",
+      "ingestion_policy": "index",
+      "name": "CommandAPI",
+      "priority": "P0",
+      "rationale": "Brigadier trees, native arguments, executors, suggestions, permissions, conversion, and registration lifecycle.",
+      "repository": "CommandAPI/CommandAPI"
+    },
+    {
+      "docs_url": "https://xiao-momi.github.io/craft-engine-wiki/",
+      "domains": [
+        "client",
+        "nms",
+        "pack",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Xiao-MoMi/craft-engine",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-11T07:44:06Z",
+          "sha": "22fe37c023ba348bac6602302dbcc08bee6d4860",
+          "url": "https://github.com/Xiao-MoMi/craft-engine/commit/22fe37c023ba348bac6602302dbcc08bee6d4860"
+        },
+        "description": "A Spigot/Paper/Folia plugin that enables dynamic creation of custom blocks, items and recipes through configuration.",
+        "fork": false,
+        "forks": 99,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-02T09:38:02Z",
+          "tag": "26.7",
+          "url": "https://github.com/Xiao-MoMi/craft-engine/releases/tag/26.7"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 6,
+        "pushed_at": "2026-07-14T14:40:13Z",
+        "stars": 256,
+        "url": "https://github.com/Xiao-MoMi/craft-engine"
+      },
+      "id": "craft-engine",
+      "ingestion_policy": "index",
+      "name": "CraftEngine",
+      "priority": "P1",
+      "rationale": "Config-driven custom items, blocks, recipes, packs, protocol integration, and unstable NMS helpers.",
+      "repository": "Xiao-MoMi/craft-engine"
+    },
+    {
+      "docs_url": "https://github.com/Mojang/DataFixerUpper",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Mojang/DataFixerUpper",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-05-05T09:20:32Z",
+          "sha": "5fc0978694e996cfe68a742b67a0d506c17de3f0",
+          "url": "https://github.com/Mojang/DataFixerUpper/commit/5fc0978694e996cfe68a742b67a0d506c17de3f0"
+        },
+        "description": "A set of utilities designed for incremental building, merging and optimization of data transformations.",
+        "fork": false,
+        "forks": 152,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2018-10-16T13:25:32Z",
+          "tag": "1.0.20",
+          "url": "https://github.com/Mojang/DataFixerUpper/releases/tag/1.0.20"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 30,
+        "pushed_at": "2026-05-05T09:20:32Z",
+        "stars": 1304,
+        "url": "https://github.com/Mojang/DataFixerUpper"
+      },
+      "id": "datafixerupper",
+      "ingestion_policy": "index",
+      "name": "DataFixerUpper",
+      "priority": "P1",
+      "rationale": "Mojang typed data migration framework; actual embedded versions remain game-version-specific.",
+      "repository": "Mojang/DataFixerUpper"
+    },
+    {
+      "docs_url": "https://wiki.decentholograms.eu/",
+      "domains": [
+        "client",
+        "dialog",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "DecentSoftware-eu/DecentHolograms",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-11T02:39:44Z",
+          "sha": "23f5c523632c4fdf41af07315141a8c3d1f91c9f",
+          "url": "https://github.com/DecentSoftware-eu/DecentHolograms/commit/23f5c523632c4fdf41af07315141a8c3d1f91c9f"
+        },
+        "description": "A lightweight but powerful hologram plugin with many features and configuration options.",
+        "fork": false,
+        "forks": 159,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-28T07:09:56Z",
+          "tag": "2.10.1",
+          "url": "https://github.com/DecentSoftware-eu/DecentHolograms/releases/tag/2.10.1"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 26,
+        "pushed_at": "2026-07-11T02:40:11Z",
+        "stars": 269,
+        "url": "https://github.com/DecentSoftware-eu/DecentHolograms"
+      },
+      "id": "decent-holograms",
+      "ingestion_policy": "index",
+      "name": "DecentHolograms",
+      "priority": "P1",
+      "rationale": "Hologram/page/line, viewer, placeholder, animation, click action, persistence, and projection APIs.",
+      "repository": "DecentSoftware-eu/DecentHolograms"
+    },
+    {
+      "docs_url": "https://meta.denizenscript.com/",
+      "domains": [
+        "core",
+        "dialog",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "DenizenScript/Denizen",
+        "default_branch": "dev",
+        "default_branch_head": {
+          "committed_at": "2026-07-09T09:46:37Z",
+          "sha": "ca30c91e4c951a9b65e6d9d1d45daeed81cc607c",
+          "url": "https://github.com/DenizenScript/Denizen/commit/ca30c91e4c951a9b65e6d9d1d45daeed81cc607c"
+        },
+        "description": "NPC and general Spigot scripting, using the Denizen Scripting Language!",
+        "fork": false,
+        "forks": 113,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 30,
+        "pushed_at": "2026-07-09T09:46:38Z",
+        "stars": 243,
+        "url": "https://github.com/DenizenScript/Denizen"
+      },
+      "id": "denizen",
+      "ingestion_policy": "index",
+      "name": "Denizen",
+      "priority": "P1",
+      "rationale": "Object/tag model, script containers, commands, events, queues, definitions, and Citizens integration.",
+      "repository": "DenizenScript/Denizen"
+    },
+    {
+      "docs_url": "https://github.com/webbukkit/dynmap#readme",
+      "domains": [
+        "client",
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "webbukkit/dynmap",
+        "default_branch": "v3.0",
+        "default_branch_head": {
+          "committed_at": "2026-03-12T17:27:31Z",
+          "sha": "93b454efb8802dc7406d6873434f2aeec5c636f4",
+          "url": "https://github.com/webbukkit/dynmap/commit/93b454efb8802dc7406d6873434f2aeec5c636f4"
+        },
+        "description": "A set of Minecraft mods that provide a real time web-based map system for various Minecraft server implementations.",
+        "fork": false,
+        "forks": 484,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2021-10-05T23:41:02Z",
+          "tag": "v3.2.1",
+          "url": "https://github.com/webbukkit/dynmap/releases/tag/v3.2.1"
+        },
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0"
+        },
+        "open_issues": 181,
+        "pushed_at": "2026-03-12T17:27:45Z",
+        "stars": 2208,
+        "url": "https://github.com/webbukkit/dynmap"
+      },
+      "id": "dynmap",
+      "ingestion_policy": "index",
+      "name": "Dynmap",
+      "priority": "P1",
+      "rationale": "Stable map and marker APIs, tiles, render components, web events, and platform adapters.",
+      "repository": "webbukkit/dynmap"
+    },
+    {
+      "docs_url": "https://github.com/FiniteReality/embeddium/wiki",
+      "domains": [
+        "client",
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FiniteReality/embeddium",
+        "default_branch": "21.4/neoforge",
+        "default_branch_head": {
+          "committed_at": "2025-02-01T10:59:50Z",
+          "sha": "aa6657df4eaea8bdfa6243233c893207f5b7f8b4",
+          "url": "https://github.com/FiniteReality/embeddium/commit/aa6657df4eaea8bdfa6243233c893207f5b7f8b4"
+        },
+        "description": "An open-source client performance mod for Minecraft (based on Sodium 0.5.8) prioritizing reliability & mod compatibility",
+        "fork": false,
+        "forks": 151,
+        "latest_release": null,
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 156,
+        "pushed_at": "2026-06-05T19:50:49Z",
+        "stars": 280,
+        "url": "https://github.com/FiniteReality/embeddium"
+      },
+      "id": "embeddium",
+      "ingestion_policy": "index",
+      "name": "Embeddium",
+      "priority": "P1",
+      "rationale": "Sodium-derived renderer focused on NeoForge and mod compatibility.",
+      "repository": "FiniteReality/embeddium"
+    },
+    {
+      "docs_url": "https://github.com/Traben-0/Entity_Model_Features",
+      "domains": [
+        "client",
+        "model"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Traben-0/Entity_Model_Features",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-05-29T11:53:13Z",
+          "sha": "216bcd4b0ebbfac00e837eb0f4fb37f9206d1bbf",
+          "url": "https://github.com/Traben-0/Entity_Model_Features/commit/216bcd4b0ebbfac00e837eb0f4fb37f9206d1bbf"
+        },
+        "description": null,
+        "fork": false,
+        "forks": 40,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2023-09-16T01:09:55Z",
+          "tag": "v1.0",
+          "url": "https://github.com/Traben-0/Entity_Model_Features/releases/tag/v1.0"
+        },
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 256,
+        "pushed_at": "2026-05-29T11:53:13Z",
+        "stars": 135,
+        "url": "https://github.com/Traben-0/Entity_Model_Features"
+      },
+      "id": "entity-model-features",
+      "ingestion_policy": "index",
+      "name": "Entity Model Features",
+      "priority": "P1",
+      "rationale": "Client implementation of OptiFine-style custom entity model features.",
+      "repository": "Traben-0/Entity_Model_Features"
+    },
+    {
+      "docs_url": "https://github.com/Traben-0/Entity_Texture_Features",
+      "domains": [
+        "client",
+        "model",
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Traben-0/Entity_Texture_Features",
+        "default_branch": "ETF-Main",
+        "default_branch_head": {
+          "committed_at": "2026-05-29T11:52:43Z",
+          "sha": "a7fc2a1172264899a3fe4058c9958a2c42269920",
+          "url": "https://github.com/Traben-0/Entity_Texture_Features/commit/a7fc2a1172264899a3fe4058c9958a2c42269920"
+        },
+        "description": "A Minecraft Fabric & Forge mod that adds random, emissive & blinking textures for mobs, skins and much more! ",
+        "fork": false,
+        "forks": 39,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2023-08-06T06:13:57Z",
+          "tag": "v4.5.0",
+          "url": "https://github.com/Traben-0/Entity_Texture_Features/releases/tag/v4.5.0"
+        },
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 127,
+        "pushed_at": "2026-05-29T11:52:43Z",
+        "stars": 166,
+        "url": "https://github.com/Traben-0/Entity_Texture_Features"
+      },
+      "id": "entity-texture-features",
+      "ingestion_policy": "index",
+      "name": "Entity Texture Features",
+      "priority": "P1",
+      "rationale": "Client random, emissive, blinking, and conditional entity texture features.",
+      "repository": "Traben-0/Entity_Texture_Features"
+    },
+    {
+      "docs_url": "https://essentialsx.net/wiki/",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "EssentialsX/Essentials",
+        "default_branch": "2.x",
+        "default_branch_head": {
+          "committed_at": "2026-06-24T22:29:19Z",
+          "sha": "776f7094a8d4d780899bac0f459ce0ec33f557ab",
+          "url": "https://github.com/EssentialsX/Essentials/commit/776f7094a8d4d780899bac0f459ce0ec33f557ab"
+        },
+        "description": "The modern Essentials suite for Spigot and Paper.",
+        "fork": false,
+        "forks": 1100,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-05-31T15:00:46Z",
+          "tag": "2.22.0",
+          "url": "https://github.com/EssentialsX/Essentials/releases/tag/2.22.0"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 175,
+        "pushed_at": "2026-07-14T22:51:58Z",
+        "stars": 2268,
+        "url": "https://github.com/EssentialsX/Essentials"
+      },
+      "id": "essentialsx",
+      "ingestion_policy": "index",
+      "name": "EssentialsX",
+      "priority": "P0",
+      "rationale": "User state, homes, warps, kits, teleport, economy, commands, spawn/chat integrations, and events.",
+      "repository": "EssentialsX/Essentials"
+    },
+    {
+      "docs_url": "https://docs.fabricmc.net/",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack",
+        "protocol",
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FabricMC/fabric-api",
+        "default_branch": "26.2",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T20:50:01Z",
+          "sha": "309832e2efe76dcc0c4e62a31def598dd7133e1f",
+          "url": "https://github.com/FabricMC/fabric-api/commit/309832e2efe76dcc0c4e62a31def598dd7133e1f"
+        },
+        "description": "Essential hooks for modding with Fabric.",
+        "fork": false,
+        "forks": 547,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-07T08:37:37Z",
+          "tag": "0.154.2+26.2",
+          "url": "https://github.com/FabricMC/fabric-api/releases/tag/0.154.2%2B26.2"
+        },
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0"
+        },
+        "open_issues": 201,
+        "pushed_at": "2026-07-12T20:50:01Z",
+        "stars": 3109,
+        "url": "https://github.com/FabricMC/fabric-api"
+      },
+      "id": "fabric-api",
+      "ingestion_policy": "index",
+      "name": "Fabric API",
+      "priority": "P0",
+      "rationale": "Canonical modular Fabric events, registries, networking, resources, models, and rendering hooks.",
+      "repository": "FabricMC/fabric-api"
+    },
+    {
+      "docs_url": "https://docs.fabricmc.net/",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "nms",
+        "pack",
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FabricMC/fabric-docs",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-10T21:50:41Z",
+          "sha": "86473743e4723af90f7dc551facd4f833b99f036",
+          "url": "https://github.com/FabricMC/fabric-docs/commit/86473743e4723af90f7dc551facd4f833b99f036"
+        },
+        "description": "Official curated documentation for Fabric, a modding toolchain for Minecraft.",
+        "fork": false,
+        "forks": 440,
+        "latest_release": null,
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 46,
+        "pushed_at": "2026-07-11T09:09:35Z",
+        "stars": 194,
+        "url": "https://github.com/FabricMC/fabric-docs"
+      },
+      "id": "fabric-docs",
+      "ingestion_policy": "metadata-only",
+      "name": "Fabric Documentation",
+      "priority": "P1",
+      "rationale": "Versioned official Fabric guidance; noncommercial ShareAlike terms require summary-first ingestion.",
+      "repository": "FabricMC/fabric-docs"
+    },
+    {
+      "docs_url": "https://github.com/FabricMC/intermediary",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": true,
+        "canonical_repository": "FabricMC/intermediary",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2025-12-09T16:02:14Z",
+          "sha": "916868752f6935dda70c4490404641a701335d81",
+          "url": "https://github.com/FabricMC/intermediary/commit/916868752f6935dda70c4490404641a701335d81"
+        },
+        "description": "Match and mapping information between different versions of Minecraft",
+        "fork": false,
+        "forks": 27,
+        "latest_release": null,
+        "license": {
+          "key": "cc0-1.0",
+          "name": "Creative Commons Zero v1.0 Universal",
+          "spdx_id": "CC0-1.0"
+        },
+        "open_issues": 4,
+        "pushed_at": "2025-12-09T16:02:23Z",
+        "stars": 128,
+        "url": "https://github.com/FabricMC/intermediary"
+      },
+      "id": "fabric-intermediary",
+      "ingestion_policy": "link-only",
+      "name": "Fabric Intermediary",
+      "priority": "P2",
+      "rationale": "Archived historical stable namespace; current metadata is resolved through Fabric Meta.",
+      "repository": "FabricMC/intermediary"
+    },
+    {
+      "docs_url": "https://docs.fabricmc.net/develop/",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FabricMC/fabric-loader",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-06-01T17:17:27Z",
+          "sha": "35b0b1c0268eb5f9d377322db491b0bb436541a8",
+          "url": "https://github.com/FabricMC/fabric-loader/commit/35b0b1c0268eb5f9d377322db491b0bb436541a8"
+        },
+        "description": "Fabric's mostly-version-independent mod loader.",
+        "fork": false,
+        "forks": 326,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-01T17:23:26Z",
+          "tag": "0.19.3",
+          "url": "https://github.com/FabricMC/fabric-loader/releases/tag/0.19.3"
+        },
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0"
+        },
+        "open_issues": 158,
+        "pushed_at": "2026-06-01T17:23:26Z",
+        "stars": 853,
+        "url": "https://github.com/FabricMC/fabric-loader"
+      },
+      "id": "fabric-loader",
+      "ingestion_policy": "index",
+      "name": "Fabric Loader",
+      "priority": "P0",
+      "rationale": "Canonical Fabric mod loader, entrypoint, metadata, and mapping resolver APIs.",
+      "repository": "FabricMC/fabric-loader"
+    },
+    {
+      "docs_url": "https://docs.fabricmc.net/develop/loom/",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FabricMC/fabric-loom",
+        "default_branch": "dev/1.17",
+        "default_branch_head": {
+          "committed_at": "2026-07-11T10:41:24Z",
+          "sha": "b117131f47ab7a467650878b1b7d3b4112520035",
+          "url": "https://github.com/FabricMC/fabric-loom/commit/b117131f47ab7a467650878b1b7d3b4112520035"
+        },
+        "description": "Gradle build system plugin used to automate the setup of a minecraft mod development environment.",
+        "fork": false,
+        "forks": 283,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-07T15:50:17Z",
+          "tag": "1.17",
+          "url": "https://github.com/FabricMC/fabric-loom/releases/tag/1.17"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 131,
+        "pushed_at": "2026-07-11T16:29:35Z",
+        "stars": 352,
+        "url": "https://github.com/FabricMC/fabric-loom"
+      },
+      "id": "fabric-loom",
+      "ingestion_policy": "index",
+      "name": "Fabric Loom",
+      "priority": "P1",
+      "rationale": "Gradle development, source mapping, run configuration, and remapping tooling.",
+      "repository": "FabricMC/fabric-loom"
+    },
+    {
+      "docs_url": "https://github.com/FabricMC/mapping-io",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FabricMC/mapping-io",
+        "default_branch": "dev",
+        "default_branch_head": {
+          "committed_at": "2025-11-02T13:58:59Z",
+          "sha": "5eb15ddbd3f1d8fbecccb79392192ff86b5c65f0",
+          "url": "https://github.com/FabricMC/mapping-io/commit/5eb15ddbd3f1d8fbecccb79392192ff86b5c65f0"
+        },
+        "description": "Mapping-IO is a small and efficient library for working with deobfuscation mapping files.",
+        "fork": false,
+        "forks": 24,
+        "latest_release": null,
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0"
+        },
+        "open_issues": 21,
+        "pushed_at": "2025-11-02T13:58:59Z",
+        "stars": 60,
+        "url": "https://github.com/FabricMC/mapping-io"
+      },
+      "id": "fabric-mapping-io",
+      "ingestion_policy": "index",
+      "name": "mapping-io",
+      "priority": "P1",
+      "rationale": "Mapping format reader, writer, tree, and conversion APIs.",
+      "repository": "FabricMC/mapping-io"
+    },
+    {
+      "docs_url": "https://meta.fabricmc.net/",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FabricMC/fabric-meta",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2025-11-26T14:57:16Z",
+          "sha": "89494d334d23be725e0d523ae3980c59ac483600",
+          "url": "https://github.com/FabricMC/fabric-meta/commit/89494d334d23be725e0d523ae3980c59ac483600"
+        },
+        "description": "Fabric Meta is a JSON-based HTTP api that can be used to query metadata about key Fabric projects.",
+        "fork": false,
+        "forks": 26,
+        "latest_release": null,
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0"
+        },
+        "open_issues": 10,
+        "pushed_at": "2025-11-26T14:57:49Z",
+        "stars": 44,
+        "url": "https://github.com/FabricMC/fabric-meta"
+      },
+      "id": "fabric-meta",
+      "ingestion_policy": "metadata-only",
+      "name": "Fabric Meta",
+      "priority": "P0",
+      "rationale": "Canonical Fabric service source behind version, loader, installer, and mapping metadata.",
+      "repository": "FabricMC/fabric-meta"
+    },
+    {
+      "docs_url": "https://github.com/FabricMC/tiny-remapper",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FabricMC/tiny-remapper",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-05-28T14:51:45Z",
+          "sha": "7834504ce1be97df03e99723bef456e40241c607",
+          "url": "https://github.com/FabricMC/tiny-remapper/commit/7834504ce1be97df03e99723bef456e40241c607"
+        },
+        "description": "Tiny JAR remapping tool.",
+        "fork": false,
+        "forks": 82,
+        "latest_release": null,
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 46,
+        "pushed_at": "2026-05-28T14:51:46Z",
+        "stars": 154,
+        "url": "https://github.com/FabricMC/tiny-remapper"
+      },
+      "id": "fabric-tiny-remapper",
+      "ingestion_policy": "index",
+      "name": "Tiny Remapper",
+      "priority": "P1",
+      "rationale": "High-performance Tiny namespace bytecode remapper used by Fabric tooling.",
+      "repository": "FabricMC/tiny-remapper"
+    },
+    {
+      "docs_url": "https://github.com/FabricMC/yarn",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FabricMC/yarn",
+        "default_branch": "1.21.11",
+        "default_branch_head": {
+          "committed_at": "2026-05-27T08:19:32Z",
+          "sha": "ee98590897c919286b96b7c7f2c89ae4ac737762",
+          "url": "https://github.com/FabricMC/yarn/commit/ee98590897c919286b96b7c7f2c89ae4ac737762"
+        },
+        "description": "Libre Minecraft mappings, free to use for everyone. No exceptions.",
+        "fork": false,
+        "forks": 434,
+        "latest_release": null,
+        "license": {
+          "key": "cc0-1.0",
+          "name": "Creative Commons Zero v1.0 Universal",
+          "spdx_id": "CC0-1.0"
+        },
+        "open_issues": 146,
+        "pushed_at": "2026-05-27T08:19:50Z",
+        "stars": 1211,
+        "url": "https://github.com/FabricMC/yarn"
+      },
+      "id": "fabric-yarn",
+      "ingestion_policy": "index",
+      "name": "Yarn",
+      "priority": "P1",
+      "rationale": "Historical human-readable mappings through the obfuscation era; not a 26.1+ requirement.",
+      "repository": "FabricMC/yarn"
+    },
+    {
+      "docs_url": "https://intellectualsites.github.io/fastasyncworldedit-javadocs/",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "IntellectualSites/FastAsyncWorldEdit",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-14T15:17:24Z",
+          "sha": "995c825dae7e3185a81fa9a88ec0651af213fe27",
+          "url": "https://github.com/IntellectualSites/FastAsyncWorldEdit/commit/995c825dae7e3185a81fa9a88ec0651af213fe27"
+        },
+        "description": "Blazingly fast world manipulation for artists, builders and everyone else.",
+        "fork": false,
+        "forks": 366,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-14T15:15:46Z",
+          "tag": "2.15.3",
+          "url": "https://github.com/IntellectualSites/FastAsyncWorldEdit/releases/tag/2.15.3"
+        },
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 124,
+        "pushed_at": "2026-07-15T02:31:50Z",
+        "stars": 792,
+        "url": "https://github.com/IntellectualSites/FastAsyncWorldEdit"
+      },
+      "id": "fastasyncworldedit",
+      "ingestion_policy": "index",
+      "name": "FastAsyncWorldEdit",
+      "priority": "P1",
+      "rationale": "Parallel edit queues, extents, chunks, history, memory controls, and WorldEdit compatibility seams.",
+      "repository": "IntellectualSites/FastAsyncWorldEdit"
+    },
+    {
+      "docs_url": "https://docs.papermc.io/paper/dev/folia-support/",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/Folia",
+        "default_branch": "ver/26.1.x",
+        "default_branch_head": {
+          "committed_at": "2026-05-06T13:33:14Z",
+          "sha": "62dc0f257a4f5de1ef2eae8cf1627156a769c67f",
+          "url": "https://github.com/PaperMC/Folia/commit/62dc0f257a4f5de1ef2eae8cf1627156a769c67f"
+        },
+        "description": "Fork of Paper which adds regionised multithreading to the dedicated server.",
+        "fork": false,
+        "forks": 598,
+        "latest_release": null,
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 63,
+        "pushed_at": "2026-07-04T16:13:30Z",
+        "stars": 4296,
+        "url": "https://github.com/PaperMC/Folia"
+      },
+      "id": "folia",
+      "ingestion_policy": "index",
+      "name": "Folia",
+      "priority": "P0",
+      "rationale": "Region-threaded Paper fork whose scheduler and ownership model requires explicit compatibility.",
+      "repository": "PaperMC/Folia"
+    },
+    {
+      "docs_url": "https://docs.minecraftforge.net/",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "MinecraftForge/MinecraftForge",
+        "default_branch": "26.1.2",
+        "default_branch_head": {
+          "committed_at": "2026-06-28T20:21:48Z",
+          "sha": "6c3729d6e96d5d07526c0572962f502f5fd645f3",
+          "url": "https://github.com/MinecraftForge/MinecraftForge/commit/6c3729d6e96d5d07526c0572962f502f5fd645f3"
+        },
+        "description": "Modifications to the Minecraft base files to assist in compatibility between mods. New Discord: https://discord.minecraftforge.net/",
+        "fork": false,
+        "forks": 2800,
+        "latest_release": null,
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 189,
+        "pushed_at": "2026-07-14T00:05:48Z",
+        "stars": 7692,
+        "url": "https://github.com/MinecraftForge/MinecraftForge"
+      },
+      "id": "forge",
+      "ingestion_policy": "index",
+      "name": "MinecraftForge",
+      "priority": "P0",
+      "rationale": "Canonical Forge/FML loader and mod API; exact Minecraft-Forge artifact pairs are mandatory.",
+      "repository": "MinecraftForge/MinecraftForge"
+    },
+    {
+      "docs_url": "https://docs.minecraftforge.net/",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "MinecraftForge/Documentation",
+        "default_branch": "1.21.x",
+        "default_branch_head": {
+          "committed_at": "2025-08-16T15:42:25Z",
+          "sha": "ac05e12aae903703cb8a9908a153623ce476a509",
+          "url": "https://github.com/MinecraftForge/Documentation/commit/ac05e12aae903703cb8a9908a153623ce476a509"
+        },
+        "description": "Read the docs MinecraftForge documentation",
+        "fork": false,
+        "forks": 193,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 19,
+        "pushed_at": "2026-06-18T14:07:54Z",
+        "stars": 512,
+        "url": "https://github.com/MinecraftForge/Documentation"
+      },
+      "id": "forge-docs",
+      "ingestion_policy": "index",
+      "name": "Forge Documentation",
+      "priority": "P1",
+      "rationale": "Versioned Forge development guidance, including client model and geometry-loader APIs.",
+      "repository": "MinecraftForge/Documentation"
+    },
+    {
+      "docs_url": "https://docs.minecraftforge.net/en/latest/gettingstarted/",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "MinecraftForge/ForgeGradle",
+        "default_branch": "FG_7.0",
+        "default_branch_head": {
+          "committed_at": "2026-06-26T05:07:06Z",
+          "sha": "aa37e15d27a46f2780761027c4c74cc3ff45388d",
+          "url": "https://github.com/MinecraftForge/ForgeGradle/commit/aa37e15d27a46f2780761027c4c74cc3ff45388d"
+        },
+        "description": "Minecraft mod development framework used by Forge and FML for the gradle build system",
+        "fork": false,
+        "forks": 449,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2015-10-28T04:23:18Z",
+          "tag": "v2.0.2",
+          "url": "https://github.com/MinecraftForge/ForgeGradle/releases/tag/v2.0.2"
+        },
+        "license": {
+          "key": "lgpl-2.1",
+          "name": "GNU Lesser General Public License v2.1",
+          "spdx_id": "LGPL-2.1"
+        },
+        "open_issues": 13,
+        "pushed_at": "2026-06-26T05:07:11Z",
+        "stars": 570,
+        "url": "https://github.com/MinecraftForge/ForgeGradle"
+      },
+      "id": "forge-gradle",
+      "ingestion_policy": "index",
+      "name": "ForgeGradle",
+      "priority": "P1",
+      "rationale": "Forge Gradle development, mapping, patching, and reobfuscation tooling.",
+      "repository": "MinecraftForge/ForgeGradle"
+    },
+    {
+      "docs_url": "https://github.com/bernie-g/geckolib/wiki",
+      "domains": [
+        "client",
+        "model"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "bernie-g/geckolib",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-06-27T04:56:51Z",
+          "sha": "05048071ce4801969237ffdca0b73223e986d94d",
+          "url": "https://github.com/bernie-g/geckolib/commit/05048071ce4801969237ffdca0b73223e986d94d"
+        },
+        "description": "GeckoLib is an animation engine for Minecraft mods, with support for complex 3D keyframe-based animations, numerous easings, concurrent animation support, sound and particle keyframes, event keyframes, math-based animations, and more. Available for all major modloaders.",
+        "fork": false,
+        "forks": 160,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 7,
+        "pushed_at": "2026-07-01T03:43:09Z",
+        "stars": 826,
+        "url": "https://github.com/bernie-g/geckolib"
+      },
+      "id": "geckolib",
+      "ingestion_policy": "index",
+      "name": "GeckoLib",
+      "priority": "P0",
+      "rationale": "Loader-specific skeletal animation and rendering API for entities, items, and blocks.",
+      "repository": "bernie-g/geckolib"
+    },
+    {
+      "docs_url": "https://geysermc.org/wiki/geyser/",
+      "domains": [
+        "client",
+        "pack",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "GeyserMC/Geyser",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-14T11:28:07Z",
+          "sha": "2c8380a2bf40b4eae8ca975f141196f6a8736e51",
+          "url": "https://github.com/GeyserMC/Geyser/commit/2c8380a2bf40b4eae8ca975f141196f6a8736e51"
+        },
+        "description": "A bridge/proxy allowing you to connect to Minecraft: Java Edition servers with Minecraft: Bedrock Edition.",
+        "fork": false,
+        "forks": 847,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 263,
+        "pushed_at": "2026-07-14T11:28:07Z",
+        "stars": 5674,
+        "url": "https://github.com/GeyserMC/Geyser"
+      },
+      "id": "geyser",
+      "ingestion_policy": "index",
+      "name": "Geyser",
+      "priority": "P1",
+      "rationale": "Java-to-Bedrock bridge, pack translation, extensions, and a separate client capability boundary.",
+      "repository": "GeyserMC/Geyser"
+    },
+    {
+      "docs_url": "https://github.com/GrimAnticheat/Grim/wiki",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "GrimAnticheat/Grim",
+        "default_branch": "2.0",
+        "default_branch_head": {
+          "committed_at": "2026-07-15T00:49:33Z",
+          "sha": "ff189cf411ac57dfd0d91afc0fc2a919336219f0",
+          "url": "https://github.com/GrimAnticheat/Grim/commit/ff189cf411ac57dfd0d91afc0fc2a919336219f0"
+        },
+        "description": "Fully async, multithreaded, predictive, open source, 3.01 reach, 1.005 timer, 0.01% speed, 99.99% antikb, \"bypassable\" 1.8-1.21 minecraft anticheat.",
+        "fork": false,
+        "forks": 611,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-03-09T09:05:17Z",
+          "tag": "v2.3.73",
+          "url": "https://github.com/GrimAnticheat/Grim/releases/tag/v2.3.73"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 335,
+        "pushed_at": "2026-07-15T00:49:38Z",
+        "stars": 1666,
+        "url": "https://github.com/GrimAnticheat/Grim"
+      },
+      "id": "grim",
+      "ingestion_policy": "derive",
+      "name": "Grim",
+      "priority": "P1",
+      "rationale": "Source for original synthesis of packet order, prediction, latency, collision replication, and check pipelines.",
+      "repository": "GrimAnticheat/Grim"
+    },
+    {
+      "docs_url": "https://shaders.properties/",
+      "domains": [
+        "client",
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "IrisShaders/Iris",
+        "default_branch": "26.1",
+        "default_branch_head": {
+          "committed_at": "2026-07-14T20:56:27Z",
+          "sha": "844542b8440f1ce6479d2914c212d099ff9d264c",
+          "url": "https://github.com/IrisShaders/Iris/commit/844542b8440f1ce6479d2914c212d099ff9d264c"
+        },
+        "description": "A modern shaders mod for Minecraft compatible with existing OptiFine shader packs",
+        "fork": false,
+        "forks": 779,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2024-07-01T00:09:45Z",
+          "tag": "1.7.3+1.21",
+          "url": "https://github.com/IrisShaders/Iris/releases/tag/1.7.3%2B1.21"
+        },
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 737,
+        "pushed_at": "2026-07-14T20:56:32Z",
+        "stars": 3776,
+        "url": "https://github.com/IrisShaders/Iris"
+      },
+      "id": "iris",
+      "ingestion_policy": "index",
+      "name": "Iris",
+      "priority": "P0",
+      "rationale": "Shader-pack loader with public APIs and a tight exact-version relationship to Sodium.",
+      "repository": "IrisShaders/Iris"
+    },
+    {
+      "docs_url": "https://github.com/IrisShaders/ShaderDoc",
+      "domains": [
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "IrisShaders/ShaderDoc",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2024-04-25T01:09:35Z",
+          "sha": "ddf473726710c6504422d192784c1652f8aece98",
+          "url": "https://github.com/IrisShaders/ShaderDoc/commit/ddf473726710c6504422d192784c1652f8aece98"
+        },
+        "description": "Documentation of Minecraft shaders",
+        "fork": false,
+        "forks": 11,
+        "latest_release": null,
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 10,
+        "pushed_at": "2024-07-08T18:36:29Z",
+        "stars": 87,
+        "url": "https://github.com/IrisShaders/ShaderDoc"
+      },
+      "id": "iris-shader-doc",
+      "ingestion_policy": "metadata-only",
+      "name": "Iris ShaderDoc",
+      "priority": "P2",
+      "rationale": "Historical shader-pack pipeline terminology; current behavior requires artifact testing.",
+      "repository": "IrisShaders/ShaderDoc"
+    },
+    {
+      "docs_url": "https://itemsadder.devs.beer/",
+      "domains": [
+        "client",
+        "pack",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "LoneDev6/API-ItemsAdder",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-05-29T14:12:03Z",
+          "sha": "55ff929655867287582889276e60055e9ec4833e",
+          "url": "https://github.com/LoneDev6/API-ItemsAdder/commit/55ff929655867287582889276e60055e9ec4833e"
+        },
+        "description": "This is the ItemsAdder API repository. It serves as a Maven/Gradle reference for anyone looking to access the API without embedding/owning the entire plugin.",
+        "fork": false,
+        "forks": 12,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2024-09-16T14:20:01Z",
+          "tag": "4.0.2-beta-release-11",
+          "url": "https://github.com/LoneDev6/API-ItemsAdder/releases/tag/4.0.2-beta-release-11"
+        },
+        "license": null,
+        "open_issues": 0,
+        "pushed_at": "2026-05-29T14:12:03Z",
+        "stars": 33,
+        "url": "https://github.com/LoneDev6/API-ItemsAdder"
+      },
+      "id": "itemsadder-api",
+      "ingestion_policy": "link-only",
+      "name": "ItemsAdder API",
+      "priority": "P1",
+      "rationale": "Public API names and lifecycle docs for a proprietary custom-content and pack plugin.",
+      "repository": "LoneDev6/API-ItemsAdder"
+    },
+    {
+      "docs_url": "https://github.com/CadixDev/Lorenz",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "CadixDev/Lorenz",
+        "default_branch": "develop",
+        "default_branch_head": {
+          "committed_at": "2021-10-23T22:49:48Z",
+          "sha": "76ce6fbdae25ed3fd5742106393ce775f169ba1c",
+          "url": "https://github.com/CadixDev/Lorenz/commit/76ce6fbdae25ed3fd5742106393ce775f169ba1c"
+        },
+        "description": "A representation of JVM deobfuscation mappings for Java.",
+        "fork": false,
+        "forks": 7,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2021-10-23T22:50:33Z",
+          "tag": "0.5.8",
+          "url": "https://github.com/CadixDev/Lorenz/releases/tag/0.5.8"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 10,
+        "pushed_at": "2021-10-23T22:49:58Z",
+        "stars": 45,
+        "url": "https://github.com/CadixDev/Lorenz"
+      },
+      "id": "lorenz",
+      "ingestion_policy": "metadata-only",
+      "name": "Lorenz",
+      "priority": "P2",
+      "rationale": "Quiet but useful historical JVM mapping model library.",
+      "repository": "CadixDev/Lorenz"
+    },
+    {
+      "docs_url": "https://javadoc.io/doc/net.luckperms/api",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "LuckPerms/LuckPerms",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-06-30T20:39:39Z",
+          "sha": "cd61d05b533db020cf25ba48c705b953af2ce08f",
+          "url": "https://github.com/LuckPerms/LuckPerms/commit/cd61d05b533db020cf25ba48c705b953af2ce08f"
+        },
+        "description": "A permissions plugin for Minecraft servers.",
+        "fork": false,
+        "forks": 674,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 111,
+        "pushed_at": "2026-06-30T20:39:43Z",
+        "stars": 2292,
+        "url": "https://github.com/LuckPerms/LuckPerms"
+      },
+      "id": "luckperms",
+      "ingestion_policy": "index",
+      "name": "LuckPerms",
+      "priority": "P0",
+      "rationale": "Permissions provider, users, groups, nodes, tracks, contexts, query options, caches, and messaging.",
+      "repository": "LuckPerms/LuckPerms"
+    },
+    {
+      "docs_url": "https://github.com/GeyserMC/MCProtocolLib",
+      "domains": [
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "GeyserMC/MCProtocolLib",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-08T09:02:34Z",
+          "sha": "19783c29ece24bc3f07f8ff08628549527e3de20",
+          "url": "https://github.com/GeyserMC/MCProtocolLib/commit/19783c29ece24bc3f07f8ff08628549527e3de20"
+        },
+        "description": "A library for communication with a Minecraft client/server.",
+        "fork": false,
+        "forks": 221,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2025-01-18T11:51:45Z",
+          "tag": "1.21.4-1",
+          "url": "https://github.com/GeyserMC/MCProtocolLib/releases/tag/1.21.4-1"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 15,
+        "pushed_at": "2026-07-09T10:53:40Z",
+        "stars": 906,
+        "url": "https://github.com/GeyserMC/MCProtocolLib"
+      },
+      "id": "mc-protocol-lib",
+      "ingestion_policy": "index",
+      "name": "MCProtocolLib",
+      "priority": "P0",
+      "rationale": "Stateful Java sessions, packets, encryption, compression, authentication, and codecs.",
+      "repository": "GeyserMC/MCProtocolLib"
+    },
+    {
+      "docs_url": "https://github.com/misode/mcmeta",
+      "domains": [
+        "core",
+        "pack",
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "misode/mcmeta",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-06-16T23:48:27Z",
+          "sha": "3d63d61bcb7421a0d8ddda656bc851cc178067dd",
+          "url": "https://github.com/misode/mcmeta/commit/3d63d61bcb7421a0d8ddda656bc851cc178067dd"
+        },
+        "description": "Processed, version controlled history of Minecraft's generated data and assets",
+        "fork": false,
+        "forks": 26,
+        "latest_release": null,
+        "license": null,
+        "open_issues": 2,
+        "pushed_at": "2026-07-07T16:36:02Z",
+        "stars": 592,
+        "url": "https://github.com/misode/mcmeta"
+      },
+      "id": "mcmeta",
+      "ingestion_policy": "link-only",
+      "name": "mcmeta",
+      "priority": "P1",
+      "rationale": "Processed versioned Minecraft reports and assets used only as a corroborating change index.",
+      "repository": "misode/mcmeta"
+    },
+    {
+      "docs_url": "https://wiki.mcmmo.org/",
+      "domains": [
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "mcMMO-Dev/mcMMO",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-11T23:31:31Z",
+          "sha": "1ae0816c9b66a40305c4cf983f80cfbb986f0e9e",
+          "url": "https://github.com/mcMMO-Dev/mcMMO/commit/1ae0816c9b66a40305c4cf983f80cfbb986f0e9e"
+        },
+        "description": "The RPG Lover's Mod!",
+        "fork": false,
+        "forks": 945,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2017-12-23T00:08:31Z",
+          "tag": "1.4.06-rerelease",
+          "url": "https://github.com/mcMMO-Dev/mcMMO/releases/tag/1.4.06-rerelease"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 455,
+        "pushed_at": "2026-07-11T23:31:42Z",
+        "stars": 1105,
+        "url": "https://github.com/mcMMO-Dev/mcMMO"
+      },
+      "id": "mcmmo",
+      "ingestion_policy": "index",
+      "name": "mcMMO",
+      "priority": "P1",
+      "rationale": "Skill, XP, profile, ability, party, combat/gathering event, modifier, and persistence APIs.",
+      "repository": "mcMMO-Dev/mcMMO"
+    },
+    {
+      "docs_url": "https://github.com/PrismarineJS/minecraft-data",
+      "domains": [
+        "core",
+        "pack",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PrismarineJS/minecraft-data",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-07T14:33:50Z",
+          "sha": "6ec59288287e4045331eaa47ee8fb104278f6b98",
+          "url": "https://github.com/PrismarineJS/minecraft-data/commit/6ec59288287e4045331eaa47ee8fb104278f6b98"
+        },
+        "description": "Language independent module providing minecraft data for minecraft clients, servers and libraries.",
+        "fork": false,
+        "forks": 269,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-18T12:06:54Z",
+          "tag": "3.111.0",
+          "url": "https://github.com/PrismarineJS/minecraft-data/releases/tag/3.111.0"
+        },
+        "license": null,
+        "open_issues": 180,
+        "pushed_at": "2026-07-09T14:30:14Z",
+        "stars": 891,
+        "url": "https://github.com/PrismarineJS/minecraft-data"
+      },
+      "id": "minecraft-data",
+      "ingestion_policy": "link-only",
+      "name": "minecraft-data",
+      "priority": "P1",
+      "rationale": "Language-neutral Minecraft data and protocol schemas with mixed per-file provenance.",
+      "repository": "PrismarineJS/minecraft-data"
+    },
+    {
+      "docs_url": "https://minestom.net/docs/",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Minestom/Minestom",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T01:00:45Z",
+          "sha": "c5daa026c57238b5ba38ebf854f34c59944f12bb",
+          "url": "https://github.com/Minestom/Minestom/commit/c5daa026c57238b5ba38ebf854f34c59944f12bb"
+        },
+        "description": "26.2 Lightweight Minecraft server",
+        "fork": false,
+        "forks": 503,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-12T13:29:24Z",
+          "tag": "2026.07.12-26.2",
+          "url": "https://github.com/Minestom/Minestom/releases/tag/2026.07.12-26.2"
+        },
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0"
+        },
+        "open_issues": 173,
+        "pushed_at": "2026-07-12T13:29:21Z",
+        "stars": 3195,
+        "url": "https://github.com/Minestom/Minestom"
+      },
+      "id": "minestom",
+      "ingestion_policy": "index",
+      "name": "Minestom",
+      "priority": "P0",
+      "rationale": "From-scratch extensible server library and protocol implementation with current-version-first support.",
+      "repository": "Minestom/Minestom"
+    },
+    {
+      "docs_url": "https://github.com/SpongePowered/Mixin/wiki",
+      "domains": [
+        "client",
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "SpongePowered/Mixin",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2024-07-06T21:41:39Z",
+          "sha": "4053421aa10aaac6127d969028a29c94fe3054f6",
+          "url": "https://github.com/SpongePowered/Mixin/commit/4053421aa10aaac6127d969028a29c94fe3054f6"
+        },
+        "description": "Mixin is a trait/mixin and bytecode weaving framework for Java using ASM",
+        "fork": false,
+        "forks": 222,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2021-12-02T16:06:38Z",
+          "tag": "releases/0.8.5",
+          "url": "https://github.com/SpongePowered/Mixin/releases/tag/releases/0.8.5"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 111,
+        "pushed_at": "2024-08-05T04:16:27Z",
+        "stars": 1703,
+        "url": "https://github.com/SpongePowered/Mixin"
+      },
+      "id": "mixin",
+      "ingestion_policy": "index",
+      "name": "Mixin",
+      "priority": "P1",
+      "rationale": "ASM mixin framework; injection contracts remain exact-target-bytecode-specific.",
+      "repository": "SpongePowered/Mixin"
+    },
+    {
+      "docs_url": "https://docs.mockbukkit.org/",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "MockBukkit/MockBukkit",
+        "default_branch": "minecraft/v26",
+        "default_branch_head": {
+          "committed_at": "2026-07-09T18:50:22Z",
+          "sha": "4cbcc1867507936ff47b00fe842430cc07191330",
+          "url": "https://github.com/MockBukkit/MockBukkit/commit/4cbcc1867507936ff47b00fe842430cc07191330"
+        },
+        "description": "MockBukkit is a mocking framework for Bukkit/PaperMC to allow the easy unit testing of Bukkit plugins.",
+        "fork": false,
+        "forks": 153,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 41,
+        "pushed_at": "2026-07-13T17:09:24Z",
+        "stars": 737,
+        "url": "https://github.com/MockBukkit/MockBukkit"
+      },
+      "id": "mockbukkit",
+      "ingestion_policy": "index",
+      "name": "MockBukkit",
+      "priority": "P0",
+      "rationale": "Plugin test lifecycle, server/player/world mocks, scheduler/event simulation, and assertions.",
+      "repository": "MockBukkit/MockBukkit"
+    },
+    {
+      "docs_url": "https://mvplugins.org/",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Multiverse/Multiverse-Core",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-06-22T03:08:07Z",
+          "sha": "9dddbdcd975d26353f311c6fd3b2e2276a6192f1",
+          "url": "https://github.com/Multiverse/Multiverse-Core/commit/9dddbdcd975d26353f311c6fd3b2e2276a6192f1"
+        },
+        "description": "The original Bukkit Multi-World Plugin! ",
+        "fork": false,
+        "forks": 344,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-07T07:09:53Z",
+          "tag": "5.7.2",
+          "url": "https://github.com/Multiverse/Multiverse-Core/releases/tag/5.7.2"
+        },
+        "license": {
+          "key": "bsd-3-clause",
+          "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+          "spdx_id": "BSD-3-Clause"
+        },
+        "open_issues": 22,
+        "pushed_at": "2026-07-14T08:14:55Z",
+        "stars": 1096,
+        "url": "https://github.com/Multiverse/Multiverse-Core"
+      },
+      "id": "multiverse-core",
+      "ingestion_policy": "index",
+      "name": "Multiverse-Core",
+      "priority": "P1",
+      "rationale": "World lifecycle, generators, properties, destinations, access control, events, and commands.",
+      "repository": "Multiverse/Multiverse-Core"
+    },
+    {
+      "docs_url": "https://docs.neoforged.net/",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "neoforged/NeoForge",
+        "default_branch": "26.2.x",
+        "default_branch_head": {
+          "committed_at": "2026-07-14T16:11:07Z",
+          "sha": "6c06cf43d9b89adde4186307414a16da46cc97bb",
+          "url": "https://github.com/neoforged/NeoForge/commit/6c06cf43d9b89adde4186307414a16da46cc97bb"
+        },
+        "description": "Neo Modding API for Minecraft: Java Edition, based on Forge",
+        "fork": false,
+        "forks": 317,
+        "latest_release": null,
+        "license": {
+          "key": "lgpl-2.1",
+          "name": "GNU Lesser General Public License v2.1",
+          "spdx_id": "LGPL-2.1"
+        },
+        "open_issues": 171,
+        "pushed_at": "2026-07-14T16:11:42Z",
+        "stars": 1981,
+        "url": "https://github.com/neoforged/NeoForge"
+      },
+      "id": "neoforge",
+      "ingestion_policy": "index",
+      "name": "NeoForge",
+      "priority": "P0",
+      "rationale": "Canonical NeoForge loader and API for events, registries, data, networking, models, and resources.",
+      "repository": "neoforged/NeoForge"
+    },
+    {
+      "docs_url": "https://docs.neoforged.net/",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "neoforged/Documentation",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-06-28T02:10:51Z",
+          "sha": "afc61558725b0114009666bea1f9f12673f296b1",
+          "url": "https://github.com/neoforged/Documentation/commit/afc61558725b0114009666bea1f9f12673f296b1"
+        },
+        "description": "The repository containing Neo's documentation",
+        "fork": false,
+        "forks": 90,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 37,
+        "pushed_at": "2026-06-28T02:10:52Z",
+        "stars": 74,
+        "url": "https://github.com/neoforged/Documentation"
+      },
+      "id": "neoforge-docs",
+      "ingestion_policy": "index",
+      "name": "NeoForge Documentation",
+      "priority": "P0",
+      "rationale": "Official versioned NeoForge development documentation.",
+      "repository": "neoforged/Documentation"
+    },
+    {
+      "docs_url": "https://github.com/neoforged/NeoForm",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "neoforged/NeoForm",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-07T15:47:03Z",
+          "sha": "2d7a8bb66773c285b5cd6f635f45503bb9b70295",
+          "url": "https://github.com/neoforged/NeoForm/commit/2d7a8bb66773c285b5cd6f635f45503bb9b70295"
+        },
+        "description": null,
+        "fork": false,
+        "forks": 19,
+        "latest_release": null,
+        "license": null,
+        "open_issues": 3,
+        "pushed_at": "2026-07-07T15:53:08Z",
+        "stars": 50,
+        "url": "https://github.com/neoforged/NeoForm"
+      },
+      "id": "neoform",
+      "ingestion_policy": "metadata-only",
+      "name": "NeoForm",
+      "priority": "P1",
+      "rationale": "Minecraft source/form transformation configuration; generated contents remain license-sensitive.",
+      "repository": "neoforged/NeoForm"
+    },
+    {
+      "docs_url": "https://docs.nexomc.com/",
+      "domains": [
+        "pack",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Nexo-MC/Nexo-Documentation",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-06-18T11:11:08Z",
+          "sha": "ab1cdb3834221e6d13d1127961e16f2bbf1f4ba9",
+          "url": "https://github.com/Nexo-MC/Nexo-Documentation/commit/ab1cdb3834221e6d13d1127961e16f2bbf1f4ba9"
+        },
+        "description": null,
+        "fork": false,
+        "forks": 8,
+        "latest_release": null,
+        "license": null,
+        "open_issues": 0,
+        "pushed_at": "2026-07-10T21:51:06Z",
+        "stars": 3,
+        "url": "https://github.com/Nexo-MC/Nexo-Documentation"
+      },
+      "id": "nexo-docs",
+      "ingestion_policy": "link-only",
+      "name": "Nexo Documentation",
+      "priority": "P1",
+      "rationale": "Public lifecycle, API, version, generated-pack, item, block, and furniture docs for a commercial plugin.",
+      "repository": "Nexo-MC/Nexo-Documentation"
+    },
+    {
+      "docs_url": "https://github.com/PrismarineJS/node-minecraft-protocol",
+      "domains": [
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PrismarineJS/node-minecraft-protocol",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-05-13T06:47:23Z",
+          "sha": "ee40987dde124cd2f560bb944cfffb29946fef81",
+          "url": "https://github.com/PrismarineJS/node-minecraft-protocol/commit/ee40987dde124cd2f560bb944cfffb29946fef81"
+        },
+        "description": "Parse and serialize minecraft packets, plus authentication and encryption.",
+        "fork": false,
+        "forks": 281,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-05-13T06:47:46Z",
+          "tag": "1.66.2",
+          "url": "https://github.com/PrismarineJS/node-minecraft-protocol/releases/tag/1.66.2"
+        },
+        "license": {
+          "key": "bsd-3-clause",
+          "name": "BSD 3-Clause \"New\" or \"Revised\" License",
+          "spdx_id": "BSD-3-Clause"
+        },
+        "open_issues": 130,
+        "pushed_at": "2026-07-08T11:23:01Z",
+        "stars": 1406,
+        "url": "https://github.com/PrismarineJS/node-minecraft-protocol"
+      },
+      "id": "node-minecraft-protocol",
+      "ingestion_policy": "index",
+      "name": "node-minecraft-protocol",
+      "priority": "P1",
+      "rationale": "Node Java-protocol parser, serializer, session, encryption, authentication, and test ecosystem.",
+      "repository": "PrismarineJS/node-minecraft-protocol"
+    },
+    {
+      "docs_url": "https://docs.xenondevs.xyz/nova/api/",
+      "domains": [
+        "client",
+        "model",
+        "pack",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "xenondevs/Nova",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-06-20T08:19:53Z",
+          "sha": "bdc8bf8a4e9d83ce7bbdf7f5f39e1e5987a2fc61",
+          "url": "https://github.com/xenondevs/Nova/commit/bdc8bf8a4e9d83ce7bbdf7f5f39e1e5987a2fc61"
+        },
+        "description": "Nova is a server-side modding framework for Paper servers that aims to streamline adding custom content like items, blocks, guis, and more, without client-side modifications, using resource pack tricks.",
+        "fork": false,
+        "forks": 42,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-05-10T09:31:58Z",
+          "tag": "0.23.0",
+          "url": "https://github.com/xenondevs/Nova/releases/tag/0.23.0"
+        },
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 25,
+        "pushed_at": "2026-07-01T02:34:07Z",
+        "stars": 490,
+        "url": "https://github.com/xenondevs/Nova"
+      },
+      "id": "nova",
+      "ingestion_policy": "index",
+      "name": "Nova",
+      "priority": "P0",
+      "rationale": "Custom items, blocks, tile entities, attachments, behaviors, models, packs, GUIs, storage, and addon APIs.",
+      "repository": "xenondevs/Nova"
+    },
+    {
+      "docs_url": "https://oraxen.mizius.com/",
+      "domains": [
+        "client",
+        "model",
+        "pack",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "oraxen/oraxen",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-06-23T12:48:24Z",
+          "sha": "8cb371ac2f5521fcb47c2cf3772dc089a24210e4",
+          "url": "https://github.com/oraxen/oraxen/commit/8cb371ac2f5521fcb47c2cf3772dc089a24210e4"
+        },
+        "description": "Oraxen is a minecraft plugin that allows to easily use Minecraft 1.14 features in order to create new items with custom textures. It handles the resourcepack generation, upload (using Polymath) and has an extensible API.",
+        "fork": false,
+        "forks": 427,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-23T12:48:54Z",
+          "tag": "v1.217.0",
+          "url": "https://github.com/oraxen/oraxen/releases/tag/v1.217.0"
+        },
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 14,
+        "pushed_at": "2026-06-23T12:48:53Z",
+        "stars": 725,
+        "url": "https://github.com/oraxen/oraxen"
+      },
+      "id": "oraxen",
+      "ingestion_policy": "metadata-only",
+      "name": "Oraxen",
+      "priority": "P2",
+      "rationale": "Metadata for custom items, glyphs, models, packs, mechanics, events, and compatibility under a restrictive custom license.",
+      "repository": "oraxen/oraxen"
+    },
+    {
+      "docs_url": "https://packsquash.aylas.org/",
+      "domains": [
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "ComunidadAylas/PackSquash",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-05T13:24:05Z",
+          "sha": "fed576e000cc736e03cfe00b1aa02ba8214d0ad2",
+          "url": "https://github.com/ComunidadAylas/PackSquash/commit/fed576e000cc736e03cfe00b1aa02ba8214d0ad2"
+        },
+        "description": "📦 Minecraft: Java Edition resource and data pack optimizer which aims to achieve the best possible compression, performance and protection, improving pack distribution, storage and in-game load times.",
+        "fork": false,
+        "forks": 38,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-01-01T19:35:18Z",
+          "tag": "v0.4.1",
+          "url": "https://github.com/ComunidadAylas/PackSquash/releases/tag/v0.4.1"
+        },
+        "license": {
+          "key": "agpl-3.0",
+          "name": "GNU Affero General Public License v3.0",
+          "spdx_id": "AGPL-3.0"
+        },
+        "open_issues": 18,
+        "pushed_at": "2026-07-14T15:08:41Z",
+        "stars": 836,
+        "url": "https://github.com/ComunidadAylas/PackSquash"
+      },
+      "id": "packsquash",
+      "ingestion_policy": "index",
+      "name": "PackSquash",
+      "priority": "P1",
+      "rationale": "Resource/data-pack optimizer whose transformed output must be validated per target.",
+      "repository": "ComunidadAylas/PackSquash"
+    },
+    {
+      "docs_url": "https://docs.papermc.io/paper/",
+      "domains": [
+        "client",
+        "core",
+        "dialog",
+        "nms",
+        "pack",
+        "protocol",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/Paper",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T18:13:18Z",
+          "sha": "b4e83001d95e1af79e01c9523f2206c10efe3663",
+          "url": "https://github.com/PaperMC/Paper/commit/b4e83001d95e1af79e01c9523f2206c10efe3663"
+        },
+        "description": "The most widely used, high performance Minecraft server that aims to fix gameplay and mechanics inconsistencies",
+        "fork": false,
+        "forks": 3477,
+        "latest_release": null,
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 695,
+        "pushed_at": "2026-07-12T18:13:20Z",
+        "stars": 12475,
+        "url": "https://github.com/PaperMC/Paper"
+      },
+      "id": "paper",
+      "ingestion_policy": "index",
+      "name": "Paper",
+      "priority": "P0",
+      "rationale": "Canonical Paper server/API, fork lineage, schedulers, displays, dialogs, registries, and components.",
+      "repository": "PaperMC/Paper"
+    },
+    {
+      "docs_url": "https://docs.papermc.io/",
+      "domains": [
+        "client",
+        "core",
+        "dialog",
+        "nms",
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/docs",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-06T23:22:42Z",
+          "sha": "cc3f331ea85a91c600564a0a3008d03a66d5f23f",
+          "url": "https://github.com/PaperMC/docs/commit/cc3f331ea85a91c600564a0a3008d03a66d5f23f"
+        },
+        "description": "Documentation for all projects under the PaperMC umbrella.",
+        "fork": false,
+        "forks": 268,
+        "latest_release": null,
+        "license": {
+          "key": "bsd-2-clause",
+          "name": "BSD 2-Clause \"Simplified\" License",
+          "spdx_id": "BSD-2-Clause"
+        },
+        "open_issues": 49,
+        "pushed_at": "2026-07-11T19:46:16Z",
+        "stars": 70,
+        "url": "https://github.com/PaperMC/docs"
+      },
+      "id": "paper-docs",
+      "ingestion_policy": "derive",
+      "name": "Paper Documentation",
+      "priority": "P0",
+      "rationale": "Official Paper, Folia, Velocity, Adventure, display, dialog, pack, and userdev guidance.",
+      "repository": "PaperMC/docs"
+    },
+    {
+      "docs_url": "https://docs.papermc.io/paper/dev/userdev/",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/paperweight",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-04-04T21:14:56Z",
+          "sha": "ac8614f774c772f98e97aec7da6ec4dc19636c4c",
+          "url": "https://github.com/PaperMC/paperweight/commit/ac8614f774c772f98e97aec7da6ec4dc19636c4c"
+        },
+        "description": "Gradle build system plugin for Paper and Paper forks",
+        "fork": false,
+        "forks": 74,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-04-03T22:19:56Z",
+          "tag": "v2.0.0-beta.21",
+          "url": "https://github.com/PaperMC/paperweight/releases/tag/v2.0.0-beta.21"
+        },
+        "license": null,
+        "open_issues": 42,
+        "pushed_at": "2026-07-12T00:49:12Z",
+        "stars": 316,
+        "url": "https://github.com/PaperMC/paperweight"
+      },
+      "id": "paperweight",
+      "ingestion_policy": "metadata-only",
+      "name": "paperweight",
+      "priority": "P1",
+      "rationale": "Supported Paper build/userdev workflow; implementation license requires cautious ingestion.",
+      "repository": "PaperMC/paperweight"
+    },
+    {
+      "docs_url": "https://parchmentmc.org/docs/getting-started",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "ParchmentMC/Parchment",
+        "default_branch": "versions/1.21.x",
+        "default_branch_head": {
+          "committed_at": "2025-12-20T14:51:04Z",
+          "sha": "c157e991f7b002cf271df02d033db72d7a150fdb",
+          "url": "https://github.com/ParchmentMC/Parchment/commit/c157e991f7b002cf271df02d033db72d7a150fdb"
+        },
+        "description": "Repository for the Parchment mappings data.",
+        "fork": false,
+        "forks": 97,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2021-07-21T21:28:12Z",
+          "tag": "releases/1.17-2021.07.21",
+          "url": "https://github.com/ParchmentMC/Parchment/releases/tag/releases/1.17-2021.07.21"
+        },
+        "license": {
+          "key": "cc0-1.0",
+          "name": "Creative Commons Zero v1.0 Universal",
+          "spdx_id": "CC0-1.0"
+        },
+        "open_issues": 16,
+        "pushed_at": "2025-12-20T14:52:34Z",
+        "stars": 331,
+        "url": "https://github.com/ParchmentMC/Parchment"
+      },
+      "id": "parchment",
+      "ingestion_policy": "index",
+      "name": "Parchment",
+      "priority": "P1",
+      "rationale": "Historical parameter and documentation enrichment layered over official mappings.",
+      "repository": "ParchmentMC/Parchment"
+    },
+    {
+      "docs_url": "https://wiki.placeholderapi.com/developers/",
+      "domains": [
+        "client",
+        "core",
+        "dialog",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PlaceholderAPI/PlaceholderAPI",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-03T11:49:43Z",
+          "sha": "7d21d2f1d73f045b86812c70e6c6975b102c6d89",
+          "url": "https://github.com/PlaceholderAPI/PlaceholderAPI/commit/7d21d2f1d73f045b86812c70e6c6975b102c6d89"
+        },
+        "description": "The best and simplest way to add placeholders to your server! - 2M+ Downloads - 3.5k+ Placeholders",
+        "fork": false,
+        "forks": 281,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-03T12:42:11Z",
+          "tag": "2.12.3",
+          "url": "https://github.com/PlaceholderAPI/PlaceholderAPI/releases/tag/2.12.3"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 14,
+        "pushed_at": "2026-07-10T19:43:00Z",
+        "stars": 970,
+        "url": "https://github.com/PlaceholderAPI/PlaceholderAPI"
+      },
+      "id": "placeholder-api",
+      "ingestion_policy": "index",
+      "name": "PlaceholderAPI",
+      "priority": "P0",
+      "rationale": "Expansion lifecycle, placeholder parsing, relational placeholders, caching, and service discovery.",
+      "repository": "PlaceholderAPI/PlaceholderAPI"
+    },
+    {
+      "docs_url": "https://kosmx.gitbook.io/player-animator",
+      "domains": [
+        "client",
+        "model"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "KosmX/minecraftPlayerAnimator",
+        "default_branch": "1.21",
+        "default_branch_head": {
+          "committed_at": "2025-12-28T20:53:31Z",
+          "sha": "cb3227efc19ec46065597332ae265076d0f2b495",
+          "url": "https://github.com/KosmX/minecraftPlayerAnimator/commit/cb3227efc19ec46065597332ae265076d0f2b495"
+        },
+        "description": "Minecraft 1.16+ player animation library",
+        "fork": false,
+        "forks": 29,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 25,
+        "pushed_at": "2025-12-28T20:53:31Z",
+        "stars": 119,
+        "url": "https://github.com/KosmX/minecraftPlayerAnimator"
+      },
+      "id": "player-animator",
+      "ingestion_policy": "index",
+      "name": "minecraftPlayerAnimator",
+      "priority": "P2",
+      "rationale": "Client player pose/animation layer with sensitive renderer-mixin compatibility.",
+      "repository": "KosmX/minecraftPlayerAnimator"
+    },
+    {
+      "docs_url": "https://polymer.pb4.eu/",
+      "domains": [
+        "client",
+        "pack",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Patbox/polymer",
+        "default_branch": "dev/26.2",
+        "default_branch_head": {
+          "committed_at": "2026-07-11T13:46:59Z",
+          "sha": "fdf5fdf326b3ca3b27dca1f7260cee5b0c5eeef3",
+          "url": "https://github.com/Patbox/polymer/commit/fdf5fdf326b3ca3b27dca1f7260cee5b0c5eeef3"
+        },
+        "description": "Library for creating better server side content! (For Fabric)",
+        "fork": false,
+        "forks": 55,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-11T13:47:29Z",
+          "tag": "0.17.3+26.2",
+          "url": "https://github.com/Patbox/polymer/releases/tag/0.17.3%2B26.2"
+        },
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 13,
+        "pushed_at": "2026-07-11T13:47:29Z",
+        "stars": 413,
+        "url": "https://github.com/Patbox/polymer"
+      },
+      "id": "polymer",
+      "ingestion_policy": "index",
+      "name": "Polymer",
+      "priority": "P0",
+      "rationale": "Fabric server-side custom content, generated packs, registry projection, and virtual entities for vanilla clients.",
+      "repository": "Patbox/polymer"
+    },
+    {
+      "docs_url": "https://dmulloy2.net/ProtocolLib/javadoc/",
+      "domains": [
+        "client",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "dmulloy2/ProtocolLib",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-13T02:46:37Z",
+          "sha": "6cf7c7d8c38f3ea521862c1d1fd3eedec7cdb8db",
+          "url": "https://github.com/dmulloy2/ProtocolLib/commit/6cf7c7d8c38f3ea521862c1d1fd3eedec7cdb8db"
+        },
+        "description": "Provides read and write access to the Minecraft protocol with Bukkit.",
+        "fork": false,
+        "forks": 326,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2025-08-07T01:23:57Z",
+          "tag": "5.4.0",
+          "url": "https://github.com/dmulloy2/ProtocolLib/releases/tag/5.4.0"
+        },
+        "license": {
+          "key": "gpl-2.0",
+          "name": "GNU General Public License v2.0",
+          "spdx_id": "GPL-2.0"
+        },
+        "open_issues": 24,
+        "pushed_at": "2026-07-13T02:46:37Z",
+        "stars": 1305,
+        "url": "https://github.com/dmulloy2/ProtocolLib"
+      },
+      "id": "protocol-lib",
+      "ingestion_policy": "index",
+      "name": "ProtocolLib",
+      "priority": "P0",
+      "rationale": "Mature Bukkit/Paper packet event, container, structure, send, and receive APIs.",
+      "repository": "dmulloy2/ProtocolLib"
+    },
+    {
+      "docs_url": "https://github.com/ProtoDef-io/ProtoDef",
+      "domains": [
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "ProtoDef-io/ProtoDef",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2024-12-07T19:58:55Z",
+          "sha": "8e07785e94626882fa3333184bb366e3f6625356",
+          "url": "https://github.com/ProtoDef-io/ProtoDef/commit/8e07785e94626882fa3333184bb366e3f6625356"
+        },
+        "description": "ProtoDef specification: describe your protocol, and read it with ease.",
+        "fork": false,
+        "forks": 11,
+        "latest_release": null,
+        "license": null,
+        "open_issues": 30,
+        "pushed_at": "2024-12-07T19:58:55Z",
+        "stars": 39,
+        "url": "https://github.com/ProtoDef-io/ProtoDef"
+      },
+      "id": "protodef",
+      "ingestion_policy": "link-only",
+      "name": "ProtoDef",
+      "priority": "P2",
+      "rationale": "Declarative protocol schema language used by Prismarine tooling; quiet and non-authoritative.",
+      "repository": "ProtoDef-io/ProtoDef"
+    },
+    {
+      "docs_url": "https://purpurmc.org/docs/",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PurpurMC/Purpur",
+        "default_branch": "ver/26.2",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T21:19:12Z",
+          "sha": "ed29e9980557c6f252ccbfbc50dced007b6c05f7",
+          "url": "https://github.com/PurpurMC/Purpur/commit/ed29e9980557c6f252ccbfbc50dced007b6c05f7"
+        },
+        "description": "Purpur is a drop-in replacement for Paper servers designed for configurability, and new fun and exciting gameplay features.",
+        "fork": false,
+        "forks": 483,
+        "latest_release": null,
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 10,
+        "pushed_at": "2026-07-13T01:59:40Z",
+        "stars": 2385,
+        "url": "https://github.com/PurpurMC/Purpur"
+      },
+      "id": "purpur",
+      "ingestion_policy": "index",
+      "name": "Purpur",
+      "priority": "P0",
+      "rationale": "Configurable Paper fork with additional APIs and composite inherited licensing.",
+      "repository": "PurpurMC/Purpur"
+    },
+    {
+      "docs_url": "https://pikamug.gitbook.io/quests/",
+      "domains": [
+        "dialog",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PikaMug/Quests",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-04T03:17:22Z",
+          "sha": "07c13aae243a7eb8e77775803ed37430dcf0de18",
+          "url": "https://github.com/PikaMug/Quests/commit/07c13aae243a7eb8e77775803ed37430dcf0de18"
+        },
+        "description": "Easy-to-use, open-source plugin for the creation and execution of quests on Minecraft servers.",
+        "fork": false,
+        "forks": 114,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-02T05:40:29Z",
+          "tag": "5.3.1",
+          "url": "https://github.com/PikaMug/Quests/releases/tag/5.3.1"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 6,
+        "pushed_at": "2026-07-04T03:17:41Z",
+        "stars": 214,
+        "url": "https://github.com/PikaMug/Quests"
+      },
+      "id": "quests",
+      "ingestion_policy": "index",
+      "name": "Quests",
+      "priority": "P1",
+      "rationale": "Quest stages, objectives, requirements, rewards, conversations, modules, events, and persistence.",
+      "repository": "PikaMug/Quests"
+    },
+    {
+      "docs_url": "https://github.com/jpenilla/reflection-remapper",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "jpenilla/reflection-remapper",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2025-09-08T03:03:11Z",
+          "sha": "3a0c287810b13523bba4828673a482996fba2575",
+          "url": "https://github.com/jpenilla/reflection-remapper/commit/3a0c287810b13523bba4828673a482996fba2575"
+        },
+        "description": "Java reflection library with support for obfuscation mappings",
+        "fork": false,
+        "forks": 3,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2025-06-29T03:28:29Z",
+          "tag": "v0.1.3",
+          "url": "https://github.com/jpenilla/reflection-remapper/releases/tag/v0.1.3"
+        },
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0"
+        },
+        "open_issues": 12,
+        "pushed_at": "2026-07-12T15:53:33Z",
+        "stars": 143,
+        "url": "https://github.com/jpenilla/reflection-remapper"
+      },
+      "id": "reflection-remapper",
+      "ingestion_policy": "index",
+      "name": "Reflection Remapper",
+      "priority": "P1",
+      "rationale": "Mapping-aware reflection helper for Paper Mojang-runtime lines.",
+      "repository": "jpenilla/reflection-remapper"
+    },
+    {
+      "docs_url": "https://skinsrestorer.net/docs/development/api",
+      "domains": [
+        "client",
+        "core",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "SkinsRestorer/SkinsRestorer",
+        "default_branch": "dev",
+        "default_branch_head": {
+          "committed_at": "2026-07-04T22:02:33Z",
+          "sha": "4cbf66608d6b9391f076a37ce092df56b9866d62",
+          "url": "https://github.com/SkinsRestorer/SkinsRestorer/commit/4cbf66608d6b9391f076a37ce092df56b9866d62"
+        },
+        "description": "🎨 The most popular skin plugin for Minecraft",
+        "fork": false,
+        "forks": 201,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-28T10:19:04Z",
+          "tag": "15.12.4",
+          "url": "https://github.com/SkinsRestorer/SkinsRestorer/releases/tag/15.12.4"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 101,
+        "pushed_at": "2026-07-06T23:45:41Z",
+        "stars": 706,
+        "url": "https://github.com/SkinsRestorer/SkinsRestorer"
+      },
+      "id": "skins-restorer",
+      "ingestion_policy": "index",
+      "name": "SkinsRestorer",
+      "priority": "P1",
+      "rationale": "Skin data/signature, player apply/update, proxy messaging, storage, lifecycle, and platform abstraction.",
+      "repository": "SkinsRestorer/SkinsRestorer"
+    },
+    {
+      "docs_url": "https://docs.skriptlang.org/",
+      "domains": [
+        "core",
+        "dialog",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "SkriptLang/Skript",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-01T16:13:00Z",
+          "sha": "702e3484bc5ab533fc66a039c81f4e8909767571",
+          "url": "https://github.com/SkriptLang/Skript/commit/702e3484bc5ab533fc66a039c81f4e8909767571"
+        },
+        "description": "Skript is a Paper plugin which allows server admins to customize their server easily, but without the hassle of programming a plugin or asking/paying someone to program a plugin for them.",
+        "fork": false,
+        "forks": 452,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-01T16:40:53Z",
+          "tag": "2.15.4",
+          "url": "https://github.com/SkriptLang/Skript/releases/tag/2.15.4"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 507,
+        "pushed_at": "2026-07-14T22:12:17Z",
+        "stars": 1322,
+        "url": "https://github.com/SkriptLang/Skript"
+      },
+      "id": "skript",
+      "ingestion_policy": "index",
+      "name": "Skript",
+      "priority": "P1",
+      "rationale": "Syntax registration, parsing, events, conditions, effects, expressions, types, and addon lifecycle.",
+      "repository": "SkriptLang/Skript"
+    },
+    {
+      "docs_url": "https://github.com/Slimefun/Slimefun4/wiki/Developer-Guide",
+      "domains": [
+        "model",
+        "pack",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "Slimefun/Slimefun4",
+        "default_branch": "experimental",
+        "default_branch_head": {
+          "committed_at": "2025-05-01T13:05:29Z",
+          "sha": "5374034c8713248909e60e6855c6f745fd7ca676",
+          "url": "https://github.com/Slimefun/Slimefun4/commit/5374034c8713248909e60e6855c6f745fd7ca676"
+        },
+        "description": "Slimefun 4 - A unique Spigot/Paper plugin that looks and feels like a modpack. We've been giving you backpacks, jetpacks, reactors and much more since 2013.",
+        "fork": false,
+        "forks": 647,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2024-02-25T18:06:52Z",
+          "tag": "RC-37",
+          "url": "https://github.com/Slimefun/Slimefun4/releases/tag/RC-37"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 123,
+        "pushed_at": "2026-06-05T22:59:19Z",
+        "stars": 1116,
+        "url": "https://github.com/Slimefun/Slimefun4"
+      },
+      "id": "slimefun",
+      "ingestion_policy": "index",
+      "name": "Slimefun 4",
+      "priority": "P0",
+      "rationale": "Custom items, research, recipes, machines, energy, block menus, handlers, addons, and persistence.",
+      "repository": "Slimefun/Slimefun4"
+    },
+    {
+      "docs_url": "https://github.com/CaffeineMC/sodium/wiki",
+      "domains": [
+        "client",
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "CaffeineMC/sodium",
+        "default_branch": "dev",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T23:52:01Z",
+          "sha": "3c4c4b29ad733ce3c20a1dddbb7f623d3897c82b",
+          "url": "https://github.com/CaffeineMC/sodium/commit/3c4c4b29ad733ce3c20a1dddbb7f623d3897c82b"
+        },
+        "description": "A high-performance rendering engine replacement for Minecraft, which greatly improves frame rates and reduces micro-stutter",
+        "fork": false,
+        "forks": 952,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-08T21:04:01Z",
+          "tag": "mc26.1.2-0.9.1",
+          "url": "https://github.com/CaffeineMC/sodium/releases/tag/mc26.1.2-0.9.1"
+        },
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 164,
+        "pushed_at": "2026-07-13T20:18:33Z",
+        "stars": 5663,
+        "url": "https://github.com/CaffeineMC/sodium"
+      },
+      "id": "sodium",
+      "ingestion_policy": "metadata-only",
+      "name": "Sodium",
+      "priority": "P0",
+      "rationale": "High-performance renderer replacement under PolyForm Shield; metadata/public API links only.",
+      "repository": "CaffeineMC/sodium"
+    },
+    {
+      "docs_url": "https://docs.spongepowered.org/",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "SpongePowered/Sponge",
+        "default_branch": "api-12",
+        "default_branch_head": {
+          "committed_at": "2026-07-07T20:26:49Z",
+          "sha": "82357050ce38dee3483472e4fa2ca530a853f84b",
+          "url": "https://github.com/SpongePowered/Sponge/commit/82357050ce38dee3483472e4fa2ca530a853f84b"
+        },
+        "description": "The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms.",
+        "fork": false,
+        "forks": 215,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-01-11T22:59:56Z",
+          "tag": "v17.0.0",
+          "url": "https://github.com/SpongePowered/Sponge/releases/tag/v17.0.0"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 208,
+        "pushed_at": "2026-07-09T18:43:22Z",
+        "stars": 432,
+        "url": "https://github.com/SpongePowered/Sponge"
+      },
+      "id": "sponge",
+      "ingestion_policy": "index",
+      "name": "Sponge",
+      "priority": "P0",
+      "rationale": "Concrete Sponge implementations whose tags and game targets differ from API branches.",
+      "repository": "SpongePowered/Sponge"
+    },
+    {
+      "docs_url": "https://jd.spongepowered.org/",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "SpongePowered/SpongeAPI",
+        "default_branch": "api-12",
+        "default_branch_head": {
+          "committed_at": "2026-06-27T23:32:22Z",
+          "sha": "fb073c867e3f8d9da87acba15a6178bc261badad",
+          "url": "https://github.com/SpongePowered/SpongeAPI/commit/fb073c867e3f8d9da87acba15a6178bc261badad"
+        },
+        "description": "A Minecraft plugin API",
+        "fork": false,
+        "forks": 341,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-01-11T22:17:51Z",
+          "tag": "v17.0.0",
+          "url": "https://github.com/SpongePowered/SpongeAPI/releases/tag/v17.0.0"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 149,
+        "pushed_at": "2026-07-07T20:49:52Z",
+        "stars": 1168,
+        "url": "https://github.com/SpongePowered/SpongeAPI"
+      },
+      "id": "sponge-api",
+      "ingestion_policy": "index",
+      "name": "SpongeAPI",
+      "priority": "P0",
+      "rationale": "Canonical plugin API independent of a concrete Sponge runtime/game target.",
+      "repository": "SpongePowered/SpongeAPI"
+    },
+    {
+      "docs_url": "https://docs.spongepowered.org/",
+      "domains": [
+        "core"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "SpongePowered/SpongeDocs",
+        "default_branch": "stable",
+        "default_branch_head": {
+          "committed_at": "2026-04-24T06:47:52Z",
+          "sha": "3e398c2f8be4f856c6adef825ad4433218f3de38",
+          "url": "https://github.com/SpongePowered/SpongeDocs/commit/3e398c2f8be4f856c6adef825ad4433218f3de38"
+        },
+        "description": "Documentation for Sponge and its Implementations",
+        "fork": false,
+        "forks": 107,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2018-03-02T12:42:36Z",
+          "tag": "v4.1.0",
+          "url": "https://github.com/SpongePowered/SpongeDocs/releases/tag/v4.1.0"
+        },
+        "license": {
+          "key": "cc-by-sa-4.0",
+          "name": "Creative Commons Attribution Share Alike 4.0 International",
+          "spdx_id": "CC-BY-SA-4.0"
+        },
+        "open_issues": 46,
+        "pushed_at": "2026-04-26T03:21:55Z",
+        "stars": 113,
+        "url": "https://github.com/SpongePowered/SpongeDocs"
+      },
+      "id": "sponge-docs",
+      "ingestion_policy": "link-only",
+      "name": "SpongeDocs",
+      "priority": "P2",
+      "rationale": "Official docs retained with freshness warnings when they lag implementation release metadata.",
+      "repository": "SpongePowered/SpongeDocs"
+    },
+    {
+      "docs_url": "https://spyglassmc.com/",
+      "domains": [
+        "pack"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "SpyglassMC/Spyglass",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-14T05:02:14Z",
+          "sha": "7afca8f147fffebcb48981654a910ff84bed698e",
+          "url": "https://github.com/SpyglassMC/Spyglass/commit/7afca8f147fffebcb48981654a910ff84bed698e"
+        },
+        "description": "Development tools for vanilla Minecraft: Java Edition data pack developers.",
+        "fork": false,
+        "forks": 50,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2020-11-29T03:51:58Z",
+          "tag": "v3.2.0",
+          "url": "https://github.com/SpyglassMC/Spyglass/releases/tag/v3.2.0"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 214,
+        "pushed_at": "2026-07-14T05:03:54Z",
+        "stars": 457,
+        "url": "https://github.com/SpyglassMC/Spyglass"
+      },
+      "id": "spyglass",
+      "ingestion_policy": "index",
+      "name": "Spyglass",
+      "priority": "P1",
+      "rationale": "Language-server and editor tooling for Java data and resource packs.",
+      "repository": "SpyglassMC/Spyglass"
+    },
+    {
+      "docs_url": "https://github.com/neoforged/SRGUtils",
+      "domains": [
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "neoforged/SRGUtils",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2025-11-05T14:30:23Z",
+          "sha": "3a5b7a11063a63317018b6e7b8b41e99d070076f",
+          "url": "https://github.com/neoforged/SRGUtils/commit/3a5b7a11063a63317018b6e7b8b41e99d070076f"
+        },
+        "description": "A library used for working with TSRG, tiny, and other mapping formats",
+        "fork": false,
+        "forks": 6,
+        "latest_release": null,
+        "license": {
+          "key": "lgpl-2.1",
+          "name": "GNU Lesser General Public License v2.1",
+          "spdx_id": "LGPL-2.1"
+        },
+        "open_issues": 4,
+        "pushed_at": "2025-11-05T14:30:27Z",
+        "stars": 3,
+        "url": "https://github.com/neoforged/SRGUtils"
+      },
+      "id": "srg-utils",
+      "ingestion_policy": "index",
+      "name": "SRGUtils",
+      "priority": "P1",
+      "rationale": "SRG, TSRG, Tiny, and mapping model utilities.",
+      "repository": "neoforged/SRGUtils"
+    },
+    {
+      "docs_url": "https://github.com/TownyAdvanced/Towny/wiki/API",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "TownyAdvanced/Towny",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-14T22:38:51Z",
+          "sha": "091791043e6ba7c5ec38b438308adf160403fd33",
+          "url": "https://github.com/TownyAdvanced/Towny/commit/091791043e6ba7c5ec38b438308adf160403fd33"
+        },
+        "description": "Towny Advanced Minecraft plugin for Bukkit/Spigot.",
+        "fork": false,
+        "forks": 405,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-05-08T16:07:06Z",
+          "tag": "0.103.0.0",
+          "url": "https://github.com/TownyAdvanced/Towny/releases/tag/0.103.0.0"
+        },
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 42,
+        "pushed_at": "2026-07-14T22:38:53Z",
+        "stars": 612,
+        "url": "https://github.com/TownyAdvanced/Towny"
+      },
+      "id": "towny",
+      "ingestion_policy": "metadata-only",
+      "name": "Towny",
+      "priority": "P2",
+      "rationale": "Metadata for residents, towns, nations, plots, permissions, economy, siege, and events under restrictive terms.",
+      "repository": "TownyAdvanced/Towny"
+    },
+    {
+      "docs_url": "https://github.com/MilkBowl/Vault#readme",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "MilkBowl/Vault",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2022-08-01T17:03:21Z",
+          "sha": "460cb21c6215433da526192720de40b6662f5f99",
+          "url": "https://github.com/MilkBowl/Vault/commit/460cb21c6215433da526192720de40b6662f5f99"
+        },
+        "description": "Vault of common APIs for Bukkit Plugins",
+        "fork": false,
+        "forks": 380,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2020-07-17T17:57:45Z",
+          "tag": "1.7.3",
+          "url": "https://github.com/MilkBowl/Vault/releases/tag/1.7.3"
+        },
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 24,
+        "pushed_at": "2024-03-10T13:12:47Z",
+        "stars": 579,
+        "url": "https://github.com/MilkBowl/Vault"
+      },
+      "id": "vault",
+      "ingestion_policy": "index",
+      "name": "Vault",
+      "priority": "P2",
+      "rationale": "Legacy economy, permission, and chat provider contracts retained as an interoperability baseline.",
+      "repository": "MilkBowl/Vault"
+    },
+    {
+      "docs_url": "https://foundrymc.github.io/Veil/",
+      "domains": [
+        "client",
+        "model",
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "FoundryMC/Veil",
+        "default_branch": "1.21",
+        "default_branch_head": {
+          "committed_at": "2026-07-02T06:56:26Z",
+          "sha": "80975b9a1655d7255613bd3daeb3d7bdc134228b",
+          "url": "https://github.com/FoundryMC/Veil/commit/80975b9a1655d7255613bd3daeb3d7bdc134228b"
+        },
+        "description": "Upgrade your modding potential with cutting-edge rendering and game-engine features. Built for modders, by modders.",
+        "fork": false,
+        "forks": 46,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-02T06:59:17Z",
+          "tag": "mc1.21.1-4.3.0-fabric",
+          "url": "https://github.com/FoundryMC/Veil/releases/tag/mc1.21.1-4.3.0-fabric"
+        },
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 28,
+        "pushed_at": "2026-07-02T06:59:16Z",
+        "stars": 494,
+        "url": "https://github.com/FoundryMC/Veil"
+      },
+      "id": "veil",
+      "ingestion_policy": "index",
+      "name": "Veil",
+      "priority": "P1",
+      "rationale": "Advanced mod rendering framework for shaders, framebuffers, post processing, and animation.",
+      "repository": "FoundryMC/Veil"
+    },
+    {
+      "docs_url": "https://docs.papermc.io/velocity/",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/Velocity",
+        "default_branch": "dev/4.0.0",
+        "default_branch_head": {
+          "committed_at": "2026-07-15T03:28:22Z",
+          "sha": "5aab0d1427f39756db525956ee16ffa0fef8b439",
+          "url": "https://github.com/PaperMC/Velocity/commit/5aab0d1427f39756db525956ee16ffa0fef8b439"
+        },
+        "description": "The modern, next-generation Minecraft server proxy.",
+        "fork": false,
+        "forks": 912,
+        "latest_release": null,
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 193,
+        "pushed_at": "2026-07-15T03:29:01Z",
+        "stars": 2214,
+        "url": "https://github.com/PaperMC/Velocity"
+      },
+      "id": "velocity",
+      "ingestion_policy": "index",
+      "name": "Velocity",
+      "priority": "P0",
+      "rationale": "Modern proxy API, events, forwarding, plugin messaging, and backend topology.",
+      "repository": "PaperMC/Velocity"
+    },
+    {
+      "docs_url": "https://docs.viaversion.com/",
+      "domains": [
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "ViaVersion/ViaBackwards",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T16:05:35Z",
+          "sha": "c1620746bcdbe031fa0f273605ef35ac491a5170",
+          "url": "https://github.com/ViaVersion/ViaBackwards/commit/c1620746bcdbe031fa0f273605ef35ac491a5170"
+        },
+        "description": "Allows older clients to connect to newer server versions for Minecraft servers.",
+        "fork": false,
+        "forks": 131,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-12T16:46:06Z",
+          "tag": "5.11.0",
+          "url": "https://github.com/ViaVersion/ViaBackwards/releases/tag/5.11.0"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 46,
+        "pushed_at": "2026-07-12T16:46:06Z",
+        "stars": 605,
+        "url": "https://github.com/ViaVersion/ViaBackwards"
+      },
+      "id": "via-backwards",
+      "ingestion_policy": "index",
+      "name": "ViaBackwards",
+      "priority": "P0",
+      "rationale": "Directed older-client to newer-server translation with explicit lossy feature boundaries.",
+      "repository": "ViaVersion/ViaBackwards"
+    },
+    {
+      "docs_url": "https://github.com/ViaVersion/Mappings",
+      "domains": [
+        "nms",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "ViaVersion/Mappings",
+        "default_branch": "main",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T08:55:37Z",
+          "sha": "1c8cb64c4288cdb5e827df993efa0da27d9db3ea",
+          "url": "https://github.com/ViaVersion/Mappings/commit/1c8cb64c4288cdb5e827df993efa0da27d9db3ea"
+        },
+        "description": "Mapping generator and mapping files for the Via projects.",
+        "fork": false,
+        "forks": 15,
+        "latest_release": null,
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 5,
+        "pushed_at": "2026-07-12T08:59:15Z",
+        "stars": 13,
+        "url": "https://github.com/ViaVersion/Mappings"
+      },
+      "id": "via-mappings",
+      "ingestion_policy": "metadata-only",
+      "name": "Via Mappings",
+      "priority": "P1",
+      "rationale": "Via-specific mapping generator and adjacent-protocol data, not a general Mojang mapping source.",
+      "repository": "ViaVersion/Mappings"
+    },
+    {
+      "docs_url": "https://docs.viaversion.com/",
+      "domains": [
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "ViaVersion/ViaRewind",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T18:22:51Z",
+          "sha": "6c19760af6868f8fa580c8467f1530885aa74134",
+          "url": "https://github.com/ViaVersion/ViaRewind/commit/6c19760af6868f8fa580c8467f1530885aa74134"
+        },
+        "description": "ViaVersion addon to allow 1.8.x and 1.7.x clients on newer server versions.",
+        "fork": false,
+        "forks": 94,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-12T18:17:13Z",
+          "tag": "4.1.3",
+          "url": "https://github.com/ViaVersion/ViaRewind/releases/tag/4.1.3"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 39,
+        "pushed_at": "2026-07-12T18:22:53Z",
+        "stars": 289,
+        "url": "https://github.com/ViaVersion/ViaRewind"
+      },
+      "id": "via-rewind",
+      "ingestion_policy": "index",
+      "name": "ViaRewind",
+      "priority": "P1",
+      "rationale": "Legacy 1.7/1.8 translation addon requiring ViaVersion and ViaBackwards.",
+      "repository": "ViaVersion/ViaRewind"
+    },
+    {
+      "docs_url": "https://docs.viaversion.com/",
+      "domains": [
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "ViaVersion/ViaVersion",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T16:05:51Z",
+          "sha": "d9a3a4493d33f9fbb03549a01f33df1df023a930",
+          "url": "https://github.com/ViaVersion/ViaVersion/commit/d9a3a4493d33f9fbb03549a01f33df1df023a930"
+        },
+        "description": "Allows of newer clients to connect to older server versions for Minecraft servers.",
+        "fork": false,
+        "forks": 327,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-07-12T16:45:54Z",
+          "tag": "5.11.0",
+          "url": "https://github.com/ViaVersion/ViaVersion/releases/tag/5.11.0"
+        },
+        "license": {
+          "key": "gpl-3.0",
+          "name": "GNU General Public License v3.0",
+          "spdx_id": "GPL-3.0"
+        },
+        "open_issues": 64,
+        "pushed_at": "2026-07-12T16:45:54Z",
+        "stars": 1601,
+        "url": "https://github.com/ViaVersion/ViaVersion"
+      },
+      "id": "via-version",
+      "ingestion_policy": "index",
+      "name": "ViaVersion",
+      "priority": "P0",
+      "rationale": "Directed newer-client to older-server protocol translation and public API.",
+      "repository": "ViaVersion/ViaVersion"
+    },
+    {
+      "docs_url": "https://github.com/vram-guild/frex",
+      "domains": [
+        "shader"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "vram-guild/frex",
+        "default_branch": "1.19",
+        "default_branch_head": {
+          "committed_at": "2023-05-11T10:16:45Z",
+          "sha": "dbfb312dd1ed25b4d3cd1c75c1eb1c77c4087ead",
+          "url": "https://github.com/vram-guild/frex/commit/dbfb312dd1ed25b4d3cd1c75c1eb1c77c4087ead"
+        },
+        "description": null,
+        "fork": false,
+        "forks": 7,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2024-06-05T17:56:02Z",
+          "tag": "fabric-20.5.369",
+          "url": "https://github.com/vram-guild/frex/releases/tag/fabric-20.5.369"
+        },
+        "license": {
+          "key": "lgpl-3.0",
+          "name": "GNU Lesser General Public License v3.0",
+          "spdx_id": "LGPL-3.0"
+        },
+        "open_issues": 1,
+        "pushed_at": "2024-07-31T01:36:05Z",
+        "stars": 17,
+        "url": "https://github.com/vram-guild/frex"
+      },
+      "id": "vram-frex",
+      "ingestion_policy": "index",
+      "name": "FREX",
+      "priority": "P2",
+      "rationale": "Historical experimental rendering-extension and material API underlying Canvas.",
+      "repository": "vram-guild/frex"
+    },
+    {
+      "docs_url": "https://github.com/PaperMC/Waterfall",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "PaperMC/Waterfall",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-06-16T15:29:37Z",
+          "sha": "150a00263470515eef6b29c1415a0eb3d6e10516",
+          "url": "https://github.com/PaperMC/Waterfall/commit/150a00263470515eef6b29c1415a0eb3d6e10516"
+        },
+        "description": "BungeeCord fork that aims to improve performance and stability.",
+        "fork": false,
+        "forks": 308,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2018-10-29T21:24:18Z",
+          "tag": "downloads",
+          "url": "https://github.com/PaperMC/Waterfall/releases/tag/downloads"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 44,
+        "pushed_at": "2026-06-16T15:30:23Z",
+        "stars": 753,
+        "url": "https://github.com/PaperMC/Waterfall"
+      },
+      "id": "waterfall",
+      "ingestion_policy": "link-only",
+      "name": "Waterfall",
+      "priority": "P2",
+      "rationale": "Historical BungeeCord fork retained for discovery; prefer Velocity or canonical Bungee evidence.",
+      "repository": "PaperMC/Waterfall"
+    },
+    {
+      "docs_url": "https://worldedit.enginehub.org/en/latest/api/",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "EngineHub/WorldEdit",
+        "default_branch": "version/7.4.x",
+        "default_branch_head": {
+          "committed_at": "2026-07-10T04:43:12Z",
+          "sha": "c9884dd09de0bf38f77555f1cad9f0f90174d00d",
+          "url": "https://github.com/EngineHub/WorldEdit/commit/c9884dd09de0bf38f77555f1cad9f0f90174d00d"
+        },
+        "description": "🗺️ Minecraft map editor and mod",
+        "fork": false,
+        "forks": 942,
+        "latest_release": null,
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 168,
+        "pushed_at": "2026-07-14T11:55:22Z",
+        "stars": 3475,
+        "url": "https://github.com/EngineHub/WorldEdit"
+      },
+      "id": "worldedit",
+      "ingestion_policy": "index",
+      "name": "WorldEdit",
+      "priority": "P0",
+      "rationale": "Edit sessions, extents, operations, regions, clipboards, schematics, masks, patterns, and history.",
+      "repository": "EngineHub/WorldEdit"
+    },
+    {
+      "docs_url": "https://worldguard.enginehub.org/en/latest/developer/",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "EngineHub/WorldGuard",
+        "default_branch": "version/7.0.x",
+        "default_branch_head": {
+          "committed_at": "2026-07-12T03:54:52Z",
+          "sha": "7c38af4c7a263be86f0afc5dae2512abd3c8267c",
+          "url": "https://github.com/EngineHub/WorldGuard/commit/7c38af4c7a263be86f0afc5dae2512abd3c8267c"
+        },
+        "description": "🛡️ Protect your Minecraft server and lets players claim areas",
+        "fork": false,
+        "forks": 651,
+        "latest_release": null,
+        "license": {
+          "key": "other",
+          "name": "Other",
+          "spdx_id": "NOASSERTION"
+        },
+        "open_issues": 156,
+        "pushed_at": "2026-07-12T04:28:23Z",
+        "stars": 927,
+        "url": "https://github.com/EngineHub/WorldGuard"
+      },
+      "id": "worldguard",
+      "ingestion_policy": "index",
+      "name": "WorldGuard",
+      "priority": "P0",
+      "rationale": "Region managers, protected regions, flags, query/cache, sessions, events, and custom flag registration.",
+      "repository": "EngineHub/WorldGuard"
+    },
+    {
+      "docs_url": "https://github.com/CryptoMorin/XSeries/wiki",
+      "domains": [
+        "client",
+        "core",
+        "nms"
+      ],
+      "github": {
+        "archived": false,
+        "canonical_repository": "CryptoMorin/XSeries",
+        "default_branch": "master",
+        "default_branch_head": {
+          "committed_at": "2026-07-04T04:16:51Z",
+          "sha": "8352681cb25c4724d4add1a9c4233de55e3a93c9",
+          "url": "https://github.com/CryptoMorin/XSeries/commit/8352681cb25c4724d4add1a9c4233de55e3a93c9"
+        },
+        "description": "Library for cross-version Minecraft Bukkit support and various efficient API methods.",
+        "fork": false,
+        "forks": 145,
+        "latest_release": {
+          "prerelease": false,
+          "published_at": "2026-06-24T19:13:07Z",
+          "tag": "v13.7.1",
+          "url": "https://github.com/CryptoMorin/XSeries/releases/tag/v13.7.1"
+        },
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT"
+        },
+        "open_issues": 6,
+        "pushed_at": "2026-07-04T04:16:52Z",
+        "stars": 532,
+        "url": "https://github.com/CryptoMorin/XSeries"
+      },
+      "id": "xseries",
+      "ingestion_policy": "index",
+      "name": "XSeries",
+      "priority": "P1",
+      "rationale": "Version-aware material, sound, particle, potion, profile, reflection, serialization, and capability helpers.",
+      "repository": "CryptoMorin/XSeries"
+    }
+  ]
+}

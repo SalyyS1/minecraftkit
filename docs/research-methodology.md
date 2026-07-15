@@ -12,6 +12,16 @@ The authorized local input contained ten plugin JARs and ten matching decompiled
 
 No input file was modified.
 
+The v2 ecosystem expansion separately reviewed 103 canonical public GitHub repositories across nine Minecraft domains and the official Mojang Java version manifest. It records metadata, public API entrypoints, original summaries, license-aware ingestion policy, and immutable commit observations; it does not clone or mirror upstream repositories.
+
+## Upstream Research And Version Provenance
+
+`scripts/sync_github_sources.py` accepts only `data/github-source-catalog.json`, verifies canonical repository identity, resolves the default branch to a full commit SHA, records GitHub release/license metadata, and writes one atomic snapshot. Its offline path revalidates the catalog hash, exact ordered identities and fields, canonical URL, and immutable commit coordinate. Mutable branch/release labels never replace the pinned commit.
+
+`scripts/sync_minecraft_versions.py` indexes Mojang's ordered Java manifest and hydrates selected version metadata only after the downloaded detail bytes match Mojang's published 40-character SHA-1. It stores artifact URLs, sizes, and hashes without downloading binaries. An authorized read-only in-memory inventory of the SHA-addressed 26.2 client produced protocol/pack-format and path/count facts in `data/minecraft-release-capabilities.json`; no Mojang file or content was persisted.
+
+Upstream source policies are `index`, `derive`, `metadata-only`, and `link-only`. Public visibility is not treated as permission. Custom/commercial, mixed-provenance, Mojang-derived, PolyForm, no-license, and documentation-specific terms receive stricter policies.
+
 ## Chain Of Custody
 
 `scripts/inventory_sources.py` records relative path, byte size, and SHA-256 for all ten JARs and every decompiled file. The deterministic inventory has no run timestamp. Verification rebuilds the inventory, rejects symlinks/reparse points and boundary escape, and reports missing, added, size-changed, hash-changed, or metadata-changed records.
@@ -58,6 +68,7 @@ Shaded/vendor packages were separated from design conclusions. Findings cite rel
 
 | Label | Meaning | Suitable use |
 |---|---|---|
+| `VERIFIED_UPSTREAM` | exact pinned canonical project, artifact, release, or documentation evidence | platform/version/API routing with source and freshness |
 | `VERIFIED_BYTECODE` | direct metadata from supplied JAR | symbol lookup and consumer compile planning |
 | `DERIVED_SOURCE` | behavior inferred from decompiled flow | architecture guidance with caveat/citation |
 | `ORIGINAL_DESIGN` | independently designed composition | addon blueprint, never vendor attribution |
@@ -70,6 +81,14 @@ Decompiler output may distort local names, synthetic constructs, casts, annotati
 `scripts/render_docs.py` loads all required JSON before mutation, rejects input/output overlap, renders into staged sibling directories, checks shard counts, and promotes with rollback backups. Package/plugin filenames include stable hashes and collision preflight. Every JSON boundary rejects non-standard NaN/Infinity.
 
 The web explorer uses generated JavaScript registration files because `fetch()` is unreliable from `file://`. It has no network dependency and lazily loads one plugin API shard at a time.
+
+The ecosystem atlas is also generated as a static JavaScript assignment from the validated domain, source, version, and capability catalogs. It performs no background network request and renders catalog strings through DOM text APIs.
+
+## CursorCs Clean-Room Boundary
+
+The supplied CursorCs 1.9.9-SNAPSHOT JAR was hashed before/after and decompiled locally with a pinned Vineflower tool under Java 21. The private report covers all 294 class records and 50 resources by inventory; two obfuscated methods failed decompilation and related claims remain qualified.
+
+Only descriptor/API names, architecture, integration boundaries, safe original summaries, and hashes informed MinecraftKit. Raw decompiled files, method bodies, resources, binaries, and an observed marketplace token are excluded from the repository and release payload.
 
 ## AgentKit Research Boundary
 

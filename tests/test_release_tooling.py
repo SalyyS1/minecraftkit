@@ -139,8 +139,8 @@ class AtomicReleaseTests(unittest.TestCase):
                 mock.patch.object(package_kit, "_write_archive", side_effect=lambda path, _root: path.write_bytes(b"zip")),
             ):
                 self.assertEqual(package_kit.main(), 0)
-            self.assertTrue((root / "dist" / "minecraft-rpg-kit-2.3.4.zip").is_file())
-            self.assertTrue((root / "dist" / "minecraft-rpg-kit-2.3.4.zip.sha256").is_file())
+            self.assertTrue((root / "dist" / "minecraftkit-2.3.4.zip").is_file())
+            self.assertTrue((root / "dist" / "minecraftkit-2.3.4.zip.sha256").is_file())
 
     def test_package_restores_previous_pair_when_second_replace_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -150,7 +150,7 @@ class AtomicReleaseTests(unittest.TestCase):
             (scripts / "validate_kit.py").write_text("", encoding="utf-8")
             dist = root / "dist"
             dist.mkdir()
-            archive = dist / "minecraft-rpg-kit-2.3.4.zip"
+            archive = dist / "minecraftkit-2.3.4.zip"
             checksum = archive.with_suffix(".zip.sha256")
             archive.write_bytes(b"old-archive")
             checksum.write_bytes(b"old-checksum")

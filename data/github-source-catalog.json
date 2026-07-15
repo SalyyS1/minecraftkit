@@ -1,0 +1,1360 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "adventure",
+      "name": "Adventure",
+      "repository": "PaperMC/adventure",
+      "domains": [
+        "core",
+        "dialog",
+        "pack"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.papermc.io/adventure/",
+      "rationale": "Cross-platform component, audience, dialog, resource-pack, serializer, and NBT APIs."
+    },
+    {
+      "id": "adventure-platform",
+      "name": "Adventure Platform",
+      "repository": "PaperMC/adventure-platform",
+      "domains": [
+        "core"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://github.com/PaperMC/adventure-platform",
+      "rationale": "Archived legacy platform adapters retained for historical routing only."
+    },
+    {
+      "id": "adventure-platform-mod",
+      "name": "Adventure Platform Mod",
+      "repository": "PaperMC/adventure-platform-mod",
+      "domains": [
+        "client",
+        "core"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/PaperMC/adventure-platform-mod",
+      "rationale": "Near-native Adventure integration for version-pinned Fabric and NeoForge clients."
+    },
+    {
+      "id": "animated-java",
+      "name": "Animated Java",
+      "repository": "Animated-Java/animated-java",
+      "domains": [
+        "model",
+        "pack"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://animated-java.dev/",
+      "rationale": "Blockbench exporter for display-entity animation and generated data/resource packs."
+    },
+    {
+      "id": "aura-skills",
+      "name": "AuraSkills",
+      "repository": "Archy-X/AuraSkills",
+      "domains": [
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://wiki.aurelium.dev/auraskills/",
+      "rationale": "Skills, stats, mana, abilities, XP, modifiers, rewards, profiles, events, and progression APIs."
+    },
+    {
+      "id": "authme-reloaded",
+      "name": "AuthMeReloaded",
+      "repository": "AuthMe/AuthMeReloaded",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://ci.codemc.org/job/AuthMe/job/AuthMeReloaded/javadoc/",
+      "rationale": "Authentication/session, hash strategy, events, migration, command guards, proxy, and storage contracts."
+    },
+    {
+      "id": "auto-renaming-tool",
+      "name": "AutoRenamingTool",
+      "repository": "neoforged/AutoRenamingTool",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/neoforged/AutoRenamingTool",
+      "rationale": "Extensible JVM renaming and remapping tooling used in the NeoForge ecosystem."
+    },
+    {
+      "id": "azurelib",
+      "name": "AzureLib",
+      "repository": "AzureDoom/AzureLib",
+      "domains": [
+        "client",
+        "model"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/AzureDoom/AzureLib/wiki",
+      "rationale": "Loader-specific Bedrock-style animation engine with a distinct GeckoLib-derived API."
+    },
+    {
+      "id": "beet",
+      "name": "beet",
+      "repository": "mcbeet/beet",
+      "domains": [
+        "pack"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://beet.readthedocs.io/",
+      "rationale": "Python development and deterministic build toolkit for data and resource packs."
+    },
+    {
+      "id": "bentobox",
+      "name": "BentoBox",
+      "repository": "BentoBoxWorld/BentoBox",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.bentobox.world/",
+      "rationale": "Addon lifecycle, islands, worlds, hooks, ranks, challenges, commands, persistence, and events."
+    },
+    {
+      "id": "betonquest",
+      "name": "BetonQuest",
+      "repository": "BetonQuest/BetonQuest",
+      "domains": [
+        "dialog",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://betonquest.org/",
+      "rationale": "Declarative conversations, conditions, events, objectives, variables, packages, journals, and extension APIs."
+    },
+    {
+      "id": "blockbench",
+      "name": "Blockbench",
+      "repository": "JannisX11/blockbench",
+      "domains": [
+        "model",
+        "pack"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://www.blockbench.net/wiki/",
+      "rationale": "Canonical low-poly model, animation, codec, format, and plugin authoring application."
+    },
+    {
+      "id": "blockbench-plugins",
+      "name": "Blockbench Plugins Registry",
+      "repository": "JannisX11/blockbench-plugins",
+      "domains": [
+        "model"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://www.blockbench.net/plugins/",
+      "rationale": "Official executable plugin registry; every plugin requires separate license and supply-chain review."
+    },
+    {
+      "id": "bluemap",
+      "name": "BlueMap",
+      "repository": "BlueMap-Minecraft/BlueMap",
+      "domains": [
+        "client",
+        "core"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://bluemap.bluecolored.de/wiki/",
+      "rationale": "Map, marker, world/render configuration, asset/web extension, storage, and live-update APIs."
+    },
+    {
+      "id": "brigadier",
+      "name": "Brigadier",
+      "repository": "Mojang/brigadier",
+      "domains": [
+        "core"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/Mojang/brigadier",
+      "rationale": "Mojang command parser used by Minecraft and many platform command APIs."
+    },
+    {
+      "id": "bukkit-legacy",
+      "name": "Bukkit Legacy",
+      "repository": "Bukkit/Bukkit",
+      "domains": [
+        "core"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://github.com/Bukkit/Bukkit",
+      "rationale": "Historical Bukkit API identity; current Bukkit-derived facts come from maintained Spigot/Paper sources."
+    },
+    {
+      "id": "bungeecord",
+      "name": "BungeeCord",
+      "repository": "SpigotMC/BungeeCord",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://www.spigotmc.org/wiki/bungeecord/",
+      "rationale": "Canonical proxy and plugin API with a custom license and security-sensitive forwarding model."
+    },
+    {
+      "id": "canvas",
+      "name": "Canvas",
+      "repository": "vram-guild/canvas",
+      "domains": [
+        "shader"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/vram-guild/canvas",
+      "rationale": "Historical Fabric shader renderer and resource-pack material pipeline."
+    },
+    {
+      "id": "citizens",
+      "name": "Citizens",
+      "repository": "CitizensDev/Citizens2",
+      "domains": [
+        "client",
+        "dialog",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://wiki.citizensnpcs.co/API",
+      "rationale": "NPC registries, traits, navigation, goals, metadata, speech, lifecycle, events, and persistence."
+    },
+    {
+      "id": "cloud",
+      "name": "cloud",
+      "repository": "Incendo/cloud",
+      "domains": [
+        "core",
+        "dialog"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://cloud.incendo.org/",
+      "rationale": "Typed command managers, parsers, contexts, suggestions, annotations, coordinators, and platform adapters."
+    },
+    {
+      "id": "codebook",
+      "name": "Codebook",
+      "repository": "PaperMC/codebook",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://github.com/PaperMC/codebook",
+      "rationale": "PaperMC remapping pipeline tooling; capability metadata is safer than source mirroring."
+    },
+    {
+      "id": "commandapi",
+      "name": "CommandAPI",
+      "repository": "CommandAPI/CommandAPI",
+      "domains": [
+        "core",
+        "dialog"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://commandapi.jorel.dev/",
+      "rationale": "Brigadier trees, native arguments, executors, suggestions, permissions, conversion, and registration lifecycle."
+    },
+    {
+      "id": "craft-engine",
+      "name": "CraftEngine",
+      "repository": "Xiao-MoMi/craft-engine",
+      "domains": [
+        "client",
+        "nms",
+        "pack",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://xiao-momi.github.io/craft-engine-wiki/",
+      "rationale": "Config-driven custom items, blocks, recipes, packs, protocol integration, and unstable NMS helpers."
+    },
+    {
+      "id": "datafixerupper",
+      "name": "DataFixerUpper",
+      "repository": "Mojang/DataFixerUpper",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/Mojang/DataFixerUpper",
+      "rationale": "Mojang typed data migration framework; actual embedded versions remain game-version-specific."
+    },
+    {
+      "id": "decent-holograms",
+      "name": "DecentHolograms",
+      "repository": "DecentSoftware-eu/DecentHolograms",
+      "domains": [
+        "client",
+        "dialog",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://wiki.decentholograms.eu/",
+      "rationale": "Hologram/page/line, viewer, placeholder, animation, click action, persistence, and projection APIs."
+    },
+    {
+      "id": "denizen",
+      "name": "Denizen",
+      "repository": "DenizenScript/Denizen",
+      "domains": [
+        "core",
+        "dialog",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://meta.denizenscript.com/",
+      "rationale": "Object/tag model, script containers, commands, events, queues, definitions, and Citizens integration."
+    },
+    {
+      "id": "dynmap",
+      "name": "Dynmap",
+      "repository": "webbukkit/dynmap",
+      "domains": [
+        "client",
+        "core"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/webbukkit/dynmap#readme",
+      "rationale": "Stable map and marker APIs, tiles, render components, web events, and platform adapters."
+    },
+    {
+      "id": "embeddium",
+      "name": "Embeddium",
+      "repository": "FiniteReality/embeddium",
+      "domains": [
+        "client",
+        "shader"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/FiniteReality/embeddium/wiki",
+      "rationale": "Sodium-derived renderer focused on NeoForge and mod compatibility."
+    },
+    {
+      "id": "entity-model-features",
+      "name": "Entity Model Features",
+      "repository": "Traben-0/Entity_Model_Features",
+      "domains": [
+        "client",
+        "model"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/Traben-0/Entity_Model_Features",
+      "rationale": "Client implementation of OptiFine-style custom entity model features."
+    },
+    {
+      "id": "entity-texture-features",
+      "name": "Entity Texture Features",
+      "repository": "Traben-0/Entity_Texture_Features",
+      "domains": [
+        "client",
+        "model",
+        "pack"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/Traben-0/Entity_Texture_Features",
+      "rationale": "Client random, emissive, blinking, and conditional entity texture features."
+    },
+    {
+      "id": "essentialsx",
+      "name": "EssentialsX",
+      "repository": "EssentialsX/Essentials",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://essentialsx.net/wiki/",
+      "rationale": "User state, homes, warps, kits, teleport, economy, commands, spawn/chat integrations, and events."
+    },
+    {
+      "id": "fabric-api",
+      "name": "Fabric API",
+      "repository": "FabricMC/fabric-api",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack",
+        "protocol",
+        "shader"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.fabricmc.net/",
+      "rationale": "Canonical modular Fabric events, registries, networking, resources, models, and rendering hooks."
+    },
+    {
+      "id": "fabric-docs",
+      "name": "Fabric Documentation",
+      "repository": "FabricMC/fabric-docs",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "nms",
+        "pack",
+        "shader"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://docs.fabricmc.net/",
+      "rationale": "Versioned official Fabric guidance; noncommercial ShareAlike terms require summary-first ingestion."
+    },
+    {
+      "id": "fabric-intermediary",
+      "name": "Fabric Intermediary",
+      "repository": "FabricMC/intermediary",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://github.com/FabricMC/intermediary",
+      "rationale": "Archived historical stable namespace; current metadata is resolved through Fabric Meta."
+    },
+    {
+      "id": "fabric-loader",
+      "name": "Fabric Loader",
+      "repository": "FabricMC/fabric-loader",
+      "domains": [
+        "core"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.fabricmc.net/develop/",
+      "rationale": "Canonical Fabric mod loader, entrypoint, metadata, and mapping resolver APIs."
+    },
+    {
+      "id": "fabric-loom",
+      "name": "Fabric Loom",
+      "repository": "FabricMC/fabric-loom",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.fabricmc.net/develop/loom/",
+      "rationale": "Gradle development, source mapping, run configuration, and remapping tooling."
+    },
+    {
+      "id": "fabric-mapping-io",
+      "name": "mapping-io",
+      "repository": "FabricMC/mapping-io",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/FabricMC/mapping-io",
+      "rationale": "Mapping format reader, writer, tree, and conversion APIs."
+    },
+    {
+      "id": "fabric-meta",
+      "name": "Fabric Meta",
+      "repository": "FabricMC/fabric-meta",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://meta.fabricmc.net/",
+      "rationale": "Canonical Fabric service source behind version, loader, installer, and mapping metadata."
+    },
+    {
+      "id": "fabric-tiny-remapper",
+      "name": "Tiny Remapper",
+      "repository": "FabricMC/tiny-remapper",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/FabricMC/tiny-remapper",
+      "rationale": "High-performance Tiny namespace bytecode remapper used by Fabric tooling."
+    },
+    {
+      "id": "fabric-yarn",
+      "name": "Yarn",
+      "repository": "FabricMC/yarn",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/FabricMC/yarn",
+      "rationale": "Historical human-readable mappings through the obfuscation era; not a 26.1+ requirement."
+    },
+    {
+      "id": "fastasyncworldedit",
+      "name": "FastAsyncWorldEdit",
+      "repository": "IntellectualSites/FastAsyncWorldEdit",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://intellectualsites.github.io/fastasyncworldedit-javadocs/",
+      "rationale": "Parallel edit queues, extents, chunks, history, memory controls, and WorldEdit compatibility seams."
+    },
+    {
+      "id": "folia",
+      "name": "Folia",
+      "repository": "PaperMC/Folia",
+      "domains": [
+        "core"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.papermc.io/paper/dev/folia-support/",
+      "rationale": "Region-threaded Paper fork whose scheduler and ownership model requires explicit compatibility."
+    },
+    {
+      "id": "forge",
+      "name": "MinecraftForge",
+      "repository": "MinecraftForge/MinecraftForge",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack",
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.minecraftforge.net/",
+      "rationale": "Canonical Forge/FML loader and mod API; exact Minecraft-Forge artifact pairs are mandatory."
+    },
+    {
+      "id": "forge-docs",
+      "name": "Forge Documentation",
+      "repository": "MinecraftForge/Documentation",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.minecraftforge.net/",
+      "rationale": "Versioned Forge development guidance, including client model and geometry-loader APIs."
+    },
+    {
+      "id": "forge-gradle",
+      "name": "ForgeGradle",
+      "repository": "MinecraftForge/ForgeGradle",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.minecraftforge.net/en/latest/gettingstarted/",
+      "rationale": "Forge Gradle development, mapping, patching, and reobfuscation tooling."
+    },
+    {
+      "id": "geckolib",
+      "name": "GeckoLib",
+      "repository": "bernie-g/geckolib",
+      "domains": [
+        "client",
+        "model"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/bernie-g/geckolib/wiki",
+      "rationale": "Loader-specific skeletal animation and rendering API for entities, items, and blocks."
+    },
+    {
+      "id": "geyser",
+      "name": "Geyser",
+      "repository": "GeyserMC/Geyser",
+      "domains": [
+        "client",
+        "pack",
+        "protocol"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://geysermc.org/wiki/geyser/",
+      "rationale": "Java-to-Bedrock bridge, pack translation, extensions, and a separate client capability boundary."
+    },
+    {
+      "id": "grim",
+      "name": "Grim",
+      "repository": "GrimAnticheat/Grim",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "derive",
+      "docs_url": "https://github.com/GrimAnticheat/Grim/wiki",
+      "rationale": "Source for original synthesis of packet order, prediction, latency, collision replication, and check pipelines."
+    },
+    {
+      "id": "iris",
+      "name": "Iris",
+      "repository": "IrisShaders/Iris",
+      "domains": [
+        "client",
+        "shader"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://shaders.properties/",
+      "rationale": "Shader-pack loader with public APIs and a tight exact-version relationship to Sodium."
+    },
+    {
+      "id": "iris-shader-doc",
+      "name": "Iris ShaderDoc",
+      "repository": "IrisShaders/ShaderDoc",
+      "domains": [
+        "shader"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://github.com/IrisShaders/ShaderDoc",
+      "rationale": "Historical shader-pack pipeline terminology; current behavior requires artifact testing."
+    },
+    {
+      "id": "itemsadder-api",
+      "name": "ItemsAdder API",
+      "repository": "LoneDev6/API-ItemsAdder",
+      "domains": [
+        "client",
+        "pack",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://itemsadder.devs.beer/",
+      "rationale": "Public API names and lifecycle docs for a proprietary custom-content and pack plugin."
+    },
+    {
+      "id": "lorenz",
+      "name": "Lorenz",
+      "repository": "CadixDev/Lorenz",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://github.com/CadixDev/Lorenz",
+      "rationale": "Quiet but useful historical JVM mapping model library."
+    },
+    {
+      "id": "luckperms",
+      "name": "LuckPerms",
+      "repository": "LuckPerms/LuckPerms",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://javadoc.io/doc/net.luckperms/api",
+      "rationale": "Permissions provider, users, groups, nodes, tracks, contexts, query options, caches, and messaging."
+    },
+    {
+      "id": "mc-protocol-lib",
+      "name": "MCProtocolLib",
+      "repository": "GeyserMC/MCProtocolLib",
+      "domains": [
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/GeyserMC/MCProtocolLib",
+      "rationale": "Stateful Java sessions, packets, encryption, compression, authentication, and codecs."
+    },
+    {
+      "id": "mcmeta",
+      "name": "mcmeta",
+      "repository": "misode/mcmeta",
+      "domains": [
+        "core",
+        "pack",
+        "shader"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://github.com/misode/mcmeta",
+      "rationale": "Processed versioned Minecraft reports and assets used only as a corroborating change index."
+    },
+    {
+      "id": "mcmmo",
+      "name": "mcMMO",
+      "repository": "mcMMO-Dev/mcMMO",
+      "domains": [
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://wiki.mcmmo.org/",
+      "rationale": "Skill, XP, profile, ability, party, combat/gathering event, modifier, and persistence APIs."
+    },
+    {
+      "id": "minecraft-data",
+      "name": "minecraft-data",
+      "repository": "PrismarineJS/minecraft-data",
+      "domains": [
+        "core",
+        "pack",
+        "protocol"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://github.com/PrismarineJS/minecraft-data",
+      "rationale": "Language-neutral Minecraft data and protocol schemas with mixed per-file provenance."
+    },
+    {
+      "id": "minestom",
+      "name": "Minestom",
+      "repository": "Minestom/Minestom",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://minestom.net/docs/",
+      "rationale": "From-scratch extensible server library and protocol implementation with current-version-first support."
+    },
+    {
+      "id": "mixin",
+      "name": "Mixin",
+      "repository": "SpongePowered/Mixin",
+      "domains": [
+        "client",
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/SpongePowered/Mixin/wiki",
+      "rationale": "ASM mixin framework; injection contracts remain exact-target-bytecode-specific."
+    },
+    {
+      "id": "mockbukkit",
+      "name": "MockBukkit",
+      "repository": "MockBukkit/MockBukkit",
+      "domains": [
+        "core"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.mockbukkit.org/",
+      "rationale": "Plugin test lifecycle, server/player/world mocks, scheduler/event simulation, and assertions."
+    },
+    {
+      "id": "multiverse-core",
+      "name": "Multiverse-Core",
+      "repository": "Multiverse/Multiverse-Core",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://mvplugins.org/",
+      "rationale": "World lifecycle, generators, properties, destinations, access control, events, and commands."
+    },
+    {
+      "id": "neoforge",
+      "name": "NeoForge",
+      "repository": "neoforged/NeoForge",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack",
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.neoforged.net/",
+      "rationale": "Canonical NeoForge loader and API for events, registries, data, networking, models, and resources."
+    },
+    {
+      "id": "neoforge-docs",
+      "name": "NeoForge Documentation",
+      "repository": "neoforged/Documentation",
+      "domains": [
+        "client",
+        "core",
+        "model",
+        "pack",
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.neoforged.net/",
+      "rationale": "Official versioned NeoForge development documentation."
+    },
+    {
+      "id": "neoform",
+      "name": "NeoForm",
+      "repository": "neoforged/NeoForm",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://github.com/neoforged/NeoForm",
+      "rationale": "Minecraft source/form transformation configuration; generated contents remain license-sensitive."
+    },
+    {
+      "id": "nexo-docs",
+      "name": "Nexo Documentation",
+      "repository": "Nexo-MC/Nexo-Documentation",
+      "domains": [
+        "pack",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://docs.nexomc.com/",
+      "rationale": "Public lifecycle, API, version, generated-pack, item, block, and furniture docs for a commercial plugin."
+    },
+    {
+      "id": "node-minecraft-protocol",
+      "name": "node-minecraft-protocol",
+      "repository": "PrismarineJS/node-minecraft-protocol",
+      "domains": [
+        "protocol"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/PrismarineJS/node-minecraft-protocol",
+      "rationale": "Node Java-protocol parser, serializer, session, encryption, authentication, and test ecosystem."
+    },
+    {
+      "id": "nova",
+      "name": "Nova",
+      "repository": "xenondevs/Nova",
+      "domains": [
+        "client",
+        "model",
+        "pack",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.xenondevs.xyz/nova/api/",
+      "rationale": "Custom items, blocks, tile entities, attachments, behaviors, models, packs, GUIs, storage, and addon APIs."
+    },
+    {
+      "id": "oraxen",
+      "name": "Oraxen",
+      "repository": "oraxen/oraxen",
+      "domains": [
+        "client",
+        "model",
+        "pack",
+        "rpg"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://oraxen.mizius.com/",
+      "rationale": "Metadata for custom items, glyphs, models, packs, mechanics, events, and compatibility under a restrictive custom license."
+    },
+    {
+      "id": "packsquash",
+      "name": "PackSquash",
+      "repository": "ComunidadAylas/PackSquash",
+      "domains": [
+        "pack"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://packsquash.aylas.org/",
+      "rationale": "Resource/data-pack optimizer whose transformed output must be validated per target."
+    },
+    {
+      "id": "paper",
+      "name": "Paper",
+      "repository": "PaperMC/Paper",
+      "domains": [
+        "client",
+        "core",
+        "dialog",
+        "nms",
+        "pack",
+        "protocol",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.papermc.io/paper/",
+      "rationale": "Canonical Paper server/API, fork lineage, schedulers, displays, dialogs, registries, and components."
+    },
+    {
+      "id": "paper-docs",
+      "name": "Paper Documentation",
+      "repository": "PaperMC/docs",
+      "domains": [
+        "client",
+        "core",
+        "dialog",
+        "nms",
+        "pack"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "derive",
+      "docs_url": "https://docs.papermc.io/",
+      "rationale": "Official Paper, Folia, Velocity, Adventure, display, dialog, pack, and userdev guidance."
+    },
+    {
+      "id": "paperweight",
+      "name": "paperweight",
+      "repository": "PaperMC/paperweight",
+      "domains": [
+        "core",
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://docs.papermc.io/paper/dev/userdev/",
+      "rationale": "Supported Paper build/userdev workflow; implementation license requires cautious ingestion."
+    },
+    {
+      "id": "parchment",
+      "name": "Parchment",
+      "repository": "ParchmentMC/Parchment",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://parchmentmc.org/docs/getting-started",
+      "rationale": "Historical parameter and documentation enrichment layered over official mappings."
+    },
+    {
+      "id": "placeholder-api",
+      "name": "PlaceholderAPI",
+      "repository": "PlaceholderAPI/PlaceholderAPI",
+      "domains": [
+        "client",
+        "core",
+        "dialog",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://wiki.placeholderapi.com/developers/",
+      "rationale": "Expansion lifecycle, placeholder parsing, relational placeholders, caching, and service discovery."
+    },
+    {
+      "id": "player-animator",
+      "name": "minecraftPlayerAnimator",
+      "repository": "KosmX/minecraftPlayerAnimator",
+      "domains": [
+        "client",
+        "model"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "index",
+      "docs_url": "https://kosmx.gitbook.io/player-animator",
+      "rationale": "Client player pose/animation layer with sensitive renderer-mixin compatibility."
+    },
+    {
+      "id": "polymer",
+      "name": "Polymer",
+      "repository": "Patbox/polymer",
+      "domains": [
+        "client",
+        "pack",
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://polymer.pb4.eu/",
+      "rationale": "Fabric server-side custom content, generated packs, registry projection, and virtual entities for vanilla clients."
+    },
+    {
+      "id": "protocol-lib",
+      "name": "ProtocolLib",
+      "repository": "dmulloy2/ProtocolLib",
+      "domains": [
+        "client",
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://dmulloy2.net/ProtocolLib/javadoc/",
+      "rationale": "Mature Bukkit/Paper packet event, container, structure, send, and receive APIs."
+    },
+    {
+      "id": "protodef",
+      "name": "ProtoDef",
+      "repository": "ProtoDef-io/ProtoDef",
+      "domains": [
+        "protocol"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://github.com/ProtoDef-io/ProtoDef",
+      "rationale": "Declarative protocol schema language used by Prismarine tooling; quiet and non-authoritative."
+    },
+    {
+      "id": "purpur",
+      "name": "Purpur",
+      "repository": "PurpurMC/Purpur",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://purpurmc.org/docs/",
+      "rationale": "Configurable Paper fork with additional APIs and composite inherited licensing."
+    },
+    {
+      "id": "quests",
+      "name": "Quests",
+      "repository": "PikaMug/Quests",
+      "domains": [
+        "dialog",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://pikamug.gitbook.io/quests/",
+      "rationale": "Quest stages, objectives, requirements, rewards, conversations, modules, events, and persistence."
+    },
+    {
+      "id": "reflection-remapper",
+      "name": "Reflection Remapper",
+      "repository": "jpenilla/reflection-remapper",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/jpenilla/reflection-remapper",
+      "rationale": "Mapping-aware reflection helper for Paper Mojang-runtime lines."
+    },
+    {
+      "id": "skins-restorer",
+      "name": "SkinsRestorer",
+      "repository": "SkinsRestorer/SkinsRestorer",
+      "domains": [
+        "client",
+        "core",
+        "protocol"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://skinsrestorer.net/docs/development/api",
+      "rationale": "Skin data/signature, player apply/update, proxy messaging, storage, lifecycle, and platform abstraction."
+    },
+    {
+      "id": "skript",
+      "name": "Skript",
+      "repository": "SkriptLang/Skript",
+      "domains": [
+        "core",
+        "dialog",
+        "rpg"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.skriptlang.org/",
+      "rationale": "Syntax registration, parsing, events, conditions, effects, expressions, types, and addon lifecycle."
+    },
+    {
+      "id": "slimefun",
+      "name": "Slimefun 4",
+      "repository": "Slimefun/Slimefun4",
+      "domains": [
+        "model",
+        "pack",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/Slimefun/Slimefun4/wiki/Developer-Guide",
+      "rationale": "Custom items, research, recipes, machines, energy, block menus, handlers, addons, and persistence."
+    },
+    {
+      "id": "sodium",
+      "name": "Sodium",
+      "repository": "CaffeineMC/sodium",
+      "domains": [
+        "client",
+        "shader"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://github.com/CaffeineMC/sodium/wiki",
+      "rationale": "High-performance renderer replacement under PolyForm Shield; metadata/public API links only."
+    },
+    {
+      "id": "sponge",
+      "name": "Sponge",
+      "repository": "SpongePowered/Sponge",
+      "domains": [
+        "core"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.spongepowered.org/",
+      "rationale": "Concrete Sponge implementations whose tags and game targets differ from API branches."
+    },
+    {
+      "id": "sponge-api",
+      "name": "SpongeAPI",
+      "repository": "SpongePowered/SpongeAPI",
+      "domains": [
+        "core"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://jd.spongepowered.org/",
+      "rationale": "Canonical plugin API independent of a concrete Sponge runtime/game target."
+    },
+    {
+      "id": "sponge-docs",
+      "name": "SpongeDocs",
+      "repository": "SpongePowered/SpongeDocs",
+      "domains": [
+        "core"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://docs.spongepowered.org/",
+      "rationale": "Official docs retained with freshness warnings when they lag implementation release metadata."
+    },
+    {
+      "id": "spyglass",
+      "name": "Spyglass",
+      "repository": "SpyglassMC/Spyglass",
+      "domains": [
+        "pack"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://spyglassmc.com/",
+      "rationale": "Language-server and editor tooling for Java data and resource packs."
+    },
+    {
+      "id": "srg-utils",
+      "name": "SRGUtils",
+      "repository": "neoforged/SRGUtils",
+      "domains": [
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/neoforged/SRGUtils",
+      "rationale": "SRG, TSRG, Tiny, and mapping model utilities."
+    },
+    {
+      "id": "towny",
+      "name": "Towny",
+      "repository": "TownyAdvanced/Towny",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://github.com/TownyAdvanced/Towny/wiki/API",
+      "rationale": "Metadata for residents, towns, nations, plots, permissions, economy, siege, and events under restrictive terms."
+    },
+    {
+      "id": "vault",
+      "name": "Vault",
+      "repository": "MilkBowl/Vault",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/MilkBowl/Vault#readme",
+      "rationale": "Legacy economy, permission, and chat provider contracts retained as an interoperability baseline."
+    },
+    {
+      "id": "veil",
+      "name": "Veil",
+      "repository": "FoundryMC/Veil",
+      "domains": [
+        "client",
+        "model",
+        "shader"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://foundrymc.github.io/Veil/",
+      "rationale": "Advanced mod rendering framework for shaders, framebuffers, post processing, and animation."
+    },
+    {
+      "id": "velocity",
+      "name": "Velocity",
+      "repository": "PaperMC/Velocity",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.papermc.io/velocity/",
+      "rationale": "Modern proxy API, events, forwarding, plugin messaging, and backend topology."
+    },
+    {
+      "id": "via-backwards",
+      "name": "ViaBackwards",
+      "repository": "ViaVersion/ViaBackwards",
+      "domains": [
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.viaversion.com/",
+      "rationale": "Directed older-client to newer-server translation with explicit lossy feature boundaries."
+    },
+    {
+      "id": "via-mappings",
+      "name": "Via Mappings",
+      "repository": "ViaVersion/Mappings",
+      "domains": [
+        "nms",
+        "protocol"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "metadata-only",
+      "docs_url": "https://github.com/ViaVersion/Mappings",
+      "rationale": "Via-specific mapping generator and adjacent-protocol data, not a general Mojang mapping source."
+    },
+    {
+      "id": "via-rewind",
+      "name": "ViaRewind",
+      "repository": "ViaVersion/ViaRewind",
+      "domains": [
+        "protocol"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.viaversion.com/",
+      "rationale": "Legacy 1.7/1.8 translation addon requiring ViaVersion and ViaBackwards."
+    },
+    {
+      "id": "via-version",
+      "name": "ViaVersion",
+      "repository": "ViaVersion/ViaVersion",
+      "domains": [
+        "protocol"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://docs.viaversion.com/",
+      "rationale": "Directed newer-client to older-server protocol translation and public API."
+    },
+    {
+      "id": "vram-frex",
+      "name": "FREX",
+      "repository": "vram-guild/frex",
+      "domains": [
+        "shader"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/vram-guild/frex",
+      "rationale": "Historical experimental rendering-extension and material API underlying Canvas."
+    },
+    {
+      "id": "waterfall",
+      "name": "Waterfall",
+      "repository": "PaperMC/Waterfall",
+      "domains": [
+        "core",
+        "protocol"
+      ],
+      "priority": "P2",
+      "ingestion_policy": "link-only",
+      "docs_url": "https://github.com/PaperMC/Waterfall",
+      "rationale": "Historical BungeeCord fork retained for discovery; prefer Velocity or canonical Bungee evidence."
+    },
+    {
+      "id": "worldedit",
+      "name": "WorldEdit",
+      "repository": "EngineHub/WorldEdit",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://worldedit.enginehub.org/en/latest/api/",
+      "rationale": "Edit sessions, extents, operations, regions, clipboards, schematics, masks, patterns, and history."
+    },
+    {
+      "id": "worldguard",
+      "name": "WorldGuard",
+      "repository": "EngineHub/WorldGuard",
+      "domains": [
+        "core",
+        "rpg"
+      ],
+      "priority": "P0",
+      "ingestion_policy": "index",
+      "docs_url": "https://worldguard.enginehub.org/en/latest/developer/",
+      "rationale": "Region managers, protected regions, flags, query/cache, sessions, events, and custom flag registration."
+    },
+    {
+      "id": "xseries",
+      "name": "XSeries",
+      "repository": "CryptoMorin/XSeries",
+      "domains": [
+        "client",
+        "core",
+        "nms"
+      ],
+      "priority": "P1",
+      "ingestion_policy": "index",
+      "docs_url": "https://github.com/CryptoMorin/XSeries/wiki",
+      "rationale": "Version-aware material, sound, particle, potion, profile, reflection, serialization, and capability helpers."
+    }
+  ]
+}

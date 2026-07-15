@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "domains": [
+    {
+      "id": "client",
+      "name": "Client And Projection",
+      "route": "mc:client",
+      "skill_directory": "mc-client",
+      "reference": "references/client-and-projection.md",
+      "keywords": ["client mod", "client-side", "display entity", "fake block", "fake entity", "geyser", "hologram", "polymer", "projection"]
+    },
+    {
+      "id": "core",
+      "name": "Minecraft Core",
+      "route": "mc:core",
+      "skill_directory": "mc-core",
+      "reference": "references/core-platforms-and-versions.md",
+      "keywords": ["bukkit", "fabric", "folia", "forge", "minecraft api", "minestom", "neoforge", "paper", "purpur", "spigot", "sponge", "velocity", "version"]
+    },
+    {
+      "id": "dialog",
+      "name": "Dialogs And Client Actions",
+      "route": "mc:dialog",
+      "skill_directory": "mc-dialog",
+      "reference": "references/dialogs-and-client-actions.md",
+      "keywords": ["action button", "custom click", "dialog", "dialog registry", "input", "menu", "player custom click", "server links"]
+    },
+    {
+      "id": "model",
+      "name": "Models And Animation",
+      "route": "mc:model",
+      "skill_directory": "mc-model",
+      "reference": "references/models-and-animation.md",
+      "keywords": ["2d model", "3d model", "animated java", "animation", "azurelib", "blockbench", "bone", "geckolib", "modelengine", "rig"]
+    },
+    {
+      "id": "nms",
+      "name": "NMS And Mappings",
+      "route": "mc:nms",
+      "skill_directory": "mc-nms",
+      "reference": "references/nms-and-mappings.md",
+      "keywords": ["internals", "mapping", "mojmap", "nms", "paperweight", "parchment", "reflection", "remap", "spigot mapping", "userdev", "yarn"]
+    },
+    {
+      "id": "pack",
+      "name": "Resource And Data Packs",
+      "route": "mc:pack",
+      "skill_directory": "mc-pack",
+      "reference": "references/resource-and-data-packs.md",
+      "keywords": ["atlas", "custom model data", "data pack", "font", "item model", "pack format", "pack.mcmeta", "resource pack", "sound", "texture"]
+    },
+    {
+      "id": "protocol",
+      "name": "Packets And Protocols",
+      "route": "mc:protocol",
+      "skill_directory": "mc-protocol",
+      "reference": "references/packets-and-protocols.md",
+      "keywords": ["codec", "mcprotocollib", "network", "packet", "packetevents", "protocol", "protocollib", "viarewind", "viaversion", "wire format"]
+    },
+    {
+      "id": "rpg",
+      "name": "RPG Systems",
+      "route": "mc:rpg",
+      "skill_directory": "mc-rpg",
+      "reference": "references/rpg-feature-design.md",
+      "keywords": ["class", "combat", "custom item", "dungeon", "loot", "mmocore", "mmoitems", "modelengine", "mythicmobs", "quest", "rpg", "skill", "stat"]
+    },
+    {
+      "id": "shader",
+      "name": "Shaders And Rendering",
+      "route": "mc:shader",
+      "skill_directory": "mc-shader",
+      "reference": "references/shaders-and-rendering.md",
+      "keywords": ["canvas", "core shader", "fragment shader", "glsl", "iris", "render pipeline", "shader", "sodium", "veil", "vertex shader"]
+    }
+  ],
+  "evidence_classes": [
+    "verified-upstream",
+    "verified-bytecode",
+    "derived-source",
+    "original-design",
+    "unverified"
+  ],
+  "ingestion_policies": [
+    "derive",
+    "index",
+    "link-only",
+    "metadata-only"
+  ]
+}
