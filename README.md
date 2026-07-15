@@ -7,8 +7,8 @@ Salyyy Minecraft Kit is an evidence-backed Minecraft engineering skill system fo
 RPG remains the deepest symbol catalog, not the limit of the project.
 
 - VI/EN command and engineering wiki: <https://salyys1.github.io/minecraftkit/wiki.html>
-- Live RPG API explorer: <https://salyys1.github.io/minecraftkit/>
-- Ecosystem atlas: <https://salyys1.github.io/minecraftkit/ecosystem.html>
+- Unified VI/EN Kit Wiki: <https://salyys1.github.io/minecraftkit/wiki.html>
+- RPG API Explorer and Ecosystem Atlas: linked from the wiki with one aqua visual system.
 - Public repository: <https://github.com/SalyyS1/minecraftkit>
 
 ## What Is Included
@@ -26,7 +26,7 @@ No Minecraft/plugin JAR, decompiled method body, proprietary asset, marketplace 
 
 ## Quick Start
 
-Open `web/wiki.html` for the bilingual command/engineering wiki, `web/ecosystem.html` for the Minecraft ecosystem atlas, or `web/index.html` for the deep RPG API explorer. All three run from local files without a server, CDN, or background request.
+Open `web/wiki.html` for the unified bilingual command/engineering wiki. Its command-center navigation opens the Minecraft ecosystem atlas and the deep RPG API explorer within the same aqua visual system. All views run from local files without a server, CDN, or background request.
 
 Query reviewed sources and exact RPG symbols locally:
 
@@ -146,9 +146,9 @@ Codex + Claude:
 
 The command intentionally names the public repository and target. Review the [bootstrap source](https://github.com/SalyyS1/minecraftkit/blob/main/scripts/install-from-github.ps1) before executing remote code in a sensitive environment.
 
-### npm CLI — registry publication pending
+### npm CLI
 
-The dependency-free `minecraftkit` CLI is ready in [`npm/`](./npm) and packages a local copy of the same reviewed bootstrap; it does not evaluate a raw GitHub script. Once the first public npm release is published, installation becomes:
+The dependency-free [`minecraftkit` package on npm](https://www.npmjs.com/package/minecraftkit) packages a local copy of the same reviewed bootstrap; it does not evaluate a raw GitHub script.
 
 ```powershell
 npx minecraftkit install --target both
@@ -163,7 +163,7 @@ minecraftkit doctor
 minecraftkit install --target codex
 ```
 
-Available commands are `install`, `update`, `doctor`, `commands`, `wiki`, and `version`. Until npm publication, use the PowerShell installer above; it remains the supported public fallback.
+Available commands are `install`, `update`, `doctor`, `commands`, `wiki`, and `version`. The PowerShell installer above remains a supported public fallback.
 
 ### Package or install a local checkout
 

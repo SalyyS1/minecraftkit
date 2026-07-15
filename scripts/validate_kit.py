@@ -41,7 +41,8 @@ REQUIRED = (
     "web/index.html", "web/styles.css", "web/app.js", "web/data/manifest.js", "web/data/insights.js",
     "web/ecosystem.html", "web/ecosystem.css", "web/ecosystem-app.js",
     "web/ecosystem-renderers.js", "web/data/ecosystem.js",
-    "web/wiki.html", "web/wiki.css", "web/wiki-app.js", "web/data/wiki.js", "data/wiki-content.json",
+    "web/wiki.html", "web/wiki.css", "web/wiki-app.js", "web/shell.css", "web/shell.js",
+    "web/assets/salyyy-minecraft-kit-logo.webp", "web/data/wiki.js", "data/wiki-content.json",
     "references/api-lookup.md", "references/architecture-review.md",
     "references/source-analysis-and-regeneration.md", "references/rpg-feature-design.md",
     "references/addon-blueprint.md", "references/compatibility-and-safety.md",
@@ -79,7 +80,7 @@ ALLOWED_DIRECTORY_EXTENSIONS = {
     "scripts": {".py", ".ps1"},
     "skill-wrappers": {".md"},
     "tests": {".py", ".json"},
-    "web": {".html", ".css", ".js"},
+    "web": {".html", ".css", ".js", ".webp"},
 }
 EXCLUDED_DIRECTORY_NAMES = {"dist", "npm", "__pycache__", ".git", ".gitignore", ".gitattributes"}
 EXCLUDED_DIRECTORY_PREFIXES = (".api-stage-", ".web-stage-", ".minecraft-rpg-kit-stage-", ".minecraftkit-stage-")
@@ -419,7 +420,7 @@ def validate(root: Path) -> list[str]:
         (root / "web" / name).read_text(encoding="utf-8")
         for name in (
             "index.html", "styles.css", "app.js", "ecosystem.html",
-            "ecosystem.css", "ecosystem-app.js", "ecosystem-renderers.js",
+            "ecosystem.css", "ecosystem-app.js", "ecosystem-renderers.js", "shell.css", "shell.js",
             "wiki.html", "wiki.css", "wiki-app.js",
         )
     )

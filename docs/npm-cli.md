@@ -4,7 +4,7 @@
 
 The `minecraftkit` npm package provides a short command surface for installing and diagnosing **Salyyy Minecraft Kit**. It is deliberately small and dependency-free: the package contains a byte-synchronized copy of the reviewed PowerShell bootstrap, while the bootstrap remains responsible for GitHub-release SHA-256 verification, bounded archive extraction and transactional installation.
 
-## Public usage after registry publication
+## Public usage
 
 ```powershell
 npx minecraftkit install --target both
@@ -42,6 +42,6 @@ npm run pack:dry-run
 
 `npm run check:bootstrap` fails if the bundled bootstrap diverges from `scripts/install-from-github.ps1`. The release tarball contains only CLI code, the bootstrap, README, notice and package metadata; it never contains the large research corpus, credentials, a postinstall hook or telemetry.
 
-## Publication gate
+## Published package
 
-The registry package is not yet published. Before `npm publish --access public`, authenticate the intended npm account, recheck that `minecraftkit` is available, choose a license for original CLI code, run the package checks, and test `npx` against the exact generated tarball. Upstream-derived research remains subject to [NOTICE.md](../NOTICE.md).
+`minecraftkit@2.2.0` is public on [npm](https://www.npmjs.com/package/minecraftkit). The package remains intentionally `UNLICENSED`; publication does not grant rights beyond the repository's existing notice. Upstream-derived research remains subject to [NOTICE.md](../NOTICE.md).

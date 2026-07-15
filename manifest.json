@@ -181,16 +181,16 @@
       "sha256": "7954b3dab957186ee0ed7c042a1ecd3581107a8b81a8d0a47252b0b8f64ac216"
     },
     "web/index.html": {
-      "bytes": 9968,
-      "sha256": "ccf25dcf8ec4f48f8dacae44b838df8bccce0d8ef0b58ef002e7fdcdc146ee81"
+      "bytes": 10067,
+      "sha256": "71c3c449d1d0b51093d212492ec8e8c957c5de116763dde8e46d5a40c5d94c08"
     },
     "web/styles.css": {
       "bytes": 23865,
       "sha256": "ee4ef80ff9662d82e926eeca44adc2e938012db949ba8a42c4ad29475e8f2e44"
     },
     "web/ecosystem.html": {
-      "bytes": 11055,
-      "sha256": "d5ed118b81ab62405fdb2b2a29b3948ceca55815e5dbdfff69fb811430c6f1e4"
+      "bytes": 11161,
+      "sha256": "5f2554586418eb4df8e09da7f61464132f18a371a74fb33d213737254e8a3b6f"
     },
     "web/ecosystem.css": {
       "bytes": 25145,
@@ -205,8 +205,8 @@
       "sha256": "8d51b1ce5f08a61f36bb198661b2c222d18eb289bcf525d39b6f73cbe728eb1c"
     },
     "web/wiki.html": {
-      "bytes": 6573,
-      "sha256": "f733b83ef2c202419eed93103e58c9611901e7e79da28bb0547b110a6e7af87d"
+      "bytes": 7594,
+      "sha256": "0e29d35dd205c0e7ab1508796777cde17f06a4967031b63aea2cdf29ce0de529"
     },
     "web/wiki.css": {
       "bytes": 18520,
