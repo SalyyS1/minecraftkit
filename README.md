@@ -1,6 +1,6 @@
 # Salyyy Minecraft Kit
 
-**Version 2.1.0 · Author/nametag: SalyVn / Salyyy**
+**Version 2.1.1 · Author/nametag: SalyVn / Salyyy**
 
 Salyyy Minecraft Kit is an evidence-backed Minecraft engineering skill system for Codex and Claude. It routes ten focused domains across production plugin builds, game/platform versions, packets, NMS, client rendering, shaders, dialogs, packs, models/animation, and RPG systems.
 

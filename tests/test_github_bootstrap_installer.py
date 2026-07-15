@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = ROOT / "scripts" / "install-from-github.ps1"
-VERSION = "2.1.0"
+VERSION = "2.1.1"
 ARCHIVE_NAME = f"minecraftkit-{VERSION}.zip"
 
 
@@ -157,7 +157,30 @@ class GitHubBootstrapInstallerTests(unittest.TestCase):
         return result, marker, temp_root
 
     def assert_temp_clean(self, temp_root: Path) -> None:
-        self.assertEqual(list(temp_root.glob("minecraftkit-bootstrap-*")), [])
+        self.assertEqual(list(temp_root.glob("mk-*")), [])
+
+    def test_release_longest_allowlisted_path_fits_windows_temp_extraction(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            longest_release_entry = (
+                "minecraftkit/docs/api/mythicdungeons-575406b3ce57/"
+                "net-playavalon-mythicdungeons-compatibility-betonquest-objectives-"
+                "f41af2b131a8-part-01.md"
+            )
+            fixture = self.make_fixture(
+                base,
+                entries=[
+                    ("minecraftkit/SKILL.md", b"skill"),
+                    ("minecraftkit/scripts/install-global.ps1", BUNDLED_INSTALLER.encode("utf-8")),
+                    (longest_release_entry, b"api shard"),
+                ],
+            )
+
+            result, marker, temp_root = self.run_installer(base, fixture, target="codex")
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(marker.read_text(encoding="utf-8-sig"), "codex")
+            self.assert_temp_clean(temp_root)
 
     def test_defaults_use_expected_repository_and_latest_release_api(self) -> None:
         script = INSTALLER.read_text(encoding="utf-8")

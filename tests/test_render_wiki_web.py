@@ -92,6 +92,8 @@ class WikiWebRenderTests(unittest.TestCase):
         html = (ROOT / "web" / "wiki.html").read_text(encoding="utf-8")
         css = (ROOT / "web" / "wiki.css").read_text(encoding="utf-8")
         runtime = (ROOT / "web" / "wiki-app.js").read_text(encoding="utf-8")
+        version = json.loads(CONTENT.read_text(encoding="utf-8"))["product"]["version"]
+        self.assertGreaterEqual(html.count(version), 3)
         self.assertIn('src="data/wiki.js"', html)
         self.assertIn('src="wiki-app.js"', html)
         self.assertIn('class="skip-link"', html)

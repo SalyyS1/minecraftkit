@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "minecraftkit",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
@@ -146,7 +146,7 @@
     },
     "data/wiki-content.json": {
       "bytes": 49727,
-      "sha256": "89799116143c9a200a23607708e6577cfe62e55f12d9d8335a8eff59ca91ecb2"
+      "sha256": "eff5e8130e754557b2d4759f65fecb2b166ec257678df4f262bfc4af35967645"
     },
     "data/minecraft-version-catalog.json": {
       "bytes": 323457,
@@ -178,7 +178,7 @@
     },
     "web/data/wiki.js": {
       "bytes": 44250,
-      "sha256": "a77e591462db42ce500c6ffaef4de5cfec472cd800b8fa05f8014fdff4a801cd"
+      "sha256": "2d860099bc204a8a639d63f8e204b093a097254a331b146267d5871c233b5f13"
     },
     "web/index.html": {
       "bytes": 9968,
@@ -206,7 +206,7 @@
     },
     "web/wiki.html": {
       "bytes": 6573,
-      "sha256": "9c111ca463034918ffb64fe318912e1c6a74ca0ab4d70e831ce94c711ac2df9c"
+      "sha256": "b9a0ff8aee7413ef730bf254d2683cccaee98194975c41f78cfcaf81495f4bf5"
     },
     "web/wiki.css": {
       "bytes": 18520,
@@ -225,16 +225,16 @@
       "sha256": "bf2f4e238449e03671f604c5d9c5612e7d9c8ec4b163b2d572da347b55366023"
     },
     "scripts/install-from-github.ps1": {
-      "bytes": 28049,
-      "sha256": "39ca05e24aede06f4838adfca3ef994668dc01abd6691901d64794f597c529bf"
+      "bytes": 28029,
+      "sha256": "1aa9a39d5d4ab625326848f4674313797a389a45729fc60dd9b1ef2c73f82e9e"
     },
     "tests/test_install_layout.py": {
       "bytes": 23357,
       "sha256": "c27b296aedc0600ddf8ce801108f2f118c3ec9fc3964ab9ce02a65ef4313b5cb"
     },
     "tests/test_github_bootstrap_installer.py": {
-      "bytes": 15567,
-      "sha256": "d91309692d557eef1b10c78b6bd69c48730757264a3367998556acb54f2c3a9a"
+      "bytes": 16614,
+      "sha256": "fcbb79a2f8fbedacee37ee265810eea5ecf9c18ee5f4c30be7fa44255ebc6e4a"
     }
   },
   "install_targets": {

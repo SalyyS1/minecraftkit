@@ -452,7 +452,7 @@ function Expand-SafeArchive {
             }
             $relativePath = [string]::Join([IO.Path]::DirectorySeparatorChar, $parts)
             $candidate = Get-FullPath (Join-Path $destinationPath $relativePath)
-            if ($candidate.Length -ge 240) {
+            if ($candidate.Length -ge 260) {
                 throw "Archive destination path exceeds the conservative Windows limit: $entryName"
             }
             if (-not $candidate.StartsWith($destinationPrefix, [StringComparison]::OrdinalIgnoreCase)) {
@@ -598,7 +598,7 @@ $selection = Select-ReleaseAssets -Release $release -RequestedVersion $Version
 
 $temporaryParent = Get-FullPath ([IO.Path]::GetTempPath())
 Assert-NoReparseAncestors $temporaryParent
-$temporaryDirectory = Join-Path $temporaryParent "minecraftkit-bootstrap-$([guid]::NewGuid().ToString('N'))"
+$temporaryDirectory = Join-Path $temporaryParent "mk-$([guid]::NewGuid().ToString('N'))"
 Assert-DirectChild -Child $temporaryDirectory -Parent $temporaryParent
 try {
     New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null

@@ -4,7 +4,7 @@
     "name": "Salyyy Minecraft Kit",
     "author": "SalyVn",
     "alias": "Salyyy",
-    "version": "2.1.0"
+    "version": "2.1.1"
   },
   "ui": {
     "vi": {
@@ -52,7 +52,7 @@
       "no_results": "Không có nội dung phù hợp. Hãy thử từ khóa rộng hơn.",
       "results_status": "kết quả",
       "offline_note": "Wiki này không tải CDN, font, dữ liệu hay script từ xa khi mở. Liên kết mạng chỉ xuất hiện bên trong lệnh cài do bạn chủ động chạy.",
-      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.0",
+      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.1",
       "footer_boundary": "Khả năng tương thích luôn phụ thuộc phiên bản; kit không cam kết hỗ trợ phổ quát."
     },
     "en": {
@@ -100,7 +100,7 @@
       "no_results": "Nothing matches. Try a broader search term.",
       "results_status": "results",
       "offline_note": "This wiki loads no remote CDN, font, data, or script. A network URL appears only inside an install command that you choose to run.",
-      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.0",
+      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.1",
       "footer_boundary": "Compatibility is always version-scoped; the kit makes no universal support claim."
     }
   },
