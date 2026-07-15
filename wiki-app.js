@@ -263,6 +263,9 @@
   document.querySelectorAll("[data-language]").forEach(function (button) {
     button.addEventListener("click", function () { state.lang = button.dataset.language; commit(false); });
   });
+  document.querySelectorAll("[data-copy-command]").forEach(function (button) {
+    button.addEventListener("click", function () { copyText(button.dataset.copyCommand, button); });
+  });
   search.addEventListener("input", function () { state.q = search.value; commit(false); });
   filter.addEventListener("change", function () { state.filter = filter.value; commit(false); });
   dialog.addEventListener("close", function () {

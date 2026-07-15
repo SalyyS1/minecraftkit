@@ -1,6 +1,9 @@
 :root {
   --mk-aqua: #52edc5;
   --mk-cyan: #68dbe8;
+  --mk-violet: #a78bfa;
+  --mk-rose: #fb7185;
+  --mk-gold: #f5c76e;
   --mk-ink: #030c11;
   --mk-surface: #081b22;
   --mk-line: rgba(104, 219, 232, 0.3);
@@ -16,10 +19,10 @@ body[data-page="ecosystem"] {
   --panel-strong: #0d2a33;
   --line: #20505a;
   --line-strong: #2f7480;
-  --mineral: #52edc5;
-  --mineral-dark: #123842;
-  --copper: #68dbe8;
-  --copper-dark: #12323b;
+  --mineral: #a78bfa;
+  --mineral-dark: #302860;
+  --copper: #fb7185;
+  --copper-dark: #472338;
   --focus: #83f7dc;
 }
 
@@ -32,9 +35,9 @@ body[data-page="api"] {
   --color-line-strong: #2f7480;
   --color-ink: #e9fbf7;
   --color-muted: #9abdbd;
-  --color-accent: #52edc5;
-  --color-accent-hover: #83f7dc;
-  --color-accent-soft: rgba(82, 237, 197, 0.16);
+  --color-accent: #a78bfa;
+  --color-accent-hover: #f5c76e;
+  --color-accent-soft: rgba(167, 139, 250, 0.18);
   --color-accent-ink: #e9fbf7;
   --color-success: #52edc5;
   --color-error: #ff9b9b;
@@ -49,8 +52,9 @@ body::before {
   content: "";
   pointer-events: none;
   background:
-    radial-gradient(circle at 88% 10%, rgba(82, 237, 197, 0.12), transparent 24rem),
-    radial-gradient(circle at 6% 45%, rgba(104, 219, 232, 0.08), transparent 26rem);
+    radial-gradient(circle at 88% 10%, rgba(167, 139, 250, 0.16), transparent 24rem),
+    radial-gradient(circle at 6% 45%, rgba(251, 113, 133, 0.1), transparent 26rem),
+    radial-gradient(circle at 52% 100%, rgba(82, 237, 197, 0.08), transparent 28rem);
 }
 
 .mk-global-nav {
@@ -64,8 +68,8 @@ body::before {
   min-height: 58px;
   margin: 16px auto 0;
   padding: 7px 9px;
-  border: 1px solid var(--mk-line);
-  background: rgba(3, 16, 22, 0.82);
+  border: 1px solid rgba(167, 139, 250, 0.42);
+  background: linear-gradient(100deg, rgba(18, 15, 42, 0.86), rgba(3, 16, 22, 0.86) 48%, rgba(21, 37, 55, 0.86));
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(18px);
 }
@@ -88,7 +92,7 @@ body::before {
 .mk-global-brand img {
   width: 36px;
   height: 36px;
-  border: 1px solid rgba(82, 237, 197, 0.65);
+  border: 1px solid rgba(167, 139, 250, 0.78);
   object-fit: cover;
 }
 
@@ -110,9 +114,9 @@ body::before {
 .mk-global-link:hover,
 .mk-global-link:focus-visible,
 .mk-global-link[aria-current="page"] {
-  border-color: rgba(82, 237, 197, 0.64);
-  color: var(--mk-aqua);
-  background: rgba(82, 237, 197, 0.09);
+  border-color: rgba(245, 199, 110, 0.72);
+  color: var(--mk-gold);
+  background: rgba(167, 139, 250, 0.16);
   transform: translateY(-1px);
 }
 
@@ -132,7 +136,7 @@ body::before {
   overflow: hidden;
   border: 1px solid var(--mk-line);
   color: #e9fbf7;
-  background: linear-gradient(145deg, rgba(13, 48, 55, 0.98), rgba(3, 14, 18, 0.96));
+  background: linear-gradient(145deg, rgba(35, 28, 69, 0.98), rgba(5, 17, 27, 0.96));
   text-decoration: none;
   transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
 }
@@ -142,14 +146,14 @@ body::before {
   inset: 0;
   content: "";
   opacity: 0;
-  background: linear-gradient(120deg, transparent 30%, rgba(82, 237, 197, 0.18), transparent 70%);
+  background: linear-gradient(120deg, transparent 26%, rgba(245, 199, 110, 0.22), rgba(82, 237, 197, 0.15), transparent 72%);
   transform: translateX(-85%);
   transition: opacity 220ms ease, transform 480ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .mk-launcher-card:hover {
   z-index: 1;
-  border-color: var(--mk-aqua);
+  border-color: var(--mk-gold);
   box-shadow: 0 24px 50px rgba(0, 0, 0, 0.3);
   transform: translateY(-5px);
 }
@@ -158,15 +162,19 @@ body::before {
 .mk-launcher-card > * { position: relative; z-index: 1; }
 .mk-launcher-card strong { display: block; margin-top: 11px; font: 700 clamp(1.55rem, 3vw, 2.6rem)/1 "Bahnschrift SemiCondensed", sans-serif; }
 .mk-launcher-card p { max-width: 42ch; margin-top: 12px; color: #b9d9d6; }
-.mk-launcher-kicker { color: var(--mk-aqua); font: 700 0.69rem/1 "Cascadia Code", Consolas, monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+.mk-launcher-kicker { color: var(--mk-gold); font: 700 0.69rem/1 "Cascadia Code", Consolas, monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+.mk-launcher-card:nth-child(2) { background: linear-gradient(145deg, rgba(13, 57, 68, 0.98), rgba(5, 17, 27, 0.96)); }
+.mk-launcher-card:nth-child(2) .mk-launcher-kicker { color: var(--mk-aqua); }
+.mk-launcher-card:nth-child(3) { background: linear-gradient(145deg, rgba(69, 28, 55, 0.98), rgba(5, 17, 27, 0.96)); }
+.mk-launcher-card:nth-child(3) .mk-launcher-kicker { color: var(--mk-rose); }
 
 .mk-page-intro {
   width: min(100% - 32px, 1380px);
   margin: 22px auto 0;
   padding: 27px 30px;
-  border: 1px solid var(--mk-line);
+  border: 1px solid rgba(104, 219, 232, 0.34);
   color: #e9fbf7;
-  background: linear-gradient(112deg, rgba(8, 31, 39, 0.98), rgba(4, 17, 23, 0.93));
+  background: linear-gradient(112deg, rgba(28, 22, 59, 0.98), rgba(7, 30, 38, 0.93) 55%, rgba(53, 24, 45, 0.78));
 }
 
 .mk-page-intro p { margin: 0; color: #9abdbd; font: 700 0.72rem/1.4 "Cascadia Code", Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
@@ -188,12 +196,21 @@ body::before {
 .mk-loader-mark { position: relative; display: grid; justify-items: center; width: min(92vw, 730px); padding: 46px 20px; }
 .mk-loader-lines { position: absolute; top: 50%; right: 0; left: 0; height: 1px; background: rgba(104, 219, 232, 0.18); overflow: hidden; }
 .mk-loader-lines::before,
-.mk-loader-lines::after { position: absolute; top: 0; width: 50%; height: 1px; content: ""; background: var(--mk-aqua); box-shadow: 0 0 18px var(--mk-aqua); animation: mk-line-in 750ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.mk-loader-lines::after { position: absolute; top: 0; width: 50%; height: 1px; content: ""; box-shadow: 0 0 18px currentColor; animation: mk-line-in 750ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.mk-loader-lines::before { color: var(--mk-violet); background: var(--mk-violet); }
+.mk-loader-lines::after { color: var(--mk-aqua); background: var(--mk-aqua); }
 .mk-loader-lines::before { left: 0; transform-origin: right; }
 .mk-loader-lines::after { right: 0; transform-origin: left; }
 .mk-loader img { width: 86px; height: 86px; margin-bottom: 14px; border: 1px solid var(--mk-aqua); object-fit: cover; opacity: 0; animation: mk-mark-in 460ms 440ms ease forwards; }
-.mk-loader h1 { position: relative; margin: 0; color: #e9fbf7; font: 800 clamp(2.3rem, 8vw, 5.8rem)/0.9 "Bahnschrift SemiCondensed", "Cascadia Code", sans-serif; letter-spacing: -0.055em; text-align: center; opacity: 0; animation: mk-mark-in 440ms 390ms ease forwards; }
-.mk-loader small { position: relative; margin-top: 13px; color: var(--mk-aqua); font: 700 0.68rem/1 "Cascadia Code", Consolas, monospace; letter-spacing: 0.27em; opacity: 0; animation: mk-mark-in 440ms 590ms ease forwards; text-transform: uppercase; }
+.mk-loader h1 { position: relative; margin: 0; color: #e9fbf7; background: linear-gradient(100deg, var(--mk-violet), #f6edf0 45%, var(--mk-aqua)); background-clip: text; font: 800 clamp(2.3rem, 8vw, 5.8rem)/0.9 "Bahnschrift SemiCondensed", "Cascadia Code", sans-serif; letter-spacing: -0.055em; text-align: center; -webkit-text-fill-color: transparent; opacity: 0; animation: mk-mark-in 440ms 390ms ease forwards; }
+.mk-loader small { position: relative; margin-top: 13px; color: var(--mk-gold); font: 700 0.68rem/1 "Cascadia Code", Consolas, monospace; letter-spacing: 0.27em; opacity: 0; animation: mk-mark-in 440ms 590ms ease forwards; text-transform: uppercase; }
+.mk-loader.is-quick img, .mk-loader.is-quick h1, .mk-loader.is-quick small { opacity: 1; animation: none; }
+.mk-loader.is-quick img { width: 52px; height: 52px; margin-bottom: 9px; }
+.mk-loader.is-quick h1 { font-size: clamp(1.8rem, 6vw, 3.2rem); }
+.mk-loader.is-quick small { margin-top: 8px; }
+
+/* The global navigation owns the only visual logo; older page headers keep their text, not a second glyph. */
+.brand-mark, .wordmark-code, .brand-rune { display: none !important; }
 
 @keyframes mk-line-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes mk-mark-in { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
