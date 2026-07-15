@@ -1,0 +1,49 @@
+{
+  "name": "minecraftkit",
+  "version": "2.2.0",
+  "description": "Secure CLI installer and doctor for Salyyy Minecraft Kit.",
+  "type": "module",
+  "bin": {
+    "minecraftkit": "bin/minecraftkit.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "README.md",
+    "NOTICE.md"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "check:bootstrap": "node scripts/check-bootstrap-sync.js",
+    "check": "npm run check:bootstrap && npm test",
+    "pack:dry-run": "npm pack --dry-run --json",
+    "prepublishOnly": "npm run check"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "minecraft",
+    "minecraft-plugin",
+    "paper",
+    "folia",
+    "claude-code",
+    "codex",
+    "skills",
+    "cli"
+  ],
+  "author": "SalyVn / Salyyy",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SalyyS1/minecraftkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SalyyS1/minecraftkit/issues"
+  },
+  "homepage": "https://salyys1.github.io/minecraftkit/wiki.html",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  }
+}

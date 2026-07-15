@@ -4,7 +4,7 @@
     "name": "Salyyy Minecraft Kit",
     "author": "SalyVn",
     "alias": "Salyyy",
-    "version": "2.1.1"
+    "version": "2.2.0"
   },
   "ui": {
     "vi": {
@@ -52,7 +52,7 @@
       "no_results": "Không có nội dung phù hợp. Hãy thử từ khóa rộng hơn.",
       "results_status": "kết quả",
       "offline_note": "Wiki này không tải CDN, font, dữ liệu hay script từ xa khi mở. Liên kết mạng chỉ xuất hiện bên trong lệnh cài do bạn chủ động chạy.",
-      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.1",
+      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.2.0",
       "footer_boundary": "Khả năng tương thích luôn phụ thuộc phiên bản; kit không cam kết hỗ trợ phổ quát."
     },
     "en": {
@@ -100,7 +100,7 @@
       "no_results": "Nothing matches. Try a broader search term.",
       "results_status": "results",
       "offline_note": "This wiki loads no remote CDN, font, data, or script. A network URL appears only inside an install command that you choose to run.",
-      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.1.1",
+      "footer_identity": "SalyVn / Salyyy • Salyyy Minecraft Kit v2.2.0",
       "footer_boundary": "Compatibility is always version-scoped; the kit makes no universal support claim."
     }
   },
@@ -518,6 +518,22 @@
           "title": "Packaging & publishing",
           "summary": "A good artifact is traceable and ships with checksums, licensing, and honest operations guidance.",
           "points": ["Build from a clean tag; record commit/version metadata; publish SHA-256 for JARs/ZIPs.", "Review dependency/asset licenses; exclude Mojang binaries, secrets, and development files.", "Document install, configuration, permissions, commands, dependencies, backup/migration, and rollback.", "Publish only verified tested/support matrices and accept bug reports with redacted logs."]
+        }
+      }
+    },
+    {
+      "id": "npm-cli",
+      "keywords": ["npm", "npx", "cli", "doctor", "install", "update", "powershell"],
+      "content": {
+        "vi": {
+          "title": "NPM CLI & cài đặt tiện lợi",
+          "summary": "CLI minecraftkit rút ngắn thao tác cài nhưng vẫn giữ bootstrap checksum và transaction đã audit.",
+          "points": ["Sau khi package npm được public, dùng npx minecraftkit install --target both hoặc npm install -g minecraftkit.", "doctor kiểm tra Node, PowerShell, Python và topology Codex/Claude; commands liệt kê mười route mc:*.", "CLI chỉ chạy bootstrap đóng gói cục bộ; bootstrap vẫn tải release GitHub, đối chiếu SHA-256 và gọi installer transaction.", "Không có postinstall, telemetry, token hay cập nhật ngầm; dùng --dry-run trước khi thao tác ở môi trường nhạy cảm."]
+        },
+        "en": {
+          "title": "npm CLI & convenient installation",
+          "summary": "The minecraftkit CLI shortens setup while retaining the audited checksum bootstrap and transaction.",
+          "points": ["After the npm package is public, use npx minecraftkit install --target both or npm install -g minecraftkit.", "doctor checks Node, PowerShell, Python, and Codex/Claude topology; commands list the ten mc:* routes.", "The CLI runs only its locally packaged bootstrap; that bootstrap still downloads the GitHub release, verifies SHA-256, and invokes the transactional installer.", "There is no postinstall hook, telemetry, token, or background update; use --dry-run before changing a sensitive environment."]
         }
       }
     }

@@ -16,7 +16,7 @@ if ([string]::IsNullOrWhiteSpace($SourceRoot)) {
 }
 $CanonicalSkillName = 'minecraftkit'
 $LegacySkillName = 'minecraft-rpg-kit'
-$ExcludedNames = @('dist', '__pycache__', '.git', '.gitignore', '.gitattributes')
+$ExcludedNames = @('dist', 'npm', '__pycache__', '.git', '.gitignore', '.gitattributes')
 $InstallCodex = $Target -eq 'codex' -or $Target -eq 'both'
 $InstallClaude = $Target -eq 'claude' -or $Target -eq 'both'
 

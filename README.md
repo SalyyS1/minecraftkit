@@ -1,6 +1,6 @@
 # Salyyy Minecraft Kit
 
-**Version 2.1.1 · Author/nametag: SalyVn / Salyyy**
+**Version 2.2.0 · Author/nametag: SalyVn / Salyyy**
 
 Salyyy Minecraft Kit is an evidence-backed Minecraft engineering skill system for Codex and Claude. It routes ten focused domains across production plugin builds, game/platform versions, packets, NMS, client rendering, shaders, dialogs, packs, models/animation, and RPG systems.
 
@@ -145,6 +145,25 @@ Codex + Claude:
 ```
 
 The command intentionally names the public repository and target. Review the [bootstrap source](https://github.com/SalyyS1/minecraftkit/blob/main/scripts/install-from-github.ps1) before executing remote code in a sensitive environment.
+
+### npm CLI — registry publication pending
+
+The dependency-free `minecraftkit` CLI is ready in [`npm/`](./npm) and packages a local copy of the same reviewed bootstrap; it does not evaluate a raw GitHub script. Once the first public npm release is published, installation becomes:
+
+```powershell
+npx minecraftkit install --target both
+
+# Or add it to a project, then run it with npx
+npm install minecraftkit
+npx minecraftkit doctor
+
+# Or install the CLI globally
+npm install -g minecraftkit
+minecraftkit doctor
+minecraftkit install --target codex
+```
+
+Available commands are `install`, `update`, `doctor`, `commands`, `wiki`, and `version`. Until npm publication, use the PowerShell installer above; it remains the supported public fallback.
 
 ### Package or install a local checkout
 

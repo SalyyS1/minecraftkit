@@ -81,7 +81,7 @@ ALLOWED_DIRECTORY_EXTENSIONS = {
     "tests": {".py", ".json"},
     "web": {".html", ".css", ".js"},
 }
-EXCLUDED_DIRECTORY_NAMES = {"dist", "__pycache__", ".git", ".gitignore", ".gitattributes"}
+EXCLUDED_DIRECTORY_NAMES = {"dist", "npm", "__pycache__", ".git", ".gitignore", ".gitattributes"}
 EXCLUDED_DIRECTORY_PREFIXES = (".api-stage-", ".web-stage-", ".minecraft-rpg-kit-stage-", ".minecraftkit-stage-")
 FORBIDDEN_SOURCE_EXTENSIONS = {".class", ".dex", ".groovy", ".jar", ".java", ".kt", ".kts", ".scala"}
 FORBIDDEN_SOURCE_DIRECTORIES = {"decomp", "decompiled", "decompiled-source", "decompiled-sources"}

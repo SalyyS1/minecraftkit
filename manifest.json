@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "minecraftkit",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
@@ -145,8 +145,8 @@
       "sha256": "4f01ad57a72be1c67ff8739bb1f3e99903a0d33c9a3462164d90c374eb6c8d08"
     },
     "data/wiki-content.json": {
-      "bytes": 49727,
-      "sha256": "eff5e8130e754557b2d4759f65fecb2b166ec257678df4f262bfc4af35967645"
+      "bytes": 51372,
+      "sha256": "00d686a535984eb02a4dbcbacca236b487b44608e3e2e5ae45bca39a29e6b898"
     },
     "data/minecraft-version-catalog.json": {
       "bytes": 323457,
@@ -177,8 +177,8 @@
       "sha256": "4eb2eb5f8408a70c94ce9f01d89d3cd9d0fba9f8d09f1886d7bd77e4bd5ff8f8"
     },
     "web/data/wiki.js": {
-      "bytes": 44250,
-      "sha256": "2d860099bc204a8a639d63f8e204b093a097254a331b146267d5871c233b5f13"
+      "bytes": 45732,
+      "sha256": "7954b3dab957186ee0ed7c042a1ecd3581107a8b81a8d0a47252b0b8f64ac216"
     },
     "web/index.html": {
       "bytes": 9968,
@@ -206,7 +206,7 @@
     },
     "web/wiki.html": {
       "bytes": 6573,
-      "sha256": "b9a0ff8aee7413ef730bf254d2683cccaee98194975c41f78cfcaf81495f4bf5"
+      "sha256": "f733b83ef2c202419eed93103e58c9611901e7e79da28bb0547b110a6e7af87d"
     },
     "web/wiki.css": {
       "bytes": 18520,
@@ -221,8 +221,8 @@
       "sha256": "26c58123a2cc4a8527b32aab4b6afeaa9617b7368b7ddcb4f0e8f5ca74c8dd47"
     },
     "scripts/install-global.ps1": {
-      "bytes": 23071,
-      "sha256": "bf2f4e238449e03671f604c5d9c5612e7d9c8ec4b163b2d572da347b55366023"
+      "bytes": 23078,
+      "sha256": "d20a3ee0129965b3dd4e8110090b3d3132bcb405d50b1a275a071ed4ce93ee06"
     },
     "scripts/install-from-github.ps1": {
       "bytes": 28029,
@@ -234,7 +234,7 @@
     },
     "tests/test_github_bootstrap_installer.py": {
       "bytes": 16614,
-      "sha256": "fcbb79a2f8fbedacee37ee265810eea5ecf9c18ee5f4c30be7fa44255ebc6e4a"
+      "sha256": "b07619ad89a3c5d366bf67b4a22d2efaef362a72c606300f2e7662179830bb1a"
     }
   },
   "install_targets": {
