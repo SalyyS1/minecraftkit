@@ -51,7 +51,8 @@ class NpmCliPackageTests(unittest.TestCase):
             {
                 "NOTICE.md", "README.md", "package.json", "bin/minecraftkit.js",
                 "lib/arguments.js", "lib/cli.js", "lib/constants.js", "lib/doctor.js",
-                "lib/install-from-github.ps1", "lib/powershell.js",
+                "lib/install-from-github.ps1", "lib/mcp.js", "lib/posix-installer.js",
+                "lib/powershell.js",
             },
         )
         self.assertLess(payload["unpackedSize"], 100_000)

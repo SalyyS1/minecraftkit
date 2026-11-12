@@ -1,6 +1,6 @@
 import { TARGETS } from "./constants.js";
 
-const COMMANDS = new Set(["install", "update", "doctor", "commands", "wiki", "version", "help"]);
+const COMMANDS = new Set(["install", "update", "doctor", "commands", "mcp", "wiki", "version", "help"]);
 const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
 
 function requireValue(argv, index, flag) {
@@ -21,6 +21,11 @@ export function parseCliArguments(argv) {
     } else if (token === "--version") {
       options.releaseVersion = requireValue(argv, index, token);
       index += 1;
+    } else if (token === "--root") {
+      options.kitRoot = requireValue(argv, index, token);
+      index += 1;
+    } else if (token === "--print-config") {
+      options.printConfig = true;
     } else if (token === "--dry-run") {
       options.dryRun = true;
     } else if (token === "--json") {
@@ -55,6 +60,7 @@ export function usage() {
 Usage:
   minecraftkit install [codex|claude|both] [--dry-run] [--version x.y.z]
   minecraftkit update [codex|claude|both]
+  minecraftkit mcp [--print-config] [--root <dir>]
   minecraftkit doctor [--json]
   minecraftkit commands [--json]
   minecraftkit wiki
@@ -63,5 +69,6 @@ Usage:
 Examples:
   npx minecraftkit install --target both
   minecraftkit install codex --dry-run
+  minecraftkit mcp --print-config
   minecraftkit doctor --json`;
 }

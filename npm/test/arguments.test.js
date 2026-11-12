@@ -12,6 +12,17 @@ test("install accepts positional target and safe options", () => {
   });
 });
 
+test("mcp command accepts --print-config and --root", () => {
+  assert.deepEqual(parseCliArguments(["mcp", "--print-config", "--root", "/opt/minecraftkit"]), {
+    command: "mcp",
+    target: "both",
+    dryRun: false,
+    json: false,
+    printConfig: true,
+    kitRoot: "/opt/minecraftkit"
+  });
+});
+
 test("invalid targets and versions fail closed", () => {
   assert.throws(() => parseCliArguments(["install", "cursor"]), /Invalid target/);
   assert.throws(() => parseCliArguments(["install", "--version", "latest"]), /SemVer/);

@@ -69,7 +69,7 @@ REQUIRED = (
     "tests/evals.json",
 )
 
-ALLOWED_TOP_LEVEL_FILES = {"SKILL.md", "README.md", "NOTICE.md", "manifest.json"}
+ALLOWED_TOP_LEVEL_FILES = {"SKILL.md", "README.md", "README.vi.md", "NOTICE.md", "manifest.json"}
 ALLOWED_DIRECTORY_EXTENSIONS = {
     "agents": {".yaml"},
     "assets": set(),
