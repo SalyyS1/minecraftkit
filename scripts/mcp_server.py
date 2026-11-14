@@ -47,7 +47,8 @@ DOMAIN_SYNONYM_HINTS: dict[str, tuple[str, ...]] = {
     "core": (
         "folia", "region scheduler", "globalregionscheduler", "entityscheduler",
         "asyncscheduler", "teleportasync", "bukkitrunnable", "bukkitscheduler",
-        "tick", "server", "proxy", "bungeecord", "waterfall",
+        "tick", "server", "proxy", "bungeecord", "waterfall", "server.properties",
+        "paper-global.yml", "simulation-distance", "view-distance",
     ),
     "dialog": (
         "dialog", "modal", "form", "custom click", "click action", "prompt",
@@ -62,10 +63,12 @@ DOMAIN_SYNONYM_HINTS: dict[str, tuple[str, ...]] = {
     "pack": (
         "pack_format", "glyph", "negative space", "unicode", "blockstate", "sounds.json",
         "lang", "custom_model_data", "item_model", "datapack", "resourcepack", "predicate",
+        "tooltip_display", "equippable", "consumable", "blocks_attacks",
     ),
     "protocol": (
         "netty", "bytebuf", "friendlybytebuf", "registryfriendlybytebuf", "streamcodec",
         "channel", "play state", "configuration state", "handshake", "packetlistener",
+        "network-compression-threshold", "eventloopthreads", "netty-threads",
     ),
     "rpg": (
         "coretools", "mmoinventory", "mmoprofiles", "mythiccrucible", "mythicdungeons",
@@ -146,7 +149,7 @@ class CatalogStore:
             version = manifest.get("version") if isinstance(manifest, dict) else None
             if isinstance(version, str) and version:
                 return version
-        return "2.5.0"
+        return "2.6.0"
 
     def api_index(self) -> dict[str, Any]:
         return self._load_json("data/api-index.json")
@@ -628,6 +631,96 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_server_properties",
+        "title": "Audit server.properties, Netty Threads & Packet Compression",
+        "description": (
+            "Audit Minecraft server.properties alongside optional config/paper-global.yml, spigot.yml, "
+            "and JVM flags for network-compression-threshold CPU/bandwidth hazards, Velocity/BungeeCord "
+            "forwarding & online-mode authentication mismatches, Netty EventLoop thread starvation or "
+            "oversubscription, quadratic view/simulation-distance chunk budgets, RCON plaintext exposure, "
+            "resource-pack SHA-1/UUID contracts, Paper 26.3 schema drift, and JVM GC flags."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_properties": {
+                    "type": "string",
+                    "description": "Contents of server.properties.",
+                },
+                "paper_global_yaml": {
+                    "type": "string",
+                    "description": "Optional contents of config/paper-global.yml.",
+                },
+                "spigot_yaml": {
+                    "type": "string",
+                    "description": "Optional contents of spigot.yml.",
+                },
+                "jvm_args": {
+                    "type": "string",
+                    "description": "Optional JVM startup flags (e.g. '-Xms8G -Xmx8G -Dio.netty.eventLoopThreads=8').",
+                },
+                "behind_proxy": {
+                    "type": "string",
+                    "enum": ["none", "velocity", "bungeecord"],
+                    "description": "Proxy topology in front of this backend server (default 'none').",
+                },
+                "expected_players": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5000,
+                    "description": "Expected peak concurrent players for Netty, bandwidth, and chunk-budget sizing (default 50).",
+                },
+                "cpu_cores": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 512,
+                    "description": "Available host vCPUs/hardware threads for Netty and Moonrise worker sizing (default 4).",
+                },
+            },
+            "required": ["server_properties"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_validate_item_components",
+        "title": "Validate Paper 1.20.5-26.3+ Item Data Components & Client Item Definitions",
+        "description": (
+            "Validate Minecraft and Paper 1.20.5 through 26.3+ structured item data components, component "
+            "patches, and optional client assets/<namespace>/items/<id>.json definitions. Detects legacy pre-1.20.5 "
+            "NBT tags, 1.21.4+ typed custom_model_data channel mismatches, 1.21.5+/26.3 tooltip_display vs removed "
+            "show_in_tooltip fields, food/consumable/use_remainder splits, equippable.asset_id renames, "
+            "max_damage + max_stack_size mutual exclusion, JSON-escaped text strings, and out-of-bounds client "
+            "custom_model_data selector indices."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "payload": {
+                    "oneOf": [
+                        {"type": "string"},
+                        {"type": "object"},
+                    ],
+                    "description": "JSON string or object representing an item stack ({id, count, components}), a direct component map/patch, or a client items/<id>.json definition.",
+                },
+                "target_version": {
+                    "type": "string",
+                    "description": "Target Minecraft/Paper version (e.g. '26.3', '26.2', '1.21.5', '1.21.4', '1.20.5'; default '26.3').",
+                },
+                "client_item_definition": {
+                    "oneOf": [
+                        {"type": "string"},
+                        {"type": "object"},
+                    ],
+                    "description": "Optional companion client item model definition (assets/<namespace>/items/<id>.json) to cross-check item_model and custom_model_data channel indices.",
+                },
+            },
+            "required": ["payload"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -925,14 +1018,625 @@ _RESOURCE_BREAKING_EPOCHS: tuple[tuple[str, str, str], ...] = (
     ("overlay_1_21_4_items", "1.21.4", "Client item definitions under assets/<namespace>/items/<id>.json replaced legacy model overrides predicates."),
     ("overlay_1_21_6_dialogs", "1.21.6", "Built-in dialog UI definitions and updated core/post shader uniform layouts."),
     ("overlay_26_1_modern", "26.1", "Year-based 26.x resource pipeline and updated shader/atlas format contracts."),
+    ("overlay_26_3_components", "26.3", "Resource pack format [97, 1]: updated item model selection properties, oversized GUI item rendering, and core shader uniform bindings."),
 )
 
 _DATA_BREAKING_EPOCHS: tuple[tuple[str, str, str], ...] = (
     ("overlay_1_20_5_components", "1.20.5", "Structured item data components replaced raw NBT tags across recipes, loot tables, and predicates."),
     ("overlay_1_21_singular_dirs", "1.21", "Registry folders renamed from plural to singular (loot_table, recipe, tags/item, tags/block) plus data-driven enchantments."),
-    ("overlay_1_21_5_predicates", "1.21.5", "Updated entity/item component predicates and dialog data definitions."),
+    ("overlay_1_21_5_predicates", "1.21.5", "Updated entity/item component predicates, tooltip_display migration, and dialog data definitions."),
     ("overlay_26_1_modern", "26.1", "Year-based 26.x data pack registry schema updates."),
+    ("overlay_26_3_components", "26.3", "Data pack format [121, 0]: Paper/Minecraft 26.3 strict typed item component codecs, tooltip_display enforcement, and weapon/blocks_attacks predicates."),
 )
+
+PAPER_26_3_ITEM_COMPONENT_SCHEMAS: dict[str, dict[str, Any]] = {
+    "minecraft:custom_model_data": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.4",
+        "value_type": "object",
+        "allowed_keys": ["floats", "flags", "strings", "colors"],
+        "notes": "Integer prior to 1.21.4; typed channel object {floats: number[], flags: boolean[], strings: string[], colors: (int|number[3])[]} in 1.21.4 through 26.3+.",
+    },
+    "minecraft:item_model": {
+        "introduced_in": "1.21.2",
+        "value_type": "resource_location",
+        "notes": "Namespaced ID resolving assets/<namespace>/items/<path>.json.",
+    },
+    "minecraft:item_name": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "text_component",
+        "notes": "Default non-italic item name; native text component object/string in 1.21.5 through 26.3+ (do not JSON-escape objects inside strings).",
+    },
+    "minecraft:custom_name": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "text_component",
+        "notes": "Anvil/custom display name; native text component object/string in 1.21.5 through 26.3+.",
+    },
+    "minecraft:lore": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "array",
+        "max_items": 256,
+        "notes": "Array of up to 256 native text component entries.",
+    },
+    "minecraft:tooltip_display": {
+        "introduced_in": "1.21.5",
+        "value_type": "object",
+        "allowed_keys": ["hide_tooltip", "hidden_components"],
+        "notes": "Replaces removed minecraft:hide_tooltip, minecraft:hide_additional_tooltip, and per-component show_in_tooltip flags.",
+    },
+    "minecraft:tooltip_style": {
+        "introduced_in": "1.21.2",
+        "value_type": "resource_location",
+        "notes": "Namespaced tooltip frame/background sprite prefix under textures/gui/sprites/tooltip/.",
+    },
+    "minecraft:equippable": {
+        "introduced_in": "1.21.2",
+        "modern_schema_since": "1.21.5",
+        "value_type": "object",
+        "required_keys": ["slot"],
+        "allowed_keys": [
+            "slot", "equip_sound", "asset_id", "camera_overlay", "allowed_entities",
+            "dispensable", "swappable", "damage_on_hurt", "equip_on_interact", "can_be_sheared", "shearing_sound",
+        ],
+        "deprecated_keys": {
+            "model": "Renamed to 'asset_id' in 1.21.4+ (referencing assets/<namespace>/equipment/<id>.json).",
+        },
+        "notes": "Controls armor, elytra, saddle, and custom equipment slot behaviour.",
+    },
+    "minecraft:consumable": {
+        "introduced_in": "1.21.2",
+        "value_type": "object",
+        "allowed_keys": ["consume_seconds", "animation", "sound", "has_consume_particles", "on_consume_effects"],
+        "notes": "Extracted from minecraft:food in 1.21.2; enables consumable animations and effects on any item.",
+    },
+    "minecraft:food": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.2",
+        "value_type": "object",
+        "required_keys": ["nutrition", "saturation"],
+        "allowed_keys": ["nutrition", "saturation", "can_always_eat"],
+        "deprecated_keys": {
+            "eat_seconds": "Moved to minecraft:consumable.consume_seconds in 1.21.2+.",
+            "using_converts_to": "Moved to minecraft:use_remainder in 1.21.2+.",
+            "effects": "Moved to minecraft:consumable.on_consume_effects in 1.21.2+.",
+        },
+        "notes": "Pure hunger/saturation stats when paired with minecraft:consumable.",
+    },
+    "minecraft:use_remainder": {
+        "introduced_in": "1.21.2",
+        "value_type": "object",
+        "required_keys": ["id"],
+        "notes": "Item stack returned after consuming an item.",
+    },
+    "minecraft:use_cooldown": {
+        "introduced_in": "1.21.2",
+        "value_type": "object",
+        "required_keys": ["seconds"],
+        "allowed_keys": ["seconds", "cooldown_group"],
+        "notes": "Applies a shared namespaced cooldown group (seconds > 0) after item use.",
+    },
+    "minecraft:weapon": {
+        "introduced_in": "1.21.5",
+        "value_type": "object",
+        "allowed_keys": ["item_damage_per_attack", "disable_blocking_for_seconds"],
+        "notes": "Controls durability cost per melee hit and shield-disable duration in seconds.",
+    },
+    "minecraft:blocks_attacks": {
+        "introduced_in": "1.21.5",
+        "value_type": "object",
+        "allowed_keys": [
+            "block_delay_seconds", "disable_cooldown_scale", "damage_reductions",
+            "item_damage", "block_sound", "disabled_sound", "bypassed_by",
+        ],
+        "notes": "Data-driven shield/parry component on 1.21.5 through 26.3+.",
+    },
+    "minecraft:break_sound": {
+        "introduced_in": "1.21.5",
+        "value_type": "sound_event",
+        "notes": "Sound event triggered when item durability reaches zero.",
+    },
+    "minecraft:attribute_modifiers": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "array",
+        "notes": "Direct array of {type, id, amount, operation, slot, display?} entries in 1.21.5 through 26.3+ (show_in_tooltip moved to tooltip_display).",
+    },
+    "minecraft:enchantments": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "object",
+        "notes": "Direct map of namespaced enchantment ID to integer level (1..255) in 1.21.5 through 26.3+.",
+    },
+    "minecraft:stored_enchantments": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "object",
+        "notes": "Direct map of stored enchantment ID to integer level (1..255) for enchanted books.",
+    },
+    "minecraft:max_stack_size": {
+        "introduced_in": "1.20.5",
+        "value_type": "int",
+        "min": 1,
+        "max": 99,
+        "notes": "Stack limit (1..99); mutually exclusive with max_damage when max_stack_size > 1.",
+    },
+    "minecraft:max_damage": {
+        "introduced_in": "1.20.5",
+        "value_type": "int",
+        "min": 1,
+        "notes": "Maximum durability (>= 1); requires max_stack_size == 1.",
+    },
+    "minecraft:damage": {
+        "introduced_in": "1.20.5",
+        "value_type": "int",
+        "min": 0,
+        "notes": "Current durability damage (>= 0).",
+    },
+    "minecraft:unbreakable": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "unit_object",
+        "notes": "Empty unit object {} in 1.21.5 through 26.3+ (show_in_tooltip moved to tooltip_display).",
+    },
+    "minecraft:enchantable": {
+        "introduced_in": "1.21.2",
+        "value_type": "object",
+        "required_keys": ["value"],
+        "allowed_keys": ["value"],
+        "notes": "Enchantability weight ({value: int >= 1}).",
+    },
+    "minecraft:repairable": {
+        "introduced_in": "1.21.2",
+        "value_type": "object",
+        "required_keys": ["items"],
+        "allowed_keys": ["items"],
+        "notes": "Anvil repair ingredient item ID, #tag, or list of item IDs.",
+    },
+    "minecraft:glider": {
+        "introduced_in": "1.21.2",
+        "value_type": "unit_object",
+        "notes": "Empty unit object {} enabling elytra-style gliding when equipped.",
+    },
+    "minecraft:death_protection": {
+        "introduced_in": "1.21.2",
+        "value_type": "object",
+        "allowed_keys": ["death_effects"],
+        "notes": "Totem-of-undying style resurrection effects.",
+    },
+    "minecraft:rarity": {
+        "introduced_in": "1.20.5",
+        "value_type": "enum",
+        "enum": ["common", "uncommon", "rare", "epic"],
+        "notes": "Item name rarity tier.",
+    },
+    "minecraft:dyed_color": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "color",
+        "notes": "Packed RGB integer or [r, g, b] float array in 1.21.5 through 26.3+ (show_in_tooltip removed).",
+    },
+    "minecraft:trim": {
+        "introduced_in": "1.20.5",
+        "modern_schema_since": "1.21.5",
+        "value_type": "object",
+        "required_keys": ["material", "pattern"],
+        "allowed_keys": ["material", "pattern"],
+        "notes": "Armor trim material and pattern IDs (show_in_tooltip removed in 1.21.5+).",
+    },
+    "minecraft:custom_data": {
+        "introduced_in": "1.20.5",
+        "value_type": "object_or_snbt",
+        "notes": "Plugin/datapack custom compound backing Paper PersistentDataContainer (PublicBukkitValues).",
+    },
+}
+
+
+def _parse_java_properties(text: str) -> dict[str, Any]:
+    values: dict[str, str] = {}
+    lines: dict[str, int] = {}
+    duplicates: list[str] = []
+
+    raw_lines = text.splitlines()
+    idx = 0
+    total = len(raw_lines)
+    while idx < total:
+        line_no = idx + 1
+        raw = raw_lines[idx]
+        idx += 1
+        stripped = raw.lstrip(" \t\f")
+        if not stripped or stripped[0] in ("#", "!"):
+            continue
+
+        logical = stripped
+        while logical.endswith("\\") and (len(logical) - len(logical.rstrip("\\"))) % 2 == 1 and idx < total:
+            logical = logical[:-1] + raw_lines[idx].lstrip(" \t\f")
+            idx += 1
+
+        key_chars: list[str] = []
+        pos = 0
+        n = len(logical)
+        escaped = False
+        while pos < n:
+            ch = logical[pos]
+            if escaped:
+                key_chars.append(ch)
+                escaped = False
+                pos += 1
+                continue
+            if ch == "\\":
+                escaped = True
+                pos += 1
+                continue
+            if ch in ("=", ":", " ", "\t", "\f"):
+                break
+            key_chars.append(ch)
+            pos += 1
+
+        while pos < n and logical[pos] in (" ", "\t", "\f"):
+            pos += 1
+        if pos < n and logical[pos] in ("=", ":"):
+            pos += 1
+            while pos < n and logical[pos] in (" ", "\t", "\f"):
+                pos += 1
+
+        val_raw = logical[pos:]
+        val_chars: list[str] = []
+        vpos = 0
+        vn = len(val_raw)
+        while vpos < vn:
+            ch = val_raw[vpos]
+            if ch == "\\" and vpos + 1 < vn:
+                nxt = val_raw[vpos + 1]
+                if nxt == "n":
+                    val_chars.append("\n")
+                    vpos += 2
+                elif nxt == "r":
+                    val_chars.append("\r")
+                    vpos += 2
+                elif nxt == "t":
+                    val_chars.append("\t")
+                    vpos += 2
+                elif nxt == "u" and vpos + 5 < vn and re.fullmatch(r"[0-9a-fA-F]{4}", val_raw[vpos + 2: vpos + 6]):
+                    val_chars.append(chr(int(val_raw[vpos + 2: vpos + 6], 16)))
+                    vpos += 6
+                else:
+                    val_chars.append(nxt)
+                    vpos += 2
+            else:
+                val_chars.append(ch)
+                vpos += 1
+
+        key = "".join(key_chars).strip()
+        if not key:
+            continue
+        if key in values and key not in duplicates:
+            duplicates.append(key)
+        values[key] = "".join(val_chars).strip()
+        lines[key] = line_no
+
+    return {"values": values, "lines": lines, "duplicates": duplicates}
+
+
+def _parse_nested_yaml_scalars(text: str) -> dict[str, Any]:
+    root_keys: list[str] = []
+    dotted: dict[str, str] = {}
+    stack: list[tuple[int, str]] = []
+
+    for raw_line in text.splitlines():
+        cleaned = _strip_yaml_inline_comment(raw_line.replace("\t", "  "))
+        content = cleaned.strip()
+        if not content or content == "---" or content.startswith("-"):
+            continue
+        indent = len(cleaned) - len(cleaned.lstrip(" "))
+        while stack and stack[-1][0] >= indent:
+            stack.pop()
+        if ":" not in content:
+            continue
+        k_part, _, r_part = content.partition(":")
+        key, _ = _unquote_yaml_scalar(k_part.strip())
+        if not key:
+            continue
+        if indent == 0 and key not in root_keys:
+            root_keys.append(key)
+        rest = r_part.strip()
+        full_key = ".".join([*(seg for _, seg in stack), key])
+        if rest == "":
+            stack.append((indent, key))
+        elif rest in ("{}", "[]"):
+            dotted[full_key] = rest
+        elif rest not in ("|", ">"):
+            val, _ = _unquote_yaml_scalar(rest)
+            dotted[full_key] = val
+
+    return {"root_keys": root_keys, "scalars": dotted}
+
+
+def _parse_jvm_memory_mb(spec: str) -> float | None:
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)([kKmMgGtT]?)", spec.strip())
+    if not m:
+        return None
+    amount = float(m.group(1))
+    unit = m.group(2).lower()
+    if unit == "t":
+        return amount * 1024.0 * 1024.0
+    if unit == "g":
+        return amount * 1024.0
+    if unit == "m":
+        return amount
+    if unit == "k":
+        return amount / 1024.0
+    return amount / (1024.0 * 1024.0)
+
+
+_NAMESPACED_ID_RE = re.compile(r"^(?:[a-z0-9_.-]+:)?[a-z0-9_./-]+$")
+
+
+def _validate_client_item_model_node(
+    node: Any,
+    *,
+    path: str,
+    cmd_counts: dict[str, int] | None,
+    findings: list[dict[str, Any]],
+    depth: int = 0,
+) -> None:
+    if depth > 16:
+        findings.append({
+            "rule_id": "COMP-006",
+            "severity": "high",
+            "title": "Client item definition exceeds maximum selector nesting depth",
+            "evidence": [f"{path} depth > 16"],
+            "problem": "Excessively nested item model selector graphs fail client model baking or indicate a cyclic generator bug.",
+            "remediation": "Flatten nested select/condition/composite branches to depth <= 16.",
+        })
+        return
+
+    if not isinstance(node, dict):
+        findings.append({
+            "rule_id": "COMP-006",
+            "severity": "critical",
+            "title": "Client item model node must be a JSON object",
+            "evidence": [f"{path}={type(node).__name__}"],
+            "problem": "Every node in assets/<namespace>/items/<id>.json model trees must be an object declaring 'type'.",
+            "remediation": "Provide a valid item model object such as {\"type\": \"minecraft:model\", \"model\": \"ns:item/name\"}.",
+        })
+        return
+
+    raw_type = node.get("type")
+    if not isinstance(raw_type, str) or not raw_type.strip():
+        findings.append({
+            "rule_id": "COMP-006",
+            "severity": "critical",
+            "title": "Missing 'type' discriminator in client item model node",
+            "evidence": [path],
+            "problem": "Minecraft 1.21.4 through 26.3+ item definitions dispatch strictly on 'type'.",
+            "remediation": "Set 'type' to 'minecraft:model', 'minecraft:condition', 'minecraft:select', 'minecraft:range_dispatch', 'minecraft:composite', 'minecraft:bundle/selected_item', 'minecraft:empty', or 'minecraft:special'.",
+        })
+        return
+
+    norm_type = raw_type if ":" in raw_type else f"minecraft:{raw_type}"
+    valid_types = {
+        "minecraft:model",
+        "minecraft:condition",
+        "minecraft:select",
+        "minecraft:range_dispatch",
+        "minecraft:composite",
+        "minecraft:bundle/selected_item",
+        "minecraft:empty",
+        "minecraft:special",
+    }
+    if norm_type not in valid_types:
+        findings.append({
+            "rule_id": "COMP-006",
+            "severity": "critical",
+            "title": "Unknown client item model selector type",
+            "evidence": [f"{path}.type={raw_type!r}"],
+            "problem": f"'{raw_type}' is not a valid Minecraft 1.21.4-26.3 item model type.",
+            "remediation": f"Use one of: {', '.join(sorted(valid_types))}.",
+        })
+        return
+
+    def _check_cmd_channel(channel: str, raw_idx: Any, ctx_path: str) -> None:
+        idx_val = 0 if raw_idx is None else raw_idx
+        if isinstance(idx_val, bool) or not isinstance(idx_val, int) or idx_val < 0:
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "high",
+                "title": "Invalid negative or non-integer custom_model_data index",
+                "evidence": [f"{ctx_path}.index={raw_idx!r}"],
+                "problem": "custom_model_data channel indices in client item definitions must be non-negative integers.",
+                "remediation": "Set 'index' to a 0-based integer matching the server item's custom_model_data channel list.",
+            })
+            return
+        if cmd_counts is not None and idx_val >= cmd_counts.get(channel, 0):
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "high",
+                "title": f"Client custom_model_data.{channel}[{idx_val}] index out of bounds for server component",
+                "evidence": [
+                    f"{ctx_path} requests {channel}[{idx_val}], server component provides len({channel})={cmd_counts.get(channel, 0)}"
+                ],
+                "problem": (
+                    f"The client item definition reads custom_model_data.{channel}[{idx_val}], "
+                    "which is missing from the server item's minecraft:custom_model_data component and falls back to default/missing visuals."
+                ),
+                "remediation": f"Populate at least {idx_val + 1} element(s) in minecraft:custom_model_data.{channel} or adjust 'index'.",
+            })
+
+    if norm_type == "minecraft:model":
+        model_ref = node.get("model")
+        if not isinstance(model_ref, str) or not model_ref.strip() or _NAMESPACED_ID_RE.fullmatch(model_ref) is None:
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "critical",
+                "title": "Invalid or missing 'model' resource location in minecraft:model",
+                "evidence": [f"{path}.model={model_ref!r}"],
+                "problem": "minecraft:model requires a lowercase namespaced resource location resolving assets/<ns>/models/<path>.json.",
+                "remediation": "Specify a valid lowercase resource location such as 'myplugin:item/sunblade'.",
+            })
+        tints = node.get("tints")
+        if isinstance(tints, list):
+            for tidx, tint in enumerate(tints):
+                if isinstance(tint, dict):
+                    t_type = str(tint.get("type", ""))
+                    if t_type in {"custom_model_data", "minecraft:custom_model_data"}:
+                        _check_cmd_channel("colors", tint.get("index"), f"{path}.tints[{tidx}]")
+
+    elif norm_type == "minecraft:condition":
+        prop = node.get("property")
+        if not isinstance(prop, str) or not prop.strip():
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "critical",
+                "title": "Missing 'property' in minecraft:condition item model",
+                "evidence": [path],
+                "problem": "minecraft:condition requires a boolean 'property' plus 'on_true' and 'on_false' branches.",
+                "remediation": "Declare 'property' (e.g. 'minecraft:using_item' or 'minecraft:custom_model_data'), 'on_true', and 'on_false'.",
+            })
+        elif prop in {"custom_model_data", "minecraft:custom_model_data"}:
+            _check_cmd_channel("flags", node.get("index"), path)
+        for branch in ("on_true", "on_false"):
+            if branch not in node:
+                findings.append({
+                    "rule_id": "COMP-006",
+                    "severity": "critical",
+                    "title": f"Missing '{branch}' branch in minecraft:condition",
+                    "evidence": [path],
+                    "problem": f"minecraft:condition requires both 'on_true' and 'on_false' child model definitions (missing '{branch}').",
+                    "remediation": f"Add '{branch}' with a valid item model object.",
+                })
+            else:
+                _validate_client_item_model_node(
+                    node[branch], path=f"{path}.{branch}", cmd_counts=cmd_counts, findings=findings, depth=depth + 1
+                )
+
+    elif norm_type == "minecraft:select":
+        prop = node.get("property")
+        cases = node.get("cases")
+        if not isinstance(prop, str) or not prop.strip():
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "critical",
+                "title": "Missing 'property' in minecraft:select item model",
+                "evidence": [path],
+                "problem": "minecraft:select requires a 'property' discriminator and a non-empty 'cases' array.",
+                "remediation": "Set 'property' (e.g. 'minecraft:custom_model_data' or 'minecraft:display_context') and 'cases'.",
+            })
+        elif prop in {"custom_model_data", "minecraft:custom_model_data"}:
+            _check_cmd_channel("strings", node.get("index"), path)
+        if not isinstance(cases, list) or not cases:
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "critical",
+                "title": "Empty or missing 'cases' array in minecraft:select",
+                "evidence": [f"{path}.cases"],
+                "problem": "minecraft:select requires at least one {when, model} entry in 'cases'.",
+                "remediation": "Populate 'cases' with objects containing 'when' and 'model'.",
+            })
+        else:
+            for cidx, case_obj in enumerate(cases):
+                if not isinstance(case_obj, dict) or "when" not in case_obj or "model" not in case_obj:
+                    findings.append({
+                        "rule_id": "COMP-006",
+                        "severity": "critical",
+                        "title": "Malformed case entry in minecraft:select",
+                        "evidence": [f"{path}.cases[{cidx}]"],
+                        "problem": "Each select case must be an object containing 'when' and 'model'.",
+                        "remediation": "Provide both 'when' and 'model' in every select case.",
+                    })
+                else:
+                    _validate_client_item_model_node(
+                        case_obj["model"], path=f"{path}.cases[{cidx}].model", cmd_counts=cmd_counts, findings=findings, depth=depth + 1
+                    )
+        if "fallback" in node:
+            _validate_client_item_model_node(
+                node["fallback"], path=f"{path}.fallback", cmd_counts=cmd_counts, findings=findings, depth=depth + 1
+            )
+
+    elif norm_type == "minecraft:range_dispatch":
+        prop = node.get("property")
+        entries = node.get("entries")
+        if not isinstance(prop, str) or not prop.strip():
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "critical",
+                "title": "Missing 'property' in minecraft:range_dispatch",
+                "evidence": [path],
+                "problem": "minecraft:range_dispatch requires a numeric 'property' and an 'entries' array.",
+                "remediation": "Set 'property' (e.g. 'minecraft:custom_model_data' or 'minecraft:damage') and 'entries'.",
+            })
+        elif prop in {"custom_model_data", "minecraft:custom_model_data"}:
+            _check_cmd_channel("floats", node.get("index"), path)
+        if not isinstance(entries, list) or not entries:
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "critical",
+                "title": "Empty or missing 'entries' in minecraft:range_dispatch",
+                "evidence": [f"{path}.entries"],
+                "problem": "minecraft:range_dispatch requires at least one {threshold, model} entry.",
+                "remediation": "Add {threshold: <number>, model: {...}} objects sorted in ascending threshold order.",
+            })
+        else:
+            thresholds: list[float] = []
+            for eidx, ent in enumerate(entries):
+                if not isinstance(ent, dict) or isinstance(ent.get("threshold"), bool) or not isinstance(ent.get("threshold"), (int, float)) or "model" not in ent:
+                    findings.append({
+                        "rule_id": "COMP-006",
+                        "severity": "critical",
+                        "title": "Malformed entry in minecraft:range_dispatch",
+                        "evidence": [f"{path}.entries[{eidx}]"],
+                        "problem": "Each range_dispatch entry requires a numeric 'threshold' and a 'model' object.",
+                        "remediation": "Specify numeric 'threshold' and valid 'model' for every range_dispatch entry.",
+                    })
+                else:
+                    thresholds.append(float(ent["threshold"]))
+                    _validate_client_item_model_node(
+                        ent["model"], path=f"{path}.entries[{eidx}].model", cmd_counts=cmd_counts, findings=findings, depth=depth + 1
+                    )
+            if len(thresholds) >= 2 and (thresholds != sorted(thresholds) or len(set(thresholds)) != len(thresholds)):
+                findings.append({
+                    "rule_id": "COMP-006",
+                    "severity": "high",
+                    "title": "Unsorted or duplicate thresholds in minecraft:range_dispatch",
+                    "evidence": [f"{path}.entries thresholds={thresholds}"],
+                    "problem": "Duplicate or unsorted range_dispatch thresholds shadow entries or produce ambiguous client dispatch.",
+                    "remediation": "Sort range_dispatch entries by strictly increasing numeric threshold.",
+                })
+        if "fallback" in node:
+            _validate_client_item_model_node(
+                node["fallback"], path=f"{path}.fallback", cmd_counts=cmd_counts, findings=findings, depth=depth + 1
+            )
+
+    elif norm_type == "minecraft:composite":
+        models = node.get("models")
+        if not isinstance(models, list) or not models:
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "critical",
+                "title": "Empty or missing 'models' array in minecraft:composite",
+                "evidence": [f"{path}.models"],
+                "problem": "minecraft:composite requires a non-empty 'models' array.",
+                "remediation": "Populate 'models' with one or more valid child item model objects.",
+            })
+        else:
+            for midx, child in enumerate(models):
+                _validate_client_item_model_node(
+                    child, path=f"{path}.models[{midx}]", cmd_counts=cmd_counts, findings=findings, depth=depth + 1
+                )
+
+    elif norm_type == "minecraft:special":
+        spec_model = node.get("model")
+        if not isinstance(spec_model, dict) or not isinstance(spec_model.get("type"), str):
+            findings.append({
+                "rule_id": "COMP-006",
+                "severity": "critical",
+                "title": "Missing special renderer 'model.type' in minecraft:special",
+                "evidence": [f"{path}.model"],
+                "problem": "minecraft:special requires a nested 'model' object declaring special renderer 'type' (e.g. 'minecraft:head', 'minecraft:shield').",
+                "remediation": "Provide 'base' and a nested special renderer object under 'model'.",
+            })
 
 
 def _resolve_pack_format(
@@ -1001,6 +1705,8 @@ class MinecraftKitMcpServer:
             "mc_audit_gradle_build": self._tool_audit_gradle_build,
             "mc_audit_paper_plugin_yml": self._tool_audit_paper_plugin_yml,
             "mc_generate_pack_overlay": self._tool_generate_pack_overlay,
+            "mc_audit_server_properties": self._tool_audit_server_properties,
+            "mc_validate_item_components": self._tool_validate_item_components,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -1075,9 +1781,10 @@ class MinecraftKitMcpServer:
                 "Use mc_route_skill first to select the right mc:* engineering domain, mc_version_capabilities "
                 "to pin exact Minecraft/protocol/pack formats, mc_search_sources for reviewed upstream GitHub "
                 "repositories, mc_list_plugins / mc_search_api / mc_inspect_type for verified RPG plugin bytecode "
-                "hierarchies and signatures, mc_generate_pack_overlay for multi-version pack.mcmeta generation, and "
-                "mc_audit_gradle_build / mc_audit_paper_plugin_yml / mc_folia_migration_advisor / "
-                "mc_diagnose_server_log for static build, descriptor, region-threading, and crash-log verification."
+                "hierarchies and signatures, mc_generate_pack_overlay and mc_validate_item_components for multi-version "
+                "pack.mcmeta and Paper 26.3 item component validation, and mc_audit_gradle_build / "
+                "mc_audit_paper_plugin_yml / mc_audit_server_properties / mc_folia_migration_advisor / "
+                "mc_diagnose_server_log for static build, descriptor, network/Netty config, region-threading, and crash-log verification."
             ),
         }
 
@@ -1089,7 +1796,14 @@ class MinecraftKitMcpServer:
                 "title": "MinecraftKit Catalog Overview",
                 "description": "JSON summary of indexed RPG plugins, Mojang release capabilities, and /mc:* engineering domains.",
                 "mimeType": "application/json",
-            }
+            },
+            {
+                "uri": "minecraftkit://catalog/paper-26.3-item-components",
+                "name": "paper-26.3-item-components",
+                "title": "Paper 26.3 Structured Item Data Component Schemas",
+                "description": "Machine-readable schema catalog of Minecraft and Paper 1.20.5 through 26.3+ item data components, era migrations, and client item model selectors.",
+                "mimeType": "application/json",
+            },
         ]
         for ref_path in self.store.reference_files():
             heading = ref_path.stem.replace("-", " ").title()
@@ -1142,6 +1856,31 @@ class MinecraftKitMcpServer:
                             "uri": uri,
                             "mimeType": "application/json",
                             "text": _pretty_json(overview),
+                        }
+                    ]
+                },
+            )
+
+        if uri == "minecraftkit://catalog/paper-26.3-item-components":
+            schema_doc = {
+                "target_release": "26.3",
+                "resource_pack_format": [97, 1],
+                "data_pack_format": [121, 0],
+                "component_count": len(PAPER_26_3_ITEM_COMPONENT_SCHEMAS),
+                "components": PAPER_26_3_ITEM_COMPONENT_SCHEMAS,
+                "removed_legacy_components": {
+                    "minecraft:hide_tooltip": "Replaced in 1.21.5+ by minecraft:tooltip_display: {hide_tooltip: true}.",
+                    "minecraft:hide_additional_tooltip": "Replaced in 1.21.5+ by minecraft:tooltip_display: {hidden_components: [...]}.",
+                },
+            }
+            return self._result_response(
+                msg_id,
+                {
+                    "contents": [
+                        {
+                            "uri": uri,
+                            "mimeType": "application/json",
+                            "text": _pretty_json(schema_doc),
                         }
                     ]
                 },
@@ -2788,6 +3527,1082 @@ class MinecraftKitMcpServer:
             "pack_mcmeta_json": _pretty_json(mcmeta) + "\n",
             "directory_layout": directory_layout,
             "breaking_epochs_in_range": applicable_epochs,
+        }))
+
+    def _tool_audit_server_properties(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_props = args.get("server_properties")
+        if not isinstance(raw_props, str) or not raw_props.strip():
+            raise ValueError("'server_properties' must be a non-empty string.")
+
+        raw_paper = args.get("paper_global_yaml")
+        if raw_paper is not None and not isinstance(raw_paper, str):
+            raise ValueError("'paper_global_yaml' must be a string.")
+
+        raw_spigot = args.get("spigot_yaml")
+        if raw_spigot is not None and not isinstance(raw_spigot, str):
+            raise ValueError("'spigot_yaml' must be a string.")
+
+        raw_jvm = args.get("jvm_args")
+        if raw_jvm is not None and not isinstance(raw_jvm, str):
+            raise ValueError("'jvm_args' must be a string.")
+
+        behind_proxy = args.get("behind_proxy", "none")
+        if behind_proxy not in {"none", "velocity", "bungeecord"}:
+            raise ValueError("'behind_proxy' must be 'none', 'velocity', or 'bungeecord'.")
+
+        expected_players = _parse_bounded_int(
+            args.get("expected_players"),
+            field="expected_players",
+            default=50,
+            minimum=1,
+            maximum=5000,
+        )
+        cpu_cores = _parse_bounded_int(
+            args.get("cpu_cores"),
+            field="cpu_cores",
+            default=4,
+            minimum=1,
+            maximum=512,
+        )
+
+        parsed_props = _parse_java_properties(raw_props)
+        props: dict[str, str] = parsed_props["values"]
+        duplicates: list[str] = parsed_props["duplicates"]
+
+        paper_doc = _parse_nested_yaml_scalars(raw_paper) if isinstance(raw_paper, str) and raw_paper.strip() else None
+        spigot_doc = _parse_nested_yaml_scalars(raw_spigot) if isinstance(raw_spigot, str) and raw_spigot.strip() else None
+        jvm_text = raw_jvm.strip() if isinstance(raw_jvm, str) else ""
+
+        findings: list[dict[str, Any]] = []
+
+        def _prop_bool(key: str, default: bool) -> bool:
+            val = props.get(key)
+            if val is None:
+                return default
+            return val.strip().lower() == "true"
+
+        def _prop_int(key: str, default: int) -> int:
+            val = props.get(key)
+            if val is None or not val.strip():
+                return default
+            try:
+                return int(val.strip())
+            except ValueError:
+                findings.append({
+                    "rule_id": "PROP-007",
+                    "severity": "high",
+                    "title": f"Non-integer value for server.properties '{key}'",
+                    "evidence": [f"{key}={val!r}"],
+                    "problem": f"Minecraft DedicatedServerProperties parses '{key}' as a 32-bit integer; malformed values fall back silently or fail startup.",
+                    "remediation": f"Set '{key}' to a valid integer (for example: {key}={default}).",
+                })
+                return default
+
+        online_mode = _prop_bool("online-mode", True)
+        compression_threshold = _prop_int("network-compression-threshold", 256)
+        view_distance = _prop_int("view-distance", 10)
+        sim_distance = _prop_int("simulation-distance", 10)
+        sync_chunk_writes = _prop_bool("sync-chunk-writes", True)
+        enable_rcon = _prop_bool("enable-rcon", False)
+        rcon_password = props.get("rcon.password", "")
+        server_ip = props.get("server-ip", "").strip()
+        pause_empty = _prop_int("pause-when-empty-seconds", 0)
+        rp_url = props.get("resource-pack", "").strip()
+        rp_sha1 = props.get("resource-pack-sha1", "").strip()
+        rp_id = props.get("resource-pack-id", "").strip()
+
+        paper_scalars = paper_doc["scalars"] if paper_doc else {}
+        spigot_scalars = spigot_doc["scalars"] if spigot_doc else {}
+
+        velocity_cfg_enabled = paper_scalars.get("proxies.velocity.enabled", "").lower() == "true"
+        velocity_secret = paper_scalars.get("proxies.velocity.secret", "")
+        bungee_cfg_enabled = spigot_scalars.get("settings.bungeecord", "").lower() == "true"
+
+        effective_proxy = behind_proxy
+        if effective_proxy == "none":
+            if velocity_cfg_enabled:
+                effective_proxy = "velocity"
+            elif bungee_cfg_enabled:
+                effective_proxy = "bungeecord"
+
+        # PROP-001: Proxy authentication & forwarding security
+        if velocity_cfg_enabled and bungee_cfg_enabled:
+            findings.append({
+                "rule_id": "PROP-001",
+                "severity": "critical",
+                "title": "Both Velocity modern forwarding and BungeeCord forwarding are enabled",
+                "evidence": ["paper-global.yml: proxies.velocity.enabled=true", "spigot.yml: settings.bungeecord=true"],
+                "problem": "Enabling both forwarding schemes creates conflicting login handshake state and breaks player authentication.",
+                "remediation": "Disable settings.bungeecord in spigot.yml and keep only proxies.velocity.enabled: true with a strong HMAC secret.",
+            })
+
+        if effective_proxy == "none" and not online_mode:
+            findings.append({
+                "rule_id": "PROP-001",
+                "severity": "critical",
+                "title": "Unauthenticated offline mode enabled without a forwarding proxy",
+                "evidence": ["online-mode=false", "behind_proxy=none"],
+                "problem": "With online-mode=false and no authenticating proxy, any client can connect with an arbitrary username and spoof operator/admin accounts.",
+                "remediation": "Set online-mode=true on standalone servers, or place the backend behind Velocity modern forwarding and bind server-ip=127.0.0.1.",
+            })
+        elif effective_proxy == "velocity":
+            if online_mode:
+                findings.append({
+                    "rule_id": "PROP-001",
+                    "severity": "high",
+                    "title": "Backend online-mode=true conflicts with Velocity player forwarding",
+                    "evidence": ["online-mode=true", "behind_proxy=velocity"],
+                    "problem": "Velocity terminates Mojang session encryption at the proxy edge; leaving online-mode=true on the Paper backend rejects forwarded connections.",
+                    "remediation": "Set online-mode=false in backend server.properties and enable proxies.velocity.enabled: true + proxies.velocity.online-mode: true in config/paper-global.yml.",
+                })
+            if paper_doc is not None:
+                if not velocity_cfg_enabled:
+                    findings.append({
+                        "rule_id": "PROP-001",
+                        "severity": "critical",
+                        "title": "Velocity backend omits proxies.velocity.enabled: true in paper-global.yml",
+                        "evidence": ["config/paper-global.yml: proxies.velocity.enabled is not true"],
+                        "problem": "Running offline-mode behind Velocity without enabling Velocity modern forwarding leaves the backend open to UUID spoofing.",
+                        "remediation": "Set proxies.velocity.enabled: true, proxies.velocity.online-mode: true, and a 32+ byte random proxies.velocity.secret in config/paper-global.yml.",
+                    })
+                elif len(velocity_secret.strip()) < 12:
+                    findings.append({
+                        "rule_id": "PROP-001",
+                        "severity": "critical",
+                        "title": "Empty or weak proxies.velocity.secret in paper-global.yml",
+                        "evidence": [f"proxies.velocity.secret length={len(velocity_secret.strip())}"],
+                        "problem": "Velocity modern forwarding relies on HMAC-SHA256 over the shared forwarding secret; an empty or short secret allows forged login payloads.",
+                        "remediation": "Configure an identical random 32+ character secret in Velocity forwarding.secret and paper-global.yml proxies.velocity.secret.",
+                    })
+        elif effective_proxy == "bungeecord":
+            if server_ip not in {"127.0.0.1", "::1", "localhost"}:
+                findings.append({
+                    "rule_id": "PROP-001",
+                    "severity": "critical",
+                    "title": "BungeeCord backend port is not restricted to loopback interface",
+                    "evidence": [f"server-ip={server_ip or '0.0.0.0'}", "behind_proxy=bungeecord"],
+                    "problem": "Legacy BungeeCord ip_forward carries no cryptographic signature; if the backend port is reachable directly, attackers can inject arbitrary UUIDs and IPs.",
+                    "remediation": "Bind server-ip=127.0.0.1 (or enforce strict host firewall rules) or migrate to Velocity modern HMAC forwarding.",
+                })
+
+        # PROP-002: network-compression-threshold packet pipeline hazard
+        if effective_proxy in {"velocity", "bungeecord"}:
+            recommended_compression = -1
+            if compression_threshold != -1:
+                findings.append({
+                    "rule_id": "PROP-002",
+                    "severity": "high",
+                    "title": "Redundant double zlib packet compression behind proxy",
+                    "evidence": [f"network-compression-threshold={compression_threshold}", f"proxy={effective_proxy}"],
+                    "problem": (
+                        "When compression is enabled on both the Paper backend and the proxy, every chunk and entity "
+                        "packet undergoes deflate -> proxy inflate -> proxy deflate, burning 15-30% extra Netty CPU and adding latency."
+                    ),
+                    "remediation": "Set network-compression-threshold=-1 in backend server.properties and keep compression (256 or 512) solely at the Velocity/proxy edge.",
+                })
+        else:
+            recommended_compression = 512 if expected_players >= 100 else 256
+            if 0 <= compression_threshold < 64:
+                findings.append({
+                    "rule_id": "PROP-002",
+                    "severity": "high",
+                    "title": "Sub-64-byte network-compression-threshold causes Netty CPU burn and header inflation",
+                    "evidence": [f"network-compression-threshold={compression_threshold}"],
+                    "problem": (
+                        "Compressing tiny packets (< 64 bytes such as keepalives, entity head rotations, and movement deltas) "
+                        "invokes zlib deflate on nearly every packet while often increasing wire size due to zlib framing overhead."
+                    ),
+                    "remediation": f"Set network-compression-threshold={recommended_compression} in server.properties.",
+                })
+            elif compression_threshold == -1 and expected_players >= 15:
+                findings.append({
+                    "rule_id": "PROP-002",
+                    "severity": "medium",
+                    "title": "Packet compression disabled on standalone server",
+                    "evidence": ["network-compression-threshold=-1", f"expected_players={expected_players}"],
+                    "problem": "Disabling packet compression on a direct internet-facing server sends full chunk section palettes uncompressed, multiplying outbound bandwidth 3-5x.",
+                    "remediation": f"Set network-compression-threshold={recommended_compression} unless an upstream reverse proxy handles compression.",
+                })
+            elif compression_threshold > 1500:
+                findings.append({
+                    "rule_id": "PROP-002",
+                    "severity": "low",
+                    "title": "network-compression-threshold exceeds standard Ethernet MTU (1500 bytes)",
+                    "evidence": [f"network-compression-threshold={compression_threshold}"],
+                    "problem": "Thresholds above 1500 bytes leave multi-packet entity equipment and dialog bursts uncompressed across TCP segments.",
+                    "remediation": f"Set network-compression-threshold={recommended_compression} (256-512 bytes).",
+                })
+
+        # PROP-003: Netty EventLoop thread sizing & direct memory bounds
+        recommended_netty = max(4, min(max(cpu_cores * 2, 4), max(4, (expected_players + 39) // 40 * 2)))
+        configured_netty: int | None = None
+        netty_source: str | None = None
+
+        jvm_netty_match = re.search(r"-Dio\.netty\.eventLoopThreads=(\d+)", jvm_text)
+        if jvm_netty_match:
+            configured_netty = int(jvm_netty_match.group(1))
+            netty_source = f"-Dio.netty.eventLoopThreads={configured_netty}"
+        elif "settings.netty-threads" in spigot_scalars:
+            try:
+                sp_netty = int(spigot_scalars["settings.netty-threads"])
+                configured_netty = sp_netty
+                netty_source = f"spigot.yml settings.netty-threads={sp_netty}"
+            except ValueError:
+                pass
+
+        if configured_netty is not None:
+            min_safe_netty = 2 if expected_players < 25 else max(4, min(cpu_cores, (expected_players + 74) // 75 * 2))
+            if configured_netty <= 1 or configured_netty < min_safe_netty:
+                findings.append({
+                    "rule_id": "PROP-003",
+                    "severity": "high",
+                    "title": "Netty EventLoop thread pool is undersized for player concurrency",
+                    "evidence": [netty_source or f"netty_threads={configured_netty}", f"expected_players={expected_players}", f"cpu_cores={cpu_cores}"],
+                    "problem": (
+                        "Netty EventLoop threads perform AES packet encryption, zlib deflate/inflate, and socket flushes. "
+                        "Pinning Netty to 1 thread (or too few threads at scale) serializes network I/O and triggers keepalive timeouts."
+                    ),
+                    "remediation": f"Increase Netty EventLoop threads to {recommended_netty} (or remove the manual override so Netty scales automatically with CPU cores).",
+                })
+            elif configured_netty > max(32, cpu_cores * 4):
+                findings.append({
+                    "rule_id": "PROP-003",
+                    "severity": "medium",
+                    "title": "Netty EventLoop thread pool oversubscribes host CPU cores",
+                    "evidence": [netty_source or f"netty_threads={configured_netty}", f"cpu_cores={cpu_cores}"],
+                    "problem": "Excessive Netty worker threads increase OS scheduler context switches and per-thread PooledByteBufAllocator arena memory overhead.",
+                    "remediation": f"Cap Netty EventLoop threads near {recommended_netty} for a {cpu_cores}-core host.",
+                })
+
+        direct_mem_match = re.search(r"-XX:MaxDirectMemorySize=([0-9]+[kKmMgGtT]?)", jvm_text)
+        if direct_mem_match:
+            direct_mb = _parse_jvm_memory_mb(direct_mem_match.group(1))
+            if direct_mb is not None and direct_mb < max(256.0, expected_players * 2.5):
+                findings.append({
+                    "rule_id": "PROP-003",
+                    "severity": "high",
+                    "title": "MaxDirectMemorySize is too small for Netty off-heap ByteBuf arenas",
+                    "evidence": [f"-XX:MaxDirectMemorySize={direct_mem_match.group(1)} ({direct_mb:.0f} MB)", f"expected_players={expected_players}"],
+                    "problem": "Netty allocates off-heap direct ByteBuf arenas per EventLoop thread; starving MaxDirectMemorySize causes io.netty.util.internal.OutOfDirectMemoryError disconnects.",
+                    "remediation": "Remove the restrictive -XX:MaxDirectMemorySize cap or raise it to at least 512M-2G.",
+                })
+
+        # PROP-004: Quadratic chunk/simulation budget & sync-chunk-writes
+        view_chunks_per_player = (2 * max(2, view_distance) + 1) ** 2
+        sim_chunks_per_player = (2 * max(2, sim_distance) + 1) ** 2
+
+        if sim_distance > view_distance:
+            findings.append({
+                "rule_id": "PROP-004",
+                "severity": "medium",
+                "title": "simulation-distance exceeds view-distance",
+                "evidence": [f"simulation-distance={sim_distance} ({sim_chunks_per_player} chunks/player)", f"view-distance={view_distance} ({view_chunks_per_player} chunks/player)"],
+                "problem": "Ticking entities, crops, and block ticks beyond client view-distance consumes server tick time for chunks players cannot see.",
+                "remediation": f"Set simulation-distance <= view-distance (recommended simulation-distance={min(view_distance, 8 if expected_players >= 50 else 10)}).",
+            })
+        elif sim_distance > 10 and expected_players >= 40:
+            findings.append({
+                "rule_id": "PROP-004",
+                "severity": "high",
+                "title": "Quadratic simulation-distance chunk budget risks tick-thread saturation",
+                "evidence": [f"simulation-distance={sim_distance} ({sim_chunks_per_player} ticked chunks/player)", f"expected_players={expected_players}"],
+                "problem": (
+                    f"Chunk ticking scales quadratically as (2d + 1)^2: simulation-distance={sim_distance} ticks "
+                    f"{sim_chunks_per_player} chunks per isolated player versus 289 chunks at simulation-distance=8."
+                ),
+                "remediation": "Lower simulation-distance to 6-8 for 40+ concurrent players while keeping view-distance at 10-12 via Paper's async Moonrise chunk sender.",
+            })
+
+        if "sync-chunk-writes" in props and sync_chunk_writes:
+            findings.append({
+                "rule_id": "PROP-004",
+                "severity": "medium",
+                "title": "sync-chunk-writes=true forces blocking disk flushes on chunk saves",
+                "evidence": ["sync-chunk-writes=true"],
+                "problem": "Enabling synchronous chunk writes serializes region file saves and degrades Paper/Folia Moonrise async chunk I/O throughput on Linux hosts.",
+                "remediation": "Set sync-chunk-writes=false in server.properties.",
+            })
+
+        # PROP-005: RCON exposure & pause-when-empty-seconds
+        if enable_rcon:
+            if len(rcon_password) < 12:
+                findings.append({
+                    "rule_id": "PROP-005",
+                    "severity": "critical",
+                    "title": "RCON enabled with an empty or short password",
+                    "evidence": ["enable-rcon=true", f"rcon.password length={len(rcon_password)}"],
+                    "problem": "Minecraft RCON transmits console commands with root server privileges over unencrypted TCP; empty or short passwords permit trivial remote takeover.",
+                    "remediation": "Disable RCON (enable-rcon=false) or set a 24+ character random rcon.password and bind RCON strictly to localhost/WireGuard.",
+                })
+        if pause_empty > 0:
+            findings.append({
+                "rule_id": "PROP-005",
+                "severity": "low",
+                "title": "pause-when-empty-seconds freezes server tick schedulers when 0 players are online",
+                "evidence": [f"pause-when-empty-seconds={pause_empty}"],
+                "problem": (
+                    "Minecraft 1.21.2+ pauses tick execution after pause-when-empty-seconds with no players online, "
+                    "stalling plugin repeating tasks, database maintenance jobs, web/Discord bridges, and automated CI probes."
+                ),
+                "remediation": "Set pause-when-empty-seconds=-1 (or 0) on dedicated multiplayer servers with background plugin tasks.",
+            })
+
+        # PROP-006: Resource-pack SHA-1, UUID & HTTPS delivery contract
+        if rp_url:
+            if rp_url.lower().startswith("http://") and not rp_url.lower().startswith(("http://127.0.0.1", "http://localhost")):
+                findings.append({
+                    "rule_id": "PROP-006",
+                    "severity": "high",
+                    "title": "Insecure plain-HTTP resource-pack download URL",
+                    "evidence": [f"resource-pack={rp_url}"],
+                    "problem": "Serving server resource packs over unencrypted HTTP exposes clients to MITM payload tampering and modern client download blocks.",
+                    "remediation": "Host the resource pack over HTTPS on a CDN or static HTTPS endpoint.",
+                })
+            if re.fullmatch(r"[0-9a-fA-F]{40}", rp_sha1) is None:
+                findings.append({
+                    "rule_id": "PROP-006",
+                    "severity": "high",
+                    "title": "Missing or malformed 40-hex resource-pack-sha1 checksum",
+                    "evidence": [f"resource-pack-sha1={rp_sha1!r}"],
+                    "problem": "Without an exact 40-character SHA-1 digest, clients cannot verify archive integrity or invalidate stale cached packs reliably.",
+                    "remediation": "Compute sha1sum of the exact published ZIP bytes and set resource-pack-sha1=<40-hex-digest>.",
+                })
+            if not rp_id or re.fullmatch(r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}", rp_id) is None:
+                findings.append({
+                    "rule_id": "PROP-006",
+                    "severity": "medium",
+                    "title": "Missing or invalid UUID in resource-pack-id",
+                    "evidence": [f"resource-pack-id={rp_id!r}"],
+                    "problem": "Minecraft 1.20.3+ identifies stacked server resource packs by UUID; omitting resource-pack-id derives a URL-based fallback that breaks clean pack replacement across CDN URLs.",
+                    "remediation": "Assign a stable RFC 4122 UUID to resource-pack-id in server.properties.",
+                })
+
+        # PROP-007: Paper 26.3 schema & duplicate server.properties keys
+        if duplicates:
+            findings.append({
+                "rule_id": "PROP-007",
+                "severity": "medium",
+                "title": "Duplicate keys in server.properties silently shadow earlier entries",
+                "evidence": duplicates,
+                "problem": "Java Properties.load overwrites duplicate keys with the last occurrence in the file, causing confusing configuration drift.",
+                "remediation": "Remove duplicate property definitions so each key appears exactly once.",
+            })
+
+        if paper_doc is not None:
+            raw_ver = paper_scalars.get("_version") or paper_scalars.get("version")
+            if raw_ver is not None and raw_ver.lstrip("-").isdigit() and int(raw_ver) < 30:
+                findings.append({
+                    "rule_id": "PROP-007",
+                    "severity": "medium",
+                    "title": "Outdated Paper configuration schema version (< 30 for Paper 26.3)",
+                    "evidence": [f"paper-global.yml version={raw_ver}"],
+                    "problem": "Paper 26.3 uses global configuration schema version 30+; legacy config files miss modern item-validation and Moonrise chunk-system defaults.",
+                    "remediation": "Boot Paper 26.3 once in staging to migrate config/paper-global.yml cleanly and remove obsolete keys.",
+                })
+            deprecated_roots = [k for k in ("timings", "chunk-loading", "messages") if k in paper_doc["root_keys"]]
+            if deprecated_roots:
+                findings.append({
+                    "rule_id": "PROP-007",
+                    "severity": "medium",
+                    "title": "Deprecated legacy root sections present in paper-global.yml",
+                    "evidence": deprecated_roots,
+                    "problem": "Root 'timings' (replaced by built-in Spark profiler), 'chunk-loading' (replaced by 'chunk-system'), and legacy 'messages' blocks are obsolete in Paper 26.3.",
+                    "remediation": "Remove obsolete root sections from config/paper-global.yml and use Spark (/spark) plus chunk-system.",
+                })
+            book_page_max = paper_scalars.get("item-validation.book-size.page-max")
+            if book_page_max is not None and book_page_max.lstrip("-").isdigit() and (int(book_page_max) <= 0 or int(book_page_max) > 16384):
+                findings.append({
+                    "rule_id": "PROP-007",
+                    "severity": "high",
+                    "title": "Paper 26.3 item-validation book-size guard disabled or dangerously raised",
+                    "evidence": [f"item-validation.book-size.page-max={book_page_max}"],
+                    "problem": "Disabling or inflating Paper's item-validation book/component size limits exposes Netty decoders and chunk NBT storage to oversized book/component crash exploits.",
+                    "remediation": "Keep item-validation.book-size.page-max at Paper's default (2560 bytes).",
+                })
+
+        # PROP-008: JVM Heap & GC startup flags
+        if jvm_text:
+            if "-XX:+UseConcMarkSweepGC" in jvm_text or "-XX:+CMSIncrementalMode" in jvm_text:
+                findings.append({
+                    "rule_id": "PROP-008",
+                    "severity": "critical",
+                    "title": "Removed CMS garbage collector flag aborts JVM startup on Java 17/21/25",
+                    "evidence": ["-XX:+UseConcMarkSweepGC"],
+                    "problem": "Concurrent Mark Sweep (CMS) was removed in JDK 14; passing -XX:+UseConcMarkSweepGC causes Java 21/25 to exit immediately on boot.",
+                    "remediation": "Use Aikar's G1GC flags (-XX:+UseG1GC -XX:MaxGCPauseMillis=200) or Java 25 Generational ZGC (-XX:+UseZGC).",
+                })
+            if "-XX:+ZGenerational" in jvm_text or "-XX:-ZGenerational" in jvm_text:
+                findings.append({
+                    "rule_id": "PROP-008",
+                    "severity": "medium",
+                    "title": "Deprecated/removed ZGenerational JVM flag for Java 24/25+ (Paper 26.x)",
+                    "evidence": ["-XX:+/-ZGenerational"],
+                    "problem": "JEP 474 and JEP 490 made Generational ZGC the sole mode of -XX:+UseZGC and removed non-generational ZGC; ZGenerational prints deprecation/obsolescence warnings on Java 24/25+.",
+                    "remediation": "Pass '-XX:+UseZGC' alone on Java 25+ without '-XX:+ZGenerational'.",
+                })
+            xms_m = re.search(r"-Xms([0-9]+[kKmMgGtT]?)", jvm_text)
+            xmx_m = re.search(r"-Xmx([0-9]+[kKmMgGtT]?)", jvm_text)
+            if xms_m and xmx_m:
+                xms_mb = _parse_jvm_memory_mb(xms_m.group(1))
+                xmx_mb = _parse_jvm_memory_mb(xmx_m.group(1))
+                if xms_mb is not None and xmx_mb is not None and abs(xms_mb - xmx_mb) > 1.0:
+                    findings.append({
+                        "rule_id": "PROP-008",
+                        "severity": "medium",
+                        "title": "Mismatched -Xms and -Xmx heap bounds cause runtime heap-resize pauses",
+                        "evidence": [f"-Xms{xms_m.group(1)}", f"-Xmx{xmx_m.group(1)}"],
+                        "problem": "Setting -Xms lower than -Xmx forces the JVM to request and zero OS memory pages dynamically during GC spikes, causing multi-hundred-millisecond tick stalls.",
+                        "remediation": f"Pin -Xms equal to -Xmx (for example: -Xms{xmx_m.group(1)} -Xmx{xmx_m.group(1)}).",
+                    })
+
+        counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for item in findings:
+            sev = str(item.get("severity", "low"))
+            if sev in counts:
+                counts[sev] += 1
+
+        moonrise_workers = max(1, min(16, (cpu_cores - 2) if cpu_cores > 4 else max(1, cpu_cores // 2)))
+        est_kbps_per_player = 45 if recommended_compression == -1 and effective_proxy == "none" else 110
+        if effective_proxy == "none" and compression_threshold == -1:
+            est_kbps_per_player = 380
+
+        return ToolOutcome(_pretty_json({
+            "effective_proxy": effective_proxy,
+            "parsed_property_count": len(props),
+            "finding_count": len(findings),
+            "severity_counts": counts,
+            "status": "fail" if (counts["critical"] + counts["high"]) > 0 else ("warn" if len(findings) > 0 else "pass"),
+            "tuning_recommendations": {
+                "recommended_network_compression_threshold": recommended_compression,
+                "recommended_netty_event_loop_threads": recommended_netty,
+                "recommended_moonrise_worker_threads": moonrise_workers,
+                "recommended_moonrise_io_threads": 2 if cpu_cores >= 4 else 1,
+                "chunk_budget_per_player": {
+                    "view_distance": view_distance,
+                    "view_chunks_per_player": view_chunks_per_player,
+                    "simulation_distance": sim_distance,
+                    "ticked_chunks_per_player": sim_chunks_per_player,
+                    "worst_case_ticked_chunks": sim_chunks_per_player * expected_players,
+                },
+                "estimated_outbound_mbps": round((expected_players * est_kbps_per_player * 8) / 1000.0, 2),
+            },
+            "findings": findings,
+            "companion_server_auditor": "https://github.com/SalyyS1/serverdoctor",
+        }))
+
+    def _tool_validate_item_components(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_payload = args.get("payload")
+        if isinstance(raw_payload, str):
+            if not raw_payload.strip():
+                raise ValueError("'payload' string must not be empty.")
+            try:
+                parsed_payload = _strict_loads(raw_payload)
+            except (ValueError, json.JSONDecodeError) as exc:
+                raise ValueError(f"'payload' is not valid JSON: {exc}") from exc
+        elif isinstance(raw_payload, dict):
+            parsed_payload = raw_payload
+        else:
+            raise ValueError("'payload' must be a JSON string or JSON object.")
+
+        if not isinstance(parsed_payload, dict):
+            raise ValueError("'payload' must decode to a JSON object.")
+
+        target_version = args.get("target_version", "26.3")
+        if not isinstance(target_version, str) or not target_version.strip():
+            raise ValueError("'target_version' must be a non-empty string.")
+        target_version = target_version.strip()
+        mc_tuple = _parse_mc_version_tuple(target_version)
+        if mc_tuple is None or (mc_tuple < (1, 20, 5)):
+            raise ValueError(
+                f"Structured item data components require Minecraft 1.20.5+ (for example '1.20.5', '1.21.4', '1.21.5', '26.2', '26.3'); got '{target_version}'."
+            )
+
+        raw_client_def = args.get("client_item_definition")
+        client_def: dict[str, Any] | None = None
+        if raw_client_def is not None:
+            if isinstance(raw_client_def, str):
+                if not raw_client_def.strip():
+                    raise ValueError("'client_item_definition' string must not be empty.")
+                try:
+                    loaded_c = _strict_loads(raw_client_def)
+                except (ValueError, json.JSONDecodeError) as exc:
+                    raise ValueError(f"'client_item_definition' is not valid JSON: {exc}") from exc
+                if not isinstance(loaded_c, dict):
+                    raise ValueError("'client_item_definition' must decode to a JSON object.")
+                client_def = loaded_c
+            elif isinstance(raw_client_def, dict):
+                client_def = raw_client_def
+            else:
+                raise ValueError("'client_item_definition' must be a JSON string or JSON object.")
+
+        findings: list[dict[str, Any]] = []
+        is_modern_1214 = mc_tuple >= (1, 21, 4)
+        is_modern_1215 = mc_tuple >= (1, 21, 5)
+        is_modern_1212 = mc_tuple >= (1, 21, 2)
+
+        # Detect payload shape: client items/<id>.json vs item stack {id, count, components} vs direct component map
+        is_standalone_client_def = (
+            "model" in parsed_payload
+            and isinstance(parsed_payload.get("model"), dict)
+            and "id" not in parsed_payload
+            and "components" not in parsed_payload
+            and not any(k.startswith(("minecraft:", "!")) for k in parsed_payload)
+        )
+
+        components_map: dict[str, Any] = {}
+        payload_kind = "component_map"
+
+        if is_standalone_client_def:
+            payload_kind = "client_item_definition"
+            client_def = parsed_payload
+        else:
+            legacy_root_nbt = [k for k in ("tag", "Count", "Damage", "HideFlags", "CustomModelData") if k in parsed_payload]
+            if legacy_root_nbt:
+                findings.append({
+                    "rule_id": "COMP-001",
+                    "severity": "critical",
+                    "title": "Legacy pre-1.20.5 item NBT keys detected at root",
+                    "evidence": legacy_root_nbt,
+                    "problem": (
+                        "Minecraft 1.20.5 through 26.3+ removed raw 'tag', uppercase 'Count', 'HideFlags', and root 'Damage' "
+                        "in favor of lowercase 'id', 'count', and structured 'components'."
+                    ),
+                    "remediation": "Migrate legacy NBT fields into 'components' (e.g. minecraft:custom_data, minecraft:custom_model_data, minecraft:tooltip_display).",
+                })
+
+            if "components" in parsed_payload or ("id" in parsed_payload and not any(k.startswith("minecraft:") for k in parsed_payload)):
+                payload_kind = "item_stack"
+                item_id = parsed_payload.get("id")
+                if item_id is not None and (not isinstance(item_id, str) or _NAMESPACED_ID_RE.fullmatch(item_id) is None):
+                    findings.append({
+                        "rule_id": "COMP-001",
+                        "severity": "critical",
+                        "title": "Invalid item 'id' resource location",
+                        "evidence": [f"id={item_id!r}"],
+                        "problem": "Item stack 'id' must be a lowercase namespaced item identifier (for example 'minecraft:diamond_sword').",
+                        "remediation": "Use a valid lowercase item registry ID.",
+                    })
+                raw_comps = parsed_payload.get("components", {})
+                if not isinstance(raw_comps, dict):
+                    findings.append({
+                        "rule_id": "COMP-001",
+                        "severity": "critical",
+                        "title": "Item stack 'components' field must be an object",
+                        "evidence": [f"components={type(raw_comps).__name__}"],
+                        "problem": "DataComponentMap / DataComponentPatch serializes 'components' as a JSON object keyed by component ID.",
+                        "remediation": "Set 'components' to a JSON object mapping 'minecraft:<component>' keys to typed values.",
+                    })
+                else:
+                    components_map = raw_comps
+            else:
+                components_map = parsed_payload
+
+        normalized_active: dict[str, Any] = {}
+        cmd_counts: dict[str, int] | None = None
+
+        removed_1215 = {
+            "minecraft:hide_tooltip": "Replace with 'minecraft:tooltip_display': {'hide_tooltip': true}.",
+            "minecraft:hide_additional_tooltip": "Replace with 'minecraft:tooltip_display': {'hidden_components': [...]}.",
+        }
+
+        def _looks_like_escaped_json_text(val: Any) -> bool:
+            if not isinstance(val, str):
+                return False
+            s = val.strip()
+            return (s.startswith("{") and s.endswith("}") and ('"text"' in s or '"translate"' in s or '"extra"' in s)) or (
+                s.startswith("[") and s.endswith("]") and '"text"' in s
+            )
+
+        for raw_key, val in components_map.items():
+            is_removal = raw_key.startswith("!")
+            bare_key = raw_key[1:] if is_removal else raw_key
+            if not bare_key or _NAMESPACED_ID_RE.fullmatch(bare_key) is None:
+                findings.append({
+                    "rule_id": "COMP-002",
+                    "severity": "critical",
+                    "title": "Malformed data component resource location key",
+                    "evidence": [raw_key],
+                    "problem": "Component keys must be lowercase resource locations (e.g. 'minecraft:custom_model_data' or '!minecraft:damage').",
+                    "remediation": "Prefix lowercase component names with 'minecraft:' (or '!' for patch removals).",
+                })
+                continue
+
+            norm_key = bare_key if ":" in bare_key else f"minecraft:{bare_key}"
+            if is_removal:
+                if val != {}:
+                    findings.append({
+                        "rule_id": "COMP-004",
+                        "severity": "high",
+                        "title": "Component removal tombstone must have an empty {} value",
+                        "evidence": [f"{raw_key}={val!r}"],
+                        "problem": "DataComponentPatch removal entries ('!minecraft:<id>') require an empty JSON object {}.",
+                        "remediation": f"Set '{raw_key}': {{}}.",
+                    })
+                continue
+
+            normalized_active[norm_key] = val
+
+            if is_modern_1215 and norm_key in removed_1215:
+                findings.append({
+                    "rule_id": "COMP-002",
+                    "severity": "critical",
+                    "title": f"Component '{norm_key}' was removed in Minecraft 1.21.5+ / Paper {target_version}",
+                    "evidence": [norm_key],
+                    "problem": f"'{norm_key}' no longer exists in DataComponents on {target_version} and fails strict Codec deserialization.",
+                    "remediation": removed_1215[norm_key],
+                })
+                continue
+
+            schema = PAPER_26_3_ITEM_COMPONENT_SCHEMAS.get(norm_key)
+            if schema is not None:
+                intro_tuple = _parse_mc_version_tuple(str(schema["introduced_in"]))
+                if intro_tuple is not None and mc_tuple < intro_tuple:
+                    findings.append({
+                        "rule_id": "COMP-002",
+                        "severity": "critical",
+                        "title": f"Component '{norm_key}' requires Minecraft {schema['introduced_in']}+ (target is {target_version})",
+                        "evidence": [f"{norm_key} introduced_in={schema['introduced_in']}", f"target_version={target_version}"],
+                        "problem": f"Target version {target_version} predates the introduction of '{norm_key}' in {schema['introduced_in']}.",
+                        "remediation": f"Raise target_version to {schema['introduced_in']}+ or emit a versioned datapack overlay via mc_generate_pack_overlay.",
+                    })
+                    continue
+
+            # Component-specific deep validation
+            if norm_key == "minecraft:custom_model_data":
+                if is_modern_1214:
+                    if isinstance(val, bool) or isinstance(val, (int, float)) or not isinstance(val, dict):
+                        findings.append({
+                            "rule_id": "COMP-003",
+                            "severity": "critical",
+                            "title": "Legacy integer minecraft:custom_model_data fails on Minecraft 1.21.4-26.3+",
+                            "evidence": [f"minecraft:custom_model_data={val!r}"],
+                            "problem": (
+                                "Minecraft 1.21.4 through 26.3+ replaced integer CustomModelData with typed channels "
+                                "{floats: number[], flags: boolean[], strings: string[], colors: (int|number[3])[]}."
+                            ),
+                            "remediation": f"Convert integer IDs to typed channels, e.g. {{\"floats\": [{val if isinstance(val, (int, float)) and not isinstance(val, bool) else 1.0}]}} or {{\"strings\": [\"variant_id\"]}}.",
+                        })
+                    else:
+                        allowed_cmd = {"floats", "flags", "strings", "colors"}
+                        bad_cmd_keys = [k for k in val if k not in allowed_cmd]
+                        if bad_cmd_keys:
+                            findings.append({
+                                "rule_id": "COMP-003",
+                                "severity": "critical",
+                                "title": "Unknown channel key in minecraft:custom_model_data",
+                                "evidence": bad_cmd_keys,
+                                "problem": "Only 'floats', 'flags', 'strings', and 'colors' channels are recognized by CustomModelData codecs.",
+                                "remediation": "Use only 'floats', 'flags', 'strings', and 'colors' arrays.",
+                            })
+                        floats_ch = val.get("floats", [])
+                        flags_ch = val.get("flags", [])
+                        strings_ch = val.get("strings", [])
+                        colors_ch = val.get("colors", [])
+                        type_errs: list[str] = []
+                        if not isinstance(floats_ch, list) or any(isinstance(x, bool) or not isinstance(x, (int, float)) for x in floats_ch):
+                            type_errs.append("floats must be an array of numbers")
+                        if not isinstance(flags_ch, list) or any(not isinstance(x, bool) for x in flags_ch):
+                            type_errs.append("flags must be an array of booleans")
+                        if not isinstance(strings_ch, list) or any(not isinstance(x, str) for x in strings_ch):
+                            type_errs.append("strings must be an array of strings")
+                        if not isinstance(colors_ch, list) or any(
+                            isinstance(x, bool) or not (
+                                isinstance(x, int) or (isinstance(x, list) and len(x) == 3 and all(not isinstance(c, bool) and isinstance(c, (int, float)) for c in x))
+                            )
+                            for x in colors_ch
+                        ):
+                            type_errs.append("colors must be an array of packed RGB ints or [r, g, b] triples")
+                        if type_errs:
+                            findings.append({
+                                "rule_id": "COMP-003",
+                                "severity": "critical",
+                                "title": "Invalid element type in minecraft:custom_model_data channel",
+                                "evidence": type_errs,
+                                "problem": "Mismatched element types in CustomModelData channels fail DFU/StreamCodec decoding.",
+                                "remediation": "Ensure floats contains numbers, flags contains booleans, strings contains strings, and colors contains ints or [r,g,b] arrays.",
+                            })
+                        else:
+                            cmd_counts = {
+                                "floats": len(floats_ch),
+                                "flags": len(flags_ch),
+                                "strings": len(strings_ch),
+                                "colors": len(colors_ch),
+                            }
+                else:
+                    if isinstance(val, bool) or not isinstance(val, int):
+                        findings.append({
+                            "rule_id": "COMP-003",
+                            "severity": "critical",
+                            "title": "Pre-1.21.4 minecraft:custom_model_data requires an integer",
+                            "evidence": [f"minecraft:custom_model_data={val!r}", f"target_version={target_version}"],
+                            "problem": f"Minecraft {target_version} expects a single 32-bit integer for minecraft:custom_model_data.",
+                            "remediation": "Pass an integer or target 1.21.4 / 26.3+ for typed channel objects.",
+                        })
+
+            elif norm_key in {"minecraft:item_name", "minecraft:custom_name"}:
+                if is_modern_1215 and _looks_like_escaped_json_text(val):
+                    findings.append({
+                        "rule_id": "COMP-005",
+                        "severity": "high",
+                        "title": f"JSON-escaped string inside '{norm_key}' renders literally on 1.21.5-26.3+",
+                        "evidence": [f"{norm_key}={val!r}"],
+                        "problem": (
+                            "Minecraft 1.21.5 through 26.3+ decodes text components directly as structured objects or plain literals "
+                            "rather than parsing JSON-encoded strings; double-encoded JSON renders raw braces on item tooltips."
+                        ),
+                        "remediation": f"Pass a direct text object (e.g. {{\"text\": \"Sunblade\", \"italic\": false}}) or plain string instead of a JSON-serialized string.",
+                    })
+
+            elif norm_key == "minecraft:lore":
+                if not isinstance(val, list):
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": "minecraft:lore must be an array of text components",
+                        "evidence": [f"type={type(val).__name__}"],
+                        "problem": "ItemLore codec expects a JSON list of text components.",
+                        "remediation": "Wrap lore lines in a JSON array.",
+                    })
+                else:
+                    if len(val) > 256:
+                        findings.append({
+                            "rule_id": "COMP-004",
+                            "severity": "high",
+                            "title": "minecraft:lore exceeds vanilla 256-line maximum",
+                            "evidence": [f"lines={len(val)}"],
+                            "problem": "Vanilla ItemLore codec rejects item stacks with more than 256 lore lines.",
+                            "remediation": "Keep minecraft:lore to <= 256 lines.",
+                        })
+                    if is_modern_1215 and any(_looks_like_escaped_json_text(line) for line in val):
+                        findings.append({
+                            "rule_id": "COMP-005",
+                            "severity": "high",
+                            "title": "JSON-escaped string inside minecraft:lore array on 1.21.5-26.3+",
+                            "evidence": ["escaped JSON string element in minecraft:lore"],
+                            "problem": "Minecraft 1.21.5 through 26.3+ treats strings inside minecraft:lore as literal text rather than parsing nested JSON.",
+                            "remediation": "Replace JSON strings with structured text component objects (e.g. {\"text\": \"+15 Strength\", \"italic\": false}).",
+                        })
+
+            elif norm_key == "minecraft:tooltip_display":
+                if not isinstance(val, dict):
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": "minecraft:tooltip_display must be an object",
+                        "evidence": [f"type={type(val).__name__}"],
+                        "problem": "tooltip_display expects {hide_tooltip?: boolean, hidden_components?: string[]}.",
+                        "remediation": "Provide an object with optional 'hide_tooltip' boolean and 'hidden_components' list.",
+                    })
+                else:
+                    bad_td = [k for k in val if k not in {"hide_tooltip", "hidden_components"}]
+                    if bad_td:
+                        findings.append({
+                            "rule_id": "COMP-003",
+                            "severity": "high",
+                            "title": "Unknown keys in minecraft:tooltip_display",
+                            "evidence": bad_td,
+                            "problem": "tooltip_display accepts only 'hide_tooltip' and 'hidden_components'.",
+                            "remediation": "Use 'hide_tooltip' (boolean) and 'hidden_components' (array of component IDs).",
+                        })
+
+            elif norm_key in {"minecraft:unbreakable", "minecraft:glider"}:
+                if not isinstance(val, dict):
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": f"{norm_key} must be a unit object {{}}",
+                        "evidence": [f"{norm_key}={val!r}"],
+                        "problem": f"{norm_key} is serialized as an empty unit object {{}}, not a boolean.",
+                        "remediation": f"Set '{norm_key}': {{}}.",
+                    })
+                elif is_modern_1215 and "show_in_tooltip" in val:
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": f"Removed 'show_in_tooltip' key inside {norm_key} on 1.21.5-26.3+",
+                        "evidence": [f"{norm_key}.show_in_tooltip"],
+                        "problem": "Minecraft 1.21.5+ removed per-component 'show_in_tooltip' fields across unbreakable, trim, dyed_color, enchantments, and attribute_modifiers.",
+                        "remediation": f"Set '{norm_key}': {{}} and add '{norm_key}' to minecraft:tooltip_display.hidden_components.",
+                    })
+
+            elif norm_key in {"minecraft:enchantments", "minecraft:stored_enchantments"}:
+                if not isinstance(val, dict):
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": f"{norm_key} must be an object",
+                        "evidence": [f"type={type(val).__name__}"],
+                        "problem": f"{norm_key} maps namespaced enchantment IDs to integer levels 1..255.",
+                        "remediation": f"Provide a direct map such as {{'minecraft:sharpness': 5}}.",
+                    })
+                elif is_modern_1215 and ("levels" in val or "show_in_tooltip" in val):
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": f"Legacy 'levels'/'show_in_tooltip' wrapper in {norm_key} on 1.21.5-26.3+",
+                        "evidence": [k for k in ("levels", "show_in_tooltip") if k in val],
+                        "problem": "Minecraft 1.21.5 through 26.3+ flattened enchantments into a direct {'minecraft:sharpness': 5} map and moved tooltip hiding to minecraft:tooltip_display.",
+                        "remediation": f"Inline enchantment entries directly under '{norm_key}' and move tooltip suppression to minecraft:tooltip_display.hidden_components.",
+                    })
+
+            elif norm_key == "minecraft:equippable":
+                if not isinstance(val, dict):
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": "minecraft:equippable must be an object",
+                        "evidence": [f"type={type(val).__name__}"],
+                        "problem": "Equippable component requires an object declaring 'slot'.",
+                        "remediation": "Set 'minecraft:equippable': {'slot': 'head', 'asset_id': 'myplugin:ruby'}.",
+                    })
+                else:
+                    if is_modern_1214 and "model" in val:
+                        findings.append({
+                            "rule_id": "COMP-003",
+                            "severity": "critical",
+                            "title": "Obsolete 'model' field in minecraft:equippable (renamed to 'asset_id' in 1.21.4+)",
+                            "evidence": [f"equippable.model={val.get('model')!r}"],
+                            "problem": "Minecraft 1.21.4 through 26.3+ renamed minecraft:equippable.model to 'asset_id' (resolving assets/<ns>/equipment/<id>.json).",
+                            "remediation": "Rename 'model' to 'asset_id' inside minecraft:equippable.",
+                        })
+                    valid_slots = {"head", "chest", "legs", "feet", "body", "mainhand", "offhand"} | ({"saddle"} if is_modern_1215 else set())
+                    slot_val = val.get("slot")
+                    if slot_val not in valid_slots:
+                        findings.append({
+                            "rule_id": "COMP-003",
+                            "severity": "critical",
+                            "title": "Missing or invalid 'slot' in minecraft:equippable",
+                            "evidence": [f"slot={slot_val!r}"],
+                            "problem": f"Equippable 'slot' must be one of {sorted(valid_slots)}.",
+                            "remediation": "Set 'slot' to a valid EquipmentSlot name (for example 'head', 'chest', 'offhand', or 'saddle').",
+                        })
+
+            elif norm_key == "minecraft:food":
+                if not isinstance(val, dict):
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": "minecraft:food must be an object",
+                        "evidence": [f"type={type(val).__name__}"],
+                        "problem": "FoodProperties requires an object with 'nutrition' and 'saturation'.",
+                        "remediation": "Set 'minecraft:food': {'nutrition': 6, 'saturation': 7.2}.",
+                    })
+                else:
+                    if is_modern_1212:
+                        moved_food = [k for k in ("eat_seconds", "using_converts_to", "effects") if k in val]
+                        if moved_food:
+                            findings.append({
+                                "rule_id": "COMP-003",
+                                "severity": "critical",
+                                "title": "Obsolete 1.20.5 food keys inside minecraft:food on 1.21.2-26.3+",
+                                "evidence": moved_food,
+                                "problem": "Minecraft 1.21.2+ split eat_seconds/effects into minecraft:consumable and using_converts_to into minecraft:use_remainder.",
+                                "remediation": "Keep only {nutrition, saturation, can_always_eat} in minecraft:food and add minecraft:consumable / minecraft:use_remainder.",
+                            })
+                    if isinstance(val.get("nutrition"), bool) or not isinstance(val.get("nutrition"), int) or val["nutrition"] < 0 or isinstance(val.get("saturation"), bool) or not isinstance(val.get("saturation"), (int, float)):
+                        findings.append({
+                            "rule_id": "COMP-003",
+                            "severity": "critical",
+                            "title": "minecraft:food requires non-negative int 'nutrition' and numeric 'saturation'",
+                            "evidence": [f"nutrition={val.get('nutrition')!r}", f"saturation={val.get('saturation')!r}"],
+                            "problem": "FoodProperties codec requires integer nutrition >= 0 and float saturation.",
+                            "remediation": "Provide valid 'nutrition' (int >= 0) and 'saturation' (number) fields.",
+                        })
+
+            elif norm_key == "minecraft:attribute_modifiers":
+                mods_list: list[Any] | None = None
+                if isinstance(val, dict):
+                    if is_modern_1215 and "show_in_tooltip" in val:
+                        findings.append({
+                            "rule_id": "COMP-003",
+                            "severity": "critical",
+                            "title": "Removed 'show_in_tooltip' inside minecraft:attribute_modifiers on 1.21.5-26.3+",
+                            "evidence": ["attribute_modifiers.show_in_tooltip"],
+                            "problem": "Minecraft 1.21.5+ removed show_in_tooltip from attribute_modifiers and accepts a direct array of modifiers.",
+                            "remediation": "Pass a direct list [...] for minecraft:attribute_modifiers and list 'minecraft:attribute_modifiers' in minecraft:tooltip_display.hidden_components.",
+                        })
+                    mods_list = val.get("modifiers") if isinstance(val.get("modifiers"), list) else None
+                elif isinstance(val, list):
+                    mods_list = val
+                else:
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": "Invalid type for minecraft:attribute_modifiers",
+                        "evidence": [f"type={type(val).__name__}"],
+                        "problem": "attribute_modifiers must be an array of modifier entries.",
+                        "remediation": "Provide an array of {type, id, amount, operation, slot} objects.",
+                    })
+
+                if mods_list is not None:
+                    valid_ops = {"add_value", "add_multiplied_base", "add_multiplied_total"}
+                    for midx, mod in enumerate(mods_list):
+                        if not isinstance(mod, dict):
+                            continue
+                        if mc_tuple >= (1, 21, 0) and ("uuid" in mod or "name" in mod) and "id" not in mod:
+                            findings.append({
+                                "rule_id": "COMP-005",
+                                "severity": "critical",
+                                "title": "Legacy 1.20.5 uuid/name in attribute_modifiers (replaced by NamespacedKey 'id' in 1.21+)",
+                                "evidence": [f"attribute_modifiers[{midx}] keys={sorted(mod.keys())}"],
+                                "problem": "Minecraft 1.21 through 26.3+ replaced AttributeModifier UUID + Name pairs with a single namespaced resource location 'id'.",
+                                "remediation": "Replace 'uuid' and 'name' with 'id': 'myplugin:bonus_attack_damage'.",
+                            })
+                        op_val = mod.get("operation")
+                        if op_val not in valid_ops:
+                            findings.append({
+                                "rule_id": "COMP-005",
+                                "severity": "critical",
+                                "title": "Invalid attribute modifier operation enum",
+                                "evidence": [f"attribute_modifiers[{midx}].operation={op_val!r}"],
+                                "problem": f"AttributeModifier operation must be one of {sorted(valid_ops)} (not legacy ADDITION or numeric 0/1/2).",
+                                "remediation": "Use 'add_value', 'add_multiplied_base', or 'add_multiplied_total'.",
+                            })
+
+            elif norm_key == "minecraft:max_stack_size":
+                if isinstance(val, bool) or not isinstance(val, int) or not 1 <= val <= 99:
+                    findings.append({
+                        "rule_id": "COMP-004",
+                        "severity": "critical",
+                        "title": "minecraft:max_stack_size out of bounds (1..99)",
+                        "evidence": [f"max_stack_size={val!r}"],
+                        "problem": "Vanilla DataComponents bounds max_stack_size strictly between 1 and 99.",
+                        "remediation": "Set minecraft:max_stack_size to an integer between 1 and 99.",
+                    })
+
+            elif norm_key == "minecraft:max_damage":
+                if isinstance(val, bool) or not isinstance(val, int) or val < 1:
+                    findings.append({
+                        "rule_id": "COMP-004",
+                        "severity": "critical",
+                        "title": "minecraft:max_damage must be a positive integer (>= 1)",
+                        "evidence": [f"max_damage={val!r}"],
+                        "problem": "max_damage requires an integer >= 1.",
+                        "remediation": "Set minecraft:max_damage >= 1.",
+                    })
+
+            elif norm_key == "minecraft:use_cooldown":
+                if not isinstance(val, dict) or isinstance(val.get("seconds"), bool) or not isinstance(val.get("seconds"), (int, float)) or val["seconds"] <= 0:
+                    findings.append({
+                        "rule_id": "COMP-004",
+                        "severity": "critical",
+                        "title": "minecraft:use_cooldown requires positive numeric 'seconds'",
+                        "evidence": [f"use_cooldown={val!r}"],
+                        "problem": "UseCooldown codec requires {'seconds': <float > 0>, 'cooldown_group'?: '<ns:id>'}.",
+                        "remediation": "Specify a positive float 'seconds' inside minecraft:use_cooldown.",
+                    })
+
+            elif norm_key == "minecraft:enchantable":
+                if not isinstance(val, dict) or isinstance(val.get("value"), bool) or not isinstance(val.get("value"), int) or val["value"] < 1:
+                    findings.append({
+                        "rule_id": "COMP-004",
+                        "severity": "critical",
+                        "title": "minecraft:enchantable requires {'value': int >= 1}",
+                        "evidence": [f"enchantable={val!r}"],
+                        "problem": "Enchantable codec requires a positive integer 'value'.",
+                        "remediation": "Set 'minecraft:enchantable': {'value': 15}.",
+                    })
+
+            elif norm_key in {"minecraft:dyed_color", "minecraft:trim"} and isinstance(val, dict) and is_modern_1215 and "show_in_tooltip" in val:
+                findings.append({
+                    "rule_id": "COMP-003",
+                    "severity": "critical",
+                    "title": f"Removed 'show_in_tooltip' inside {norm_key} on 1.21.5-26.3+",
+                    "evidence": [f"{norm_key}.show_in_tooltip"],
+                    "problem": f"Minecraft 1.21.5+ removed show_in_tooltip from {norm_key}.",
+                    "remediation": f"Remove 'show_in_tooltip' from {norm_key} and add '{norm_key}' to minecraft:tooltip_display.hidden_components.",
+                })
+
+            elif norm_key == "minecraft:item_model":
+                if not isinstance(val, str) or _NAMESPACED_ID_RE.fullmatch(val) is None:
+                    findings.append({
+                        "rule_id": "COMP-003",
+                        "severity": "critical",
+                        "title": "Invalid resource location in minecraft:item_model",
+                        "evidence": [f"item_model={val!r}"],
+                        "problem": "minecraft:item_model must be a lowercase namespaced ID resolving assets/<ns>/items/<id>.json.",
+                        "remediation": "Use a lowercase namespaced ID such as 'myplugin:sunblade'.",
+                    })
+
+        # Cross-component mutual exclusion invariant: max_damage + max_stack_size > 1
+        max_dmg = normalized_active.get("minecraft:max_damage")
+        max_stack = normalized_active.get("minecraft:max_stack_size")
+        if isinstance(max_dmg, int) and not isinstance(max_dmg, bool) and isinstance(max_stack, int) and not isinstance(max_stack, bool) and max_stack > 1:
+            findings.append({
+                "rule_id": "COMP-004",
+                "severity": "critical",
+                "title": "Item cannot combine minecraft:max_damage with minecraft:max_stack_size > 1",
+                "evidence": [f"minecraft:max_damage={max_dmg}", f"minecraft:max_stack_size={max_stack}"],
+                "problem": "DataComponentMap validation throws IllegalStateException when an item is both damageable (max_damage) and stackable (max_stack_size > 1).",
+                "remediation": "Set minecraft:max_stack_size to 1 or omit minecraft:max_damage.",
+            })
+
+        # Validate client item definition (assets/<ns>/items/<id>.json) if present
+        expected_client_asset_path: str | None = None
+        item_model_id = normalized_active.get("minecraft:item_model")
+        if isinstance(item_model_id, str) and _NAMESPACED_ID_RE.fullmatch(item_model_id):
+            ns, _, rel_path = item_model_id.partition(":")
+            if not rel_path:
+                ns, rel_path = "minecraft", ns
+            expected_client_asset_path = f"assets/{ns}/items/{rel_path}.json"
+
+        if client_def is not None:
+            allowed_client_root = {"model", "hand_animation_on_swap", "oversized_in_gui", "swap_animation_scale"}
+            unknown_root = [k for k in client_def if k not in allowed_client_root]
+            if unknown_root:
+                findings.append({
+                    "rule_id": "COMP-006",
+                    "severity": "high",
+                    "title": "Unknown root property in client items/<id>.json definition",
+                    "evidence": unknown_root,
+                    "problem": f"Client item definitions only recognize {sorted(allowed_client_root)} at the root.",
+                    "remediation": "Place selector properties inside the root 'model' object.",
+                })
+            if "oversized_in_gui" in client_def and mc_tuple < (1, 21, 6):
+                findings.append({
+                    "rule_id": "COMP-006",
+                    "severity": "medium",
+                    "title": "'oversized_in_gui' requires Minecraft 1.21.6 / 26.x+ client",
+                    "evidence": [f"target_version={target_version}", "oversized_in_gui"],
+                    "problem": "Older 1.21.4-1.21.5 clients ignore or reject 'oversized_in_gui' in items/<id>.json.",
+                    "remediation": "Place 'oversized_in_gui' inside a 1.21.6+ / 26.x resource pack overlay.",
+                })
+            if "model" not in client_def:
+                findings.append({
+                    "rule_id": "COMP-006",
+                    "severity": "critical",
+                    "title": "Client items/<id>.json omits required root 'model' object",
+                    "evidence": ["missing root 'model' key"],
+                    "problem": "Every assets/<namespace>/items/<id>.json file must define a root 'model' object.",
+                    "remediation": "Add a root 'model' object (e.g. {'model': {'type': 'minecraft:model', 'model': 'ns:item/id'}}).",
+                })
+            else:
+                effective_cmd = cmd_counts
+                if effective_cmd is None and payload_kind != "client_item_definition":
+                    effective_cmd = {"floats": 0, "flags": 0, "strings": 0, "colors": 0}
+                _validate_client_item_model_node(
+                    client_def["model"],
+                    path="model",
+                    cmd_counts=effective_cmd,
+                    findings=findings,
+                )
+
+        counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for item in findings:
+            sev = str(item.get("severity", "low"))
+            if sev in counts:
+                counts[sev] += 1
+
+        return ToolOutcome(_pretty_json({
+            "target_version": target_version,
+            "payload_kind": payload_kind,
+            "validated_component_count": len(normalized_active),
+            "expected_client_item_definition_path": expected_client_asset_path,
+            "finding_count": len(findings),
+            "severity_counts": counts,
+            "status": "fail" if (counts["critical"] + counts["high"]) > 0 else ("warn" if len(findings) > 0 else "pass"),
+            "findings": findings,
+            "schema_resource_uri": "minecraftkit://catalog/paper-26.3-item-components",
         }))
 
     @staticmethod

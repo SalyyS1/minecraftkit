@@ -97,7 +97,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_eleven_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_thirteen_readonly_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -116,6 +116,8 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_audit_gradle_build",
                 "mc_audit_paper_plugin_yml",
                 "mc_generate_pack_overlay",
+                "mc_audit_server_properties",
+                "mc_validate_item_components",
             ],
         )
         for tool in tools:
@@ -270,7 +272,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 11)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 13)
 
     def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
         res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
@@ -278,8 +280,21 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         resources = res_list["result"]["resources"]
         uris = {r["uri"] for r in resources}
         self.assertIn("minecraftkit://catalog/overview", uris)
+        self.assertIn("minecraftkit://catalog/paper-26.3-item-components", uris)
         self.assertIn("minecraftkit://references/kotlin-java-gradle.md", uris)
         self.assertGreaterEqual(len(resources), 20)
+
+        comp_schema_resp = self.rpc({
+            "jsonrpc": "2.0",
+            "id": 301,
+            "method": "resources/read",
+            "params": {"uri": "minecraftkit://catalog/paper-26.3-item-components"},
+        })
+        assert comp_schema_resp is not None
+        comp_schema_data = json.loads(comp_schema_resp["result"]["contents"][0]["text"])
+        self.assertEqual(comp_schema_data["target_release"], "26.3")
+        self.assertIn("minecraft:tooltip_display", comp_schema_data["components"])
+        self.assertIn("minecraft:blocks_attacks", comp_schema_data["components"])
 
         overview_resp = self.rpc({
             "jsonrpc": "2.0",
@@ -624,6 +639,278 @@ dependencies:
         assert bad_dir_resp is not None
         self.assertTrue(bad_dir_resp["result"]["isError"])
         self.assertIn("OverlayMetadataSection", bad_dir_resp["result"]["content"][0]["text"])
+
+    def test_mc_audit_server_properties_detects_compression_netty_proxy_chunk_rcon_and_gc_hazards(self) -> None:
+        misconfigured_props = """
+        online-mode=false
+        network-compression-threshold=16
+        view-distance=10
+        simulation-distance=16
+        sync-chunk-writes=true
+        enable-rcon=true
+        rcon.password=admin
+        pause-when-empty-seconds=60
+        resource-pack=http\\://cdn.example.com/pack.zip
+        resource-pack-sha1=deadbeef
+        motd=First MOTD
+        motd=Duplicate MOTD
+        """
+        old_paper_global = """
+        _version: 28
+        timings:
+          enabled: true
+        item-validation:
+          book-size:
+            page-max: -1
+        """
+        spigot_yml = """
+        settings:
+          netty-threads: 1
+        """
+        bad_jvm = "-Xms2G -Xmx8G -XX:MaxDirectMemorySize=64M -XX:+UseConcMarkSweepGC -XX:+ZGenerational"
+
+        report, is_err = self.call_tool(
+            "mc_audit_server_properties",
+            {
+                "server_properties": misconfigured_props,
+                "paper_global_yaml": old_paper_global,
+                "spigot_yaml": spigot_yml,
+                "jvm_args": bad_jvm,
+                "behind_proxy": "none",
+                "expected_players": 120,
+                "cpu_cores": 8,
+            },
+        )
+        self.assertFalse(is_err)
+        self.assertEqual(report["status"], "fail")
+        rules = {item["rule_id"] for item in report["findings"]}
+        self.assertEqual(
+            rules,
+            {"PROP-001", "PROP-002", "PROP-003", "PROP-004", "PROP-005", "PROP-006", "PROP-007", "PROP-008"},
+        )
+        self.assertEqual(report["tuning_recommendations"]["recommended_network_compression_threshold"], 512)
+        self.assertGreaterEqual(report["tuning_recommendations"]["recommended_netty_event_loop_threads"], 6)
+        self.assertEqual(report["tuning_recommendations"]["chunk_budget_per_player"]["ticked_chunks_per_player"], 1089)
+
+        velocity_double_compress, vel_err = self.call_tool(
+            "mc_audit_server_properties",
+            {
+                "server_properties": "online-mode=true\nnetwork-compression-threshold=256\n",
+                "paper_global_yaml": "proxies:\n  velocity:\n    enabled: true\n    secret: ''\n",
+                "behind_proxy": "velocity",
+            },
+        )
+        self.assertFalse(vel_err)
+        self.assertEqual(velocity_double_compress["status"], "fail")
+        vel_rules = {item["rule_id"] for item in velocity_double_compress["findings"]}
+        self.assertIn("PROP-001", vel_rules)
+        self.assertIn("PROP-002", vel_rules)
+        self.assertEqual(
+            velocity_double_compress["tuning_recommendations"]["recommended_network_compression_threshold"],
+            -1,
+        )
+
+        clean_velocity_props = """
+        online-mode=false
+        server-ip=127.0.0.1
+        network-compression-threshold=-1
+        view-distance=10
+        simulation-distance=8
+        sync-chunk-writes=false
+        enable-rcon=false
+        pause-when-empty-seconds=-1
+        resource-pack=https\\://cdn.example.com/rpg-pack.zip
+        resource-pack-sha1=0123456789abcdef0123456789abcdef01234567
+        resource-pack-id=550e8400-e29b-41d4-a716-446655440000
+        """
+        clean_paper_global = """
+        _version: 30
+        proxies:
+          velocity:
+            enabled: true
+            online-mode: true
+            secret: 'v9K4mP8xQ2wR7zL5nJ3tB6yH1cF0dG8sA4eU'
+        item-validation:
+          book-size:
+            page-max: 2560
+        """
+        clean_res, clean_err = self.call_tool(
+            "mc_audit_server_properties",
+            {
+                "server_properties": clean_velocity_props,
+                "paper_global_yaml": clean_paper_global,
+                "jvm_args": "-Xms8G -Xmx8G -XX:+UseZGC -Dio.netty.eventLoopThreads=8",
+                "behind_proxy": "velocity",
+                "expected_players": 80,
+                "cpu_cores": 8,
+            },
+        )
+        self.assertFalse(clean_err)
+        self.assertEqual(clean_res["status"], "pass", clean_res["findings"])
+        self.assertEqual(clean_res["finding_count"], 0)
+
+    def test_mc_validate_item_components_enforces_paper_26_3_schemas_and_client_selector_bounds(self) -> None:
+        broken_stack = {
+            "id": "minecraft:diamond_sword",
+            "Count": 1,
+            "tag": "{Legacy:1b}",
+            "components": {
+                "minecraft:hide_tooltip": {},
+                "minecraft:custom_model_data": 1001,
+                "minecraft:unbreakable": {"show_in_tooltip": False},
+                "minecraft:equippable": {"slot": "head", "model": "myplugin:crown"},
+                "minecraft:food": {"nutrition": 4, "saturation": 2.4, "eat_seconds": 1.6},
+                "minecraft:item_name": '{"text":"Sunblade","italic":false}',
+                "minecraft:attribute_modifiers": {
+                    "show_in_tooltip": False,
+                    "modifiers": [
+                        {
+                            "type": "minecraft:attack_damage",
+                            "uuid": "00000000-0000-0000-0000-000000000001",
+                            "name": "bonus",
+                            "amount": 12.0,
+                            "operation": "ADDITION",
+                            "slot": "mainhand",
+                        }
+                    ],
+                },
+                "minecraft:max_damage": 500,
+                "minecraft:max_stack_size": 64,
+                "!minecraft:damage": 0,
+            },
+        }
+        bad_report, bad_err = self.call_tool(
+            "mc_validate_item_components",
+            {"payload": broken_stack, "target_version": "26.3"},
+        )
+        self.assertFalse(bad_err)
+        self.assertEqual(bad_report["status"], "fail")
+        bad_rules = {f["rule_id"] for f in bad_report["findings"]}
+        self.assertEqual(bad_rules, {"COMP-001", "COMP-002", "COMP-003", "COMP-004", "COMP-005"})
+
+        mismatch_client_def = {
+            "oversized_in_gui": True,
+            "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 2,
+                "cases": [
+                    {
+                        "when": "awakened",
+                        "model": {
+                            "type": "minecraft:range_dispatch",
+                            "property": "minecraft:custom_model_data",
+                            "index": 0,
+                            "entries": [
+                                {"threshold": 0.8, "model": {"type": "minecraft:model", "model": "myplugin:item/sunblade_full"}},
+                                {"threshold": 0.2, "model": {"type": "minecraft:model", "model": "myplugin:item/sunblade_low"}},
+                            ],
+                        },
+                    }
+                ],
+            },
+        }
+        cross_report, cross_err = self.call_tool(
+            "mc_validate_item_components",
+            {
+                "payload": {
+                    "id": "minecraft:netherite_sword",
+                    "components": {
+                        "minecraft:item_model": "myplugin:sunblade",
+                        "minecraft:custom_model_data": {
+                            "floats": [0.9],
+                            "strings": ["awakened"],
+                        },
+                    },
+                },
+                "target_version": "26.3",
+                "client_item_definition": mismatch_client_def,
+            },
+        )
+        self.assertFalse(cross_err)
+        self.assertEqual(cross_report["status"], "fail")
+        comp6_titles = [f["title"] for f in cross_report["findings"] if f["rule_id"] == "COMP-006"]
+        self.assertTrue(any("strings[2]" in t for t in comp6_titles), comp6_titles)
+        self.assertTrue(any("Unsorted" in t for t in comp6_titles), comp6_titles)
+
+        clean_stack = {
+            "id": "minecraft:netherite_sword",
+            "count": 1,
+            "components": {
+                "minecraft:item_model": "myplugin:sunblade",
+                "minecraft:item_name": {"text": "Sunblade", "italic": False},
+                "minecraft:lore": [{"text": "Forged in solar fire", "italic": False}],
+                "minecraft:custom_model_data": {
+                    "floats": [1.0],
+                    "flags": [True],
+                    "strings": ["awakened"],
+                    "colors": [[1.0, 0.85, 0.2]],
+                },
+                "minecraft:tooltip_display": {
+                    "hide_tooltip": False,
+                    "hidden_components": ["minecraft:attribute_modifiers", "minecraft:unbreakable"],
+                },
+                "minecraft:unbreakable": {},
+                "minecraft:weapon": {"item_damage_per_attack": 1, "disable_blocking_for_seconds": 2.5},
+                "minecraft:blocks_attacks": {"block_delay_seconds": 0.1, "disable_cooldown_scale": 1.0},
+                "minecraft:equippable": {"slot": "mainhand", "asset_id": "myplugin:solar_plate"},
+                "minecraft:use_cooldown": {"seconds": 1.5, "cooldown_group": "myplugin:solar_slash"},
+                "minecraft:attribute_modifiers": [
+                    {
+                        "type": "minecraft:attack_damage",
+                        "id": "myplugin:solar_edge",
+                        "amount": 14.0,
+                        "operation": "add_value",
+                        "slot": "mainhand",
+                    }
+                ],
+                "minecraft:max_damage": 2048,
+                "minecraft:max_stack_size": 1,
+                "!minecraft:damage": {},
+            },
+        }
+        clean_client_def = {
+            "hand_animation_on_swap": True,
+            "oversized_in_gui": False,
+            "model": {
+                "type": "minecraft:select",
+                "property": "minecraft:custom_model_data",
+                "index": 0,
+                "cases": [
+                    {
+                        "when": "awakened",
+                        "model": {
+                            "type": "minecraft:condition",
+                            "property": "minecraft:custom_model_data",
+                            "index": 0,
+                            "on_true": {
+                                "type": "minecraft:range_dispatch",
+                                "property": "minecraft:custom_model_data",
+                                "index": 0,
+                                "entries": [
+                                    {"threshold": 0.25, "model": {"type": "minecraft:model", "model": "myplugin:item/sunblade_1"}},
+                                    {"threshold": 0.75, "model": {"type": "minecraft:model", "model": "myplugin:item/sunblade_2", "tints": [{"type": "minecraft:custom_model_data", "index": 0}]}},
+                                ],
+                            },
+                            "on_false": {"type": "minecraft:model", "model": "myplugin:item/sunblade_idle"},
+                        },
+                    }
+                ],
+                "fallback": {"type": "minecraft:model", "model": "myplugin:item/sunblade_base"},
+            },
+        }
+        valid_report, valid_err = self.call_tool(
+            "mc_validate_item_components",
+            {
+                "payload": json.dumps(clean_stack),
+                "target_version": "26.3",
+                "client_item_definition": json.dumps(clean_client_def),
+            },
+        )
+        self.assertFalse(valid_err)
+        self.assertEqual(valid_report["status"], "pass", valid_report["findings"])
+        self.assertEqual(valid_report["finding_count"], 0)
+        self.assertEqual(valid_report["expected_client_item_definition_path"], "assets/myplugin/items/sunblade.json")
 
     def test_cli_subprocess_serves_stdio_end_to_end(self) -> None:
         request = json.dumps({"jsonrpc": "2.0", "id": 7, "method": "initialize", "params": {}}) + "\n"
