@@ -146,7 +146,7 @@ class CatalogStore:
             version = manifest.get("version") if isinstance(manifest, dict) else None
             if isinstance(version, str) and version:
                 return version
-        return "2.4.0"
+        return "2.5.0"
 
     def api_index(self) -> dict[str, Any]:
         return self._load_json("data/api-index.json")
@@ -544,6 +544,90 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_paper_plugin_yml",
+        "title": "Audit Paper Plugin Descriptor & Dependency Graph",
+        "description": (
+            "Validate paper-plugin.yml (and optional dual plugin.yml) across Paper 1.19 through 26.3+ "
+            "for unquoted YAML float truncation (e.g. 1.20 parsed as 1.2), illegal legacy plugin.yml root keys "
+            "(commands, depend, softdepend, loadbefore, libraries), bootstrapper/loader/main class collisions, "
+            "bootstrap vs server dependency graph ordering conflicts, isolated ConfiguredPluginClassLoader "
+            "join-classpath hazards, and Folia region-threading declarations."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "paper_plugin_yaml": {
+                    "type": "string",
+                    "description": "Contents of paper-plugin.yml.",
+                },
+                "legacy_plugin_yaml": {
+                    "type": "string",
+                    "description": "Optional companion plugin.yml contents when shipping dual descriptors.",
+                },
+                "require_folia": {
+                    "type": "boolean",
+                    "description": "Require folia-supported: true for Folia deployments (default false).",
+                },
+            },
+            "required": ["paper_plugin_yaml"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_generate_pack_overlay",
+        "title": "Generate Multi-Version pack.mcmeta & Overlays Manifest",
+        "description": (
+            "Generate a client- and server-validated pack.mcmeta JSON and overlays.entries layout for "
+            "Minecraft resource packs and data packs spanning 1.20.1 through 26.3+ (enforcing pre-minor "
+            "supported_formats clamping at 64/81, 1.21.9+ and 26.x min_format/max_format [major, minor] "
+            "tuples, OverlayMetadataSection directory naming rules, and optional breaking-epoch splits)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "pack_type": {
+                    "type": "string",
+                    "enum": ["resource", "data"],
+                    "description": "Pack kind: 'resource' (client assets) or 'data' (server data pack). Defaults to 'resource'.",
+                },
+                "min_version": {
+                    "type": "string",
+                    "description": "Minimum supported Minecraft release or pack format (e.g. '1.20.1', '1.21.4', '26.2', '88.0').",
+                },
+                "max_version": {
+                    "type": "string",
+                    "description": "Maximum supported Minecraft release or pack format (defaults to min_version; e.g. '26.2', '26.3', '97.1').",
+                },
+                "description": {
+                    "type": "string",
+                    "description": "Pack description string written into pack.description.",
+                },
+                "overlays": {
+                    "type": "array",
+                    "description": "Optional explicit overlay layers ordered from lowest priority to highest priority.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "directory": {"type": "string"},
+                            "min_version": {"type": "string"},
+                            "max_version": {"type": "string"},
+                        },
+                        "required": ["directory", "min_version"],
+                        "additionalProperties": False,
+                    },
+                },
+                "auto_split_epochs": {
+                    "type": "boolean",
+                    "description": "Automatically emit recommended overlay entries at breaking vanilla pack-format boundaries when 'overlays' is omitted (default false).",
+                },
+            },
+            "required": ["min_version"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -582,6 +666,324 @@ def _required_java_for_mc(mc_tuple: tuple[int, int, int]) -> int:
     return 8
 
 
+def _strip_yaml_inline_comment(line: str) -> str:
+    in_single = False
+    in_double = False
+    escaped = False
+    for idx, ch in enumerate(line):
+        if escaped:
+            escaped = False
+            continue
+        if ch == "\\" and in_double:
+            escaped = True
+            continue
+        if ch == "'" and not in_double:
+            in_single = not in_single
+        elif ch == '"' and not in_single:
+            in_double = not in_double
+        elif ch == "#" and not in_single and not in_double:
+            if idx == 0 or line[idx - 1].isspace():
+                return line[:idx].rstrip()
+    return line.rstrip()
+
+
+def _unquote_yaml_scalar(raw: str) -> tuple[str, bool]:
+    val = raw.strip()
+    if len(val) >= 2 and ((val[0] == "'" and val[-1] == "'") or (val[0] == '"' and val[-1] == '"')):
+        return val[1:-1], True
+    return val, False
+
+
+def _parse_paper_plugin_yaml(text: str) -> dict[str, Any]:
+    scalars: dict[str, str] = {}
+    raw_scalars: dict[str, str] = {}
+    quoted_flags: dict[str, bool] = {}
+    root_keys: list[str] = []
+    dependencies: dict[str, dict[str, dict[str, Any]]] = {"bootstrap": {}, "server": {}}
+    has_tab_indentation = False
+
+    in_deps = False
+    deps_indent = 0
+    current_section: str | None = None
+    section_indent: int | None = None
+    current_dep: str | None = None
+    dep_indent: int | None = None
+
+    for raw_line in text.splitlines():
+        if raw_line and raw_line[0] in (" ", "\t"):
+            leading = raw_line[: len(raw_line) - len(raw_line.lstrip(" \t"))]
+            if "\t" in leading and raw_line.strip() and not raw_line.lstrip().startswith("#"):
+                has_tab_indentation = True
+
+        cleaned = _strip_yaml_inline_comment(raw_line.replace("\t", "  "))
+        if not cleaned.strip() or cleaned.strip() == "---":
+            continue
+
+        indent = len(cleaned) - len(cleaned.lstrip(" "))
+        content = cleaned.strip()
+
+        if indent == 0:
+            in_deps = False
+            current_section = None
+            section_indent = None
+            current_dep = None
+            dep_indent = None
+
+            if ":" in content:
+                key_part, _, rest_part = content.partition(":")
+                key = key_part.strip()
+                if key and key not in root_keys:
+                    root_keys.append(key)
+                rest = rest_part.strip()
+                if key == "dependencies" and rest in ("", "{}"):
+                    in_deps = rest == ""
+                    deps_indent = 0
+                elif rest and rest not in ("|", ">"):
+                    unq, was_q = _unquote_yaml_scalar(rest)
+                    scalars[key] = unq
+                    raw_scalars[key] = rest
+                    quoted_flags[key] = was_q
+            continue
+
+        if not in_deps:
+            continue
+
+        if section_indent is not None and indent <= section_indent:
+            current_section = None
+            section_indent = None
+            current_dep = None
+            dep_indent = None
+
+        if current_section is None:
+            if ":" in content and indent > deps_indent:
+                sec_key, _, sec_rest = content.partition(":")
+                sec_key = sec_key.strip()
+                sec_rest = sec_rest.strip()
+                if sec_key in ("bootstrap", "server") and sec_rest in ("", "{}"):
+                    if sec_rest == "":
+                        current_section = sec_key
+                        section_indent = indent
+            continue
+
+        if dep_indent is not None and indent <= dep_indent:
+            current_dep = None
+            dep_indent = None
+
+        if current_dep is None:
+            if ":" in content and section_indent is not None and indent > section_indent:
+                d_key, _, d_rest = content.partition(":")
+                d_name, _ = _unquote_yaml_scalar(d_key.strip())
+                d_rest = d_rest.strip()
+                if d_name:
+                    dependencies[current_section][d_name] = {
+                        "load": "OMIT",
+                        "raw_load": "OMIT",
+                        "required": True,
+                        "join_classpath": True,
+                        "invalid_bool_fields": [],
+                    }
+                    if d_rest == "":
+                        current_dep = d_name
+                        dep_indent = indent
+            continue
+
+        if ":" in content and dep_indent is not None and indent > dep_indent:
+            p_key, _, p_rest = content.partition(":")
+            p_key = p_key.strip()
+            p_val, _ = _unquote_yaml_scalar(p_rest.strip())
+            cfg = dependencies[current_section][current_dep]
+            if p_key == "load":
+                cfg["raw_load"] = p_val
+                if p_val in {"BEFORE", "AFTER", "OMIT"}:
+                    cfg["load"] = p_val
+            elif p_key == "required":
+                if p_val.lower() == "true":
+                    cfg["required"] = True
+                elif p_val.lower() == "false":
+                    cfg["required"] = False
+                else:
+                    cfg["invalid_bool_fields"].append("required")
+            elif p_key == "join-classpath":
+                if p_val.lower() == "true":
+                    cfg["join_classpath"] = True
+                elif p_val.lower() == "false":
+                    cfg["join_classpath"] = False
+                else:
+                    cfg["invalid_bool_fields"].append("join-classpath")
+
+    return {
+        "scalars": scalars,
+        "raw_scalars": raw_scalars,
+        "quoted_flags": quoted_flags,
+        "root_keys": root_keys,
+        "dependencies": dependencies,
+        "has_tab_indentation": has_tab_indentation,
+    }
+
+
+def _parse_legacy_plugin_yaml(text: str) -> dict[str, Any]:
+    lists: dict[str, list[str]] = {"depend": [], "softdepend": [], "loadbefore": []}
+    scalars: dict[str, str] = {}
+    active_list_key: str | None = None
+
+    for raw_line in text.splitlines():
+        cleaned = _strip_yaml_inline_comment(raw_line.replace("\t", "  "))
+        if not cleaned.strip() or cleaned.strip() == "---":
+            continue
+        indent = len(cleaned) - len(cleaned.lstrip(" "))
+        content = cleaned.strip()
+
+        if indent == 0:
+            active_list_key = None
+            if ":" in content:
+                k_part, _, r_part = content.partition(":")
+                key = k_part.strip()
+                rest = r_part.strip()
+                if key in lists:
+                    if rest.startswith("[") and rest.endswith("]"):
+                        inner = rest[1:-1].strip()
+                        if inner:
+                            for item in inner.split(","):
+                                val, _ = _unquote_yaml_scalar(item.strip())
+                                if val:
+                                    lists[key].append(val)
+                    elif rest == "":
+                        active_list_key = key
+                elif rest:
+                    val, _ = _unquote_yaml_scalar(rest)
+                    scalars[key] = val
+        elif active_list_key is not None and content.startswith("-"):
+            item_raw = content[1:].strip()
+            val, _ = _unquote_yaml_scalar(item_raw)
+            if val:
+                lists[active_list_key].append(val)
+
+    return {
+        "scalars": scalars,
+        "depend": lists["depend"],
+        "softdepend": lists["softdepend"],
+        "loadbefore": lists["loadbefore"],
+    }
+
+
+_RESOURCE_PACK_FORMATS: dict[str, tuple[int, int | None]] = {
+    "1.20": (15, None),
+    "1.20.1": (15, None),
+    "1.20.2": (18, None),
+    "1.20.3": (22, None),
+    "1.20.4": (22, None),
+    "1.20.5": (32, None),
+    "1.20.6": (32, None),
+    "1.21": (34, None),
+    "1.21.1": (34, None),
+    "1.21.2": (42, None),
+    "1.21.3": (42, None),
+    "1.21.4": (46, None),
+    "1.21.5": (55, None),
+    "1.21.6": (63, None),
+    "1.21.7": (64, None),
+    "1.21.8": (64, None),
+    "1.21.9": (69, None),
+    "1.21.10": (69, None),
+    "1.21.11": (75, None),
+    "26.1": (84, None),
+    "26.1.1": (84, None),
+    "26.1.2": (84, None),
+    "26.2": (88, 0),
+    "26.3": (97, 1),
+}
+
+_DATA_PACK_FORMATS: dict[str, tuple[int, int | None]] = {
+    "1.20": (15, None),
+    "1.20.1": (15, None),
+    "1.20.2": (18, None),
+    "1.20.3": (26, None),
+    "1.20.4": (26, None),
+    "1.20.5": (41, None),
+    "1.20.6": (41, None),
+    "1.21": (48, None),
+    "1.21.1": (48, None),
+    "1.21.2": (57, None),
+    "1.21.3": (57, None),
+    "1.21.4": (61, None),
+    "1.21.5": (71, None),
+    "1.21.6": (80, None),
+    "1.21.7": (81, None),
+    "1.21.8": (81, None),
+    "1.21.9": (88, 0),
+    "1.21.10": (88, 0),
+    "1.21.11": (94, 1),
+    "26.1": (101, 1),
+    "26.1.1": (101, 1),
+    "26.1.2": (101, 1),
+    "26.2": (107, 1),
+    "26.3": (121, 0),
+}
+
+_RESOURCE_BREAKING_EPOCHS: tuple[tuple[str, str, str], ...] = (
+    ("overlay_1_21_2_equipment", "1.21.2", "Armor and elytra rendering moved to assets/<namespace>/equipment/ definitions."),
+    ("overlay_1_21_4_items", "1.21.4", "Client item definitions under assets/<namespace>/items/<id>.json replaced legacy model overrides predicates."),
+    ("overlay_1_21_6_dialogs", "1.21.6", "Built-in dialog UI definitions and updated core/post shader uniform layouts."),
+    ("overlay_26_1_modern", "26.1", "Year-based 26.x resource pipeline and updated shader/atlas format contracts."),
+)
+
+_DATA_BREAKING_EPOCHS: tuple[tuple[str, str, str], ...] = (
+    ("overlay_1_20_5_components", "1.20.5", "Structured item data components replaced raw NBT tags across recipes, loot tables, and predicates."),
+    ("overlay_1_21_singular_dirs", "1.21", "Registry folders renamed from plural to singular (loot_table, recipe, tags/item, tags/block) plus data-driven enchantments."),
+    ("overlay_1_21_5_predicates", "1.21.5", "Updated entity/item component predicates and dialog data definitions."),
+    ("overlay_26_1_modern", "26.1", "Year-based 26.x data pack registry schema updates."),
+)
+
+
+def _resolve_pack_format(
+    spec: str,
+    *,
+    pack_type: str,
+    dynamic_caps: dict[str, tuple[int, int | None]],
+) -> tuple[int, int | None]:
+    table = _RESOURCE_PACK_FORMATS if pack_type == "resource" else _DATA_PACK_FORMATS
+    cleaned = spec.strip()
+    if cleaned in dynamic_caps:
+        return dynamic_caps[cleaned]
+    if cleaned in table:
+        return table[cleaned]
+
+    parts = cleaned.split(".")
+    if len(parts) == 1 and parts[0].isdigit():
+        return (int(parts[0]), None)
+    if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+        major = int(parts[0])
+        minor = int(parts[1])
+        # Distinguish pack_format tuples (e.g. 88.0, 97.1, 107.1, 121.0) from unknown MC releases (e.g. 1.19)
+        if major >= 65:
+            return (major, minor)
+
+    known = ", ".join(table.keys())
+    raise ValueError(
+        f"Unknown Minecraft version '{cleaned}' for {pack_type} pack. "
+        f"Known releases: {known}. For snapshots, pass the numeric pack format directly (e.g. '88' or '97.1')."
+    )
+
+
+def _pack_format_sort_key(fmt: tuple[int, int | None], *, is_max: bool) -> tuple[int, int]:
+    major, minor = fmt
+    if minor is None:
+        return (major, 999999 if is_max else 0)
+    return (major, minor)
+
+
+def _pack_format_to_json(fmt: tuple[int, int | None]) -> int | list[int]:
+    major, minor = fmt
+    if minor is None:
+        return major
+    return [major, minor]
+
+
+def _format_pack_tuple(fmt: tuple[int, int | None]) -> str:
+    major, minor = fmt
+    return f"{major}" if minor is None else f"{major}.{minor}"
+
+
 class MinecraftKitMcpServer:
     """Pure-Python MCP server exposing MinecraftKit's offline catalogs over JSON-RPC 2.0."""
 
@@ -597,6 +999,8 @@ class MinecraftKitMcpServer:
             "mc_diagnose_server_log": self._tool_diagnose_server_log,
             "mc_inspect_type": self._tool_inspect_type,
             "mc_audit_gradle_build": self._tool_audit_gradle_build,
+            "mc_audit_paper_plugin_yml": self._tool_audit_paper_plugin_yml,
+            "mc_generate_pack_overlay": self._tool_generate_pack_overlay,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -671,8 +1075,9 @@ class MinecraftKitMcpServer:
                 "Use mc_route_skill first to select the right mc:* engineering domain, mc_version_capabilities "
                 "to pin exact Minecraft/protocol/pack formats, mc_search_sources for reviewed upstream GitHub "
                 "repositories, mc_list_plugins / mc_search_api / mc_inspect_type for verified RPG plugin bytecode "
-                "hierarchies and signatures, and mc_audit_gradle_build / mc_folia_migration_advisor / "
-                "mc_diagnose_server_log for static build, region-threading, and crash-log verification."
+                "hierarchies and signatures, mc_generate_pack_overlay for multi-version pack.mcmeta generation, and "
+                "mc_audit_gradle_build / mc_audit_paper_plugin_yml / mc_folia_migration_advisor / "
+                "mc_diagnose_server_log for static build, descriptor, region-threading, and crash-log verification."
             ),
         }
 
@@ -1835,6 +2240,554 @@ class MinecraftKitMcpServer:
             "status": "fail" if (counts["critical"] + counts["high"]) > 0 else ("warn" if len(findings) > 0 else "pass"),
             "findings": findings,
             "companion_jar_auditor": "https://github.com/SalyyS1/pluginscope",
+        }))
+
+    def _tool_audit_paper_plugin_yml(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_yaml = args.get("paper_plugin_yaml")
+        if not isinstance(raw_yaml, str) or not raw_yaml.strip():
+            raise ValueError("'paper_plugin_yaml' must be a non-empty string.")
+
+        legacy_raw = args.get("legacy_plugin_yaml")
+        if legacy_raw is not None and not isinstance(legacy_raw, str):
+            raise ValueError("'legacy_plugin_yaml' must be a string.")
+
+        require_folia = args.get("require_folia", False)
+        if not isinstance(require_folia, bool):
+            raise ValueError("'require_folia' must be a boolean.")
+
+        parsed = _parse_paper_plugin_yaml(raw_yaml)
+        legacy = _parse_legacy_plugin_yaml(legacy_raw) if isinstance(legacy_raw, str) and legacy_raw.strip() else None
+
+        findings: list[dict[str, Any]] = []
+        scalars = parsed["scalars"]
+        raw_scalars = parsed["raw_scalars"]
+        quoted_flags = parsed["quoted_flags"]
+        root_keys = parsed["root_keys"]
+
+        if parsed["has_tab_indentation"]:
+            findings.append({
+                "rule_id": "PAPER-001",
+                "severity": "critical",
+                "title": "Tab character used for YAML indentation",
+                "evidence": ["leading '\\t' indentation detected"],
+                "problem": "YAML 1.2 forbids tab characters for block indentation; SnakeYAML throws ScannerException when Paper loads paper-plugin.yml.",
+                "remediation": "Replace all leading tab characters with 2-space indentation.",
+            })
+
+        # PAPER-001: Required root keys & valid plugin identifier
+        required_keys = ("name", "version", "main", "api-version")
+        missing_required = [k for k in required_keys if not scalars.get(k)]
+        if missing_required:
+            findings.append({
+                "rule_id": "PAPER-001",
+                "severity": "critical",
+                "title": "Missing required paper-plugin.yml root attributes",
+                "evidence": missing_required,
+                "problem": "PaperPluginMeta requires name, version, main, and api-version to be non-empty strings at the root of paper-plugin.yml.",
+                "remediation": "Declare name, version, main, and quoted api-version (for example: api-version: '1.21.4' or '26.2') at the root level.",
+            })
+
+        plugin_name = scalars.get("name", "")
+        if plugin_name and re.fullmatch(r"[A-Za-z0-9_-]+", plugin_name) is None:
+            findings.append({
+                "rule_id": "PAPER-001",
+                "severity": "critical",
+                "title": "Invalid characters in plugin name",
+                "evidence": [f"name={plugin_name!r}"],
+                "problem": "Paper plugin names may only contain alphanumeric characters, underscores, and hyphens (^[A-Za-z0-9_-]+$).",
+                "remediation": "Remove spaces or punctuation from 'name' and use 'prefix' or 'description' for display formatting.",
+            })
+
+        # PAPER-002: api-version validation (1.19..1.21.x and 26.1..26.x + YAML float truncation)
+        api_ver = scalars.get("api-version", "")
+        api_raw = raw_scalars.get("api-version", "")
+        api_quoted = quoted_flags.get("api-version", False)
+        required_java: int | None = None
+        if api_ver:
+            if not api_quoted and re.fullmatch(r"\d+\.\d*0", api_raw):
+                truncated = api_raw.rstrip("0").rstrip(".")
+                findings.append({
+                    "rule_id": "PAPER-002",
+                    "severity": "critical",
+                    "title": "Unquoted api-version loses trailing zero under YAML float parsing",
+                    "evidence": [f"api-version: {api_raw} -> parsed as float '{truncated}'"],
+                    "problem": (
+                        f"In YAML, unquoted '{api_raw}' is parsed by SnakeYAML as floating-point {truncated}, "
+                        "causing PaperPluginMeta to reject the descriptor as an unsupported legacy version."
+                    ),
+                    "remediation": f"Quote the string value explicitly: api-version: '{api_raw}'.",
+                })
+
+            ver_match = re.fullmatch(r"(\d+)\.(\d+)(?:\.(\d+))?", api_ver)
+            if ver_match is None:
+                findings.append({
+                    "rule_id": "PAPER-002",
+                    "severity": "critical",
+                    "title": "Malformed api-version string in paper-plugin.yml",
+                    "evidence": [f"api-version={api_ver!r}"],
+                    "problem": "Paper expects 'major.minor' or 'major.minor.patch' (e.g. '1.20.4', '1.21.4', '26.2', '26.3').",
+                    "remediation": "Set a quoted release version such as api-version: '1.21.4' or api-version: '26.2'.",
+                })
+            else:
+                v_maj, v_min, v_pat = int(ver_match.group(1)), int(ver_match.group(2)), int(ver_match.group(3) or 0)
+                required_java = _required_java_for_mc((v_maj, v_min, v_pat))
+                if (v_maj == 1 and v_min < 19) or v_maj < 1 or (1 < v_maj < 26):
+                    findings.append({
+                        "rule_id": "PAPER-002",
+                        "severity": "critical",
+                        "title": "Unsupported api-version for paper-plugin.yml",
+                        "evidence": [f"api-version={api_ver}"],
+                        "problem": (
+                            "Paper introduced paper-plugin.yml in 1.19.3 (minimum api-version '1.19'); "
+                            "supported eras are 1.19..1.21.x and Mojang's year-based 26.1+ releases."
+                        ),
+                        "remediation": "Set api-version to '1.20.1'+ (or '26.2' / '26.3' for Java 25 servers), or use legacy plugin.yml for <= 1.18.",
+                    })
+
+        # PAPER-003: Legacy plugin.yml keys mistakenly placed in paper-plugin.yml
+        legacy_key_replacements = {
+            "commands": "Register commands programmatically via LifecycleEvents.COMMANDS in PluginBootstrap or JavaPlugin.",
+            "depend": "Move hard dependencies under dependencies.server.<Plugin> with required: true and load: BEFORE.",
+            "softdepend": "Move optional dependencies under dependencies.server.<Plugin> with required: false.",
+            "loadbefore": "Move reverse load-order edges under dependencies.server.<Plugin> with load: AFTER.",
+            "libraries": "Implement io.papermc.paper.plugin.loader.PluginLoader (MavenLibraryResolver) and wire it via 'loader:'.",
+        }
+        illegal_present = [k for k in legacy_key_replacements if k in root_keys]
+        if illegal_present:
+            findings.append({
+                "rule_id": "PAPER-003",
+                "severity": "critical",
+                "title": "Legacy plugin.yml keys are ignored or rejected in paper-plugin.yml",
+                "evidence": illegal_present,
+                "problem": (
+                    "paper-plugin.yml does not support root 'commands', 'depend', 'softdepend', 'loadbefore', or 'libraries' "
+                    "blocks; leaving them in paper-plugin.yml silently drops command registration, library downloads, or load order."
+                ),
+                "remediation": " ".join(legacy_key_replacements[k] for k in illegal_present),
+            })
+
+        # PAPER-004: main / bootstrapper / loader FQCN validation and lifecycle collision
+        fqcn_pattern = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)+$")
+        entrypoints = {
+            role: scalars[role]
+            for role in ("main", "bootstrapper", "loader")
+            if scalars.get(role)
+        }
+        bad_fqcns: list[str] = []
+        for role, fqcn in entrypoints.items():
+            if fqcn.endswith(".class") or "/" in fqcn or fqcn_pattern.fullmatch(fqcn) is None:
+                bad_fqcns.append(f"{role}={fqcn}")
+        if bad_fqcns:
+            findings.append({
+                "rule_id": "PAPER-004",
+                "severity": "critical",
+                "title": "Invalid Java fully-qualified class name in entrypoint",
+                "evidence": bad_fqcns,
+                "problem": "Entrypoint classes must be dot-separated packaged Java class names without '.class' suffixes or '/' slashes.",
+                "remediation": "Use valid packaged FQCNs such as 'com.example.myplugin.MyPlugin'.",
+            })
+
+        collisions: list[str] = []
+        main_cls = entrypoints.get("main")
+        boot_cls = entrypoints.get("bootstrapper")
+        load_cls = entrypoints.get("loader")
+        if main_cls and boot_cls and main_cls == boot_cls:
+            collisions.append(f"main == bootstrapper ({main_cls})")
+        if main_cls and load_cls and main_cls == load_cls:
+            collisions.append(f"main == loader ({main_cls})")
+        if boot_cls and load_cls and boot_cls == load_cls:
+            collisions.append(f"bootstrapper == loader ({boot_cls})")
+        if collisions:
+            findings.append({
+                "rule_id": "PAPER-004",
+                "severity": "critical",
+                "title": "Colliding main, bootstrapper, or loader entrypoint classes",
+                "evidence": collisions,
+                "problem": (
+                    "Paper instantiates PluginLoader and PluginBootstrap before Bukkit server state exists; "
+                    "pointing them at a JavaPlugin main class triggers class-initialization failures at boot."
+                ),
+                "remediation": "Isolate PluginBootstrap and PluginLoader in dedicated classes that do not extend JavaPlugin or touch Bukkit statics.",
+            })
+
+        # PAPER-005 & PAPER-006: Dependency graph & classloader audit
+        bootstrap_deps: dict[str, dict[str, Any]] = parsed["dependencies"]["bootstrap"]
+        server_deps: dict[str, dict[str, Any]] = parsed["dependencies"]["server"]
+
+        known_java_api_plugins = {
+            "modelengine", "mmoitems", "mmocore", "mmoinventory", "mmoprofiles",
+            "mythiccrucible", "mythicdungeons", "mythicenchants", "mythicrpg", "coretools",
+            "mythicmobs", "mythiclib", "placeholderapi", "vault", "luckperms",
+            "protocollib", "packetevents", "worldguard", "worldedit", "citizens",
+        }
+
+        graph_errors: list[str] = []
+        classpath_hazards: list[str] = []
+
+        for section_name, section_map in (("bootstrap", bootstrap_deps), ("server", server_deps)):
+            for dep_name, cfg in section_map.items():
+                if plugin_name and dep_name.casefold() == plugin_name.casefold():
+                    graph_errors.append(f"{section_name}.{dep_name}: self-dependency on '{plugin_name}'")
+                raw_load = cfg["raw_load"]
+                if raw_load not in {"BEFORE", "AFTER", "OMIT"}:
+                    graph_errors.append(
+                        f"{section_name}.{dep_name}.load={raw_load!r} (must be BEFORE, AFTER, or OMIT)"
+                    )
+                if cfg["invalid_bool_fields"]:
+                    for bf in cfg["invalid_bool_fields"]:
+                        graph_errors.append(f"{section_name}.{dep_name}.{bf} must be boolean true or false")
+                if cfg["join_classpath"] is False and dep_name.casefold() in known_java_api_plugins:
+                    classpath_hazards.append(
+                        f"{section_name}.{dep_name} sets join-classpath: false (blocks Java API class visibility)"
+                    )
+
+        boot_by_low = {k.casefold(): (k, v) for k, v in bootstrap_deps.items()}
+        for s_name, s_cfg in server_deps.items():
+            b_entry = boot_by_low.get(s_name.casefold())
+            if b_entry is not None:
+                b_name, b_cfg = b_entry
+                b_load = b_cfg["load"]
+                s_load = s_cfg["load"]
+                if {b_load, s_load} == {"BEFORE", "AFTER"}:
+                    graph_errors.append(
+                        f"Contradictory load order on '{s_name}': bootstrap.{b_name}.load={b_load} vs server.{s_name}.load={s_load}"
+                    )
+
+        if legacy is not None:
+            server_by_low = {k.casefold(): (k, v) for k, v in server_deps.items()}
+            missing_from_paper: list[str] = []
+            for hard_dep in legacy["depend"]:
+                s_entry = server_by_low.get(hard_dep.casefold())
+                if s_entry is None:
+                    missing_from_paper.append(f"depend:{hard_dep}")
+                elif s_entry[1]["load"] == "AFTER":
+                    graph_errors.append(
+                        f"Dual-descriptor conflict on '{hard_dep}': plugin.yml 'depend' loads {hard_dep} BEFORE plugin, "
+                        f"but paper-plugin.yml sets server.{s_entry[0]}.load=AFTER"
+                    )
+            for soft_dep in legacy["softdepend"]:
+                if soft_dep.casefold() not in server_by_low:
+                    missing_from_paper.append(f"softdepend:{soft_dep}")
+            for lb_dep in legacy["loadbefore"]:
+                s_entry = server_by_low.get(lb_dep.casefold())
+                if s_entry is not None and s_entry[1]["load"] == "BEFORE":
+                    graph_errors.append(
+                        f"Dual-descriptor conflict on '{lb_dep}': plugin.yml 'loadbefore' loads plugin BEFORE {lb_dep}, "
+                        f"but paper-plugin.yml sets server.{s_entry[0]}.load=BEFORE"
+                    )
+            if missing_from_paper:
+                classpath_hazards.append(
+                    "Dependencies in plugin.yml missing from paper-plugin.yml dependencies.server: "
+                    + ", ".join(missing_from_paper)
+                )
+
+        if graph_errors:
+            findings.append({
+                "rule_id": "PAPER-005",
+                "severity": "critical",
+                "title": "Dependency graph schema or topological ordering conflict",
+                "evidence": graph_errors,
+                "problem": (
+                    "Invalid dependency load modes, self-dependencies, or contradictory BEFORE/AFTER edges "
+                    "cause Paper's cyclic plugin dependency resolver to abort startup."
+                ),
+                "remediation": (
+                    "Ensure load is BEFORE (dependency loads before your plugin), AFTER (your plugin loads before dependency), "
+                    "or OMIT, and keep bootstrap, server, and companion plugin.yml edges consistent."
+                ),
+            })
+
+        if classpath_hazards:
+            findings.append({
+                "rule_id": "PAPER-006",
+                "severity": "high",
+                "title": "Isolated ConfiguredPluginClassLoader visibility hazard",
+                "evidence": classpath_hazards,
+                "problem": (
+                    "When paper-plugin.yml is present, Paper ignores plugin.yml completely and isolates classloaders; "
+                    "omitting a dependency from dependencies.server or setting join-classpath: false causes ClassNotFoundException."
+                ),
+                "remediation": (
+                    "Declare every hooked external plugin under dependencies.server.<Plugin> with join-classpath: true."
+                ),
+            })
+
+        open_cl_raw = scalars.get("has-open-classloader")
+        has_open_classloader = open_cl_raw.lower() == "true" if isinstance(open_cl_raw, str) else False
+        if has_open_classloader:
+            findings.append({
+                "rule_id": "PAPER-006",
+                "severity": "low",
+                "title": "has-open-classloader: true weakens Paper classloader isolation",
+                "evidence": ["has-open-classloader: true"],
+                "problem": "Opening the plugin classloader exposes internal shaded classes to legacy Spigot plugins on the shared classpath.",
+                "remediation": "Keep has-open-classloader omitted (false) unless legacy plugins reflectively access your classes without declaring a dependency.",
+            })
+
+        # PAPER-007: Folia support validation
+        folia_raw = scalars.get("folia-supported")
+        folia_supported: bool | None = None
+        if folia_raw is not None:
+            if folia_raw.lower() == "true":
+                folia_supported = True
+            elif folia_raw.lower() == "false":
+                folia_supported = False
+            else:
+                findings.append({
+                    "rule_id": "PAPER-007",
+                    "severity": "high",
+                    "title": "Non-boolean folia-supported value",
+                    "evidence": [f"folia-supported={folia_raw!r}"],
+                    "problem": "Paper and Folia require folia-supported to be a YAML boolean (true or false).",
+                    "remediation": "Set folia-supported: true once regionized scheduler compliance is verified.",
+                })
+
+        if require_folia and folia_supported is not True:
+            findings.append({
+                "rule_id": "PAPER-007",
+                "severity": "high",
+                "title": "Plugin does not declare folia-supported: true",
+                "evidence": [f"folia-supported={folia_supported!r}"],
+                "problem": "Folia refuses to load plugins whose descriptor omits folia-supported: true.",
+                "remediation": (
+                    "Audit schedulers and teleports with mc_folia_migration_advisor (or SalyyS1/foliascan) "
+                    "and add 'folia-supported: true' to paper-plugin.yml."
+                ),
+            })
+
+        counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for item in findings:
+            sev = str(item.get("severity", "low"))
+            if sev in counts:
+                counts[sev] += 1
+
+        load_before_us = sorted({
+            dep for sec in (bootstrap_deps, server_deps)
+            for dep, cfg in sec.items() if cfg["load"] == "BEFORE"
+        })
+        load_after_us = sorted({
+            dep for sec in (bootstrap_deps, server_deps)
+            for dep, cfg in sec.items() if cfg["load"] == "AFTER"
+        })
+
+        return ToolOutcome(_pretty_json({
+            "plugin_meta": {
+                "name": plugin_name or None,
+                "version": scalars.get("version") or None,
+                "api_version": api_ver or None,
+                "required_java_version": required_java,
+                "main": main_cls,
+                "bootstrapper": boot_cls,
+                "loader": load_cls,
+                "folia_supported": bool(folia_supported),
+                "has_open_classloader": has_open_classloader,
+            },
+            "dependency_graph": {
+                "bootstrap": {
+                    k: {
+                        "load": v["load"],
+                        "required": v["required"],
+                        "join_classpath": v["join_classpath"],
+                    }
+                    for k, v in bootstrap_deps.items()
+                },
+                "server": {
+                    k: {
+                        "load": v["load"],
+                        "required": v["required"],
+                        "join_classpath": v["join_classpath"],
+                    }
+                    for k, v in server_deps.items()
+                },
+                "loads_before_this_plugin": load_before_us,
+                "loads_after_this_plugin": load_after_us,
+            },
+            "finding_count": len(findings),
+            "severity_counts": counts,
+            "status": "fail" if (counts["critical"] + counts["high"]) > 0 else ("warn" if len(findings) > 0 else "pass"),
+            "findings": findings,
+        }))
+
+    def _tool_generate_pack_overlay(self, args: dict[str, Any]) -> ToolOutcome:
+        pack_type = args.get("pack_type", "resource")
+        if pack_type not in {"resource", "data"}:
+            raise ValueError("'pack_type' must be 'resource' or 'data'.")
+
+        raw_min = args.get("min_version")
+        if not isinstance(raw_min, str) or not raw_min.strip():
+            raise ValueError("'min_version' must be a non-empty string.")
+        raw_min = raw_min.strip()
+
+        raw_max = args.get("max_version")
+        if raw_max is not None and not isinstance(raw_max, str):
+            raise ValueError("'max_version' must be a string.")
+
+        if ".." in raw_min:
+            if raw_max is not None and raw_max.strip():
+                raise ValueError("Specify either 'min_version' with '..' range syntax or 'max_version', not both.")
+            parts = raw_min.split("..")
+            if len(parts) != 2 or not parts[0].strip() or not parts[1].strip():
+                raise ValueError(f"Invalid version range '{raw_min}'; expected '<min>..<max>' (e.g. '1.20.1..26.2').")
+            min_spec, max_spec = parts[0].strip(), parts[1].strip()
+        else:
+            min_spec = raw_min
+            max_spec = raw_max.strip() if isinstance(raw_max, str) and raw_max.strip() else min_spec
+
+        description = args.get("description", "Multi-version Minecraft pack")
+        if not isinstance(description, str):
+            raise ValueError("'description' must be a string.")
+
+        auto_split = args.get("auto_split_epochs", False)
+        if not isinstance(auto_split, bool):
+            raise ValueError("'auto_split_epochs' must be a boolean.")
+
+        raw_overlays = args.get("overlays")
+        if raw_overlays is not None and not isinstance(raw_overlays, list):
+            raise ValueError("'overlays' must be an array of overlay specifications.")
+
+        dynamic_caps: dict[str, tuple[int, int | None]] = {}
+        cap_field = "resource_pack" if pack_type == "resource" else "data_pack"
+        for rel_entry in self.store.release_capabilities().get("releases", []):
+            rel_id = rel_entry.get("id")
+            fmt_obj = rel_entry.get(cap_field)
+            if isinstance(rel_id, str) and isinstance(fmt_obj, dict) and isinstance(fmt_obj.get("major"), int):
+                minor_val = fmt_obj.get("minor")
+                dynamic_caps[rel_id] = (int(fmt_obj["major"]), int(minor_val) if isinstance(minor_val, int) else None)
+
+        min_fmt = _resolve_pack_format(min_spec, pack_type=pack_type, dynamic_caps=dynamic_caps)
+        max_fmt = _resolve_pack_format(max_spec, pack_type=pack_type, dynamic_caps=dynamic_caps)
+
+        if _pack_format_sort_key(min_fmt, is_max=False) > _pack_format_sort_key(max_fmt, is_max=True):
+            raise ValueError(
+                f"min_version ({min_spec} -> {_format_pack_tuple(min_fmt)}) exceeds "
+                f"max_version ({max_spec} -> {_format_pack_tuple(max_fmt)})."
+            )
+
+        last_pre_minor = 64 if pack_type == "resource" else 81
+        multi_version_floor = 15
+
+        if min_fmt[0] != max_fmt[0] and min_fmt[0] < multi_version_floor:
+            raise ValueError(
+                f"Multi-version {pack_type} packs cannot start below format {multi_version_floor} (Minecraft 1.20); "
+                f"got {_format_pack_tuple(min_fmt)}."
+            )
+
+        pack_block: dict[str, Any] = {"description": description}
+        if min_fmt[0] > last_pre_minor:
+            format_era = "modern_minor_tuple"
+            pack_block["min_format"] = _pack_format_to_json(min_fmt)
+            pack_block["max_format"] = _pack_format_to_json(max_fmt)
+        elif max_fmt[0] > last_pre_minor:
+            format_era = "dual_era_hybrid"
+            pack_block["pack_format"] = min_fmt[0]
+            pack_block["supported_formats"] = [min_fmt[0], last_pre_minor]
+            pack_block["min_format"] = _pack_format_to_json(min_fmt)
+            pack_block["max_format"] = _pack_format_to_json(max_fmt)
+        else:
+            format_era = "pre_minor"
+            pack_block["pack_format"] = min_fmt[0]
+            if min_fmt[0] != max_fmt[0]:
+                pack_block["supported_formats"] = [min_fmt[0], max_fmt[0]]
+            pack_block["min_format"] = _pack_format_to_json(min_fmt)
+            pack_block["max_format"] = _pack_format_to_json(max_fmt)
+
+        overlay_specs: list[dict[str, str]] = []
+        if raw_overlays is not None:
+            for idx, item in enumerate(raw_overlays):
+                if not isinstance(item, dict):
+                    raise ValueError(f"overlays[{idx}] must be an object.")
+                d_name = item.get("directory")
+                ov_min = item.get("min_version")
+                ov_max = item.get("max_version")
+                if not isinstance(d_name, str) or not d_name.strip():
+                    raise ValueError(f"overlays[{idx}].directory must be a non-empty string.")
+                if re.fullmatch(r"[a-z0-9_-]+", d_name) is None:
+                    raise ValueError(
+                        f"Invalid overlay directory '{d_name}': Mojang OverlayMetadataSection allows only "
+                        "lowercase ASCII letters, digits, underscores, and hyphens (^[a-z0-9_-]+$)."
+                    )
+                if not isinstance(ov_min, str) or not ov_min.strip():
+                    raise ValueError(f"overlays[{idx}].min_version must be a non-empty string.")
+                if ov_max is not None and not isinstance(ov_max, str):
+                    raise ValueError(f"overlays[{idx}].max_version must be a string.")
+                overlay_specs.append({
+                    "directory": d_name,
+                    "min_version": ov_min.strip(),
+                    "max_version": ov_max.strip() if isinstance(ov_max, str) and ov_max.strip() else max_spec,
+                })
+        elif auto_split and min_fmt[0] < max_fmt[0]:
+            epoch_defs = (
+                _RESOURCE_BREAKING_EPOCHS if pack_type == "resource" else _DATA_BREAKING_EPOCHS
+            )
+            for directory, epoch_ver, _reason in epoch_defs:
+                ep_fmt = _resolve_pack_format(epoch_ver, pack_type=pack_type, dynamic_caps=dynamic_caps)
+                if min_fmt[0] < ep_fmt[0] <= max_fmt[0]:
+                    overlay_specs.append({
+                        "directory": directory,
+                        "min_version": epoch_ver,
+                        "max_version": max_spec,
+                    })
+
+        compiled_overlays: list[dict[str, Any]] = []
+        seen_dirs: set[str] = set()
+        for spec in overlay_specs:
+            d_name = spec["directory"]
+            if d_name in seen_dirs:
+                raise ValueError(f"Duplicate overlay directory '{d_name}'.")
+            seen_dirs.add(d_name)
+            ov_min_fmt = _resolve_pack_format(spec["min_version"], pack_type=pack_type, dynamic_caps=dynamic_caps)
+            ov_max_fmt = _resolve_pack_format(spec["max_version"], pack_type=pack_type, dynamic_caps=dynamic_caps)
+            if _pack_format_sort_key(ov_min_fmt, is_max=False) > _pack_format_sort_key(ov_max_fmt, is_max=True):
+                raise ValueError(
+                    f"Overlay '{d_name}' min_version ({spec['min_version']}) exceeds max_version ({spec['max_version']})."
+                )
+            entry: dict[str, Any] = {"directory": d_name}
+            if ov_min_fmt[0] > last_pre_minor:
+                entry["min_format"] = _pack_format_to_json(ov_min_fmt)
+                entry["max_format"] = _pack_format_to_json(ov_max_fmt)
+            elif ov_max_fmt[0] > last_pre_minor:
+                entry["formats"] = [ov_min_fmt[0], last_pre_minor]
+                entry["min_format"] = _pack_format_to_json(ov_min_fmt)
+                entry["max_format"] = _pack_format_to_json(ov_max_fmt)
+            else:
+                entry["formats"] = (
+                    ov_min_fmt[0] if ov_min_fmt[0] == ov_max_fmt[0] else [ov_min_fmt[0], ov_max_fmt[0]]
+                )
+                entry["min_format"] = _pack_format_to_json(ov_min_fmt)
+                entry["max_format"] = _pack_format_to_json(ov_max_fmt)
+            compiled_overlays.append(entry)
+
+        mcmeta: dict[str, Any] = {"pack": pack_block}
+        if compiled_overlays:
+            mcmeta["overlays"] = {"entries": compiled_overlays}
+
+        root_subtree = "assets/<namespace>/" if pack_type == "resource" else "data/<namespace>/"
+        directory_layout = ["pack.mcmeta", root_subtree] + [
+            f"{entry['directory']}/{root_subtree}" for entry in compiled_overlays
+        ]
+
+        epoch_source = _RESOURCE_BREAKING_EPOCHS if pack_type == "resource" else _DATA_BREAKING_EPOCHS
+        applicable_epochs: list[dict[str, Any]] = []
+        for directory, epoch_ver, reason in epoch_source:
+            ep_fmt = _resolve_pack_format(epoch_ver, pack_type=pack_type, dynamic_caps=dynamic_caps)
+            if min_fmt[0] < ep_fmt[0] <= max_fmt[0]:
+                applicable_epochs.append({
+                    "introduced_in": epoch_ver,
+                    "format_major": ep_fmt[0],
+                    "suggested_overlay_directory": directory,
+                    "breaking_change": reason,
+                })
+
+        return ToolOutcome(_pretty_json({
+            "pack_type": pack_type,
+            "format_era": format_era,
+            "resolved_min_format": {"major": min_fmt[0], "minor": min_fmt[1]},
+            "resolved_max_format": {"major": max_fmt[0], "minor": max_fmt[1]},
+            "last_pre_minor_format": last_pre_minor,
+            "pack_mcmeta": mcmeta,
+            "pack_mcmeta_json": _pretty_json(mcmeta) + "\n",
+            "directory_layout": directory_layout,
+            "breaking_epochs_in_range": applicable_epochs,
         }))
 
     @staticmethod

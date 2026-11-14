@@ -97,7 +97,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_nine_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_eleven_readonly_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -114,6 +114,8 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_diagnose_server_log",
                 "mc_inspect_type",
                 "mc_audit_gradle_build",
+                "mc_audit_paper_plugin_yml",
+                "mc_generate_pack_overlay",
             ],
         )
         for tool in tools:
@@ -268,7 +270,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 9)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 11)
 
     def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
         res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
@@ -469,6 +471,159 @@ dependencies:
         self.assertIn("folia_region_violation", cats)
         self.assertIn("java_bytecode_mismatch", cats)
         self.assertIn("com.acme.rpg.DungeonListener.onAsyncTick(DungeonListener.java:142)", diag["suspect_plugin_frames"])
+
+    def test_mc_audit_paper_plugin_yml_catches_float_truncation_legacy_keys_and_graph_conflicts(self) -> None:
+        broken_paper_yml = """
+name: Bad Plugin Name
+version: '1.0.0'
+main: com.acme.rpg.RpgPlugin
+bootstrapper: com.acme.rpg.RpgPlugin
+api-version: 1.20 # unquoted -> SnakeYAML float 1.2!
+commands:
+  rpg:
+    description: Legacy command block ignored by Paper
+dependencies:
+  bootstrap:
+    MythicMobs:
+      load: BEFORE
+      required: true
+  server:
+    MythicMobs:
+      load: AFTER
+      required: true
+    MMOItems:
+      load: BEFORE
+      required: true
+      join-classpath: false
+"""
+        legacy_yml = """
+name: BadPlugin
+version: '1.0.0'
+main: com.acme.rpg.RpgPlugin
+depend: [MMOItems, ModelEngine]
+"""
+        report, is_err = self.call_tool(
+            "mc_audit_paper_plugin_yml",
+            {
+                "paper_plugin_yaml": broken_paper_yml,
+                "legacy_plugin_yaml": legacy_yml,
+                "require_folia": True,
+            },
+        )
+        self.assertFalse(is_err)
+        self.assertEqual(report["status"], "fail")
+        rules = {item["rule_id"] for item in report["findings"]}
+        self.assertEqual(
+            rules,
+            {"PAPER-001", "PAPER-002", "PAPER-003", "PAPER-004", "PAPER-005", "PAPER-006", "PAPER-007"},
+        )
+
+        clean_263_yml = """
+name: BossArena
+version: '2.5.0'
+main: com.acme.arena.BossArenaPlugin
+bootstrapper: com.acme.arena.BossArenaBootstrap
+loader: com.acme.arena.BossArenaLoader
+api-version: '26.3'
+folia-supported: true
+dependencies:
+  bootstrap:
+    CoreTools:
+      load: BEFORE
+      required: true
+  server:
+    ModelEngine:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    MMOItems:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    ArenaAddon:
+      load: AFTER
+      required: false
+"""
+        clean_report, clean_err = self.call_tool(
+            "mc_audit_paper_plugin_yml",
+            {"paper_plugin_yaml": clean_263_yml, "require_folia": True},
+        )
+        self.assertFalse(clean_err)
+        self.assertEqual(clean_report["status"], "pass")
+        self.assertEqual(clean_report["finding_count"], 0)
+        self.assertEqual(clean_report["plugin_meta"]["required_java_version"], 25)
+        self.assertTrue(clean_report["plugin_meta"]["folia_supported"])
+        self.assertEqual(
+            clean_report["dependency_graph"]["loads_before_this_plugin"],
+            ["CoreTools", "MMOItems", "ModelEngine"],
+        )
+        self.assertEqual(clean_report["dependency_graph"]["loads_after_this_plugin"], ["ArenaAddon"])
+
+    def test_mc_generate_pack_overlay_builds_dual_era_and_modern_pack_mcmeta(self) -> None:
+        hybrid_res, hybrid_err = self.call_tool(
+            "mc_generate_pack_overlay",
+            {
+                "pack_type": "resource",
+                "min_version": "1.20.1",
+                "max_version": "26.2",
+                "description": "Salyyy RPG Assets",
+                "auto_split_epochs": True,
+            },
+        )
+        self.assertFalse(hybrid_err)
+        self.assertEqual(hybrid_res["format_era"], "dual_era_hybrid")
+        pack_obj = hybrid_res["pack_mcmeta"]["pack"]
+        self.assertEqual(pack_obj["pack_format"], 15)
+        self.assertEqual(pack_obj["supported_formats"], [15, 64])
+        self.assertEqual(pack_obj["min_format"], 15)
+        self.assertEqual(pack_obj["max_format"], [88, 0])
+        entries = hybrid_res["pack_mcmeta"]["overlays"]["entries"]
+        self.assertGreaterEqual(len(entries), 3)
+        modern_entry = next(e for e in entries if e["directory"] == "overlay_26_1_modern")
+        self.assertNotIn("formats", modern_entry)
+        self.assertEqual(modern_entry["min_format"], 84)
+        self.assertEqual(modern_entry["max_format"], [88, 0])
+
+        modern_data, data_err = self.call_tool(
+            "mc_generate_pack_overlay",
+            {
+                "pack_type": "data",
+                "min_version": "26.2..26.3",
+                "description": "Wilderness Data Pack",
+                "overlays": [
+                    {"directory": "overlay_26_3", "min_version": "26.3", "max_version": "26.3"},
+                ],
+            },
+        )
+        self.assertFalse(data_err)
+        self.assertEqual(modern_data["format_era"], "modern_minor_tuple")
+        d_pack = modern_data["pack_mcmeta"]["pack"]
+        self.assertNotIn("pack_format", d_pack)
+        self.assertNotIn("supported_formats", d_pack)
+        self.assertEqual(d_pack["min_format"], [107, 1])
+        self.assertEqual(d_pack["max_format"], [121, 0])
+        self.assertEqual(
+            modern_data["pack_mcmeta"]["overlays"]["entries"][0],
+            {"directory": "overlay_26_3", "min_format": [121, 0], "max_format": [121, 0]},
+        )
+
+        bad_dir_resp = self.rpc({
+            "jsonrpc": "2.0",
+            "id": 108,
+            "method": "tools/call",
+            "params": {
+                "name": "mc_generate_pack_overlay",
+                "arguments": {
+                    "pack_type": "resource",
+                    "min_version": "1.21.4",
+                    "max_version": "26.2",
+                    "overlays": [{"directory": "../UpperBad", "min_version": "26.2"}],
+                },
+            },
+        })
+        assert bad_dir_resp is not None
+        self.assertTrue(bad_dir_resp["result"]["isError"])
+        self.assertIn("OverlayMetadataSection", bad_dir_resp["result"]["content"][0]["text"])
 
     def test_cli_subprocess_serves_stdio_end_to_end(self) -> None:
         request = json.dumps({"jsonrpc": "2.0", "id": 7, "method": "initialize", "params": {}}) + "\n"

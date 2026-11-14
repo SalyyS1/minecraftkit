@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.SalyyS1/minecraftkit",
-  "description": "Offline Minecraft Paper, Folia, Gradle build, and RPG plugin API catalog MCP server (9 tools, 22 resources, 10 prompts).",
-  "version": "2.4.0",
+  "description": "Offline Minecraft Paper, Folia, Gradle build, pack overlay, and RPG plugin API catalog MCP server (11 tools, 22 resources, 10 prompts).",
+  "version": "2.5.0",
   "repository": {
     "url": "https://github.com/SalyyS1/minecraftkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "minecraftkit",
-      "version": "2.4.0",
+      "version": "2.5.0",
       "transport": {
         "type": "stdio"
       },
