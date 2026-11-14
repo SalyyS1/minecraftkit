@@ -90,7 +90,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_five_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_seven_readonly_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -103,6 +103,8 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_search_sources",
                 "mc_version_capabilities",
                 "mc_route_skill",
+                "mc_folia_migration_advisor",
+                "mc_diagnose_server_log",
             ],
         )
         for tool in tools:
@@ -257,7 +259,34 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 5)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 7)
+
+    def test_mc_folia_migration_advisor_and_log_doctor(self) -> None:
+        folia, folia_err = self.call_tool(
+            "mc_folia_migration_advisor",
+            {"code_or_symbol": "Bukkit.getScheduler().runTaskTimer(plugin, () -> player.teleport(loc), 0L, 20L);"},
+        )
+        self.assertFalse(folia_err)
+        rule_ids = {item["rule_id"] for item in folia["findings"]}
+        self.assertIn("FOLIA-001", rule_ids)
+        self.assertIn("FOLIA-003", rule_ids)
+
+        diag, diag_err = self.call_tool(
+            "mc_diagnose_server_log",
+            {
+                "log_text": (
+                    "java.lang.IllegalStateException: Thread failed main thread check: Block set\n"
+                    "\tat ca.spottedleaf.moonrise.common.util.TickThread.ensureTickThread(TickThread.java:58)\n"
+                    "\tat com.acme.rpg.DungeonListener.onAsyncTick(DungeonListener.java:142)\n"
+                    "Caused by: java.lang.UnsupportedClassVersionError: com/acme/Main has been compiled by a more recent version of the Java Runtime (class file version 65.0)"
+                )
+            },
+        )
+        self.assertFalse(diag_err)
+        cats = {item["category"] for item in diag["diagnoses"]}
+        self.assertIn("folia_region_violation", cats)
+        self.assertIn("java_bytecode_mismatch", cats)
+        self.assertIn("com.acme.rpg.DungeonListener.onAsyncTick(DungeonListener.java:142)", diag["suspect_plugin_frames"])
 
     def test_cli_subprocess_serves_stdio_end_to_end(self) -> None:
         request = json.dumps({"jsonrpc": "2.0", "id": 7, "method": "initialize", "params": {}}) + "\n"

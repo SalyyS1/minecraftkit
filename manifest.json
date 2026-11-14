@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "minecraftkit",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
@@ -146,7 +146,7 @@
     },
     "data/wiki-content.json": {
       "bytes": 52066,
-      "sha256": "9fd8f9d13460898420a400e8429f8642990d1e8717349003c8c40391a902f2e3"
+      "sha256": "17e46e1e37254ca2db4c6f4755020e139648b18dc9ea0a8d0db7bade4f59cf76"
     },
     "data/minecraft-version-catalog.json": {
       "bytes": 323457,
@@ -178,7 +178,7 @@
     },
     "web/data/wiki.js": {
       "bytes": 46378,
-      "sha256": "9103c334db62abff23bfb5f098b297d720f3aec3bbdf7e7d935f744f72733574"
+      "sha256": "87a4f3c9b84c7410c87b68f4eaa5203d38d39ff949063b9886504cc98995bc7e"
     },
     "web/index.html": {
       "bytes": 10067,
@@ -206,7 +206,7 @@
     },
     "web/wiki.html": {
       "bytes": 8324,
-      "sha256": "0bdeabea2730b74be3c8bf0e4a2bd3de23fc7f222065ca6f0eaedeecd15e2b7e"
+      "sha256": "bfc2b362ff1cf24c389fd46020fd611a6940ecac60000ab458f482781c8e8000"
     },
     "web/wiki.css": {
       "bytes": 19589,

@@ -146,7 +146,7 @@ class CatalogStore:
             version = manifest.get("version") if isinstance(manifest, dict) else None
             if isinstance(version, str) and version:
                 return version
-        return "2.2.1"
+        return "2.3.0"
 
     def api_records(self) -> tuple[dict[str, Any], ...]:
         key = "__flattened_api_records__"
@@ -369,6 +369,48 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_folia_migration_advisor",
+        "title": "Folia Region-Threading Migration Advisor",
+        "description": (
+            "Audit a Java/Kotlin plugin snippet or Bukkit/Paper API symbol for Folia "
+            "regionized multithreading incompatibilities and return exact EntityScheduler, "
+            "RegionScheduler, GlobalRegionScheduler, AsyncScheduler, and teleportAsync replacements."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "code_or_symbol": {
+                    "type": "string",
+                    "description": "Java/Kotlin code snippet or Bukkit/Paper API class/method name to audit for Folia safety.",
+                },
+            },
+            "required": ["code_or_symbol"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_diagnose_server_log",
+        "title": "Diagnose Paper/Folia Server Crash & Watchdog Logs",
+        "description": (
+            "Analyze Minecraft Paper, Folia, Purpur, or Velocity console logs and stack traces "
+            "to pinpoint off-region thread violations, Java classfile version mismatches, "
+            "paper-plugin.yml classloader/shading conflicts, and tick-thread stalls."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "log_text": {
+                    "type": "string",
+                    "description": "Server log output, watchdog dump, or Java exception stack trace.",
+                },
+            },
+            "required": ["log_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -383,6 +425,8 @@ class MinecraftKitMcpServer:
             "mc_search_sources": self._tool_search_sources,
             "mc_version_capabilities": self._tool_version_capabilities,
             "mc_route_skill": self._tool_route_skill,
+            "mc_folia_migration_advisor": self._tool_folia_migration_advisor,
+            "mc_diagnose_server_log": self._tool_diagnose_server_log,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -803,6 +847,184 @@ class MinecraftKitMcpServer:
                 payload["route_workflow"] = route_steps
 
         return ToolOutcome(_pretty_json(payload))
+
+    def _tool_folia_migration_advisor(self, args: dict[str, Any]) -> ToolOutcome:
+        snippet = args.get("code_or_symbol")
+        if not isinstance(snippet, str) or not snippet.strip():
+            raise ValueError("'code_or_symbol' must be a non-empty string.")
+        lower = snippet.casefold()
+
+        rules: tuple[tuple[str, str, tuple[str, ...], str, str], ...] = (
+            (
+                "FOLIA-001",
+                "high",
+                ("getscheduler(", "bukkitscheduler", "runtask", "schedulesync"),
+                "Legacy BukkitScheduler / Server.getScheduler() assumes a single global main thread and throws UnsupportedOperationException on Folia.",
+                "Route entity-bound work to entity.getScheduler().run(plugin, task, retired), chunk/block work to Bukkit.getRegionScheduler().execute(plugin, location, task), global console/weather work to Bukkit.getGlobalRegionScheduler(), and non-world I/O to Bukkit.getAsyncScheduler().",
+            ),
+            (
+                "FOLIA-002",
+                "high",
+                ("bukkitrunnable",),
+                "BukkitRunnable delegates directly to legacy BukkitScheduler methods that fail at runtime on Folia.",
+                "Replace BukkitRunnable with Consumer<ScheduledTask> lambdas scheduled on EntityScheduler, RegionScheduler, GlobalRegionScheduler, or AsyncScheduler, calling ScheduledTask.cancel() to stop repeating tasks.",
+            ),
+            (
+                "FOLIA-003",
+                "high",
+                (".teleport(", "entity.teleport"),
+                "Synchronous Entity.teleport(...) fails on Folia when source and destination chunks belong to different tick regions.",
+                "Use entity.teleportAsync(destinationLocation).thenAccept(success -> ...) and run follow-up entity mutations on entity.getScheduler().",
+            ),
+            (
+                "FOLIA-004",
+                "medium",
+                ("getentities(", "getlivingentities(", "getonlineplayers("),
+                "Iterating world-wide entity or player collections and mutating entities directly crosses independent Folia tick regions.",
+                "Snapshot references safely and dispatch per-entity state changes onto each target's entity.getScheduler().run(plugin, task, null).",
+            ),
+            (
+                "FOLIA-005",
+                "high",
+                ("settype(", "setblockdata(", "getchunkat(", "chunk.load"),
+                "Mutating blocks or loading chunks from AsyncScheduler or another entity's region triggers TickThread.ensureTickThread failures.",
+                "Use world.getChunkAtAsync(x, z) or dispatch block mutations via Bukkit.getRegionScheduler().execute(plugin, targetLocation, () -> ...).",
+            ),
+            (
+                "FOLIA-006",
+                "medium",
+                ("dispatchcommand(", "consolesender", "setstorm(", "settime("),
+                "Global server commands, weather, time, and scoreboard/world-border mutations belong to Folia's GlobalRegionScheduler rather than chunk regions.",
+                "Schedule via Bukkit.getGlobalRegionScheduler().execute(plugin, () -> Bukkit.dispatchCommand(...)).",
+            ),
+            (
+                "FOLIA-007",
+                "medium",
+                ("new hashmap", "hashmap<", "new arraylist", "hashset<"),
+                "Unprotected HashMap/HashSet/ArrayList fields shared across event handlers race concurrently under Folia's parallel region threads.",
+                "Use ConcurrentHashMap, ConcurrentHashMap.newKeySet(), AtomicLong, or immutable snapshots for cross-region plugin state.",
+            ),
+            (
+                "FOLIA-008",
+                "low",
+                ("plugin.yml", "paper-plugin.yml", "folia-supported"),
+                "Folia refuses to load plugin JARs unless folia-supported: true is declared in plugin.yml or paper-plugin.yml.",
+                "Add 'folia-supported: true' to plugin.yml / paper-plugin.yml and audit compiled bytecode with https://github.com/SalyyS1/foliascan.",
+            ),
+        )
+
+        findings: list[dict[str, str]] = []
+        for rule_id, severity, triggers, problem, replacement in rules:
+            if any(trig in lower for trig in triggers):
+                if rule_id == "FOLIA-003" and "teleportasync" in lower and ".teleport(" not in lower:
+                    continue
+                findings.append({
+                    "rule_id": rule_id,
+                    "severity": severity,
+                    "problem": problem,
+                    "folia_replacement": replacement,
+                })
+
+        if not findings:
+            findings.append({
+                "rule_id": "FOLIA-GEN",
+                "severity": "info",
+                "problem": "No direct legacy scheduler or sync teleport token matched in snippet; verify transitive call-graph region ownership.",
+                "folia_replacement": "Ensure folia-supported: true is set and run bytecode taint analysis with SalyyS1/foliascan before shipping.",
+            })
+
+        return ToolOutcome(_pretty_json({
+            "input_preview": snippet.strip()[:200],
+            "finding_count": len(findings),
+            "findings": findings,
+            "bytecode_verifier": "https://github.com/SalyyS1/foliascan",
+        }))
+
+    def _tool_diagnose_server_log(self, args: dict[str, Any]) -> ToolOutcome:
+        log_text = args.get("log_text")
+        if not isinstance(log_text, str) or not log_text.strip():
+            raise ValueError("'log_text' must be a non-empty string.")
+        lower = log_text.casefold()
+        diagnoses: list[dict[str, Any]] = []
+
+        # Extract non-core plugin stack frames
+        frames = re.findall(r"at\s+([a-zA-Z0-9_.$]+)\.([a-zA-Z0-9_$<>]+)\(([^)]+)\)", log_text)
+        plugin_frames = [
+            f"{cls}.{meth}({src})"
+            for cls, meth, src in frames
+            if not cls.startswith((
+                "java.", "javax.", "jdk.", "sun.", "kotlin.",
+                "net.minecraft.", "org.bukkit.", "org.spigotmc.",
+                "io.papermc.", "ca.spottedleaf.", "com.mojang.", "io.netty.",
+            ))
+        ][:5]
+
+        if "thread failed main thread check" in lower or "ensuretickthread" in lower or "unsupportedoperationexception" in lower and "folia" in lower:
+            diagnoses.append({
+                "category": "folia_region_violation",
+                "severity": "critical",
+                "summary": "Off-region or legacy main-thread access violated Folia's TickThread region ownership guard.",
+                "suspect_plugin_frames": plugin_frames,
+                "remediation": "Dispatch entity mutations onto entity.getScheduler(), block/chunk mutations onto Bukkit.getRegionScheduler(), and audit the plugin JAR with https://github.com/SalyyS1/foliascan.",
+            })
+
+        ver_match = re.search(r"class file version (\d+)\.\d+", log_text)
+        if "unsupportedclassversionerror" in lower or ver_match:
+            major = int(ver_match.group(1)) if ver_match else None
+            java_ver = (major - 44) if major and major >= 52 else None
+            diagnoses.append({
+                "category": "java_bytecode_mismatch",
+                "severity": "critical",
+                "summary": (
+                    f"Plugin JAR was compiled for class file major {major} (Java {java_ver}), which is newer than the server JVM."
+                    if java_ver
+                    else "Plugin bytecode major version exceeds the running JVM runtime."
+                ),
+                "suspect_plugin_frames": plugin_frames,
+                "remediation": f"Upgrade the server container/host JVM to Java {java_ver or 21}+ or set Gradle java.toolchain.languageVersion properly.",
+            })
+
+        if any(tok in lower for tok in ("classnotfoundexception", "noclassdeffounderror", "linkageerror", "loader constraint violation")):
+            diagnoses.append({
+                "category": "classloader_or_shading_conflict",
+                "severity": "high",
+                "summary": "Missing dependency or isolated classloader / un-relocated shaded library collision.",
+                "suspect_plugin_frames": plugin_frames,
+                "remediation": "Verify paper-plugin.yml dependencies declare join-classpath: true when accessing another plugin's classes, relocate shaded libraries in Gradle shadowJar, and inspect the JAR with https://github.com/SalyyS1/pluginscope.",
+            })
+
+        if any(tok in lower for tok in ("do not report this to paper", "server thread dump", "can't keep up!", "hikaripool", "sync chunk load")):
+            diagnoses.append({
+                "category": "tick_stall_or_blocking_io",
+                "severity": "high",
+                "summary": "Synchronous I/O, JDBC pool exhaustion, or main-thread chunk loading stalled server tick execution.",
+                "suspect_plugin_frames": plugin_frames,
+                "remediation": "Move JDBC/HTTP calls to AsyncScheduler / CompletableFuture, switch sync chunk loads to getChunkAtAsync, and inspect full server logs with https://github.com/SalyyS1/serverdoctor.",
+            })
+
+        if "not marked as supporting folia" in lower:
+            diagnoses.append({
+                "category": "missing_folia_descriptor",
+                "severity": "high",
+                "summary": "Plugin descriptor omits 'folia-supported: true', causing Folia to reject loading it.",
+                "suspect_plugin_frames": plugin_frames,
+                "remediation": "Add 'folia-supported: true' to plugin.yml or paper-plugin.yml only after verifying scheduler safety with FoliaScan.",
+            })
+
+        if not diagnoses:
+            diagnoses.append({
+                "category": "unclassified_log",
+                "severity": "info",
+                "summary": "No fatal Folia, bytecode version, classloader, or watchdog stall signature matched.",
+                "suspect_plugin_frames": plugin_frames,
+                "remediation": "Include the full Caused by stack trace or inspect server configuration with SalyyS1/serverdoctor.",
+            })
+
+        return ToolOutcome(_pretty_json({
+            "diagnosis_count": len(diagnoses),
+            "suspect_plugin_frames": plugin_frames,
+            "diagnoses": diagnoses,
+        }))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

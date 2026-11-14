@@ -2,6 +2,10 @@
 
 [Tiếng Việt (README.vi.md)](README.vi.md) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [npm](https://www.npmjs.com/package/minecraftkit)
 
+[![Version: v2.3.0](https://img.shields.io/badge/version-v2.3.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v2.3.0)
+[![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
+[![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
+
 Offline Minecraft plugin engineering catalog, 10 `/mc:*` agent skills for Claude Code and Codex, interactive web explorers, and a zero-dependency stdio MCP server by **SalyVn / Salyyy**.
 
 ## What Salyyy Minecraft Kit Includes
@@ -72,6 +76,8 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_search_sources` | Filter 103 curated upstream Minecraft, Paper, Folia, protocol, shader, and pack GitHub repositories with pinned commit SHAs. |
 | `mc_version_capabilities` | Query Mojang version history (901 versions), Java requirements, protocol numbers, and resource/data pack formats (including `26.2`). |
 | `mc_route_skill` | Recommend primary and secondary `/mc:*` engineering skills, reference handbooks, and verification checklists for a task. |
+| `mc_folia_migration_advisor` | Audit Java/Kotlin snippets or Bukkit API symbols for Folia regionized threading hazards and output `RegionScheduler` / `EntityScheduler` / `teleportAsync` replacements. |
+| `mc_diagnose_server_log` | Analyze Paper, Folia, Purpur, and Velocity crash logs, watchdog stalls, classloader/shading collisions, and JVM classfile mismatches. |
 
 ## CLI Commands
 

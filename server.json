@@ -1,0 +1,26 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.SalyyS1/minecraftkit",
+  "description": "Offline Minecraft Paper, Folia, and RPG plugin API catalog and log/migration MCP server (41,800+ symbols, 901 releases).",
+  "version": "2.3.0",
+  "repository": {
+    "url": "https://github.com/SalyyS1/minecraftkit",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "minecraftkit",
+      "version": "2.3.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "positional",
+          "value": "mcp"
+        }
+      ]
+    }
+  ]
+}
