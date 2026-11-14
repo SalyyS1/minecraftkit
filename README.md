@@ -2,7 +2,8 @@
 
 [Tiếng Việt (README.vi.md)](README.vi.md) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [npm](https://www.npmjs.com/package/minecraftkit)
 
-[![Version: v2.3.0](https://img.shields.io/badge/version-v2.3.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v2.3.0)
+[![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
+[![Version: v2.4.0](https://img.shields.io/badge/version-v2.4.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v2.4.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
@@ -78,6 +79,13 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_route_skill` | Recommend primary and secondary `/mc:*` engineering skills, reference handbooks, and verification checklists for a task. |
 | `mc_folia_migration_advisor` | Audit Java/Kotlin snippets or Bukkit API symbols for Folia regionized threading hazards and output `RegionScheduler` / `EntityScheduler` / `teleportAsync` replacements. |
 | `mc_diagnose_server_log` | Analyze Paper, Folia, Purpur, and Velocity crash logs, watchdog stalls, classloader/shading collisions, and JVM classfile mismatches. |
+| `mc_inspect_type` | Inspect the full bytecode hierarchy of any indexed RPG plugin class, interface, enum, or record, including superclass, interfaces, indexed subtypes, constructors, methods, fields, and minimum Java version. |
+| `mc_audit_gradle_build` | Audit `build.gradle.kts` / `build.gradle` and `paper-plugin.yml` / `plugin.yml` for bundled server APIs, un-relocated `shadowJar` packages, Paperweight mapping mismatches, Java toolchain gaps, and isolated classloader `join-classpath` issues. |
+
+### Exposed MCP Resources & Slash Prompts
+
+- **MCP Resources (`resources/list` & `resources/read`)**: Exposes `minecraftkit://catalog/overview` (`application/json`) plus 21 offline engineering handbooks (`minecraftkit://references/*.md`) covering Paper/Folia threading, Gradle/Shadow builds, Netty packets, Mojang mappings, GLSL shaders, dialogs, and RPG plugin boundaries.
+- **MCP Prompts (`prompts/list` & `prompts/get`)**: Exposes all 10 `/mc:*` domain workflows (`mc-core`, `mc-build`, `mc-rpg`, `mc-protocol`, `mc-nms`, `mc-pack`, `mc-model`, `mc-shader`, `mc-dialog`, `mc-client`) as native parameterized MCP prompts.
 
 ## CLI Commands
 

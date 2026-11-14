@@ -83,7 +83,7 @@ ALLOWED_DIRECTORY_EXTENSIONS = {
     "web": {".html", ".css", ".js", ".webp"},
 }
 EXCLUDED_DIRECTORY_NAMES = {
-    "dist", "npm", "__pycache__", ".git", ".gitignore", ".gitattributes",
+    "dist", "npm", "__pycache__", ".git", ".github", ".gitignore", ".gitattributes",
     "Dockerfile", "glama.json", "smithery.yaml", "server.json",
 }
 EXCLUDED_DIRECTORY_PREFIXES = (".api-stage-", ".web-stage-", ".minecraft-rpg-kit-stage-", ".minecraftkit-stage-")

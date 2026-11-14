@@ -70,7 +70,14 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         assert isinstance(result, dict)
         self.assertEqual(result["protocolVersion"], "2024-11-05")
         self.assertEqual(result["serverInfo"], {"name": "minecraftkit", "version": manifest_version})
-        self.assertEqual(result["capabilities"], {"tools": {"listChanged": False}})
+        self.assertEqual(
+            result["capabilities"],
+            {
+                "tools": {"listChanged": False},
+                "resources": {"subscribe": False, "listChanged": False},
+                "prompts": {"listChanged": False},
+            },
+        )
         self.assertIn("mc_route_skill", result["instructions"])
 
         fallback = self.rpc({
@@ -90,7 +97,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_seven_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_nine_readonly_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -105,6 +112,8 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_route_skill",
                 "mc_folia_migration_advisor",
                 "mc_diagnose_server_log",
+                "mc_inspect_type",
+                "mc_audit_gradle_build",
             ],
         )
         for tool in tools:
@@ -216,7 +225,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         assert bad_req is not None
         self.assertEqual(bad_req["error"]["code"], INVALID_REQUEST)
 
-        unknown_method = self.rpc({"jsonrpc": "2.0", "id": 11, "method": "resources/list"})
+        unknown_method = self.rpc({"jsonrpc": "2.0", "id": 11, "method": "sampling/createMessage"})
         assert unknown_method is not None
         self.assertEqual(unknown_method["error"]["code"], METHOD_NOT_FOUND)
 
@@ -259,7 +268,180 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 7)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 9)
+
+    def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
+        res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
+        assert res_list is not None
+        resources = res_list["result"]["resources"]
+        uris = {r["uri"] for r in resources}
+        self.assertIn("minecraftkit://catalog/overview", uris)
+        self.assertIn("minecraftkit://references/kotlin-java-gradle.md", uris)
+        self.assertGreaterEqual(len(resources), 20)
+
+        overview_resp = self.rpc({
+            "jsonrpc": "2.0",
+            "id": 31,
+            "method": "resources/read",
+            "params": {"uri": "minecraftkit://catalog/overview"},
+        })
+        assert overview_resp is not None
+        overview_data = json.loads(overview_resp["result"]["contents"][0]["text"])
+        self.assertEqual(overview_data["plugin_count"], 10)
+        self.assertEqual(len(overview_data["routes"]), 10)
+
+        handbook_resp = self.rpc({
+            "jsonrpc": "2.0",
+            "id": 32,
+            "method": "resources/read",
+            "params": {"uri": "minecraftkit://references/kotlin-java-gradle.md"},
+        })
+        assert handbook_resp is not None
+        self.assertEqual(handbook_resp["result"]["contents"][0]["mimeType"], "text/markdown")
+        self.assertGreater(len(handbook_resp["result"]["contents"][0]["text"]), 100)
+
+        traversal_resp = self.rpc({
+            "jsonrpc": "2.0",
+            "id": 33,
+            "method": "resources/read",
+            "params": {"uri": "minecraftkit://references/../manifest.json"},
+        })
+        assert traversal_resp is not None
+        self.assertEqual(traversal_resp["error"]["code"], INVALID_PARAMS)
+
+        prompts_resp = self.rpc({"jsonrpc": "2.0", "id": 34, "method": "prompts/list"})
+        assert prompts_resp is not None
+        prompt_names = {p["name"] for p in prompts_resp["result"]["prompts"]}
+        self.assertEqual(len(prompt_names), 10)
+        self.assertIn("mc-core", prompt_names)
+        self.assertIn("mc-build", prompt_names)
+
+        prompt_get = self.rpc({
+            "jsonrpc": "2.0",
+            "id": 35,
+            "method": "prompts/get",
+            "params": {"name": "mc:build", "arguments": {"task": "Configure Shadow relocation for HikariCP"}},
+        })
+        assert prompt_get is not None
+        msg_text = prompt_get["result"]["messages"][0]["content"]["text"]
+        self.assertIn("/mc:build", msg_text)
+        self.assertIn("Configure Shadow relocation for HikariCP", msg_text)
+
+    def test_mc_inspect_type_resolves_hierarchy_subtypes_and_members(self) -> None:
+        inspected, is_err = self.call_tool(
+            "mc_inspect_type",
+            {"type_name": "CoreEvents", "plugin": "CoreTools"},
+        )
+        self.assertFalse(is_err)
+        self.assertEqual(inspected["plugin"], "CoreTools")
+        self.assertEqual(inspected["name"], "ranet.coretools.features.eventmanager.CoreEvents")
+        self.assertGreaterEqual(inspected["known_subtype_count"], 1)
+
+        active_model, am_err = self.call_tool(
+            "mc_inspect_type",
+            {"type_name": "ActiveModel", "plugin": "ModelEngine", "member_filter": "Bone"},
+        )
+        self.assertFalse(am_err)
+        self.assertEqual(active_model["plugin"], "ModelEngine")
+        self.assertGreaterEqual(active_model["member_counts"]["returned_methods"], 1)
+        self.assertTrue(any("Bone" in m["name"] or "Bone" in m["return_type"] for m in active_model["methods"]))
+
+        fqcn_inspect, fqcn_err = self.call_tool(
+            "mc_inspect_type",
+            {"type_name": "ModelEngine:com.ticxo.modelengine.api.ModelEngineAPI"},
+        )
+        self.assertFalse(fqcn_err)
+        self.assertEqual(fqcn_inspect["plugin"], "ModelEngine")
+        self.assertIsNotNone(fqcn_inspect["min_java_version"])
+        self.assertTrue(any(m["name"] == "createActiveModel" for m in fqcn_inspect["methods"]))
+
+        missing, missing_err = self.call_tool(
+            "mc_inspect_type",
+            {"type_name": "NonExistentDragonClass999"},
+        )
+        self.assertTrue(missing_err)
+        self.assertIn("error", missing)
+
+    def test_mc_audit_gradle_build_flags_bundling_relocation_toolchain_and_descriptor_hazards(self) -> None:
+        buggy_gradle = """
+        plugins {
+            java
+            id("io.papermc.paperweight.userdev") version "1.7.3"
+            id("com.gradleup.shadow") version "8.3.0"
+        }
+        java {
+            toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+        }
+        repositories {
+            maven("http://insecure.example.com/repo")
+        }
+        dependencies {
+            paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
+            implementation("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+            implementation("com.zaxxer:HikariCP:5.1.0")
+        }
+        paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.REOBF_PRODUCTION
+        """
+        buggy_paper_yml = """
+name: DemoPlugin
+version: '1.0.0'
+main: com.acme.DemoPlugin
+dependencies:
+  server:
+    MMOItems:
+      load: BEFORE
+      required: true
+"""
+        report, is_err = self.call_tool(
+            "mc_audit_gradle_build",
+            {"build_script": buggy_gradle, "descriptor_yaml": buggy_paper_yml},
+        )
+        self.assertFalse(is_err)
+        self.assertEqual(report["status"], "fail")
+        rule_ids = {f["rule_id"] for f in report["findings"]}
+        self.assertEqual(
+            rule_ids,
+            {"GRADLE-001", "GRADLE-002", "GRADLE-003", "GRADLE-004", "GRADLE-005", "GRADLE-006", "GRADLE-007"},
+        )
+
+        clean_gradle = """
+        plugins {
+            java
+            id("com.gradleup.shadow") version "8.3.5"
+        }
+        java {
+            toolchain.languageVersion.set(JavaLanguageVersion.of(25))
+        }
+        repositories {
+            maven("https://repo.papermc.io/repository/maven-public/")
+        }
+        dependencies {
+            compileOnly("io.papermc.paper:paper-api:26.2-R0.1-SNAPSHOT")
+            implementation("com.zaxxer:HikariCP:6.2.1")
+        }
+        tasks.shadowJar {
+            relocate("com.zaxxer.hikari", "com.acme.shaded.hikari")
+        }
+        """
+        clean_paper_yml = """
+name: DemoPlugin
+version: '1.0.0'
+main: com.acme.DemoPlugin
+api-version: '26.2'
+dependencies:
+  server:
+    MMOItems:
+      load: BEFORE
+      required: true
+      join-classpath: true
+"""
+        clean_report, clean_err = self.call_tool(
+            "mc_audit_gradle_build",
+            {"build_script": clean_gradle, "descriptor_yaml": clean_paper_yml},
+        )
+        self.assertFalse(clean_err)
+        self.assertEqual(clean_report["status"], "pass")
+        self.assertEqual(clean_report["finding_count"], 0)
 
     def test_mc_folia_migration_advisor_and_log_doctor(self) -> None:
         folia, folia_err = self.call_tool(

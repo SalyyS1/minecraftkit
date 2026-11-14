@@ -42,6 +42,9 @@ class ReleasePolicyTests(unittest.TestCase):
             git = root / ".git"
             git.mkdir()
             (git / "config").write_text("repository metadata\n", encoding="utf-8")
+            github_wf = root / ".github" / "workflows"
+            github_wf.mkdir(parents=True)
+            (github_wf / "ci.yml").write_text("name: CI\n", encoding="utf-8")
 
             included = [path.relative_to(root).as_posix() for path in validate_kit.release_payload_files(root)]
 
