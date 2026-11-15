@@ -3,7 +3,7 @@
 [Tiếng Việt (README.vi.md)](README.vi.md) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v2.6.0](https://img.shields.io/badge/version-v2.6.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v2.6.0)
+[![Version: v2.7.0](https://img.shields.io/badge/version-v2.7.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v2.7.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
@@ -85,6 +85,8 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_generate_pack_overlay` | Generate client- and server-validated `pack.mcmeta` files and `overlays.entries` manifests for resource packs and data packs spanning `1.20.1` through `26.3+` (enforcing `supported_formats` pre-minor clamping at `64`/`81`, `min_format`/`max_format` `[major, minor]` tuples, `OverlayMetadataSection` directory naming rules, and breaking-epoch splits). |
 | `mc_audit_server_properties` | Audit `server.properties` alongside optional `config/paper-global.yml`, `spigot.yml`, and JVM flags for `network-compression-threshold` double-compression and sub-64-byte CPU burn hazards, Velocity/BungeeCord forwarding authentication mismatches, Netty EventLoop thread starvation or oversubscription, quadratic `(2d + 1)^2` simulation-distance chunk budgets, RCON plaintext exposure, resource-pack SHA-1/UUID contracts, Paper `26.3` schema drift, and Java 25 GC flags. |
 | `mc_validate_item_components` | Validate Minecraft and Paper `1.20.5` through `26.3+` structured item data components, component patches, and companion client `assets/<namespace>/items/<id>.json` definitions (`custom_model_data` typed channels, `tooltip_display` vs removed `show_in_tooltip`, `food`/`consumable`/`use_remainder` splits, `equippable.asset_id` renames, `max_damage` + `max_stack_size` mutual exclusion, and client selector channel index bounds). |
+| `mc_diagnose_crash_report` | Parse and triage Minecraft server and client crash reports (Vanilla, Paper, Folia, Fabric, Forge, NeoForge) for ticking entities (exact block coords and `/minecraft:kill` commands), ticking block entities (`/setblock air`), mixin application conflicts, classloader NoSuchMethodError/NoClassDefFoundError linkage faults, JVM OOM/Metaspace exhaustion, and corrupted chunk I/O boundaries with optional OASIS SARIF v2.1.0 output. |
+| `mc_audit_datapack` | Audit Minecraft `1.20.5` through `26.3+` datapacks for `pack.mcmeta` format compliance (`pack_format` 41 through 97, integer or `[min, max]` range tuples), modern recipe component syntax (replacing legacy `result.item` and raw `tag` strings with structured component patches), recipe pattern bounds, cyclical tag reference graph loops, namespace validity, and `.mcfunction` command hygiene. |
 
 ### Exposed MCP Resources & Slash Prompts
 

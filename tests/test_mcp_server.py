@@ -97,7 +97,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_thirteen_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_fifteen_readonly_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -118,6 +118,8 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_generate_pack_overlay",
                 "mc_audit_server_properties",
                 "mc_validate_item_components",
+                "mc_diagnose_crash_report",
+                "mc_audit_datapack",
             ],
         )
         for tool in tools:
@@ -272,7 +274,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 13)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 15)
 
     def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
         res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
@@ -911,6 +913,165 @@ dependencies:
         self.assertEqual(valid_report["status"], "pass", valid_report["findings"])
         self.assertEqual(valid_report["finding_count"], 0)
         self.assertEqual(valid_report["expected_client_item_definition_path"], "assets/myplugin/items/sunblade.json")
+
+    def test_mc_diagnose_crash_report_ticking_entity_and_block_entity(self) -> None:
+        entity_crash = """
+        ---- Minecraft Crash Report ----
+        Time: 2026-11-15 11:20:00 UTC
+        Description: Ticking entity
+
+        java.lang.NullPointerException: Cannot invoke Goal.tick()
+            at net.minecraft.world.entity.ai.goal.GoalSelector.tick(GoalSelector.java:120)
+            at net.minecraft.world.entity.LivingEntity.aiStep(LivingEntity.java:3100)
+
+        -- Entity being ticked --
+        Details:
+            Entity Type: minecraft:creeper (net.minecraft.world.entity.monster.Creeper)
+            Entity ID: 9942
+            Entity Name: Creeper
+            Entity's Exact location: 200.50, 65.00, -100.50
+            Entity's Block location: World: (200,65,-101)
+
+        -- System Details --
+        Details:
+            Minecraft Version: 1.21.4
+            Paper: true
+        """
+        report, is_err = self.call_tool("mc_diagnose_crash_report", {"crash_report": entity_crash, "sarif": True})
+        self.assertFalse(is_err)
+        self.assertEqual(report["status"], "fail")
+        self.assertEqual(report["root_cause_category"], "TICKING_ENTITY")
+        self.assertEqual(report["offending_component"]["name"], "minecraft:creeper")
+        self.assertEqual(report["offending_component"]["location"], "World: (200,65,-101)")
+        self.assertIn("kill", report["remediation_steps"][0])
+        self.assertIn("sarif_report", report)
+        self.assertEqual(len(report["sarif_report"]["runs"][0]["results"]), 1)
+
+        block_entity_crash = """
+        ---- Minecraft Crash Report ----
+        Time: 2026-11-15 11:25:00 UTC
+        Description: Ticking block entity
+
+        java.lang.IllegalStateException: Corrupted container inventory
+            at net.minecraft.world.level.block.entity.HopperBlockEntity.tryMoveItems(HopperBlockEntity.java:150)
+
+        -- Block entity being ticked --
+        Details:
+            Block location: World: (12,64,-88)
+            Block: minecraft:hopper[facing=down,enabled=true]
+            Block Entity Type: minecraft:hopper
+
+        -- System Details --
+        Details:
+            Minecraft Version: 26.3
+            Folia: true
+        """
+        be_report, be_err = self.call_tool("mc_diagnose_crash_report", {"crash_report": block_entity_crash})
+        self.assertFalse(be_err)
+        self.assertEqual(be_report["status"], "fail")
+        self.assertEqual(be_report["root_cause_category"], "TICKING_BLOCK_ENTITY")
+        self.assertEqual(be_report["server_flavor"], "folia")
+        self.assertIn("setblock", be_report["remediation_steps"][0])
+
+    def test_mc_diagnose_crash_report_mixin_linkage_and_oom(self) -> None:
+        mixin_crash = """
+        ---- Minecraft Crash Report ----
+        Description: Initializing game
+        org.spongepowered.asm.mixin.transformer.throwables.MixinTransformerError: An unexpected critical error was encountered
+            at org.spongepowered.asm.mixin.transformer.MixinProcessor.applyMixins(MixinProcessor.java:392)
+        Caused by: org.spongepowered.asm.mixin.injection.throwables.InvalidInjectionException: Critical injection failure
+            at org.spongepowered.asm.mixin.injection.struct.InjectionInfo.postInject(InjectionInfo.java:468)
+        Target class: net.minecraft.client.renderer.LevelRenderer
+        failing mixin: com.example.iris.mixin.LevelRendererMixin
+        config [iris.mixins.json]
+        """
+        mix_report, mix_err = self.call_tool("mc_diagnose_crash_report", {"crash_report": mixin_crash})
+        self.assertFalse(mix_err)
+        self.assertEqual(mix_report["root_cause_category"], "MIXIN_APPLICATION_FAILED")
+        self.assertEqual(mix_report["findings"][0]["rule_id"], "CRASH003")
+
+        linkage_crash = """
+        ---- Minecraft Crash Report ----
+        Description: Exception in server tick loop
+        java.lang.NoSuchMethodError: 'void org.bukkit.entity.Player.sendMessage(net.kyori.adventure.text.Component)'
+            at com.myrpg.core.CombatListener.onHit(CombatListener.java:45)
+            at org.bukkit.plugin.RegisteredListener.execute(RegisteredListener.java:70)
+        """
+        link_report, link_err = self.call_tool("mc_diagnose_crash_report", {"crash_report": linkage_crash})
+        self.assertFalse(link_err)
+        self.assertEqual(link_report["root_cause_category"], "LINKAGE_OR_API_MISMATCH")
+        self.assertEqual(link_report["findings"][0]["rule_id"], "CRASH004")
+        self.assertEqual(link_report["offending_component"]["name"], "myrpg")
+
+        oom_crash = """
+        ---- Minecraft Crash Report ----
+        Description: Exception in server tick loop
+        java.lang.OutOfMemoryError: Java heap space
+        -- System Details --
+        Details:
+            Minecraft Version: 26.3
+            Java Version: 25, Oracle Corporation
+        """
+        oom_report, oom_err = self.call_tool("mc_diagnose_crash_report", {"crash_report": oom_crash})
+        self.assertFalse(oom_err)
+        self.assertEqual(oom_report["root_cause_category"], "OUT_OF_MEMORY")
+        self.assertEqual(oom_report["findings"][0]["rule_id"], "CRASH005")
+        self.assertIn("-Xmx", oom_report["remediation_steps"][0])
+
+    def test_mc_audit_datapack_verifies_pack_mcmeta_modern_recipes_and_cyclical_tags(self) -> None:
+        clean_mcmeta = json.dumps({"pack": {"pack_format": 97, "description": "Clean Modern Datapack"}})
+        clean_files = {
+            "data/rpg/recipe/hero_bow.json": json.dumps({
+                "type": "minecraft:crafting_shaped",
+                "pattern": [" S#", "S #", " S#"],
+                "key": {
+                    "S": {"item": "minecraft:stick"},
+                    "#": {"item": "minecraft:string"},
+                },
+                "result": {
+                    "id": "minecraft:bow",
+                    "count": 1,
+                    "components": {
+                        "minecraft:item_name": "Hero Bow",
+                        "minecraft:unbreakable": {},
+                    },
+                },
+            }),
+            "data/rpg/tags/item/bows.json": json.dumps({
+                "values": ["minecraft:bow", "minecraft:crossbow"],
+            }),
+            "data/rpg/function/init.mcfunction": "scoreboard objectives add rpg_mana dummy\nsay RPG initialized",
+        }
+        clean_res, clean_err = self.call_tool("mc_audit_datapack", {"pack_mcmeta": clean_mcmeta, "files": clean_files, "target_version": "26.3"})
+        self.assertFalse(clean_err)
+        self.assertEqual(clean_res["status"], "pass")
+        self.assertEqual(clean_res["finding_count"], 0)
+
+        # Mismatch pack format
+        mismatch_res, mismatch_err = self.call_tool("mc_audit_datapack", {"pack_mcmeta": clean_mcmeta, "target_version": "1.21.4"})
+        self.assertFalse(mismatch_err)
+        self.assertEqual(mismatch_res["status"], "fail")
+        self.assertTrue(any(f["rule_id"] == "DP002" for f in mismatch_res["findings"]))
+
+        # Legacy recipe syntax and cyclical tag references
+        bad_files = {
+            "data/rpg/recipe/legacy_blade.json": json.dumps({
+                "type": "minecraft:crafting_shaped",
+                "pattern": ["X"],
+                "key": {"X": {"item": "minecraft:iron_ingot"}},
+                "result": {"item": "minecraft:iron_sword", "tag": "{CustomModelData:42}"},
+            }),
+            "data/rpg/tags/item/tag_alpha.json": json.dumps({"values": ["#rpg:tag_beta"]}),
+            "data/rpg/tags/item/tag_beta.json": json.dumps({"values": ["#rpg:tag_alpha"]}),
+            "data/rpg/function/slash_cmd.mcfunction": "/give @p iron_sword",
+        }
+        bad_res, bad_err = self.call_tool("mc_audit_datapack", {"pack_mcmeta": clean_mcmeta, "files": bad_files, "target_version": "26.3"})
+        self.assertFalse(bad_err)
+        self.assertEqual(bad_res["status"], "fail")
+        rules = [f["rule_id"] for f in bad_res["findings"]]
+        self.assertIn("DP003", rules)
+        self.assertIn("DP005", rules)
+        self.assertIn("DP009", rules)
 
     def test_cli_subprocess_serves_stdio_end_to_end(self) -> None:
         request = json.dumps({"jsonrpc": "2.0", "id": 7, "method": "initialize", "params": {}}) + "\n"

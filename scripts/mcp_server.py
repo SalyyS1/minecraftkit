@@ -149,7 +149,7 @@ class CatalogStore:
             version = manifest.get("version") if isinstance(manifest, dict) else None
             if isinstance(version, str) and version:
                 return version
-        return "2.6.0"
+        return "2.7.0"
 
     def api_index(self) -> dict[str, Any]:
         return self._load_json("data/api-index.json")
@@ -717,6 +717,73 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
                 },
             },
             "required": ["payload"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_diagnose_crash_report",
+        "title": "Diagnose Minecraft Server & Client Crash Reports",
+        "description": (
+            "Parse and triage Minecraft server and client crash reports (Vanilla, Paper, Folia, Fabric, "
+            "Forge, NeoForge). Analyzes crash headers, thread stacks, ticking entities (coordinates, NBT, "
+            "type), ticking block entities (tile location, container state), mixin application conflicts, "
+            "classloader NoSuchMethodError/NoClassDefFoundError linkage faults, JVM OOM/Metaspace exhaustion, "
+            "and corrupted chunk I/O boundaries. Returns structured root cause categorization, offending "
+            "mod/plugin attribution, stack trace origin, remediation steps, and optional OASIS SARIF v2.1.0 output."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "crash_report": {
+                    "type": "string",
+                    "description": "Full text of the crash report (e.g. crash-YYYY-MM-DD_HH.MM.SS-server.txt) or stack trace snippet.",
+                },
+                "server_flavor": {
+                    "type": "string",
+                    "enum": ["auto", "paper", "folia", "fabric", "neoforge", "forge", "vanilla"],
+                    "description": "Server or client platform flavor (default 'auto').",
+                },
+                "sarif": {
+                    "type": "boolean",
+                    "description": "Whether to include an OASIS SARIF v2.1.0 report in the response (default false).",
+                },
+            },
+            "required": ["crash_report"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_audit_datapack",
+        "title": "Audit Minecraft 1.20.5-26.3+ Datapack Structure & Components",
+        "description": (
+            "Audit Minecraft 1.20.5 through 26.3+ datapacks for pack.mcmeta format compliance (supporting single "
+            "int or [min, max] range format), recipe item data components syntax (replacing legacy result count/item "
+            "pairs with components patches), predicate & loot table damage type / item sub-predicate migrations, "
+            "cyclical tag references, namespace naming collisions, and function command syntax."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "pack_mcmeta": {
+                    "oneOf": [
+                        {"type": "string"},
+                        {"type": "object"},
+                    ],
+                    "description": "Content of pack.mcmeta as JSON string or object.",
+                },
+                "files": {
+                    "type": "object",
+                    "description": "Optional mapping of virtual datapack file paths to their string contents (e.g. {'data/custom/recipe/magic_wand.json': '...'}).",
+                    "additionalProperties": {"type": "string"},
+                },
+                "target_version": {
+                    "type": "string",
+                    "description": "Target Minecraft version (e.g. '26.3', '1.21.4', '1.20.5'; default '26.3').",
+                },
+            },
+            "required": ["pack_mcmeta"],
             "additionalProperties": False,
         },
         "annotations": {"readOnlyHint": True},
@@ -1707,6 +1774,8 @@ class MinecraftKitMcpServer:
             "mc_generate_pack_overlay": self._tool_generate_pack_overlay,
             "mc_audit_server_properties": self._tool_audit_server_properties,
             "mc_validate_item_components": self._tool_validate_item_components,
+            "mc_diagnose_crash_report": self._tool_diagnose_crash_report,
+            "mc_audit_datapack": self._tool_audit_datapack,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -1781,10 +1850,11 @@ class MinecraftKitMcpServer:
                 "Use mc_route_skill first to select the right mc:* engineering domain, mc_version_capabilities "
                 "to pin exact Minecraft/protocol/pack formats, mc_search_sources for reviewed upstream GitHub "
                 "repositories, mc_list_plugins / mc_search_api / mc_inspect_type for verified RPG plugin bytecode "
-                "hierarchies and signatures, mc_generate_pack_overlay and mc_validate_item_components for multi-version "
-                "pack.mcmeta and Paper 26.3 item component validation, and mc_audit_gradle_build / "
-                "mc_audit_paper_plugin_yml / mc_audit_server_properties / mc_folia_migration_advisor / "
-                "mc_diagnose_server_log for static build, descriptor, network/Netty config, region-threading, and crash-log verification."
+                "hierarchies and signatures, mc_generate_pack_overlay, mc_validate_item_components, and mc_audit_datapack "
+                "for multi-version pack.mcmeta, Paper 26.3 item components, and datapack recipe/tag validation, "
+                "and mc_audit_gradle_build / mc_audit_paper_plugin_yml / mc_audit_server_properties / "
+                "mc_folia_migration_advisor / mc_diagnose_server_log / mc_diagnose_crash_report for static build, "
+                "descriptor, network/Netty config, region-threading, and crash-log/report verification."
             ),
         }
 
@@ -4603,6 +4673,625 @@ class MinecraftKitMcpServer:
             "status": "fail" if (counts["critical"] + counts["high"]) > 0 else ("warn" if len(findings) > 0 else "pass"),
             "findings": findings,
             "schema_resource_uri": "minecraftkit://catalog/paper-26.3-item-components",
+        }))
+
+    def _tool_diagnose_crash_report(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_report = args.get("crash_report")
+        if not isinstance(raw_report, str) or not raw_report.strip():
+            raise ValueError("'crash_report' must be a non-empty string.")
+
+        server_flavor = str(args.get("server_flavor", "auto")).strip().lower()
+        sarif = bool(args.get("sarif", False))
+
+        lines = raw_report.splitlines()
+        report_text = raw_report
+
+        # 1. Metadata extraction
+        time_match = re.search(r"Time:\s*(.+)", report_text)
+        crash_time = time_match.group(1).strip() if time_match else None
+
+        desc_match = re.search(r"Description:\s*(.+)", report_text)
+        description = desc_match.group(1).strip() if desc_match else None
+
+        mc_ver_match = re.search(r"Minecraft Version:\s*([^\r\n]+)", report_text)
+        mc_version = mc_ver_match.group(1).strip() if mc_ver_match else None
+
+        os_match = re.search(r"Operating System:\s*([^\r\n]+)", report_text)
+        os_info = os_match.group(1).strip() if os_match else None
+
+        java_match = re.search(r"Java Version:\s*([^\r\n]+)", report_text)
+        java_version = java_match.group(1).strip() if java_match else None
+
+        # Detect platform flavor
+        flavor = server_flavor
+        if flavor == "auto":
+            lower_text = report_text.lower()
+            if "folia" in lower_text or "io.papermc.paper.threadedregions" in lower_text:
+                flavor = "folia"
+            elif "paper" in lower_text or "com.destroystokyo.paper" in lower_text:
+                flavor = "paper"
+            elif "fabric" in lower_text or "fabric mods:" in lower_text or "net.fabricmc" in lower_text:
+                flavor = "fabric"
+            elif "neoforge" in lower_text or "net.neoforged" in lower_text:
+                flavor = "neoforge"
+            elif "forge" in lower_text or "net.minecraftforge" in lower_text:
+                flavor = "forge"
+            else:
+                flavor = "vanilla"
+
+        findings: list[dict[str, Any]] = []
+        root_cause_category = "UNKNOWN"
+        offending_component: dict[str, Any] = {
+            "type": "unknown",
+            "name": None,
+            "class_name": None,
+            "method_name": None,
+            "location": None,
+        }
+        remediation_steps: list[str] = []
+
+        # Check 1: TICKING_ENTITY
+        if (description and "ticking entity" in description.lower()) or "-- Entity being ticked --" in report_text:
+            root_cause_category = "TICKING_ENTITY"
+            offending_component["type"] = "entity"
+
+            ent_type_match = re.search(r"Entity Type:\s*([^\s\r\n]+)", report_text)
+            if ent_type_match:
+                offending_component["name"] = ent_type_match.group(1).strip()
+
+            ent_name_match = re.search(r"Entity Name:\s*([^\r\n]+)", report_text)
+            ent_name = ent_name_match.group(1).strip() if ent_name_match else offending_component["name"]
+
+            ent_id_match = re.search(r"Entity ID:\s*(\d+)", report_text)
+            ent_id = ent_id_match.group(1) if ent_id_match else None
+
+            loc_match = re.search(r"Entity's Exact location:\s*([-\d.]+),\s*([-\d.]+),\s*([-\d.]+)", report_text)
+            block_loc_match = re.search(r"Entity's Block location:\s*World:\s*\(([-\d]+),([-\d]+),([-\d]+)\)", report_text)
+
+            bx, by, bz = None, None, None
+            if block_loc_match:
+                bx, by, bz = block_loc_match.group(1), block_loc_match.group(2), block_loc_match.group(3)
+                offending_component["location"] = f"World: ({bx},{by},{bz})"
+            elif loc_match:
+                bx, by, bz = str(int(float(loc_match.group(1)))), str(int(float(loc_match.group(2)))), str(int(float(loc_match.group(3))))
+                offending_component["location"] = f"World: ({bx},{by},{bz})"
+
+            kill_cmd = f"/minecraft:kill @e[type={offending_component['name']},x={bx},y={by},z={bz},distance=..2]" if (bx and offending_component['name']) else f"/minecraft:kill @e[type={offending_component['name']}]"
+
+            findings.append({
+                "rule_id": "CRASH001",
+                "name": "TickingEntity",
+                "severity": "critical",
+                "message": f"Entity '{ent_name}' ({offending_component['name']}) crashed the server tick loop at {offending_component['location'] or 'unknown location'}.",
+                "details": {
+                    "entity_type": offending_component["name"],
+                    "entity_id": ent_id,
+                    "location": offending_component["location"],
+                    "kill_command": kill_cmd,
+                }
+            })
+            remediation_steps.append(f"Execute console command: {kill_cmd}")
+            remediation_steps.append("If server crashes before console access, load world in MCA Selector / Chunker and prune the entity from chunk data.")
+
+        # Check 2: TICKING_BLOCK_ENTITY
+        elif (description and "ticking block entity" in description.lower()) or "-- Block entity being ticked --" in report_text:
+            root_cause_category = "TICKING_BLOCK_ENTITY"
+            offending_component["type"] = "block_entity"
+
+            bloc_match = re.search(r"Block location:\s*World:\s*\(([-\d]+),([-\d]+),([-\d]+)\)", report_text)
+            bx, by, bz = None, None, None
+            if bloc_match:
+                bx, by, bz = bloc_match.group(1), bloc_match.group(2), bloc_match.group(3)
+                offending_component["location"] = f"World: ({bx},{by},{bz})"
+
+            block_match = re.search(r"Block:\s*([^\r\n]+)", report_text)
+            block_desc = block_match.group(1).strip() if block_match else "unknown"
+            offending_component["name"] = block_desc
+
+            be_type_match = re.search(r"Block Entity Type:\s*([^\s\r\n]+)", report_text)
+            be_type = be_type_match.group(1).strip() if be_type_match else "unknown"
+
+            setblock_cmd = f"/setblock {bx} {by} {bz} minecraft:air destroy" if bx else None
+
+            findings.append({
+                "rule_id": "CRASH002",
+                "name": "TickingBlockEntity",
+                "severity": "critical",
+                "message": f"Block entity '{be_type}' at {offending_component['location'] or 'unknown'} crashed during tick.",
+                "details": {
+                    "block": block_desc,
+                    "block_entity_type": be_type,
+                    "location": offending_component["location"],
+                    "setblock_command": setblock_cmd,
+                }
+            })
+            if setblock_cmd:
+                remediation_steps.append(f"Execute console command: {setblock_cmd}")
+            remediation_steps.append("Alternatively prune the block entity from the chunk using MCA Selector or world editor.")
+
+        # Check 3: MIXIN_APPLICATION_FAILED
+        elif "MixinTransformerError" in report_text or "InvalidInjectionException" in report_text or "Mixin apply failed" in report_text:
+            root_cause_category = "MIXIN_APPLICATION_FAILED"
+            offending_component["type"] = "mixin"
+
+            mixin_match = re.search(r"(?:failing mixin|Mixin|mixin):\s*([a-zA-Z0-9_.]+(?:Mixin[a-zA-Z0-9_]*|Injector))", report_text, re.IGNORECASE)
+            target_match = re.search(r"(?:Target class|target):\s*([a-zA-Z0-9_.]+)", report_text, re.IGNORECASE)
+            cfg_match = re.search(r"config\s*\[([a-zA-Z0-9_.-]+\.mixins?\.json)\]", report_text)
+
+            if mixin_match:
+                offending_component["class_name"] = mixin_match.group(1)
+            if target_match:
+                offending_component["name"] = target_match.group(1)
+            mod_id = cfg_match.group(1).split(".")[0] if cfg_match else None
+            if mod_id:
+                offending_component["name"] = mod_id
+
+            findings.append({
+                "rule_id": "CRASH003",
+                "name": "MixinApplicationFailed",
+                "severity": "critical",
+                "message": f"Bytecode mixin transformation failed on target class '{target_match.group(1) if target_match else 'unknown'}' by mixin config '{cfg_match.group(1) if cfg_match else 'unknown'}'.",
+                "details": {
+                    "mixin": mixin_match.group(1) if mixin_match else None,
+                    "target": target_match.group(1) if target_match else None,
+                    "config": cfg_match.group(1) if cfg_match else None,
+                }
+            })
+            remediation_steps.append(f"Check mod compatibility for mod '{mod_id or 'unknown'}'. Update or remove this mod.")
+            remediation_steps.append("Verify both mods target the exact same Minecraft minor version.")
+
+        # Check 4: LINKAGE_OR_API_MISMATCH
+        elif any(err in report_text for err in ("NoSuchMethodError", "NoClassDefFoundError", "AbstractMethodError", "NoSuchFieldError")):
+            root_cause_category = "LINKAGE_OR_API_MISMATCH"
+            offending_component["type"] = "plugin_or_mod"
+
+            err_type = "NoSuchMethodError"
+            for candidate in ("NoSuchMethodError", "NoClassDefFoundError", "AbstractMethodError", "NoSuchFieldError"):
+                if candidate in report_text:
+                    err_type = candidate
+                    break
+
+            err_match = re.search(rf"{err_type}:\s*([^\r\n]+)", report_text)
+            missing_sig = err_match.group(1).strip() if err_match else "unknown"
+
+            plugin_name = None
+            for line in lines:
+                stripped = line.strip()
+                if stripped.startswith("at ") and not any(pkg in stripped for pkg in ("java.", "javax.", "jdk.", "sun.", "net.minecraft.", "io.netty.")):
+                    frame_match = re.search(r"at\s+([a-zA-Z0-9_.]+)\.([a-zA-Z0-9_$<]+)\(", stripped)
+                    if frame_match:
+                        offending_component["class_name"] = frame_match.group(1)
+                        offending_component["method_name"] = frame_match.group(2)
+                        parts = offending_component["class_name"].split(".")
+                        plugin_name = parts[1] if len(parts) > 1 and parts[0] in ("com", "net", "org", "io") else parts[0]
+                        offending_component["name"] = plugin_name
+                        break
+
+            findings.append({
+                "rule_id": "CRASH004",
+                "name": "LinkageOrApiMismatch",
+                "severity": "high",
+                "message": f"Binary API mismatch ({err_type}): missing '{missing_sig}'. Offending caller: '{offending_component['class_name'] or 'unknown'}'.",
+                "details": {
+                    "error_type": err_type,
+                    "missing_symbol": missing_sig,
+                    "caller_class": offending_component["class_name"],
+                    "inferred_plugin": plugin_name,
+                }
+            })
+            remediation_steps.append(f"Plugin/mod '{plugin_name or 'unknown'}' was built against an incompatible Bukkit/Paper/Minecraft API.")
+            remediation_steps.append("Update the plugin to a build compiled for this server version, or report the missing API method to the plugin author.")
+
+        # Check 5: OUT_OF_MEMORY
+        elif "OutOfMemoryError" in report_text:
+            root_cause_category = "OUT_OF_MEMORY"
+            offending_component["type"] = "jvm_memory"
+
+            oom_type = "Java heap space"
+            if "Metaspace" in report_text:
+                oom_type = "Metaspace"
+            elif "Direct buffer memory" in report_text:
+                oom_type = "Direct buffer memory"
+
+            findings.append({
+                "rule_id": "CRASH005",
+                "name": "OutOfMemory",
+                "severity": "critical",
+                "message": f"JVM exhausted {oom_type}.",
+                "details": {
+                    "pool": oom_type,
+                    "java_version": java_version,
+                }
+            })
+            if oom_type == "Java heap space":
+                remediation_steps.append("Increase maximum heap size using JVM flag -Xmx (e.g. -Xms8G -Xmx8G -XX:+UseG1GC).")
+            elif oom_type == "Metaspace":
+                remediation_steps.append("Increase Metaspace limit with -XX:MaxMetaspaceSize=512M (or 1G for modded servers).")
+            else:
+                remediation_steps.append("Check for Netty direct memory leaks or increase -XX:MaxDirectMemorySize=1G.")
+
+        # Check 6: ASYNC_CATCHER_OR_CONCURRENCY
+        elif any(term in report_text for term in ("Asynchronous entity", "Asynchronous world access", "Current thread is not tick thread")):
+            root_cause_category = "ASYNC_CATCHER_OR_CONCURRENCY"
+            offending_component["type"] = "concurrency"
+
+            caller_class = None
+            for line in lines:
+                stripped = line.strip()
+                if stripped.startswith("at ") and not any(pkg in stripped for pkg in ("java.", "javax.", "jdk.", "sun.", "net.minecraft.", "org.bukkit.", "io.papermc.")):
+                    frame_match = re.search(r"at\s+([a-zA-Z0-9_.]+)\.([a-zA-Z0-9_$<]+)\(", stripped)
+                    if frame_match:
+                        caller_class = frame_match.group(1)
+                        offending_component["class_name"] = caller_class
+                        offending_component["method_name"] = frame_match.group(2)
+                        break
+
+            findings.append({
+                "rule_id": "CRASH006",
+                "name": "AsyncCatcherOrConcurrency",
+                "severity": "high",
+                "message": f"Illegal asynchronous state mutation detected by Paper/Folia: '{caller_class or 'unknown'}'.",
+                "details": {
+                    "caller_class": caller_class,
+                }
+            })
+            remediation_steps.append("Wrap entity/world mutations in Bukkit.getScheduler().runTask(...) or Folia RegionScheduler.")
+
+        # Check 7: CORRUPTED_CHUNK
+        elif any(term in report_text for term in ("wrong location", "Tag 'Level' not found", "IllegalChunkPos")):
+            root_cause_category = "CORRUPTED_CHUNK"
+            offending_component["type"] = "world_chunk"
+
+            coord_match = re.search(r"Chunk coordinates:\s*([-\d]+),\s*([-\d]+)", report_text)
+            cx, cz = (coord_match.group(1), coord_match.group(2)) if coord_match else (None, None)
+
+            findings.append({
+                "rule_id": "CRASH007",
+                "name": "CorruptedChunk",
+                "severity": "critical",
+                "message": f"Corrupted chunk data at coordinates [{cx or '?'}, {cz or '?'}].",
+                "details": {
+                    "chunk_x": cx,
+                    "chunk_z": cz,
+                }
+            })
+            remediation_steps.append("Use MCA Selector to select and prune or regenerate the affected chunk.")
+
+        # Check 8: WATCHDOG_TIMEOUT
+        elif any(term in report_text for term in ("stopped responding", "Watchdog")):
+            root_cause_category = "WATCHDOG_TIMEOUT"
+            offending_component["type"] = "watchdog"
+
+            findings.append({
+                "rule_id": "CRASH008",
+                "name": "WatchdogTimeout",
+                "severity": "high",
+                "message": "Main server thread stopped responding exceeding watchdog limit.",
+                "details": {}
+            })
+            remediation_steps.append("Inspect thread dump for long-running synchronous database queries, infinite loops, or network calls.")
+
+        # Default fallback
+        if not findings:
+            findings.append({
+                "rule_id": "CRASH_GENERIC",
+                "name": "UncategorizedCrash",
+                "severity": "medium",
+                "message": description or "Uncategorized Minecraft crash report.",
+                "details": {}
+            })
+            remediation_steps.append("Inspect full stack trace and update plugins/mods to latest releases.")
+
+        counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for f in findings:
+            sev = f.get("severity", "low")
+            if sev in counts:
+                counts[sev] += 1
+
+        res_dict: dict[str, Any] = {
+            "status": "fail" if (counts["critical"] + counts["high"]) > 0 else "pass",
+            "root_cause_category": root_cause_category,
+            "server_flavor": flavor,
+            "minecraft_version": mc_version,
+            "crash_time": crash_time,
+            "description": description,
+            "offending_component": offending_component,
+            "remediation_steps": remediation_steps,
+            "finding_count": len(findings),
+            "severity_counts": counts,
+            "findings": findings,
+        }
+
+        if sarif:
+            res_dict["sarif_report"] = {
+                "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+                "version": "2.1.0",
+                "runs": [
+                    {
+                        "tool": {
+                            "driver": {
+                                "name": "minecraftkit",
+                                "semanticVersion": self.store.kit_version(),
+                                "rules": [
+                                    {
+                                        "id": f["rule_id"],
+                                        "name": f["name"],
+                                        "shortDescription": {"text": f["message"]},
+                                        "defaultConfiguration": {
+                                            "level": "error" if f["severity"] == "critical" else "warning"
+                                        }
+                                    }
+                                    for f in findings
+                                ]
+                            }
+                        },
+                        "results": [
+                            {
+                                "ruleId": f["rule_id"],
+                                "level": "error" if f["severity"] == "critical" else "warning",
+                                "message": {"text": f["message"]},
+                            }
+                            for f in findings
+                        ]
+                    }
+                ]
+            }
+
+        return ToolOutcome(_pretty_json(res_dict))
+
+    def _tool_audit_datapack(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_mcmeta = args.get("pack_mcmeta")
+        if isinstance(raw_mcmeta, str):
+            if not raw_mcmeta.strip():
+                raise ValueError("'pack_mcmeta' string must not be empty.")
+            try:
+                meta_obj = _strict_loads(raw_mcmeta)
+            except (ValueError, json.JSONDecodeError) as exc:
+                raise ValueError(f"'pack_mcmeta' is not valid JSON: {exc}") from exc
+        elif isinstance(raw_mcmeta, dict):
+            meta_obj = raw_mcmeta
+        else:
+            raise ValueError("'pack_mcmeta' must be a JSON string or JSON object.")
+
+        target_version = str(args.get("target_version", "26.3")).strip()
+        raw_files = args.get("files") or {}
+        if not isinstance(raw_files, dict):
+            raise ValueError("'files' must be a dictionary mapping file paths to their string contents.")
+
+        findings: list[dict[str, Any]] = []
+
+        # 1. pack.mcmeta validation
+        pack_section = meta_obj.get("pack")
+        if not isinstance(pack_section, dict):
+            findings.append({
+                "rule_id": "DP001",
+                "name": "PackMcmetaMissingOrInvalid",
+                "severity": "critical",
+                "path": "pack.mcmeta",
+                "message": "Missing 'pack' root object in pack.mcmeta."
+            })
+        else:
+            pack_format = pack_section.get("pack_format")
+            if pack_format is None:
+                findings.append({
+                    "rule_id": "DP001",
+                    "name": "PackMcmetaMissingOrInvalid",
+                    "severity": "critical",
+                    "path": "pack.mcmeta",
+                    "message": "Missing 'pack_format' inside 'pack' object."
+                })
+            else:
+                expected_format = 97
+                if target_version.startswith("1.20.5") or target_version.startswith("1.20.6"):
+                    expected_format = 41
+                elif target_version.startswith("1.21.0") or target_version.startswith("1.21.1") or target_version == "1.21":
+                    expected_format = 48
+                elif target_version.startswith("1.21.2") or target_version.startswith("1.21.3"):
+                    expected_format = 57
+                elif target_version.startswith("1.21.4"):
+                    expected_format = 61
+                elif target_version.startswith("26."):
+                    expected_format = 97
+
+                matched = False
+                if isinstance(pack_format, int):
+                    matched = (pack_format == expected_format)
+                elif isinstance(pack_format, dict):
+                    min_f = pack_format.get("min_inclusive", 0)
+                    max_f = pack_format.get("max_inclusive", 0)
+                    matched = (min_f <= expected_format <= max_f)
+                elif isinstance(pack_format, list) and len(pack_format) == 2:
+                    matched = (pack_format[0] <= expected_format <= pack_format[1])
+
+                if not matched:
+                    findings.append({
+                        "rule_id": "DP002",
+                        "name": "PackFormatMismatch",
+                        "severity": "high",
+                        "path": "pack.mcmeta",
+                        "message": f"Target Minecraft version '{target_version}' expects pack_format {expected_format}, but pack.mcmeta specifies {pack_format}."
+                    })
+
+        # 2. Virtual files validation
+        tag_graph: dict[str, list[str]] = {}
+
+        for file_path, content in raw_files.items():
+            clean_path = str(file_path).replace("\\", "/").strip()
+            if not clean_path.startswith("data/"):
+                findings.append({
+                    "rule_id": "DP006",
+                    "name": "InvalidResourceLocation",
+                    "severity": "medium",
+                    "path": clean_path,
+                    "message": f"Datapack asset '{clean_path}' does not reside inside 'data/<namespace>/' directory structure."
+                })
+                continue
+
+            parts = clean_path.split("/")
+            if len(parts) < 3:
+                continue
+            ns = parts[1]
+            if not re.match(r"^[a-z0-9_.-]+$", ns):
+                findings.append({
+                    "rule_id": "DP006",
+                    "name": "InvalidResourceLocation",
+                    "severity": "high",
+                    "path": clean_path,
+                    "message": f"Invalid datapack namespace '{ns}': namespaces must contain only lowercase ASCII letters, numbers, underscores, periods, and hyphens."
+                })
+
+            # Recipe audit
+            if "/recipe/" in clean_path or "/recipes/" in clean_path:
+                try:
+                    recipe_data = _strict_loads(content)
+                except (ValueError, json.JSONDecodeError) as exc:
+                    findings.append({
+                        "rule_id": "DP003",
+                        "name": "LegacyRecipeResultSyntax",
+                        "severity": "critical",
+                        "path": clean_path,
+                        "message": f"Invalid recipe JSON syntax: {exc}"
+                    })
+                    continue
+
+                rec_type = recipe_data.get("type", "")
+                if rec_type in ("minecraft:crafting_shaped", "crafting_shaped"):
+                    pattern = recipe_data.get("pattern")
+                    if not isinstance(pattern, list) or not (1 <= len(pattern) <= 3):
+                        findings.append({
+                            "rule_id": "DP004",
+                            "name": "InvalidShapedRecipePattern",
+                            "severity": "high",
+                            "path": clean_path,
+                            "message": "Shaped recipe 'pattern' must be an array of 1 to 3 strings."
+                        })
+                    else:
+                        first_len = len(pattern[0])
+                        if not (1 <= first_len <= 3):
+                            findings.append({
+                                "rule_id": "DP004",
+                                "name": "InvalidShapedRecipePattern",
+                                "severity": "high",
+                                "path": clean_path,
+                                "message": f"Shaped recipe pattern row length ({first_len}) must be between 1 and 3."
+                            })
+                        for row in pattern:
+                            if len(row) != first_len:
+                                findings.append({
+                                    "rule_id": "DP004",
+                                    "name": "InvalidShapedRecipePattern",
+                                    "severity": "high",
+                                    "path": clean_path,
+                                    "message": f"Shaped recipe pattern rows must all be of equal length; got {len(row)} vs {first_len}."
+                                })
+
+                    key_dict = recipe_data.get("key", {})
+                    if pattern and isinstance(pattern, list):
+                        for row in pattern:
+                            for char in row:
+                                if char != " " and char not in key_dict:
+                                    findings.append({
+                                        "rule_id": "DP004",
+                                        "name": "InvalidShapedRecipePattern",
+                                        "severity": "high",
+                                        "path": clean_path,
+                                        "message": f"Pattern references key '{char}' which is not mapped in recipe 'key' dictionary."
+                                    })
+
+                result = recipe_data.get("result")
+                if isinstance(result, dict):
+                    if "item" in result and "id" not in result:
+                        findings.append({
+                            "rule_id": "DP003",
+                            "name": "LegacyRecipeResultSyntax",
+                            "severity": "high",
+                            "path": clean_path,
+                            "message": "Modern 1.20.5+ recipes require 'result.id' instead of legacy 'result.item'."
+                        })
+                    if "tag" in result:
+                        findings.append({
+                            "rule_id": "DP003",
+                            "name": "LegacyRecipeResultSyntax",
+                            "severity": "high",
+                            "path": clean_path,
+                            "message": "Legacy string 'tag' in recipe result is deprecated in 1.20.5+; use structured 'components' patch instead."
+                        })
+
+            # Tags audit & cyclical dependency check
+            elif "/tags/" in clean_path:
+                tag_id = f"{ns}:{clean_path.rsplit('/', 1)[-1].split('.', 1)[0]}"
+                try:
+                    tag_data = _strict_loads(content)
+                except (ValueError, json.JSONDecodeError):
+                    continue
+                values = tag_data.get("values", [])
+                tag_deps = []
+                if isinstance(values, list):
+                    for v in values:
+                        val_id = v.get("id") if isinstance(v, dict) else v
+                        if isinstance(val_id, str) and val_id.startswith("#"):
+                            tag_deps.append(val_id[1:])
+                tag_graph[tag_id] = tag_deps
+
+            # Function file audit
+            elif clean_path.endswith(".mcfunction"):
+                for idx, line in enumerate(str(content).splitlines(), start=1):
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith("#"):
+                        continue
+                    if stripped.startswith("/"):
+                        findings.append({
+                            "rule_id": "DP009",
+                            "name": "FunctionSyntaxHazard",
+                            "severity": "low",
+                            "path": f"{clean_path}:{idx}",
+                            "message": f"Command in .mcfunction starts with unnecessary slash '/': '{stripped[:30]}'."
+                        })
+
+        # Detect cycle in tag_graph
+        def find_cycle(node: str, visited: set[str], path: list[str]) -> list[str] | None:
+            visited.add(node)
+            path.append(node)
+            for neighbor in tag_graph.get(node, []):
+                if neighbor not in visited:
+                    cycle = find_cycle(neighbor, visited, path)
+                    if cycle:
+                        return cycle
+                elif neighbor in path:
+                    cycle_start = path.index(neighbor)
+                    return path[cycle_start:] + [neighbor]
+            path.pop()
+            return None
+
+        visited_nodes: set[str] = set()
+        for root_tag in list(tag_graph.keys()):
+            if root_tag not in visited_nodes:
+                cycle = find_cycle(root_tag, visited_nodes, [])
+                if cycle:
+                    cycle_str = " -> ".join(cycle)
+                    findings.append({
+                        "rule_id": "DP005",
+                        "name": "CyclicalTagReference",
+                        "severity": "critical",
+                        "path": f"data/tags/{cycle[0]}",
+                        "message": f"Cyclical tag dependency detected: {cycle_str}."
+                    })
+                    break
+
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for f in findings:
+            sev = f.get("severity", "low")
+            if sev in severity_counts:
+                severity_counts[sev] += 1
+
+        return ToolOutcome(_pretty_json({
+            "status": "fail" if (severity_counts["critical"] + severity_counts["high"]) > 0 else ("warn" if len(findings) > 0 else "pass"),
+            "target_version": target_version,
+            "files_audited": len(raw_files),
+            "finding_count": len(findings),
+            "severity_counts": severity_counts,
+            "findings": findings,
+            "schema_resource_uri": "minecraftkit://catalog/overview",
         }))
 
     @staticmethod
