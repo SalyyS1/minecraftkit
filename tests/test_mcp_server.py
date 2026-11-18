@@ -97,7 +97,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_nineteen_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_twenty_one_readonly_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -124,6 +124,8 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_analyze_folia_scheduler_trace",
                 "mc_audit_packet_codec",
                 "mc_audit_sql_persistence",
+                "mc_profile_chunk_io_barriers",
+                "mc_correlate_spark_jfr_traces",
             ],
         )
         for tool in tools:
@@ -278,7 +280,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 19)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 21)
 
     def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
         res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
@@ -1230,7 +1232,7 @@ dependencies:
         ):
             self.assertIn(expected, codes)
         self.assertEqual(res["sarif_report"]["version"], "2.1.0")
-        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "2.9.0")
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.0.0")
 
         # Clean bounded RegistryFriendlyByteBuf codec with exact field wire math
         clean_codec = "\n".join([
@@ -1344,6 +1346,178 @@ dependencies:
         self.assertFalse(clean_err)
         self.assertEqual(clean_res["status"], "pass")
         self.assertEqual(clean_res["finding_count"], 0)
+
+    def test_mc_profile_chunk_io_barriers_rules_and_queueing_math(self) -> None:
+        # Empty input is rejected cleanly
+        _, empty_err = self.call_tool("mc_profile_chunk_io_barriers", {})
+        self.assertTrue(empty_err)
+
+        bad_chunk_src = "\n".join([
+            "public void raidTeleport(World world, int cx, int cz, Plugin plugin) {",
+            "    Chunk syncChunk = world.getChunkAt(cx + 2, cz);",
+            "    world.addPluginChunkTicket(cx, cz, plugin);",
+            "    BlockState[] tiles = syncChunk.getTileEntities();",
+            "    world.locateNearestStructure(syncChunk.getBlock(0, 64, 0).getLocation(), null, 64, false);",
+            "    for (int i = 0; i < 32; i++) {",
+            "        world.getChunkAtAsync(cx + i, cz).join();",
+            "    }",
+            "}",
+        ])
+        bad_cfg = "\n".join([
+            "sync-chunk-writes=true",
+            "region-file-compression=zlib",
+            "player-max-concurrent-chunk-generates: 16",
+        ])
+        res, err = self.call_tool(
+            "mc_profile_chunk_io_barriers",
+            {
+                "source": bad_chunk_src,
+                "config_text": bad_cfg,
+                "workload": {
+                    "cpu_cores": 6,
+                    "player_count": 80,
+                    "simulation_distance": 10,
+                    "view_distance": 12,
+                    "rtp_burst_per_sec": 12.0,
+                    "chunks_per_rtp": 25,
+                    "active_plugin_tickets": 100,
+                    "ticket_radius": 2,
+                    "worldgen_miss_ratio": 0.5,
+                },
+                "folia": True,
+                "sarif": True,
+            },
+        )
+        self.assertFalse(err)
+        self.assertEqual(res["status"], "fail")
+        model = res["io_barrier_model"]
+        self.assertEqual(model["worker_threads"], 2)
+        self.assertTrue(model["saturated"])
+        self.assertIsNone(model["expected_queue_wait_ms"])
+        self.assertGreater(model["backlog_growth_chunks_per_sec"], 0.0)
+        self.assertEqual(model["pinned_ticket_chunks"], 2500)
+        self.assertAlmostEqual(model["pinned_ticket_ram_mb"], 234.38, places=2)
+        codes = {f["rule_id"] for f in res["findings"]}
+        for expected in (
+            "CHUNK-IO-001",
+            "CHUNK-IO-002",
+            "CHUNK-IO-003",
+            "CHUNK-IO-004",
+            "CHUNK-IO-005",
+            "CHUNK-IO-006",
+            "CHUNK-IO-007",
+            "CHUNK-IO-008",
+        ):
+            self.assertIn(expected, codes)
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.0.0")
+
+        # Healthy sub-critical LZ4 async pipeline passes cleanly
+        clean_src = "\n".join([
+            "world.getChunkAtAsync(cx, cz, true, false).thenAccept(chunk -> {",
+            "    Bukkit.getRegionScheduler().execute(plugin, world, cx, cz, () -> {",
+            "        chunk.getTileEntities(b -> b.getType() == Material.HOPPER, false);",
+            "    });",
+            "});",
+        ])
+        clean_res, clean_err = self.call_tool(
+            "mc_profile_chunk_io_barriers",
+            {
+                "source": clean_src,
+                "config_text": "sync-chunk-writes=false\nregion-file-compression=lz4",
+                "workload": {
+                    "cpu_cores": 16,
+                    "player_count": 30,
+                    "view_distance": 10,
+                    "simulation_distance": 8,
+                    "rtp_burst_per_sec": 0.5,
+                    "worldgen_miss_ratio": 0.1,
+                },
+                "folia": True,
+            },
+        )
+        self.assertFalse(clean_err)
+        self.assertEqual(clean_res["status"], "pass")
+        self.assertEqual(clean_res["finding_count"], 0)
+        self.assertFalse(clean_res["io_barrier_model"]["saturated"])
+        self.assertIsNotNone(clean_res["io_barrier_model"]["expected_total_barrier_ms"])
+
+    def test_mc_correlate_spark_jfr_traces_interval_overlap_deadlock_and_skew(self) -> None:
+        _, empty_err = self.call_tool("mc_correlate_spark_jfr_traces", {})
+        self.assertTrue(empty_err)
+
+        spark_cpu = "\n".join([
+            "Region Scheduler Thread #0;io.papermc.paper.threadedregions.TickRegions.tickRegion;com.ticxo.modelengine.core.ModelUpdater.tick;java.util.concurrent.CompletableFuture.waitingGet 450",
+            "Region Scheduler Thread #1;io.papermc.paper.threadedregions.TickRegions.tickRegion 25",
+            "Region Scheduler Thread #2;io.papermc.paper.threadedregions.TickRegions.tickRegion 25",
+        ])
+        jfr_text = "\n".join([
+            'jdk.JavaMonitorEnter { startTime = 10.020s, duration = 55.0 ms, monitorClass = com.myrpg.cache.VaultLockA, eventThread = "Region Scheduler Thread #0", previousOwner = "Folia Async Scheduler Thread #1" }',
+            'jdk.JavaMonitorEnter { startTime = 10.030s, duration = 45.0 ms, monitorClass = com.myrpg.cache.VaultLockB, eventThread = "Folia Async Scheduler Thread #1", previousOwner = "Region Scheduler Thread #0" }',
+            'jdk.FileForce { startTime = 10.010s, duration = 60.0 ms, eventThread = "RegionFile I/O #0" }',
+            'jdk.ObjectAllocationOutsideTLAB { startTime = 10.050s, duration = 0.0 ms, allocationSize = 16777216, eventThread = "Region Scheduler Thread #0", stack = "net.Indyuce.mmoitems.ItemBuilder.build" }',
+            'jdk.VirtualThreadPinned { startTime = 10.060s, duration = 24.0 ms, eventThread = "VirtualThread-9" }',
+        ])
+        gc_tick_log = "\n".join([
+            "[10.200s] Tick #200 took 200.0ms",
+            "[10.150s][info][gc] GC(9) Pause Young (Evacuation Failure) 60.0ms",
+            "[10.180s][info][safepoint] Safepoint: Reaching safepoint: 18.0 ms",
+        ])
+        res, err = self.call_tool(
+            "mc_correlate_spark_jfr_traces",
+            {
+                "spark_profile": spark_cpu,
+                "sampling_mode": "cpu",
+                "jfr_events": jfr_text,
+                "gc_or_tick_log": gc_tick_log,
+                "tick_budget_ms": 50.0,
+                "sarif": True,
+            },
+        )
+        self.assertFalse(err)
+        self.assertEqual(res["status"], "fail")
+        cm = res["correlation_matrix"]
+        self.assertEqual(cm["tick_spike_count"], 1)
+        self.assertEqual(cm["worst_tick_ms"], 200.0)
+        # Tick interval [10000, 10200] overlaps GC [10090, 10150] (60ms), TTSP [10162, 10180] (18ms), IO [10010, 10070] (60ms), Locks [10020, 10075] (55ms)
+        self.assertEqual(cm["overlapping_gc_ms"], 60.0)
+        self.assertEqual(cm["overlapping_ttsp_ms"], 18.0)
+        self.assertEqual(cm["overlapping_io_ms"], 60.0)
+        self.assertEqual(cm["overlapping_lock_ms"], 55.0)
+        self.assertTrue(cm["has_lock_cycle"])
+        self.assertEqual(cm["outside_tlab_mb"], 16.0)
+        self.assertGreater(cm["region_skew"]["gini_coefficient"], 0.45)
+        self.assertIn("ModelEngine", cm["plugin_attribution_weights"])
+        self.assertIn("MMOItems", cm["plugin_attribution_weights"])
+        codes = {f["rule_id"] for f in res["findings"]}
+        for expected in (
+            "CORR-001",
+            "CORR-002",
+            "CORR-003",
+            "CORR-004",
+            "CORR-005",
+            "CORR-006",
+            "CORR-007",
+        ):
+            self.assertIn(expected, codes)
+        self.assertEqual(res["sarif_report"]["version"], "2.1.0")
+
+        # Structured JSON JFR list + balanced Folia wall profile passes cleanly
+        balanced_spark = "\n".join([
+            "Region Scheduler Thread #0;io.papermc.paper.threadedregions.TickRegions.tickRegion 100",
+            "Region Scheduler Thread #1;io.papermc.paper.threadedregions.TickRegions.tickRegion 98",
+        ])
+        clean_corr, clean_corr_err = self.call_tool(
+            "mc_correlate_spark_jfr_traces",
+            {
+                "spark_profile": balanced_spark,
+                "sampling_mode": "wall",
+                "jfr_events": [{"type": "jdk.ExecutionSample", "start_ms": 100.0, "duration_ms": 0.0, "thread": "Region Scheduler Thread #0"}],
+                "tick_budget_ms": 50.0,
+            },
+        )
+        self.assertFalse(clean_corr_err)
+        self.assertEqual(clean_corr["status"], "pass")
+        self.assertEqual(clean_corr["finding_count"], 0)
 
     def test_cli_subprocess_serves_stdio_end_to_end(self) -> None:
         request = json.dumps({"jsonrpc": "2.0", "id": 7, "method": "initialize", "params": {}}) + "\n"

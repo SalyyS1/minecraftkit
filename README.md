@@ -3,7 +3,7 @@
 [Tiếng Việt (README.vi.md)](README.vi.md) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v2.9.0](https://img.shields.io/badge/version-v2.9.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v2.9.0)
+[![Version: v3.0.0](https://img.shields.io/badge/version-v3.0.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.0.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
@@ -91,6 +91,8 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_analyze_folia_scheduler_trace` | Verify Folia 4-domain scheduler thread-affinity contracts (`REGION`, `ENTITY`, `GLOBAL`, `ASYNC`, plus `NETTY`) across stack traces and multi-thread dumps (`FOLIA-TRC-001` through `FOLIA-TRC-007`), catching `GlobalRegionScheduler` spatial escapes, async world/entity mutations, Netty packet-thread world access, blocking `CompletableFuture.join()` barrier deadlocks, synchronous teleports, and missing `EntityScheduler` retired callbacks, with optional OASIS SARIF v2.1.0 output. |
 | `mc_audit_packet_codec` | Audit Minecraft `1.20.5` through `26.3+` `StreamCodec`, `CustomPacketPayload`, PacketEvents/ProtocolLib listeners, and Velocity plugin messaging channels (`NETTY-001` through `NETTY-008`), computing exact LEB128 VarInt and worst-case UTF-8/collection wire-byte budgets against `32,767 B` serverbound and `1,048,576 B` clientbound caps, catching unbounded decode DoS, asymmetric read/write order, `ByteBuf` ref-count leaks, invalid `ResourceLocation` channels, and plain `FriendlyByteBuf` registry-codec mismatches, with optional OASIS SARIF v2.1.0 output. |
 | `mc_audit_sql_persistence` | Audit Paper, Folia, and Velocity plugin SQL persistence layers and HikariCP configurations (`SQL-001` through `SQL-007`), computing fleet MySQL connection budgets and `maxLifetime` vs `wait_timeout` safety margins, and catching synchronous tick-thread JDBC calls, SQLite multi-pool `SQLITE_BUSY` contention without WAL, unclosed JDBC resource leaks, SQL string interpolation, and direct Bukkit/Folia mutations inside async DB completion callbacks, with optional OASIS SARIF v2.1.0 output. |
+| `mc_profile_chunk_io_barriers` | Profile Paper `1.21.4` through `26.3+` Moonrise and Folia async chunk I/O pipelines, plugin chunk tickets, and worldgen worker saturation (`CHUNK-IO-001` through `CHUNK-IO-008`), computing Sakasegawa M/M/c expected barrier latency, utilization `rho`, and resident chunk RAM budgets while catching synchronous tick-thread chunk loads, `CompletableFuture.join()` self-deadlocks, unbounded ticket leaks, `sync-chunk-writes` fsync stalls, and Folia `16x16` region-section escapes, with optional OASIS SARIF v2.1.0 output. |
+| `mc_correlate_spark_jfr_traces` | Cross-correlate Spark CPU/wall/alloc flamegraphs with JDK Flight Recorder (JFR) event streams and unified HotSpot GC/safepoint/tick-spike logs (`CORR-001` through `CORR-007`), computing sweep-line interval overlap attribution, directed `JavaMonitorEnter` wait-for deadlock graphs, outside-TLAB allocation churn, JDK 21/25 virtual-thread pinning, and Folia region thread Gini skew, with optional OASIS SARIF v2.1.0 output. |
 
 ### Exposed MCP Resources & Slash Prompts
 
@@ -127,7 +129,7 @@ minecraftkit version
 ## Web Explorers
 
 - **[RPG API Explorer](https://salyys1.github.io/minecraftkit/)**: Search indexed plugin classes, methods, fields, and architectural insights in the browser.
-- **[Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html)**: Run client-side Spark flamegraph hotspot classification (`SPARK-001`..`SPARK-008`), Folia 4-domain scheduler trace verification (`FOLIA-TRC-001`..`FOLIA-TRC-007`), Netty `StreamCodec` wire-byte budget and HikariCP/SQLite persistence audits (`NETTY-001`..`NETTY-008`, `SQL-001`..`SQL-007`), and SARIF v2.1.0 export with zero uploads.
+- **[Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html)**: Run client-side Spark flamegraph hotspot classification (`SPARK-001`..`SPARK-008`), Folia 4-domain scheduler trace verification (`FOLIA-TRC-001`..`FOLIA-TRC-007`), Netty `StreamCodec` wire-byte budget and HikariCP/SQLite persistence audits (`NETTY-001`..`NETTY-008`, `SQL-001`..`SQL-007`), Moonrise chunk I/O barrier & Spark/JFR trace correlation (`CHUNK-IO-001`..`CHUNK-IO-008`, `CORR-001`..`CORR-007`), and SARIF v2.1.0 export with zero uploads.
 - **[Minecraft Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html)**: Browse 103 reviewed upstream repositories, Mojang version history, and release capability profiles.
 - **[Bilingual Wiki (VI/EN)](https://salyys1.github.io/minecraftkit/wiki.html)**: Step-by-step installation guides, route overviews, and engineering checklists.
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 import sys
 from dataclasses import dataclass
@@ -978,6 +979,116 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
                 "folia": {
                     "type": "boolean",
                     "description": "Whether the plugin targets Folia regionized multithreading (default true).",
+                },
+                "sarif": {
+                    "type": "boolean",
+                    "description": "Whether to include an OASIS SARIF v2.1.0 report under sarif_report (default false).",
+                },
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_profile_chunk_io_barriers",
+        "title": "Profile Moonrise Async Chunk I/O Barriers, Queue Saturation & Ticket Leaks",
+        "description": (
+            "Profile Paper 1.21.4 through 26.3+ Moonrise and Folia async chunk I/O pipelines, plugin chunk "
+            "tickets, and worldgen worker saturation across CHUNK-IO-001 through CHUNK-IO-008: synchronous "
+            "tick-thread chunk loads, CompletableFuture.join/get barrier self-deadlocks, unbounded plugin chunk "
+            "ticket memory retention, M/M/c queueing saturation under RTP or pregen bursts, sync-chunk-writes "
+            "fsync and region-file-compression bottlenecks, Folia 16x16 region-section neighborhood escapes, "
+            "synchronous locateNearestStructure/Biome scans, and full-chunk BlockState snapshot materialization. "
+            "Computes Sakasegawa M/M/c expected barrier latency, utilization rho, and resident chunk RAM budgets, "
+            "with optional OASIS SARIF v2.1.0 output."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "description": "Optional Java/Kotlin chunk-loading snippet, Moonrise stall log, or /paper chunkinfo dump.",
+                },
+                "config_text": {
+                    "type": "string",
+                    "description": "Optional server.properties or config/paper-global.yml chunk-system settings.",
+                },
+                "workload": {
+                    "type": "object",
+                    "description": "Optional server and chunk workload parameters for M/M/c barrier latency and RAM modeling.",
+                    "properties": {
+                        "cpu_cores": {"type": "integer", "minimum": 1},
+                        "worker_threads": {"type": "integer", "minimum": 1},
+                        "player_count": {"type": "integer", "minimum": 0},
+                        "simulation_distance": {"type": "integer", "minimum": 2, "maximum": 32},
+                        "view_distance": {"type": "integer", "minimum": 2, "maximum": 32},
+                        "rtp_burst_per_sec": {"type": "number", "minimum": 0},
+                        "chunks_per_rtp": {"type": "integer", "minimum": 1},
+                        "active_plugin_tickets": {"type": "integer", "minimum": 0},
+                        "ticket_radius": {"type": "integer", "minimum": 0, "maximum": 16},
+                        "avg_disk_read_ms": {"type": "number", "minimum": 0.05},
+                        "avg_worldgen_ms": {"type": "number", "minimum": 0.1},
+                        "worldgen_miss_ratio": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+                        "compression": {"type": "string", "enum": ["lz4", "zlib", "none"]},
+                    },
+                    "additionalProperties": False,
+                },
+                "folia": {
+                    "type": "boolean",
+                    "description": "Whether the target runtime uses Folia regionized multithreading (default true).",
+                },
+                "sarif": {
+                    "type": "boolean",
+                    "description": "Whether to include an OASIS SARIF v2.1.0 report under sarif_report (default false).",
+                },
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_correlate_spark_jfr_traces",
+        "title": "Correlate Spark Profiles, JFR Event Streams & GC/Safepoint Timelines",
+        "description": (
+            "Cross-correlate Spark CPU/wall/alloc flamegraphs with JDK Flight Recorder (JFR) event streams and "
+            "unified HotSpot GC/safepoint/tick-spike logs across CORR-001 through CORR-007: CPU-only sampling "
+            "off-CPU blind spots, STW GC evacuation/allocation-stall and Safepoint TTSP pause masking, "
+            "cross-thread JavaMonitorEnter lock convoys and cycles, background FileForce/SocketRead to tick-barrier "
+            "causal chains, outside-TLAB allocation churn driving GC pauses, JDK 21/25 virtual-thread carrier "
+            "pinning, and Folia region thread Gini skew. Computes exact sweep-line interval overlap attribution "
+            "and optional OASIS SARIF v2.1.0 output."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "spark_profile": {
+                    "type": "string",
+                    "description": "Optional collapsed flamegraph stack lines or indented Spark call-tree text.",
+                },
+                "sampling_mode": {
+                    "type": "string",
+                    "enum": ["cpu", "wall", "alloc"],
+                    "description": "Spark profiler sampling mode used to capture spark_profile (default 'cpu').",
+                },
+                "jfr_events": {
+                    "oneOf": [
+                        {"type": "string"},
+                        {
+                            "type": "array",
+                            "items": {"type": "object"},
+                        },
+                    ],
+                    "description": "Optional JFR event dump text ('jfr print') or structured list of JFR event objects.",
+                },
+                "gc_or_tick_log": {
+                    "type": "string",
+                    "description": "Optional HotSpot -Xlog:gc*,safepoint* and Paper/Folia/Spark tick spike log text.",
+                },
+                "tick_budget_ms": {
+                    "type": "number",
+                    "minimum": 5.0,
+                    "maximum": 1000.0,
+                    "description": "Target server tick budget in milliseconds (default 50.0 for 20 TPS).",
                 },
                 "sarif": {
                     "type": "boolean",
@@ -1980,6 +2091,8 @@ class MinecraftKitMcpServer:
             "mc_analyze_folia_scheduler_trace": self._tool_analyze_folia_scheduler_trace,
             "mc_audit_packet_codec": self._tool_audit_packet_codec,
             "mc_audit_sql_persistence": self._tool_audit_sql_persistence,
+            "mc_profile_chunk_io_barriers": self._tool_profile_chunk_io_barriers,
+            "mc_correlate_spark_jfr_traces": self._tool_correlate_spark_jfr_traces,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -2057,10 +2170,11 @@ class MinecraftKitMcpServer:
                 "hierarchies and signatures, mc_generate_pack_overlay, mc_validate_item_components, and mc_audit_datapack "
                 "for multi-version pack.mcmeta, Paper 26.3 item components, and datapack recipe/tag validation, "
                 "and mc_audit_gradle_build / mc_audit_paper_plugin_yml / mc_audit_server_properties / "
-                "mc_audit_packet_codec / mc_audit_sql_persistence / "
+                "mc_audit_packet_codec / mc_audit_sql_persistence / mc_profile_chunk_io_barriers / "
                 "mc_folia_migration_advisor / mc_analyze_folia_scheduler_trace / mc_audit_spark_flamegraph / "
-                "mc_diagnose_server_log / mc_diagnose_crash_report for static build, descriptor, network/Netty wire codecs, "
-                "HikariCP/SQLite persistence, 4-domain Folia scheduler affinity, Spark flamegraph hotspots, and crash-log/report verification."
+                "mc_correlate_spark_jfr_traces / mc_diagnose_server_log / mc_diagnose_crash_report for static build, "
+                "descriptor, network/Netty wire codecs, HikariCP/SQLite persistence, Moonrise chunk I/O barriers, "
+                "4-domain Folia scheduler affinity, Spark/JFR trace correlation, and crash-log/report verification."
             ),
         }
 
@@ -7327,6 +7441,927 @@ class MinecraftKitMcpServer:
                 "mysql_wait_timeout_ms": wait_timeout_ms if is_mysql_family else None,
                 "recommended_max_lifetime_ms": recommended_max_lifetime_ms if is_mysql_family else None,
                 "connection_timeout_ms": conn_timeout_ms,
+            },
+            "finding_count": len(findings),
+            "severity_counts": severity_counts,
+            "findings": findings,
+            "remediation_snippets": remediation_snippets,
+        }
+        if sarif:
+            out["sarif_report"] = self._build_sarif_report(findings)
+        return ToolOutcome(_pretty_json(out))
+
+    @staticmethod
+    def _merge_intervals(intervals: list[tuple[float, float]]) -> list[tuple[float, float]]:
+        valid = sorted((min(a, b), max(a, b)) for a, b in intervals if b > a)
+        if not valid:
+            return []
+        merged: list[tuple[float, float]] = [valid[0]]
+        for start, end in valid[1:]:
+            prev_s, prev_e = merged[-1]
+            if start <= prev_e:
+                merged[-1] = (prev_s, max(prev_e, end))
+            else:
+                merged.append((start, end))
+        return merged
+
+    @classmethod
+    def _interval_overlap_ms(
+        cls,
+        primary: list[tuple[float, float]],
+        secondary: list[tuple[float, float]],
+    ) -> float:
+        m_a = cls._merge_intervals(primary)
+        m_b = cls._merge_intervals(secondary)
+        if not m_a or not m_b:
+            return 0.0
+        i = 0
+        j = 0
+        total = 0.0
+        while i < len(m_a) and j < len(m_b):
+            lo = max(m_a[i][0], m_b[j][0])
+            hi = min(m_a[i][1], m_b[j][1])
+            if hi > lo:
+                total += hi - lo
+            if m_a[i][1] < m_b[j][1]:
+                i += 1
+            else:
+                j += 1
+        return round(total, 3)
+
+    @staticmethod
+    def _gini_coefficient(values: list[float]) -> float:
+        cleaned = [float(v) for v in values if v >= 0]
+        n = len(cleaned)
+        total = sum(cleaned)
+        if n <= 1 or total <= 0.0:
+            return 0.0
+        diff_sum = 0.0
+        for x in cleaned:
+            for y in cleaned:
+                diff_sum += abs(x - y)
+        return round(diff_sum / (2.0 * n * total), 4)
+
+    @staticmethod
+    def _parse_timestamp_ms(line: str) -> float | None:
+        # Matches HotSpot [12.345s] uptime or [HH:MM:SS.mmm] / [HH:MM:SS] wall-clock
+        m_up = re.search(r"\[\s*(\d+(?:\.\d+)?)s\s*\]", line)
+        if m_up:
+            return round(float(m_up.group(1)) * 1000.0, 3)
+        m_clk = re.search(r"\[?(\d{2}):(\d{2}):(\d{2})(?:[.,](\d{1,3}))?\]?", line)
+        if m_clk:
+            hh = int(m_clk.group(1))
+            mm = int(m_clk.group(2))
+            ss = int(m_clk.group(3))
+            ms_raw = m_clk.group(4) or "0"
+            ms = int(ms_raw.ljust(3, "0")[:3])
+            return float(((hh * 3600) + (mm * 60) + ss) * 1000 + ms)
+        return None
+
+    @staticmethod
+    def _infer_plugin_from_text(text: str) -> str | None:
+        known_prefixes = (
+            ("com.ticxo.modelengine", "ModelEngine"),
+            ("net.indyuce.mmoitems", "MMOItems"),
+            ("net.indyuce.mmocore", "MMOCore"),
+            ("net.indyuce.mmoinventory", "MMOInventory"),
+            ("fr.phoenixdevt.mmoprofiles", "MMOProfiles"),
+            ("io.lumine.mythiccrucible", "MythicCrucible"),
+            ("net.playavalon.mythicdungeons", "MythicDungeons"),
+            ("com.stelliusstudio.mythicenchants", "MythicEnchants"),
+            ("io.lumine.mythic", "MythicMobs"),
+        )
+        low = text.lower()
+        for prefix, label in known_prefixes:
+            if prefix in low:
+                return label
+        for m in re.finditer(r"\b([a-z][a-z0-9_]*\.[a-z0-9_]+(?:\.[a-z0-9_]+)+)\.[A-Z][A-Za-z0-9_$]*", text):
+            pkg = m.group(1)
+            if not pkg.startswith((
+                "java.", "javax.", "jdk.", "sun.", "net.minecraft.", "org.bukkit.",
+                "io.papermc.", "ca.spottedleaf.", "io.netty.", "com.mojang.",
+                "com.google.", "it.unimi.", "org.apache.", "com.zaxxer.", "com.mysql.", "org.sqlite.",
+            )):
+                parts = pkg.split(".")
+                return parts[2] if len(parts) >= 3 else parts[-1]
+        return None
+
+    def _tool_profile_chunk_io_barriers(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_source = args.get("source")
+        raw_config = args.get("config_text")
+        raw_workload = args.get("workload")
+        if raw_source is None and raw_config is None and raw_workload is None:
+            return ToolOutcome(
+                _pretty_json({"error": "Provide at least one of 'source', 'config_text', or 'workload' to profile chunk I/O barriers."}),
+                is_error=True,
+            )
+
+        source = str(raw_source or "")
+        config_text = str(raw_config or "")
+        workload = raw_workload if isinstance(raw_workload, dict) else {}
+        folia = bool(args.get("folia", True))
+        sarif = bool(args.get("sarif", False))
+
+        cleaned_src = _strip_gradle_comments(source) if source else ""
+        low_src = cleaned_src.lower()
+        low_cfg = config_text.lower()
+
+        # Parse config_text overrides when present
+        cfg_compression: str | None = None
+        sync_chunk_writes: bool | None = None
+        cfg_sim_dist: int | None = None
+        cfg_view_dist: int | None = None
+        cfg_max_concurrent_gen: int | None = None
+        cfg_worker_threads: int | None = None
+
+        if config_text:
+            m_comp = re.search(r"region-file-compression\s*[=:]\s*([A-Za-z0-9_-]+)", config_text, re.IGNORECASE)
+            if m_comp:
+                val = m_comp.group(1).strip().lower()
+                if val in {"lz4", "zlib", "deflate", "none"}:
+                    cfg_compression = "zlib" if val == "deflate" else val
+            m_sync = re.search(r"sync-chunk-writes\s*[=:]\s*(true|false)", config_text, re.IGNORECASE)
+            if m_sync:
+                sync_chunk_writes = m_sync.group(1).lower() == "true"
+            m_sim = re.search(r"simulation-distance\s*[=:]\s*(\d+)", config_text, re.IGNORECASE)
+            if m_sim:
+                cfg_sim_dist = max(2, min(32, int(m_sim.group(1))))
+            m_view = re.search(r"(?<![a-z-])view-distance\s*[=:]\s*(\d+)", config_text, re.IGNORECASE)
+            if m_view:
+                cfg_view_dist = max(2, min(32, int(m_view.group(1))))
+            m_cgen = re.search(r"player-max-concurrent-chunk-generates\s*:\s*(-?\d+)", config_text, re.IGNORECASE)
+            if m_cgen:
+                cfg_max_concurrent_gen = int(m_cgen.group(1))
+            m_wth = re.search(r"worker-threads\s*:\s*(-?\d+)", config_text, re.IGNORECASE)
+            if m_wth and int(m_wth.group(1)) > 0:
+                cfg_worker_threads = int(m_wth.group(1))
+
+        cpu_cores = int(workload.get("cpu_cores") or 8)
+        explicit_workers = workload.get("worker_threads") or cfg_worker_threads
+        worker_threads = int(explicit_workers) if explicit_workers is not None else max(1, min(8, max(1, (cpu_cores - 2) // 2)))
+        player_count = int(workload.get("player_count") if workload.get("player_count") is not None else 40)
+        sim_distance = int(workload.get("simulation_distance") or cfg_sim_dist or 10)
+        view_distance = int(workload.get("view_distance") or cfg_view_dist or 10)
+        rtp_burst_per_sec = float(workload.get("rtp_burst_per_sec") if workload.get("rtp_burst_per_sec") is not None else 0.0)
+        chunks_per_rtp = int(workload.get("chunks_per_rtp") or 25)
+        active_tickets = int(workload.get("active_plugin_tickets") if workload.get("active_plugin_tickets") is not None else 0)
+        ticket_radius = int(workload.get("ticket_radius") if workload.get("ticket_radius") is not None else 2)
+        avg_disk_ms = float(workload.get("avg_disk_read_ms") or 1.2)
+        avg_gen_ms = float(workload.get("avg_worldgen_ms") or 14.0)
+        gen_miss_ratio = float(workload.get("worldgen_miss_ratio") if workload.get("worldgen_miss_ratio") is not None else 0.25)
+        compression = str(workload.get("compression") or cfg_compression or "lz4").lower()
+
+        # Infer active tickets from /paper chunkinfo or holderinfo snippets if present in source
+        if active_tickets == 0 and source:
+            m_tkt = re.search(r"plugin[_ -]?tickets?\s*[:=]\s*(\d+)", source, re.IGNORECASE)
+            if m_tkt:
+                active_tickets = int(m_tkt.group(1))
+
+        # Compression decode/inflate CPU and disk read amplification factors
+        comp_cpu = {"lz4": 1.0, "zlib": 2.6, "none": 0.7}.get(compression, 1.0)
+        comp_io = {"lz4": 1.0, "zlib": 0.85, "none": 1.85}.get(compression, 1.0)
+        fsync_penalty_ms = 4.5 if sync_chunk_writes is True else 0.0
+
+        # Expected service time S (ms) per chunk transition across Moonrise I/O + generation pipeline
+        read_stage_ms = (avg_disk_ms * comp_io) + (0.35 * comp_cpu) + (0.20 * fsync_penalty_ms)
+        gen_stage_ms = avg_gen_ms * (0.85 + 0.15 * comp_cpu) + (0.35 * fsync_penalty_ms)
+        service_time_ms = ((1.0 - gen_miss_ratio) * read_stage_ms) + (gen_miss_ratio * gen_stage_ms)
+        mu_per_worker = 1000.0 / max(0.05, service_time_ms)
+        service_capacity_cps = worker_threads * mu_per_worker
+
+        # Steady-state player movement horizon loads + RTP/pregen burst arrival rate (chunks/sec)
+        movement_cps = player_count * 0.35 * (2 * view_distance + 1) * 0.12
+        burst_cps = rtp_burst_per_sec * chunks_per_rtp
+        arrival_rate_cps = movement_cps + burst_cps
+        utilization_rho = arrival_rate_cps / max(0.001, service_capacity_cps)
+
+        # Sakasegawa closed-form M/M/c waiting time in queue W_q (ms)
+        saturated = utilization_rho >= 1.0
+        if saturated:
+            expected_queue_wait_ms: float | None = None
+            expected_barrier_ms: float | None = None
+            backlog_growth_cps = round(arrival_rate_cps - service_capacity_cps, 2)
+        else:
+            c = float(worker_threads)
+            if utilization_rho <= 1e-6:
+                wq_ms = 0.0
+            else:
+                exponent = math.sqrt(2.0 * (c + 1.0)) - 1.0
+                wq_ms = ((utilization_rho ** exponent) / (c * (1.0 - utilization_rho))) * service_time_ms
+            expected_queue_wait_ms = round(wq_ms, 2)
+            expected_barrier_ms = round(wq_ms + service_time_ms, 2)
+            backlog_growth_cps = 0.0
+
+        # Resident chunk memory model (96 KiB = 0.09375 MiB per loaded LevelChunk + light + Moonrise holder)
+        chunks_per_player_sim = (2 * sim_distance + 1) ** 2
+        # Overlap factor 0.72 accounts for player clustering around hubs/towns when player_count > 1
+        overlap_factor = 1.0 if player_count <= 1 else 0.72
+        player_resident_chunks = int(round(player_count * chunks_per_player_sim * overlap_factor))
+        chunks_per_ticket = (2 * ticket_radius + 1) ** 2
+        pinned_ticket_chunks = active_tickets * chunks_per_ticket
+        total_resident_chunks = player_resident_chunks + pinned_ticket_chunks
+        resident_chunk_ram_mb = round(total_resident_chunks * 0.09375, 2)
+        pinned_ticket_ram_mb = round(pinned_ticket_chunks * 0.09375, 2)
+
+        findings: list[dict[str, Any]] = []
+        remediation_snippets: list[str] = []
+
+        def add_finding(
+            rule_id: str,
+            name: str,
+            severity: str,
+            location: str,
+            message: str,
+            remediation: str,
+        ) -> None:
+            findings.append({
+                "rule_id": rule_id,
+                "name": name,
+                "severity": severity,
+                "location": location,
+                "message": message,
+                "remediation": remediation,
+            })
+            if remediation not in remediation_snippets:
+                remediation_snippets.append(remediation)
+
+        if cleaned_src:
+            # CHUNK-IO-001: Synchronous chunk load on tick / event / command thread
+            has_sync_chunk_call = bool(
+                re.search(
+                    r"\.(?:getChunkAt\s*\(|getChunk\s*\(\s*\)|loadChunk\s*\(|load\s*\(\s*(?:true|false)?\s*\))"
+                    r"|ServerChunkCache\.getChunk\s*\([^)]*,\s*true\s*\)"
+                    r"|blockingLoad|"
+                    r"Main thread chunk load|Slow chunk load",
+                    cleaned_src,
+                )
+            )
+            if has_sync_chunk_call:
+                add_finding(
+                    "CHUNK-IO-001",
+                    "SyncChunkLoadBarrierOnTickThread",
+                    "critical",
+                    "World.getChunkAt / Location.getChunk",
+                    "Synchronous chunk load blocks the region or main tick thread behind Moonrise disk decompression and worldgen barriers, spiking MSPT above 50ms.",
+                    "Replace world.getChunkAt(x, z) / loc.getChunk() with world.getChunkAtAsync(x, z, true).thenAccept(chunk -> Bukkit.getRegionScheduler().execute(plugin, world, x, z, () -> ...)).",
+                )
+
+            # CHUNK-IO-002: Blocking .join() / .get() on async chunk or teleport futures
+            has_chunk_future_join = bool(
+                re.search(
+                    r"(?:getChunkAtAsync|teleportAsync)\s*\([^;]*?\)\s*\.\s*(?:join|get)\s*\(",
+                    cleaned_src,
+                    re.DOTALL,
+                )
+            ) or (
+                ("getchunkatasync" in low_src or "teleportasync" in low_src or "chunk-system-worker" in low_src)
+                and bool(re.search(r"\b(?:CompletableFuture\.allOf\([^)]*\)\s*\.\s*(?:join|get)|future\s*\.\s*(?:join|get)\s*\()", cleaned_src))
+            )
+            if has_chunk_future_join:
+                add_finding(
+                    "CHUNK-IO-002",
+                    "ChunkFutureJoinDeadlockHazard",
+                    "critical",
+                    "CompletableFuture.join/get",
+                    "Blocking .join() or .get() on a getChunkAtAsync / teleportAsync future stalls or self-deadlocks the owning tick or Moonrise worker thread waiting for main-thread chunk stage completion.",
+                    "Never block on chunk futures; compose continuations non-blockingly via .thenAccept(...) and marshal mutations onto RegionScheduler or EntityScheduler.",
+                )
+
+            # CHUNK-IO-003 (source): Plugin chunk ticket leak without cleanup
+            adds_ticket = bool(re.search(r"\b(?:addPluginChunkTicket|addRegionTicket)\s*\(", cleaned_src))
+            removes_ticket = bool(re.search(r"\b(?:removePluginChunkTicket|removePluginChunkTickets|removeRegionTicket)\s*\(", cleaned_src))
+            if adds_ticket and not removes_ticket:
+                add_finding(
+                    "CHUNK-IO-003",
+                    "UnboundedPluginChunkTicketLeak",
+                    "high",
+                    "World.addPluginChunkTicket",
+                    f"Plugin acquires chunk tickets without a matching removePluginChunkTicket / removePluginChunkTickets lifecycle release; each level-31 ticket pins {chunks_per_ticket} chunks (~{round(chunks_per_ticket * 0.09375, 2)} MiB) permanently in RAM.",
+                    "Track issued (world, chunkX, chunkZ) tickets with bounded TTLs and call world.removePluginChunkTickets(plugin) inside onDisable().",
+                )
+
+            # CHUNK-IO-004 (source): Unthrottled loop dispatching async chunk loads
+            has_unthrottled_loop = bool(
+                re.search(r"\b(?:for|while)\s*\([^)]*\)\s*\{[^}]*(?:getChunkAtAsync|teleportAsync)", cleaned_src, re.DOTALL)
+            ) and not any(tok in low_src for tok in ("semaphore", "ratelimiter", "maxconcurrent", "urgent = false", ", false)"))
+            if has_unthrottled_loop:
+                add_finding(
+                    "CHUNK-IO-004",
+                    "UnthrottledAsyncChunkSpiralStorm",
+                    "high",
+                    "BatchChunkLoop",
+                    "Loop dispatches unbounded parallel getChunkAtAsync / teleportAsync requests without a concurrency semaphore, flooding Moonrise queues ahead of player movement chunks.",
+                    "Gate batch pregen or RTP probes behind a bounded Semaphore (4 to 8 in-flight chunks) and pass urgent=false on non-interactive chunk loads.",
+                )
+
+            # CHUNK-IO-006: Folia 16x16-chunk region-section neighborhood escape
+            if folia:
+                neighbor_match = re.search(
+                    r"(?:getChunkAt|getBlockAt)\s*\([^)]*[+-]\s*(\d+)",
+                    cleaned_src,
+                )
+                if neighbor_match:
+                    offset_val = int(neighbor_match.group(1))
+                    is_chunk_call = "getChunkAt" in neighbor_match.group(0)
+                    crosses_grid = (is_chunk_call and offset_val >= 1) or (not is_chunk_call and offset_val >= 16)
+                    has_region_dispatch = "getregionscheduler()" in low_src or "isownedbycurrentregion" in low_src
+                    if crosses_grid and not has_region_dispatch:
+                        add_finding(
+                            "CHUNK-IO-006",
+                            "CrossRegionChunkNeighborhoodEscape",
+                            "critical",
+                            neighbor_match.group(0).strip(),
+                            f"Neighbor offset ({offset_val}) can cross Folia's 16x16-chunk region-section ownership boundary without Bukkit.isOwnedByCurrentRegion(...) or per-chunk RegionScheduler dispatch.",
+                            "Guard cross-chunk block/entity reads with Bukkit.isOwnedByCurrentRegion(location) or schedule a separate Bukkit.getRegionScheduler().execute(plugin, world, targetChunkX, targetChunkZ, ...) task.",
+                        )
+
+            # CHUNK-IO-007: Synchronous structure or biome search stall
+            if any(tok in low_src for tok in ("locateneareststructure(", "locatenearestbiome(", "locatenearestraid(")):
+                add_finding(
+                    "CHUNK-IO-007",
+                    "SyncStructureOrBiomeLocateStall",
+                    "high",
+                    "World.locateNearestStructure/Biome",
+                    "Synchronous locateNearestStructure / locateNearestBiome scans hundreds of ungenerated chunk headers and biome quarts on the tick thread, causing multi-second watchdog freezes.",
+                    "Pre-compute structure coordinates asynchronously during arena provisioning or bound search radius strictly <= 16 chunks with StructureSearchResult caching.",
+                )
+
+            # CHUNK-IO-008: Full-chunk BlockState snapshot materialization
+            if re.search(r"\.getTileEntities\s*\(\s*\)", cleaned_src):
+                add_finding(
+                    "CHUNK-IO-008",
+                    "FullChunkBlockStateSnapshotMaterialization",
+                    "medium",
+                    "Chunk.getTileEntities()",
+                    "No-arg chunk.getTileEntities() clones defensive BlockState NBT snapshots for every block entity in the chunk on each call.",
+                    "Use Paper's chunk.getTileEntities(block -> block.getType() == Material.HOPPER, false) overload to filter by block type before state allocation and skip NBT snapshot cloning.",
+                )
+
+        # CHUNK-IO-003 (workload): Excessive resident memory pinned by plugin tickets
+        if pinned_ticket_chunks > 2048 and not any(f["rule_id"] == "CHUNK-IO-003" for f in findings):
+            add_finding(
+                "CHUNK-IO-003",
+                "ExcessivePinnedPluginChunkTickets",
+                "high",
+                f"active_plugin_tickets={active_tickets}",
+                f"{active_tickets:,} active plugin tickets (radius {ticket_radius}) pin {pinned_ticket_chunks:,} chunks (~{pinned_ticket_ram_mb:,} MiB) in resident heap, preventing Moonrise chunk unloading.",
+                "Audit ticket owners with '/paper holderinfo' and replace permanent chunk tickets with on-demand getChunkAtAsync loads.",
+            )
+
+        # CHUNK-IO-004 (workload): Little's Law / M/M/c Moonrise queue saturation
+        if saturated or utilization_rho >= 0.80:
+            sev = "critical" if saturated else "high"
+            wait_desc = (
+                f"unbounded queue growth (+{backlog_growth_cps} chunks/s backlog)"
+                if saturated
+                else f"expected M/M/c barrier wait {expected_barrier_ms} ms"
+            )
+            add_finding(
+                "CHUNK-IO-004",
+                "MoonriseQueueSaturationStorm",
+                sev,
+                "MoonriseChunkSystem",
+                f"Chunk arrival rate ({round(arrival_rate_cps, 2)} chunks/s) vs {worker_threads}-worker capacity ({round(service_capacity_cps, 2)} chunks/s) yields utilization rho={round(utilization_rho, 3)} ({wait_desc}).",
+                "Pre-generate world borders offline with Chunky, rate-limit RTP bursts with a token bucket, switch region-file-compression to lz4, or allocate dedicated Moonrise worker-threads.",
+            )
+
+        # CHUNK-IO-005: Config compression / sync-chunk-writes / player generation concurrency
+        if sync_chunk_writes is True:
+            add_finding(
+                "CHUNK-IO-005",
+                "SyncChunkWritesFsyncBottleneck",
+                "high",
+                "server.properties:sync-chunk-writes",
+                "sync-chunk-writes=true forces synchronous OS fsync calls on every region sector write, stalling Moonrise I/O workers on Linux ext4/XFS filesystems.",
+                "Set sync-chunk-writes=false in server.properties on Linux hosts backed by UPS/journaling filesystems.",
+            )
+        if compression in {"zlib", "none"} and (config_text or workload.get("compression")):
+            reason = (
+                "zlib (deflate) inflates Moonrise serialization CPU cost by ~2.6x compared to lz4"
+                if compression == "zlib"
+                else "uncompressed 'none' amplifies NVMe sector read/write bandwidth by ~1.85x"
+            )
+            add_finding(
+                "CHUNK-IO-005",
+                "SuboptimalRegionFileCompression",
+                "medium",
+                f"region-file-compression={compression}",
+                f"region-file-compression='{compression}': {reason}.",
+                "Set region-file-compression=lz4 in server.properties on Paper 1.20.5+ through 26.3+ for optimal throughput-to-IOPS balance.",
+            )
+        if cfg_max_concurrent_gen is not None and cfg_max_concurrent_gen > worker_threads * 2:
+            add_finding(
+                "CHUNK-IO-005",
+                "OversubscribedPlayerChunkGenerates",
+                "medium",
+                "paper-global.yml:player-max-concurrent-chunk-generates",
+                f"player-max-concurrent-chunk-generates ({cfg_max_concurrent_gen}) exceeds 2x Moonrise worker threads ({worker_threads}), allowing a single fast-flying player to monopolize worldgen workers.",
+                "Set chunk-loading-advanced.player-max-concurrent-chunk-generates: -1 (auto) or <= worker_threads.",
+            )
+
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for f in findings:
+            sev = f.get("severity", "low")
+            if sev in severity_counts:
+                severity_counts[sev] += 1
+
+        out: dict[str, Any] = {
+            "status": "fail" if (severity_counts["critical"] + severity_counts["high"]) > 0 else ("warn" if findings else "pass"),
+            "folia_mode": folia,
+            "io_barrier_model": {
+                "cpu_cores": cpu_cores,
+                "worker_threads": worker_threads,
+                "compression": compression,
+                "sync_chunk_writes": bool(sync_chunk_writes),
+                "service_time_per_chunk_ms": round(service_time_ms, 3),
+                "service_capacity_chunks_per_sec": round(service_capacity_cps, 2),
+                "arrival_rate_chunks_per_sec": round(arrival_rate_cps, 2),
+                "utilization_rho": round(utilization_rho, 4),
+                "saturated": saturated,
+                "expected_queue_wait_ms": expected_queue_wait_ms,
+                "expected_total_barrier_ms": expected_barrier_ms,
+                "backlog_growth_chunks_per_sec": backlog_growth_cps,
+                "player_resident_chunks": player_resident_chunks,
+                "pinned_ticket_chunks": pinned_ticket_chunks,
+                "total_resident_chunks": total_resident_chunks,
+                "resident_chunk_ram_mb": resident_chunk_ram_mb,
+                "pinned_ticket_ram_mb": pinned_ticket_ram_mb,
+            },
+            "finding_count": len(findings),
+            "severity_counts": severity_counts,
+            "findings": findings,
+            "remediation_snippets": remediation_snippets,
+        }
+        if sarif:
+            out["sarif_report"] = self._build_sarif_report(findings)
+        return ToolOutcome(_pretty_json(out))
+
+    def _tool_correlate_spark_jfr_traces(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_spark = args.get("spark_profile")
+        raw_jfr = args.get("jfr_events")
+        raw_log = args.get("gc_or_tick_log")
+        if raw_spark is None and raw_jfr is None and raw_log is None:
+            return ToolOutcome(
+                _pretty_json({"error": "Provide at least one of 'spark_profile', 'jfr_events', or 'gc_or_tick_log' to correlate traces."}),
+                is_error=True,
+            )
+
+        spark_text = str(raw_spark or "")
+        sampling_mode = str(args.get("sampling_mode", "cpu")).strip().lower()
+        if sampling_mode not in {"cpu", "wall", "alloc"}:
+            return ToolOutcome(_pretty_json({"error": f"Unsupported sampling_mode: {sampling_mode!r}"}), is_error=True)
+        gc_log = str(raw_log or "")
+        tick_budget_ms = float(args.get("tick_budget_ms") or 50.0)
+        sarif = bool(args.get("sarif", False))
+
+        # 1. Parse Spark profile samples, off-CPU waiting markers, plugin weights, and Folia region thread loads
+        total_spark_samples = 0.0
+        parked_tick_samples = 0.0
+        alloc_hotspot_samples = 0.0
+        plugin_samples: dict[str, float] = {}
+        region_thread_samples: dict[str, float] = {}
+
+        for raw_line in spark_text.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            # Collapsed stack: "Thread;frame1;frame2 120"
+            m_col = re.match(r"^(.+?)\s+(\d+(?:\.\d+)?)$", line)
+            weight = 0.0
+            stack_part = line
+            if m_col and ";" in m_col.group(1):
+                stack_part = m_col.group(1)
+                weight = float(m_col.group(2))
+            else:
+                m_pct = re.search(r"(\d+(?:\.\d+)?)%", line)
+                if m_pct:
+                    weight = float(m_pct.group(1))
+            if weight <= 0.0:
+                continue
+            total_spark_samples += weight
+
+            first_seg = stack_part.split(";", 1)[0].strip()
+            if re.search(r"Region Scheduler Thread #\d+|Folia Region Scheduler #\d+", first_seg, re.IGNORECASE):
+                region_thread_samples[first_seg] = region_thread_samples.get(first_seg, 0.0) + weight
+
+            low_stack = stack_part.lower()
+            is_tick_thread = any(
+                t in low_stack
+                for t in ("server thread", "region scheduler thread", "folia region scheduler", "global region scheduler")
+            )
+            if is_tick_thread and any(
+                w in low_stack
+                for w in ("waitingget", "completablefuture.join", "unsafe.park", "object.wait", "monitorenter")
+            ):
+                parked_tick_samples += weight
+
+            if sampling_mode == "alloc" or any(a in low_stack for a in ("byte[]", "objectallocation", "clone")):
+                alloc_hotspot_samples += weight
+
+            plug = self._infer_plugin_from_text(stack_part)
+            if plug:
+                plugin_samples[plug] = plugin_samples.get(plug, 0.0) + weight
+
+        # 2. Parse JFR events (structured array or text blocks / compact lines)
+        normalized_jfr: list[dict[str, Any]] = []
+        if isinstance(raw_jfr, list):
+            for ev in raw_jfr:
+                if not isinstance(ev, dict):
+                    continue
+                etype = str(ev.get("type") or ev.get("event") or "").strip()
+                start_ms = float(ev.get("start_ms") if ev.get("start_ms") is not None else 0.0)
+                dur_ms = float(ev.get("duration_ms") if ev.get("duration_ms") is not None else 0.0)
+                normalized_jfr.append({
+                    "type": etype,
+                    "start_ms": start_ms,
+                    "end_ms": start_ms + max(0.0, dur_ms),
+                    "duration_ms": max(0.0, dur_ms),
+                    "thread": str(ev.get("thread") or ""),
+                    "monitor_class": str(ev.get("monitor_class") or ""),
+                    "owner_thread": str(ev.get("owner_thread") or ""),
+                    "bytes": int(ev.get("bytes") or 0),
+                    "stack": str(ev.get("stack") or ""),
+                })
+        elif isinstance(raw_jfr, str) and raw_jfr.strip():
+            # Parse JFR print blocks ("jdk.EventName { ... }") and single-line event logs
+            block_pattern = re.compile(r"(jdk\.[A-Za-z0-9_]+)\s*\{([^}]*)\}", re.DOTALL)
+            matched_spans: list[tuple[int, int]] = []
+            for m_blk in block_pattern.finditer(raw_jfr):
+                matched_spans.append(m_blk.span())
+                etype = m_blk.group(1)
+                body = m_blk.group(2)
+                ts = self._parse_timestamp_ms(body) or 0.0
+                m_st = re.search(r"startTime\s*=\s*(\d+(?:\.\d+)?)\s*s", body)
+                if m_st:
+                    ts = float(m_st.group(1)) * 1000.0
+                dur_ms = 0.0
+                m_dur = re.search(r"duration\s*=\s*(\d+(?:\.\d+)?)\s*(ms|s|us|ns)", body)
+                if m_dur:
+                    val = float(m_dur.group(1))
+                    unit = m_dur.group(2)
+                    dur_ms = val * 1000.0 if unit == "s" else (val if unit == "ms" else (val / 1000.0 if unit == "us" else val / 1_000_000.0))
+                m_thr = re.search(r'(?:eventThread|pinnedThread|thread)\s*=\s*"([^"]+)"', body)
+                m_mon = re.search(r"monitorClass\s*=\s*([^\s\n;]+)", body)
+                m_own = re.search(r'previousOwner\s*=\s*"([^"]+)"', body)
+                m_byt = re.search(r"(?:allocationSize|bytes|weight)\s*=\s*(\d+)", body)
+                normalized_jfr.append({
+                    "type": etype,
+                    "start_ms": ts,
+                    "end_ms": ts + dur_ms,
+                    "duration_ms": dur_ms,
+                    "thread": m_thr.group(1) if m_thr else "",
+                    "monitor_class": m_mon.group(1) if m_mon else "",
+                    "owner_thread": m_own.group(1) if m_own else "",
+                    "bytes": int(m_byt.group(1)) if m_byt else 0,
+                    "stack": body,
+                })
+            # Also parse compact single-line JFR summaries outside braces
+            for line in raw_jfr.splitlines():
+                if "{" in line or "}" in line:
+                    continue
+                m_ev = re.search(r"(jdk\.[A-Za-z0-9_]+)", line)
+                if not m_ev:
+                    continue
+                etype = m_ev.group(1)
+                ts = self._parse_timestamp_ms(line) or 0.0
+                dur_ms = 0.0
+                m_dur = re.search(r"(?:duration[=:\s]+)?(\d+(?:\.\d+)?)\s*(ms|s)\b", line)
+                if m_dur and f"[{m_dur.group(1)}s]" not in line:
+                    val = float(m_dur.group(1))
+                    dur_ms = val * 1000.0 if m_dur.group(2) == "s" else val
+                m_thr = re.search(r'thread[=:\s]+"([^"]+)"', line, re.IGNORECASE)
+                m_mon = re.search(r"monitor(?:Class)?[=:\s]+([A-Za-z0-9_.$]+)", line)
+                m_own = re.search(r'owner[=:\s]+"([^"]+)"', line, re.IGNORECASE)
+                m_byt = re.search(r"bytes[=:\s]+(\d+)", line, re.IGNORECASE)
+                normalized_jfr.append({
+                    "type": etype,
+                    "start_ms": ts,
+                    "end_ms": ts + dur_ms,
+                    "duration_ms": dur_ms,
+                    "thread": m_thr.group(1) if m_thr else "",
+                    "monitor_class": m_mon.group(1) if m_mon else "",
+                    "owner_thread": m_own.group(1) if m_own else "",
+                    "bytes": int(m_byt.group(1)) if m_byt else 0,
+                    "stack": line,
+                })
+
+        # 3. Parse GC / Safepoint / Tick-spike intervals from gc_or_tick_log + JFR events
+        tick_intervals: list[tuple[float, float]] = []
+        gc_intervals: list[tuple[float, float]] = []
+        ttsp_intervals: list[tuple[float, float]] = []
+        io_intervals: list[tuple[float, float]] = []
+        lock_intervals: list[tuple[float, float]] = []
+        virtual_pin_ms = 0.0
+        outside_tlab_bytes = 0
+        lock_edges: list[dict[str, Any]] = []
+
+        for ev in normalized_jfr:
+            et = ev["type"]
+            s0, e0, dur = ev["start_ms"], ev["end_ms"], ev["duration_ms"]
+            thr = ev["thread"]
+            if re.search(r"Region Scheduler Thread #\d+|Folia Region Scheduler #\d+", thr, re.IGNORECASE) and dur > 0:
+                region_thread_samples[thr] = region_thread_samples.get(thr, 0.0) + dur
+            if et == "jdk.GarbageCollection" and dur > 0:
+                gc_intervals.append((s0, e0))
+            elif et == "jdk.SafepointBegin" and dur > 0:
+                ttsp_intervals.append((s0, e0))
+            elif et in {"jdk.FileForce", "jdk.FileRead", "jdk.FileWrite", "jdk.SocketRead", "jdk.SocketWrite"} and dur > 0:
+                io_intervals.append((s0, e0))
+            elif et == "jdk.JavaMonitorEnter" and dur > 0:
+                lock_intervals.append((s0, e0))
+                plug = self._infer_plugin_from_text(ev["monitor_class"] + " " + ev["stack"])
+                lock_edges.append({
+                    "waiter": thr or "unknown",
+                    "monitor": ev["monitor_class"] or "ObjectMonitor",
+                    "owner": ev["owner_thread"] or "unknown",
+                    "duration_ms": round(dur, 2),
+                    "plugin": plug,
+                })
+            elif et == "jdk.ThreadPark" and dur > 0:
+                if any(k in ev["stack"].lower() for k in ("completablefuture", "chunk", "hikari")):
+                    io_intervals.append((s0, e0))
+            elif et in {"jdk.ObjectAllocationOutsideTLAB", "jdk.ObjectAllocationSample"}:
+                outside_tlab_bytes += ev["bytes"]
+                plug = self._infer_plugin_from_text(ev["stack"])
+                if plug:
+                    plugin_samples[plug] = plugin_samples.get(plug, 0.0) + max(1.0, ev["bytes"] / 1_048_576.0)
+            elif et == "jdk.VirtualThreadPinned":
+                virtual_pin_ms += dur
+
+        for line in gc_log.splitlines():
+            s_line = line.strip()
+            if not s_line:
+                continue
+            end_ts = self._parse_timestamp_ms(s_line)
+            low_l = s_line.lower()
+
+            # Unified GC pause or ZGC Allocation Stall
+            if ("pause " in low_l or "allocation stall" in low_l or "evacuation failure" in low_l) and "safepoint" not in low_l:
+                m_ms = re.search(r"(\d+(?:\.\d+)?)\s*ms", s_line)
+                if m_ms:
+                    dur = float(m_ms.group(1))
+                    t1 = end_ts if end_ts is not None else dur
+                    gc_intervals.append((max(0.0, t1 - dur), t1))
+                    continue
+
+            # Safepoint TTSP ("Reaching safepoint: 38.4 ms" or "TTSP: 38.4ms" or "Entering safepoint region ... 42ms")
+            m_ttsp = re.search(
+                r"(?:reaching safepoint|ttsp|time to safepoint)\s*[:=]?\s*(\d+(?:\.\d+)?)\s*(ms|ns|us)",
+                s_line,
+                re.IGNORECASE,
+            )
+            if m_ttsp:
+                raw_v = float(m_ttsp.group(1))
+                u = m_ttsp.group(2).lower()
+                dur = raw_v if u == "ms" else (raw_v / 1000.0 if u == "us" else raw_v / 1_000_000.0)
+                t1 = end_ts if end_ts is not None else dur
+                ttsp_intervals.append((max(0.0, t1 - dur), t1))
+                continue
+
+            # Tick duration spikes ("Tick #240 took 185.0ms", "running 210ms behind", "tick duration 164.2ms")
+            if any(k in low_l for k in ("tick", "can't keep up", "mspt", "watchdog")):
+                m_tk = re.search(r"(?:took|duration|running)\s+(\d+(?:\.\d+)?)\s*ms", s_line, re.IGNORECASE)
+                if m_tk:
+                    dur = float(m_tk.group(1))
+                    if dur > tick_budget_ms:
+                        t1 = end_ts if end_ts is not None else dur
+                        tick_intervals.append((max(0.0, t1 - dur), t1))
+
+        merged_ticks = self._merge_intervals(tick_intervals)
+        merged_gc = self._merge_intervals(gc_intervals)
+        merged_ttsp = self._merge_intervals(ttsp_intervals)
+        merged_io = self._merge_intervals(io_intervals)
+        merged_locks = self._merge_intervals(lock_intervals)
+
+        total_gc_ms = round(sum(b - a for a, b in merged_gc), 2)
+        total_ttsp_ms = round(sum(b - a for a, b in merged_ttsp), 2)
+        total_io_ms = round(sum(b - a for a, b in merged_io), 2)
+        total_lock_ms = round(sum(b - a for a, b in merged_locks), 2)
+        worst_tick_ms = round(max((b - a for a, b in merged_ticks), default=0.0), 2)
+        total_spike_ms = round(sum(b - a for a, b in merged_ticks), 2)
+
+        if merged_ticks:
+            ov_gc = self._interval_overlap_ms(merged_ticks, merged_gc)
+            ov_ttsp = self._interval_overlap_ms(merged_ticks, merged_ttsp)
+            ov_io = self._interval_overlap_ms(merged_ticks, merged_io)
+            ov_lock = self._interval_overlap_ms(merged_ticks, merged_locks)
+        else:
+            ov_gc = total_gc_ms
+            ov_ttsp = total_ttsp_ms
+            ov_io = total_io_ms
+            ov_lock = total_lock_ms
+
+        denom = max(total_spike_ms, ov_gc + ov_ttsp + ov_io + ov_lock, 1.0)
+        raw_off_cpu = min(denom, ov_gc + ov_ttsp + ov_io + ov_lock)
+        on_cpu_ms = max(0.0, denom - raw_off_cpu)
+        scale_sum = ov_gc + ov_ttsp + ov_io + ov_lock + on_cpu_ms
+        if scale_sum <= 0:
+            attribution_pct = {
+                "gc_stw": 0.0,
+                "safepoint_ttsp": 0.0,
+                "lock_contention": 0.0,
+                "io_barrier_wait": 0.0,
+                "on_cpu_compute": 100.0,
+            }
+        else:
+            attribution_pct = {
+                "gc_stw": round((ov_gc / scale_sum) * 100.0, 2),
+                "safepoint_ttsp": round((ov_ttsp / scale_sum) * 100.0, 2),
+                "lock_contention": round((ov_lock / scale_sum) * 100.0, 2),
+                "io_barrier_wait": round((ov_io / scale_sum) * 100.0, 2),
+                "on_cpu_compute": round((on_cpu_ms / scale_sum) * 100.0, 2),
+            }
+
+        # Detect directed cycles (deadlocks) in lock_edges
+        adj: dict[str, set[str]] = {}
+        for edge in lock_edges:
+            w = edge["waiter"]
+            o = edge["owner"]
+            if w and o and w != "unknown" and o != "unknown" and w != o:
+                adj.setdefault(w, set()).add(o)
+
+        has_lock_cycle = False
+        visited_global: set[str] = set()
+        for node in list(adj):
+            if node in visited_global:
+                continue
+            stack_path: set[str] = set()
+
+            def _dfs(cur: str) -> bool:
+                visited_global.add(cur)
+                stack_path.add(cur)
+                for nxt in adj.get(cur, ()):
+                    if nxt in stack_path:
+                        return True
+                    if nxt not in visited_global and _dfs(nxt):
+                        return True
+                stack_path.remove(cur)
+                return False
+
+            if _dfs(node):
+                has_lock_cycle = True
+                break
+
+        # Compute Folia region thread Gini skew
+        reg_vals = list(region_thread_samples.values())
+        gini_skew = self._gini_coefficient(reg_vals)
+        max_region_thread = max(region_thread_samples, key=region_thread_samples.get) if region_thread_samples else None
+        max_region_share_pct = (
+            round((region_thread_samples[max_region_thread] / sum(reg_vals)) * 100.0, 2)
+            if max_region_thread and sum(reg_vals) > 0
+            else 0.0
+        )
+
+        findings: list[dict[str, Any]] = []
+        remediation_snippets: list[str] = []
+
+        def add_finding(
+            rule_id: str,
+            name: str,
+            severity: str,
+            location: str,
+            message: str,
+            remediation: str,
+        ) -> None:
+            findings.append({
+                "rule_id": rule_id,
+                "name": name,
+                "severity": severity,
+                "location": location,
+                "message": message,
+                "remediation": remediation,
+            })
+            if remediation not in remediation_snippets:
+                remediation_snippets.append(remediation)
+
+        # CORR-001: CPU-only sampling blind spot hiding off-CPU blocking stalls
+        off_cpu_stall_ms = round(ov_io + ov_lock, 2)
+        if sampling_mode == "cpu" and (off_cpu_stall_ms >= 20.0 or (total_spike_ms >= tick_budget_ms and ov_io + ov_lock > on_cpu_ms)):
+            blind_ratio = round(off_cpu_stall_ms / max(1.0, total_spike_ms or off_cpu_stall_ms), 2)
+            add_finding(
+                "CORR-001",
+                "CpuSamplingOffCpuBlindSpot",
+                "high",
+                "spark:sampling_mode=cpu",
+                f"Spark profile was captured in 'cpu' mode (Runnable threads only), hiding {off_cpu_stall_ms} ms of off-CPU JFR lock/I/O wait (blind-spot ratio {blind_ratio}).",
+                "Re-capture with wall-clock sampling ('/spark profiler start --thread * --timeout 60' without --only-ticks-over CPU filtering) alongside JFR lock/I/O events.",
+            )
+
+        # CORR-002: GC STW or Safepoint TTSP masking plugin CPU frames
+        if ov_gc >= 15.0 or ov_ttsp >= 10.0 or total_gc_ms >= tick_budget_ms * 0.5 or total_ttsp_ms >= 10.0:
+            pause_label = f"GC STW={round(max(ov_gc, total_gc_ms), 1)} ms, Safepoint TTSP={round(max(ov_ttsp, total_ttsp_ms), 1)} ms"
+            add_finding(
+                "CORR-002",
+                "GcOrSafepointTtspPauseMasking",
+                "critical",
+                "JVM:Safepoint/GC",
+                f"JVM stop-the-world pause ({pause_label}) overlaps server tick spikes, inflating apparent duration of interrupted Java frames.",
+                "Switch to Generational ZGC (-XX:+UseZGC -XX:+ZGenerational) or tune G1RegionSize/MaxGCPauseMillis, and pass -XX:+SafepointTimeout -XX:SafepointTimeoutDelay=50 to isolate counted-loop TTSP offenders.",
+            )
+
+        # CORR-003: Cross-thread JavaMonitorEnter lock convoy or cycle
+        tick_lock_edges = [
+            e for e in lock_edges
+            if e["duration_ms"] >= 10.0 or any(k in e["waiter"].lower() for k in ("server thread", "region scheduler"))
+        ]
+        if has_lock_cycle or tick_lock_edges:
+            top_edge = max(lock_edges, key=lambda e: e["duration_ms"]) if lock_edges else None
+            loc = top_edge["monitor"] if top_edge else "JavaMonitorEnter"
+            cyc_note = " (CYCLIC MONITOR DEADLOCK DETECTED)" if has_lock_cycle else ""
+            owner_note = f" held by '{top_edge['owner']}'" if top_edge and top_edge["owner"] != "unknown" else ""
+            add_finding(
+                "CORR-003",
+                "CrossThreadMonitorLockConvoy",
+                "critical",
+                loc,
+                f"Monitor contention on '{loc}'{owner_note} stalled waiter thread(s) for {round(total_lock_ms, 1)} ms{cyc_note}.",
+                "Replace coarse synchronized plugin caches and cross-region shared maps with ConcurrentHashMap, StampedLock optimistic reads, or region-local RegionizedData storage.",
+            )
+
+        # CORR-004: Background FileForce / SocketRead to tick-barrier causal chain
+        has_tick_park = parked_tick_samples > 0 or any(
+            ev["type"] == "jdk.ThreadPark" and any(k in ev["thread"].lower() for k in ("server thread", "region scheduler"))
+            for ev in normalized_jfr
+        )
+        if total_io_ms >= 15.0 and (ov_io >= 10.0 or has_tick_park):
+            add_finding(
+                "CORR-004",
+                "AsyncIoToTickBarrierCausalChain",
+                "critical",
+                "JFR:FileForce/SocketRead->TickBarrier",
+                f"Background disk fsync or network SocketRead stall ({total_io_ms} ms) temporally overlaps parked tick-thread barriers, proving an off-thread I/O stall propagated into MSPT.",
+                "Eliminate synchronous CompletableFuture.join() barriers on tick threads, set sync-chunk-writes=false, and enforce a <=3000ms timeout on async HTTP/JDBC pools.",
+            )
+
+        # CORR-005: Outside-TLAB / humongous allocation churn driving GC pauses
+        outside_tlab_mb = round(outside_tlab_bytes / 1_048_576.0, 2)
+        alloc_share_pct = round((alloc_hotspot_samples / total_spark_samples) * 100.0, 2) if total_spark_samples > 0 else 0.0
+        if (outside_tlab_mb >= 8.0 or (sampling_mode == "alloc" and alloc_share_pct >= 25.0)) and (total_gc_ms >= 15.0 or outside_tlab_mb >= 32.0):
+            top_plug = max(plugin_samples, key=plugin_samples.get) if plugin_samples else "HeapAllocator"
+            add_finding(
+                "CORR-005",
+                "AllocationChurnDrivingGcStalls",
+                "high",
+                top_plug,
+                f"High outside-TLAB allocation churn ({outside_tlab_mb} MiB recorded; alloc frame share {alloc_share_pct}%) correlates with {total_gc_ms} ms of GC pause pressure.",
+                "Reuse thread-local ByteBuf/scratch arrays, avoid per-tick ItemStack/NBT/BlockState defensive cloning, and increase -XX:G1HeapRegionSize=16M if humongous arrays exceed 50% of region size.",
+            )
+
+        # CORR-006: JDK 21/25 virtual-thread carrier pinning
+        if virtual_pin_ms >= 10.0:
+            add_finding(
+                "CORR-006",
+                "VirtualThreadCarrierPinning",
+                "high",
+                "jdk.VirtualThreadPinned",
+                f"Virtual thread(s) pinned ForkJoinPool carrier threads for {round(virtual_pin_ms, 2)} ms inside synchronized monitors or JNI calls.",
+                "Replace 'synchronized' blocks around JDBC/HTTP I/O with java.util.concurrent.locks.ReentrantLock or upgrade to JDK 24/25 JEP 491 unpinned object monitors.",
+            )
+
+        # CORR-007: Folia region thread Gini skew imbalance
+        if len(region_thread_samples) >= 2 and (gini_skew >= 0.35 or max_region_share_pct >= 65.0):
+            add_finding(
+                "CORR-007",
+                "FoliaRegionThreadSkewImbalance",
+                "high",
+                max_region_thread or "FoliaRegionScheduler",
+                f"Single hot region thread '{max_region_thread}' consumes {max_region_share_pct}% of regional execution weight across {len(region_thread_samples)} active region threads (Gini={gini_skew}).",
+                "Shard player hubs, boss arenas, or dense entity farms across chunk distances > 32 chunks so Folia's regionizer splits the hot region onto independent worker cores.",
+            )
+
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for f in findings:
+            sev = f.get("severity", "low")
+            if sev in severity_counts:
+                severity_counts[sev] += 1
+
+        all_bounds = merged_ticks + merged_gc + merged_ttsp + merged_io + merged_locks
+        window_ms = round(max((b for _, b in all_bounds), default=0.0) - min((a for a, _ in all_bounds), default=0.0), 2)
+        out: dict[str, Any] = {
+            "status": "fail" if (severity_counts["critical"] + severity_counts["high"]) > 0 else ("warn" if findings else "pass"),
+            "sampling_mode": sampling_mode,
+            "tick_budget_ms": tick_budget_ms,
+            "correlation_matrix": {
+                "timeline_window_ms": window_ms,
+                "tick_spike_count": len(merged_ticks),
+                "worst_tick_ms": worst_tick_ms,
+                "total_spike_ms": total_spike_ms,
+                "overlapping_gc_ms": round(ov_gc, 2),
+                "overlapping_ttsp_ms": round(ov_ttsp, 2),
+                "overlapping_io_ms": round(ov_io, 2),
+                "overlapping_lock_ms": round(ov_lock, 2),
+                "outside_tlab_mb": outside_tlab_mb,
+                "pinned_virtual_thread_ms": round(virtual_pin_ms, 2),
+                "has_lock_cycle": has_lock_cycle,
+                "spike_attribution_pct": attribution_pct,
+                "lock_wait_graph": lock_edges,
+                "plugin_attribution_weights": {k: round(v, 2) for k, v in sorted(plugin_samples.items(), key=lambda kv: -kv[1])},
+                "region_skew": {
+                    "region_thread_count": len(region_thread_samples),
+                    "max_region_thread": max_region_thread,
+                    "max_share_pct": max_region_share_pct,
+                    "gini_coefficient": gini_skew,
+                },
             },
             "finding_count": len(findings),
             "severity_counts": severity_counts,

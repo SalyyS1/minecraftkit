@@ -70,7 +70,7 @@
     var config = {
       ecosystem: ["Ecosystem atlas", "Pinned sources, exact versions, and platform contracts."],
       api: ["RPG API explorer", "Search the deep, local symbol catalog without leaving the Kit wiki."],
-      playground: ["Diagnostics lab", "Offline Spark flamegraph hotspot classifier, 4-domain Folia trace verifier, and Netty/HikariCP persistence auditor."]
+      playground: ["Diagnostics lab", "Offline Spark flamegraph, 4-domain Folia trace, Netty/HikariCP persistence, and Moonrise chunk I/O + JFR correlation lab."]
     }[page];
     if (!config) { return; }
     var main = document.querySelector("main");

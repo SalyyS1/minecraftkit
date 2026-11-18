@@ -116,9 +116,53 @@
           "    new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(\"myrpg\", \"rune_sync\"));",
           "public static final StreamCodec<RegistryFriendlyByteBuf, RuneSyncPayload> CODEC = StreamCodec.composite(",
           "    ByteBufCodecs.VAR_INT, RuneSyncPayload::slot,",
-          "    ByteBufCodecs.stringUtf8(64), RuneSyncPayload::runeId,",
+            "    ByteBufCodecs.stringUtf8(64), RuneSyncPayload::runeId,",
           "    RuneSyncPayload::new",
           ");"
+        ].join("\n")
+      }
+    ],
+    chunk_jfr: [
+      {
+        label: "Moonrise: Sync Load + Join Deadlock + Ticket Leak",
+        text: [
+          "sync-chunk-writes=true",
+          "region-file-compression=zlib",
+          "plugin_tickets: 120",
+          "public void teleportGuildRaid(World world, int cx, int cz, Plugin plugin) {",
+          "    Chunk syncChunk = world.getChunkAt(cx + 2, cz);",
+          "    world.addPluginChunkTicket(cx, cz, plugin);",
+          "    BlockState[] tiles = syncChunk.getTileEntities();",
+          "    world.locateNearestStructure(syncChunk.getBlock(0, 64, 0).getLocation(), StructureType.MINESHAFT, 64, false);",
+          "    for (int i = 0; i < 32; i++) {",
+          "        world.getChunkAtAsync(cx + i, cz).join();",
+          "    }",
+          "}"
+        ].join("\n")
+      },
+      {
+        label: "JFR + GC STW + Monitor Convoy + Region Skew",
+        text: [
+          "[12.200s] Tick #244 took 190.0ms",
+          "[12.160s][info][gc] GC(18) Pause Young (Evacuation Failure) 95.0ms",
+          "[12.195s][info][safepoint] Safepoint: Reaching safepoint: 24.5 ms",
+          "jdk.JavaMonitorEnter { startTime = 12.040s, duration = 64.0 ms, monitorClass = com.myrpg.cache.GuildVaultLock, eventThread = \"Region Scheduler Thread #0\", previousOwner = \"Folia Async Scheduler Thread #2\" }",
+          "jdk.FileForce { startTime = 12.050s, duration = 48.0 ms, eventThread = \"RegionFile I/O #0\" }",
+          "jdk.VirtualThreadPinned { startTime = 12.080s, duration = 22.0 ms, eventThread = \"VirtualThread-44\" }",
+          "Region Scheduler Thread #0;io.papermc.paper.threadedregions.TickRegions.tickRegion;java.util.concurrent.CompletableFuture.waitingGet 380",
+          "Region Scheduler Thread #1;io.papermc.paper.threadedregions.TickRegions.tickRegion 20"
+        ].join("\n")
+      },
+      {
+        label: "Clean Async Chunk + LZ4 Healthy Pipeline",
+        text: [
+          "sync-chunk-writes=false",
+          "region-file-compression=lz4",
+          "world.getChunkAtAsync(cx, cz, true, false).thenAccept(chunk -> {",
+          "    Bukkit.getRegionScheduler().execute(plugin, world, cx, cz, () -> {",
+          "        chunk.getTileEntities(b -> b.getType() == Material.CHEST, false);",
+          "    });",
+          "});"
         ].join("\n")
       }
     ]
@@ -604,6 +648,131 @@
     };
   }
 
+  function analyzeChunkAndJfr(src) {
+    var findings = [];
+    var low = src.toLowerCase();
+    var pinnedTickets = 0;
+    var tktMatch = src.match(/plugin[_ -]?tickets?\s*[:=]\s*(\d+)/i);
+    if (tktMatch) { pinnedTickets = parseInt(tktMatch[1], 10); }
+    var pinnedRamMb = Math.round(pinnedTickets * 25 * 0.09375 * 10) / 10;
+
+    if (/\.(?:getChunkAt\s*\(|getChunk\s*\(\s*\)|loadChunk\s*\()/.test(src)) {
+      findings.push({
+        rule_id: "CHUNK-IO-001", severity: "critical", frame: "World.getChunkAt", domain: "CHUNK-IO",
+        message: "Synchronous chunk load stalls tick thread behind Moonrise I/O and worldgen barriers.",
+        remediation: "Switch to world.getChunkAtAsync(x, z, true).thenAccept(...) and marshal work onto RegionScheduler."
+      });
+    }
+    if (/(?:getChunkAtAsync|teleportAsync)\s*\([^;]*?\)\s*\.\s*(?:join|get)\s*\(/.test(src)) {
+      findings.push({
+        rule_id: "CHUNK-IO-002", severity: "critical", frame: "CompletableFuture.join", domain: "CHUNK-IO",
+        message: "Blocking .join()/.get() on async chunk future risks Moonrise task-queue barrier self-deadlock.",
+        remediation: "Attach non-blocking .thenAccept(...) continuations instead of blocking the calling thread."
+      });
+    }
+    if ((/addPluginChunkTicket\s*\(/.test(src) && !/removePluginChunkTicket/.test(src)) || pinnedTickets > 80) {
+      findings.push({
+        rule_id: "CHUNK-IO-003", severity: "high", frame: "PluginChunkTicket", domain: "CHUNK-IO",
+        message: "Unreleased plugin chunk tickets pin resident chunks (25 chunks / ~2.34 MiB per level-31 ticket).",
+        remediation: "Release tickets on expiry and invoke world.removePluginChunkTickets(plugin) in onDisable()."
+      });
+    }
+    if (/\b(?:for|while)\s*\([^)]*\)\s*\{[\s\S]*?(?:getChunkAtAsync|teleportAsync)/.test(src) && low.indexOf("semaphore") < 0) {
+      findings.push({
+        rule_id: "CHUNK-IO-004", severity: "high", frame: "BatchChunkLoop", domain: "CHUNK-IO",
+        message: "Unbounded async chunk burst saturates Moonrise worker queues (rho >= 1.0).",
+        remediation: "Bound concurrent loads behind a Semaphore (4-8 permits) and pass urgent=false."
+      });
+    }
+    if (/sync-chunk-writes\s*[=:]\s*true/i.test(src) || /region-file-compression\s*[=:]\s*(?:zlib|none)/i.test(src)) {
+      findings.push({
+        rule_id: "CHUNK-IO-005", severity: "high", frame: "RegionFileStorage", domain: "CHUNK-IO",
+        message: "sync-chunk-writes=true or non-LZ4 region compression inflates Moonrise sector write/decode latency.",
+        remediation: "Set sync-chunk-writes=false and region-file-compression=lz4 in server.properties."
+      });
+    }
+    if (/(?:getChunkAt|getBlockAt)\s*\([^)]*[+-]\s*[1-9]\d*/.test(src) && low.indexOf("getregionscheduler()") < 0) {
+      findings.push({
+        rule_id: "CHUNK-IO-006", severity: "critical", frame: "RegionNeighborhood", domain: "FOLIA-CHUNK",
+        message: "Neighbor chunk offset can cross Folia 16x16-chunk region-section boundary without ownership check.",
+        remediation: "Guard neighbor access with Bukkit.isOwnedByCurrentRegion(loc) or dispatch via RegionScheduler."
+      });
+    }
+    if (low.indexOf("locateneareststructure(") >= 0 || low.indexOf("locatenearestbiome(") >= 0) {
+      findings.push({
+        rule_id: "CHUNK-IO-007", severity: "high", frame: "World.locateNearestStructure", domain: "CHUNK-IO",
+        message: "Synchronous structure/biome lookup scans ungenerated region headers on the tick thread.",
+        remediation: "Pre-index structure coordinates offline or cap radius <= 16 chunks with result caching."
+      });
+    }
+    if (/\.getTileEntities\s*\(\s*\)/.test(src)) {
+      findings.push({
+        rule_id: "CHUNK-IO-008", severity: "medium", frame: "Chunk.getTileEntities()", domain: "CHUNK-IO",
+        message: "No-arg getTileEntities() clones full NBT BlockState snapshots for every tile in the chunk.",
+        remediation: "Use chunk.getTileEntities(predicate, false) to avoid defensive snapshot cloning."
+      });
+    }
+
+    var gcPauseMs = 0;
+    var gcM = src.match(/Pause Young[^\n]*?(\d+(?:\.\d+)?)\s*ms/i) || src.match(/Allocation Stall[^\n]*?(\d+(?:\.\d+)?)\s*ms/i);
+    if (gcM) { gcPauseMs += parseFloat(gcM[1]); }
+    var ttspM = src.match(/Reaching safepoint:\s*(\d+(?:\.\d+)?)\s*ms/i);
+    if (ttspM) { gcPauseMs += parseFloat(ttspM[1]); }
+    if (gcPauseMs >= 15) {
+      findings.push({
+        rule_id: "CORR-002", severity: "critical", frame: "JVM:GC+Safepoint", domain: "JFR-CORR",
+        message: "STW GC / Safepoint TTSP pause (" + gcPauseMs.toFixed(1) + " ms) overlaps tick spike and masks Java CPU frames.",
+        remediation: "Enable Generational ZGC (-XX:+UseZGC -XX:+ZGenerational) and diagnose TTSP with -XX:+SafepointTimeout."
+      });
+    }
+    if (low.indexOf("jdk.javamonitorenter") >= 0) {
+      findings.push({
+        rule_id: "CORR-003", severity: "critical", frame: "jdk.JavaMonitorEnter", domain: "JFR-CORR",
+        message: "Cross-thread monitor lock convoy stalls Region/Server tick thread behind background worker.",
+        remediation: "Replace coarse synchronized caches with ConcurrentHashMap or Folia RegionizedData."
+      });
+    }
+    if ((low.indexOf("jdk.fileforce") >= 0 || low.indexOf("jdk.socketread") >= 0) && low.indexOf("waitingget") >= 0) {
+      findings.push({
+        rule_id: "CORR-004", severity: "critical", frame: "JFR:FileForce->waitingGet", domain: "JFR-CORR",
+        message: "Background disk fsync / socket stall overlaps tick thread parked in CompletableFuture.waitingGet.",
+        remediation: "Remove tick-thread future .join() barriers and disable synchronous region fsync."
+      });
+    }
+    if (low.indexOf("jdk.virtualthreadpinned") >= 0) {
+      findings.push({
+        rule_id: "CORR-006", severity: "high", frame: "jdk.VirtualThreadPinned", domain: "JFR-CORR",
+        message: "Virtual thread pinned carrier thread inside synchronized monitor or JNI call.",
+        remediation: "Migrate I/O locks to ReentrantLock or run on JDK 25 JEP 491 unpinned monitors."
+      });
+    }
+    var regLoads = [];
+    src.split(/\r?\n/).forEach(function (ln) {
+      var m = ln.match(/^(?:Folia )?Region Scheduler Thread #\d+;.+?\s+(\d+(?:\.\d+)?)$/i);
+      if (m) { regLoads.push(parseFloat(m[1])); }
+    });
+    if (regLoads.length >= 2) {
+      var sumR = regLoads.reduce(function (a, b) { return a + b; }, 0);
+      var maxR = Math.max.apply(null, regLoads);
+      if (sumR > 0 && (maxR / sumR) >= 0.65) {
+        findings.push({
+          rule_id: "CORR-007", severity: "high", frame: "FoliaRegionScheduler", domain: "JFR-CORR",
+          message: "Hot Folia region consumes " + Math.round((maxR / sumR) * 100) + "% of regional tick weight across " + regLoads.length + " threads.",
+          remediation: "Shard dense hubs and boss arenas > 32 chunks apart so Folia splits region ownership."
+        });
+      }
+    }
+
+    return {
+      tool: "mc_profile_chunk_io_barriers+mc_correlate_spark_jfr_traces",
+      status: findings.length ? "fail" : "pass",
+      stw_pause_ms: Math.round(gcPauseMs * 10) / 10,
+      pinned_ram_mb: pinnedRamMb,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
   function toSarif(report) {
     return {
       version: "2.1.0",
@@ -612,7 +781,7 @@
           tool: {
             driver: {
               name: "minecraftkit",
-              semanticVersion: "2.9.0",
+              semanticVersion: "3.0.0",
               rules: report.findings.map(function (f) {
                 return { id: f.rule_id, shortDescription: { text: f.message } };
               })
@@ -638,6 +807,7 @@
   var tabSpark = document.getElementById("tab-spark");
   var tabFolia = document.getElementById("tab-folia");
   var tabProtoSql = document.getElementById("tab-protocol-sql");
+  var tabChunkJfr = document.getElementById("tab-chunk-jfr");
   var presetBox = document.getElementById("preset-buttons");
   var inputHeading = document.getElementById("input-heading");
   var inputSubtitle = document.getElementById("input-subtitle");
@@ -684,6 +854,13 @@
         [report.domains_detected.join(", ") || "NONE", "Domains"],
         [report.finding_count, "Violations"]
       ]);
+    } else if (mode === "chunk_jfr") {
+      renderMetrics([
+        [report.status.toUpperCase(), "Verdict"],
+        [report.stw_pause_ms + " ms", "GC + TTSP Overlap"],
+        [report.pinned_ram_mb + " MiB", "Pinned Ticket RAM"],
+        [report.finding_count, "Violations"]
+      ]);
     } else {
       renderMetrics([
         [report.status.toUpperCase(), "Verdict"],
@@ -724,6 +901,8 @@
       renderReport(analyzeSpark(traceInput.value, thr));
     } else if (mode === "folia") {
       renderReport(analyzeFolia(traceInput.value, domainSelect.value));
+    } else if (mode === "chunk_jfr") {
+      renderReport(analyzeChunkAndJfr(traceInput.value));
     } else {
       renderReport(analyzeProtocolAndSql(traceInput.value));
     }
@@ -749,6 +928,7 @@
     var isSpark = mode === "spark";
     var isFolia = mode === "folia";
     var isProtoSql = mode === "protocol_sql";
+    var isChunkJfr = mode === "chunk_jfr";
     tabSpark.classList.toggle("is-active", isSpark);
     tabSpark.setAttribute("aria-selected", String(isSpark));
     tabFolia.classList.toggle("is-active", isFolia);
@@ -756,6 +936,10 @@
     if (tabProtoSql) {
       tabProtoSql.classList.toggle("is-active", isProtoSql);
       tabProtoSql.setAttribute("aria-selected", String(isProtoSql));
+    }
+    if (tabChunkJfr) {
+      tabChunkJfr.classList.toggle("is-active", isChunkJfr);
+      tabChunkJfr.setAttribute("aria-selected", String(isChunkJfr));
     }
     thresholdWrap.hidden = !isSpark;
     domainWrap.hidden = !isFolia;
@@ -765,6 +949,9 @@
     } else if (isFolia) {
       inputHeading.textContent = "Folia Stack Trace or Multi-Thread Dump";
       inputSubtitle.textContent = "Verifies Folia 4-domain state ownership across REGION, ENTITY, GLOBAL, ASYNC, and NETTY threads.";
+    } else if (isChunkJfr) {
+      inputHeading.textContent = "Moonrise Chunk I/O Pipeline or Spark + JFR + GC Timeline";
+      inputSubtitle.textContent = "Profiles Moonrise chunk barriers and ticket RAM (CHUNK-IO-001..008) and correlates JFR lock/I/O/GC pauses (CORR-001..007).";
     } else {
       inputHeading.textContent = "Netty StreamCodec or HikariCP / SQL Persistence Snippet";
       inputSubtitle.textContent = "Computes worst-case LEB128/UTF-8 wire-byte budgets (NETTY-001..008) and audits sync JDBC, resource leaks, and Folia callbacks (SQL-001..007).";
@@ -778,6 +965,9 @@
   tabFolia.addEventListener("click", function () { switchMode("folia"); });
   if (tabProtoSql) {
     tabProtoSql.addEventListener("click", function () { switchMode("protocol_sql"); });
+  }
+  if (tabChunkJfr) {
+    tabChunkJfr.addEventListener("click", function () { switchMode("chunk_jfr"); });
   }
   runBtn.addEventListener("click", runAudit);
   sarifBtn.addEventListener("click", function () {

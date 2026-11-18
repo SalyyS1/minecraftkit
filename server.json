@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.SalyyS1/minecraftkit",
-  "description": "Offline Minecraft Paper 26.3, Folia, Spark flamegraph, scheduler affinity, Netty StreamCodec, HikariCP/SQLite, item component, Gradle, crash report, datapack, and RPG plugin API MCP server (19 tools, 23 resources, 10 prompts).",
-  "version": "2.9.0",
+  "description": "Offline Minecraft Paper 26.3, Folia, Moonrise chunk I/O barrier, Spark/JFR trace correlation, scheduler affinity, Netty StreamCodec, HikariCP/SQLite, item component, Gradle, crash report, datapack, and RPG plugin API MCP server (21 tools, 23 resources, 10 prompts).",
+  "version": "3.0.0",
   "repository": {
     "url": "https://github.com/SalyyS1/minecraftkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "minecraftkit",
-      "version": "2.9.0",
+      "version": "3.0.0",
       "transport": {
         "type": "stdio"
       },

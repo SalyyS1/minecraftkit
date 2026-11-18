@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Offline Spark flamegraph hotspot classifier, 4-domain Folia scheduler trace verifier, and Netty StreamCodec &amp; HikariCP persistence auditor for Minecraft Paper and Folia servers.">
+  <meta name="description" content="Offline Spark flamegraph hotspot classifier, 4-domain Folia scheduler trace verifier, Netty StreamCodec &amp; HikariCP persistence auditor, and Moonrise chunk I/O &amp; JFR trace correlator for Minecraft Paper and Folia servers.">
   <title>Salyyy Minecraft Kit | Diagnostics Lab</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2306141b'/%3E%3Cpath d='M14 14h36v36H14z' fill='none' stroke='%2352edc5' stroke-width='4'/%3E%3Cpath d='M22 40V24h6l4 7 4-7h6v16h-5V31l-5 8-5-8v9z' fill='%2383f7dc'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="playground.css">
@@ -23,6 +23,9 @@
         </button>
         <button id="tab-protocol-sql" class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="protocol_sql">
           Netty &amp; SQL Auditor (mc_audit_packet_codec / mc_audit_sql_persistence)
+        </button>
+        <button id="tab-chunk-jfr" class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="chunk_jfr">
+          Chunk I/O &amp; JFR Correlator (mc_profile_chunk_io_barriers / mc_correlate_spark_jfr_traces)
         </button>
       </div>
 
@@ -81,7 +84,7 @@
   </main>
 
   <footer class="lab-footer">
-    <p>Salyyy Minecraft Kit v2.9.0 Diagnostics Lab. Client-side execution only; zero network calls.</p>
+    <p>Salyyy Minecraft Kit v3.0.0 Diagnostics Lab. Client-side execution only; zero network calls.</p>
   </footer>
 
   <script src="playground.js"></script>
