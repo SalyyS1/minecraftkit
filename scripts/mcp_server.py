@@ -860,6 +860,134 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_packet_codec",
+        "title": "Audit Netty StreamCodec, CustomPacketPayload & Wire-Byte Budgets",
+        "description": (
+            "Audit Minecraft 1.20.5 through 26.3+ custom packet codecs, Netty handlers, PacketEvents/ProtocolLib "
+            "listeners, and Paper/Velocity plugin messaging channels. Computes exact LEB128 VarInt and worst-case "
+            "UTF-8/collection wire-byte budgets against ServerboundCustomPayloadPacket (32,767 B), "
+            "ClientboundCustomPayloadPacket (1,048,576 B), and proxy messaging caps, and evaluates NETTY-001 through "
+            "NETTY-008: unbounded serverbound decode DoS, wire-budget overflow, Netty EventLoop world/blocking calls, "
+            "ByteBuf reference-count leaks, invalid ResourceLocation channel keys, asymmetric encode/decode field order, "
+            "CONFIGURATION vs PLAY phase mismatches, and plain FriendlyByteBuf usage with RegistryAccess codecs."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "description": "Optional Java/Kotlin StreamCodec, CustomPacketPayload, PacketEvents, or PluginMessageListener snippet.",
+                },
+                "fields": {
+                    "type": "array",
+                    "description": "Optional declared wire fields in encode/decode order for exact byte-budget accounting.",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "type": {
+                                "type": "string",
+                                "enum": [
+                                    "boolean", "byte", "short", "int", "long", "float", "double",
+                                    "varint", "varlong", "uuid", "blockpos", "utf8", "byte_array",
+                                    "item_stack", "nbt", "collection",
+                                ],
+                            },
+                            "max_length": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "Max UTF-16 code units for utf8 or max byte length for byte_array.",
+                            },
+                            "max_count": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "Max element count for collection fields.",
+                            },
+                            "element_type": {
+                                "type": "string",
+                                "description": "Element primitive type when type is collection (default varint).",
+                            },
+                            "element_max_length": {
+                                "type": "integer",
+                                "minimum": 0,
+                                "description": "Max length per element when element_type is utf8 or byte_array.",
+                            },
+                        },
+                        "required": ["name", "type"],
+                        "additionalProperties": False,
+                    },
+                },
+                "direction": {
+                    "type": "string",
+                    "enum": ["serverbound", "clientbound", "velocity_plugin_message"],
+                    "description": "Packet transport direction determining wire payload byte cap (default 'serverbound').",
+                },
+                "channel": {
+                    "type": "string",
+                    "description": "Optional namespace:path channel ResourceLocation identifier.",
+                },
+                "phase": {
+                    "type": "string",
+                    "enum": ["play", "configuration"],
+                    "description": "Protocol connection phase (default 'play').",
+                },
+                "sarif": {
+                    "type": "boolean",
+                    "description": "Whether to include an OASIS SARIF v2.1.0 report under sarif_report (default false).",
+                },
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_audit_sql_persistence",
+        "title": "Audit HikariCP Pool Sizing, SQLite WAL & Folia Async Persistence",
+        "description": (
+            "Audit Minecraft Paper, Folia, and Velocity plugin SQL persistence layers and HikariCP configurations "
+            "across SQL-001 through SQL-007: synchronous JDBC calls on main/region tick threads, HikariCP maxLifetime "
+            "vs MySQL wait_timeout socket resets and fleet max_connections exhaustion, SQLite multi-connection "
+            "SQLITE_BUSY contention without WAL, unclosed Connection/PreparedStatement resource leaks, SQL string "
+            "interpolation injection, direct Bukkit/Folia world/entity mutation inside async DB completion callbacks, "
+            "and missing MySQL/MariaDB server prepared-statement cache properties."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "description": "Optional Java/Kotlin repository, DAO, listener, or HikariConfig setup code.",
+                },
+                "hikari_config": {
+                    "type": "object",
+                    "description": "Optional HikariCP and database timeout parameters.",
+                    "properties": {
+                        "jdbc_url": {"type": "string"},
+                        "maximum_pool_size": {"type": "integer", "minimum": 1},
+                        "minimum_idle": {"type": "integer", "minimum": 0},
+                        "max_lifetime_ms": {"type": "integer", "minimum": 1000},
+                        "connection_timeout_ms": {"type": "integer", "minimum": 250},
+                        "leak_detection_threshold_ms": {"type": "integer", "minimum": 0},
+                        "mysql_wait_timeout_sec": {"type": "integer", "minimum": 10},
+                        "server_count": {"type": "integer", "minimum": 1},
+                        "cache_prep_stmts": {"type": "boolean"},
+                    },
+                    "additionalProperties": False,
+                },
+                "folia": {
+                    "type": "boolean",
+                    "description": "Whether the plugin targets Folia regionized multithreading (default true).",
+                },
+                "sarif": {
+                    "type": "boolean",
+                    "description": "Whether to include an OASIS SARIF v2.1.0 report under sarif_report (default false).",
+                },
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -1850,6 +1978,8 @@ class MinecraftKitMcpServer:
             "mc_audit_datapack": self._tool_audit_datapack,
             "mc_audit_spark_flamegraph": self._tool_audit_spark_flamegraph,
             "mc_analyze_folia_scheduler_trace": self._tool_analyze_folia_scheduler_trace,
+            "mc_audit_packet_codec": self._tool_audit_packet_codec,
+            "mc_audit_sql_persistence": self._tool_audit_sql_persistence,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -1927,9 +2057,10 @@ class MinecraftKitMcpServer:
                 "hierarchies and signatures, mc_generate_pack_overlay, mc_validate_item_components, and mc_audit_datapack "
                 "for multi-version pack.mcmeta, Paper 26.3 item components, and datapack recipe/tag validation, "
                 "and mc_audit_gradle_build / mc_audit_paper_plugin_yml / mc_audit_server_properties / "
+                "mc_audit_packet_codec / mc_audit_sql_persistence / "
                 "mc_folia_migration_advisor / mc_analyze_folia_scheduler_trace / mc_audit_spark_flamegraph / "
-                "mc_diagnose_server_log / mc_diagnose_crash_report for static build, descriptor, network/Netty config, "
-                "4-domain Folia scheduler affinity, Spark flamegraph hotspots, and crash-log/report verification."
+                "mc_diagnose_server_log / mc_diagnose_crash_report for static build, descriptor, network/Netty wire codecs, "
+                "HikariCP/SQLite persistence, 4-domain Folia scheduler affinity, Spark flamegraph hotspots, and crash-log/report verification."
             ),
         }
 
@@ -5522,7 +5653,13 @@ class MinecraftKitMcpServer:
                 "level": level,
                 "message": {"text": str(f.get("message", ""))},
             }
-            loc_target = f.get("frame") or f.get("violating_frame") or f.get("thread")
+            loc_target = (
+                f.get("frame")
+                or f.get("violating_frame")
+                or f.get("thread")
+                or f.get("location")
+                or f.get("field")
+            )
             if loc_target:
                 entry["locations"] = [
                     {
@@ -6419,6 +6556,785 @@ class MinecraftKitMcpServer:
         if sarif:
             out["sarif_report"] = self._build_sarif_report(findings)
 
+        return ToolOutcome(_pretty_json(out))
+
+    @staticmethod
+    def _varint_wire_bytes(value: int) -> int:
+        if value < 0:
+            return 5
+        if value < (1 << 7):
+            return 1
+        if value < (1 << 14):
+            return 2
+        if value < (1 << 21):
+            return 3
+        if value < (1 << 28):
+            return 4
+        return 5
+
+    @classmethod
+    def _primitive_wire_bounds(
+        cls,
+        ftype: str,
+        max_length: int | None = None,
+    ) -> tuple[int, int, bool]:
+        """Return (min_bytes, max_bytes, is_unbounded) for a single non-collection protocol primitive."""
+        kind = ftype.lower().strip()
+        if kind in {"boolean", "byte"}:
+            return 1, 1, False
+        if kind == "short":
+            return 2, 2, False
+        if kind in {"int", "float"}:
+            return 4, 4, False
+        if kind in {"long", "double", "blockpos"}:
+            return 8, 8, False
+        if kind == "uuid":
+            return 16, 16, False
+        if kind == "varint":
+            return 1, 5, False
+        if kind == "varlong":
+            return 1, 10, False
+        if kind == "utf8":
+            if max_length is None:
+                # Mojang FriendlyByteBuf.readUtf() default cap is 32767 UTF-16 units -> up to 98301 UTF-8 bytes
+                max_utf8 = 32767 * 3
+                return 1, cls._varint_wire_bytes(max_utf8) + max_utf8, True
+            max_utf8 = max_length * 3
+            return 1, cls._varint_wire_bytes(max_utf8) + max_utf8, False
+        if kind == "byte_array":
+            if max_length is None:
+                # Unbounded ByteBufCodecs.BYTE_ARRAY / readByteArray() defaults to entire readable buffer
+                default_cap = 1_048_576
+                return 1, cls._varint_wire_bytes(default_cap) + default_cap, True
+            return 1, cls._varint_wire_bytes(max_length) + max_length, False
+        if kind == "item_stack":
+            # Empty ItemStack is 1 byte (count=0 VarInt); DataComponentPatch-heavy stack bounded conservatively at 65536 B
+            return 1, 65_536, max_length is None
+        if kind == "nbt":
+            # Mojang NbtAccounter.defaultQuota() is 2 MiB (2,097,152 bytes) unless capped
+            cap = max_length if max_length is not None else 2_097_152
+            return 1, cap, max_length is None
+        return 1, 5, False
+
+    def _tool_audit_packet_codec(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_source = args.get("source")
+        raw_fields = args.get("fields")
+        if raw_source is None and raw_fields is None:
+            return ToolOutcome(
+                "Provide at least 'source' (Java/Kotlin codec or listener snippet) or 'fields' (wire layout).",
+                is_error=True,
+            )
+        source = str(raw_source or "")
+        direction = str(args.get("direction", "serverbound")).strip().lower()
+        if direction not in {"serverbound", "clientbound", "velocity_plugin_message"}:
+            return ToolOutcome(f"Unsupported direction: {direction!r}", is_error=True)
+        phase = str(args.get("phase", "play")).strip().lower()
+        if phase not in {"play", "configuration"}:
+            return ToolOutcome(f"Unsupported phase: {phase!r}", is_error=True)
+        sarif = bool(args.get("sarif", False))
+
+        cap_bytes = 1_048_576 if direction == "clientbound" else 32_767
+
+        # Resolve channel identifier from explicit arg or source snippet
+        channel = str(args.get("channel") or "").strip()
+        if not channel and source:
+            m_rl = re.search(
+                r'(?:ResourceLocation\.fromNamespaceAndPath|Key\.key)\s*\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)',
+                source,
+            )
+            if m_rl:
+                channel = f"{m_rl.group(1)}:{m_rl.group(2)}"
+            else:
+                m_parse = re.search(
+                    r'(?:ResourceLocation\.(?:parse|tryParse)|new\s+ResourceLocation|registerIncomingPluginChannel\s*\([^,]+,)\s*"([^"]+)"',
+                    source,
+                )
+                if m_parse:
+                    channel = m_parse.group(1)
+
+        findings: list[dict[str, Any]] = []
+        remediation_snippets: list[str] = []
+
+        def add_finding(
+            rule_id: str,
+            name: str,
+            severity: str,
+            location: str,
+            message: str,
+            remediation: str,
+        ) -> None:
+            findings.append({
+                "rule_id": rule_id,
+                "name": name,
+                "severity": severity,
+                "location": location,
+                "message": message,
+                "remediation": remediation,
+            })
+            if remediation not in remediation_snippets:
+                remediation_snippets.append(remediation)
+
+        # NETTY-005: Validate 1.20.5+..26.3+ CustomPacketPayload ResourceLocation channel
+        channel_header_bytes = 0
+        if channel:
+            raw_chan_utf8 = len(channel.encode("utf-8"))
+            channel_header_bytes = self._varint_wire_bytes(raw_chan_utf8) + raw_chan_utf8
+            if ":" not in channel:
+                add_finding(
+                    "NETTY-005",
+                    "InvalidCustomPayloadChannelKey",
+                    "high",
+                    channel,
+                    f"Channel '{channel}' is missing an explicit 'namespace:path' separator required by CustomPacketPayload.Type.",
+                    'Use an explicit lowercase namespace and path such as ResourceLocation.fromNamespaceAndPath("myrpg", "spell_cast").',
+                )
+            else:
+                ns, path_part = channel.split(":", 1)
+                valid_ns = bool(re.fullmatch(r"[a-z0-9_.-]+", ns))
+                valid_path = bool(re.fullmatch(r"[a-z0-9/._-]+", path_part))
+                if not valid_ns or not valid_path:
+                    add_finding(
+                        "NETTY-005",
+                        "InvalidCustomPayloadChannelKey",
+                        "high",
+                        channel,
+                        f"Channel '{channel}' violates ResourceLocation character rules (only lowercase [a-z0-9_.-] in namespace and [a-z0-9/._-] in path); runtime throws ResourceLocationException.",
+                        "Normalize plugin messaging channels to strict lowercase snake_case before constructing CustomPacketPayload.Type or Key.key.",
+                    )
+                elif channel in {"minecraft:register", "minecraft:unregister", "minecraft:brand"}:
+                    add_finding(
+                        "NETTY-005",
+                        "ReservedMinecraftPayloadChannel",
+                        "medium",
+                        channel,
+                        f"Channel '{channel}' targets a reserved vanilla/proxy control channel rather than a plugin-owned namespace.",
+                        "Bind custom payloads under your plugin's dedicated namespace (for example 'myplugin:sync_state') instead of mutating reserved 'minecraft:*' channels directly.",
+                    )
+
+        # Build field list from explicit input + source auto-extraction when fields omitted
+        normalized_fields: list[dict[str, Any]] = []
+        if isinstance(raw_fields, list):
+            for idx, item in enumerate(raw_fields):
+                if not isinstance(item, dict):
+                    continue
+                normalized_fields.append({
+                    "name": str(item.get("name") or f"field_{idx}"),
+                    "type": str(item.get("type") or "varint").lower(),
+                    "max_length": item.get("max_length"),
+                    "max_count": item.get("max_count"),
+                    "element_type": str(item.get("element_type") or "varint").lower(),
+                    "element_max_length": item.get("element_max_length"),
+                })
+        elif source:
+            # Auto-extract codec primitives from StreamCodec / FriendlyByteBuf calls
+            auto_idx = 0
+            for m in re.finditer(
+                r"(ByteBufCodecs\.STRING_UTF8|ByteBufCodecs\.stringUtf8\s*\(\s*(\d+)\s*\)|"
+                r"\.readUtf\s*\(\s*(\d*)\s*\)|ByteBufCodecs\.BYTE_ARRAY|"
+                r"ByteBufCodecs\.byteArray\s*\(\s*(\d+)\s*\)|\.readByteArray\s*\(\s*(\d*)\s*\)|"
+                r"ByteBufCodecs\.VAR_INT|\.readVarInt\s*\(\s*\)|"
+                r"ByteBufCodecs\.VAR_LONG|\.readVarLong\s*\(\s*\)|"
+                r"UUIDUtil\.STREAM_CODEC|\.readUUID\s*\(\s*\)|"
+                r"BlockPos\.STREAM_CODEC|\.readBlockPos\s*\(\s*\)|"
+                r"ItemStack\.STREAM_CODEC|ByteBufCodecs\.COMPOUND_TAG|\.readNbt\s*\(\s*\))",
+                source,
+            ):
+                auto_idx += 1
+                tok = m.group(1)
+                if "STRING_UTF8" in tok:
+                    normalized_fields.append({"name": f"utf8_{auto_idx}", "type": "utf8", "max_length": None})
+                elif "stringUtf8" in tok:
+                    normalized_fields.append({"name": f"utf8_{auto_idx}", "type": "utf8", "max_length": int(m.group(2))})
+                elif "readUtf" in tok:
+                    ml = int(m.group(3)) if m.group(3) else None
+                    normalized_fields.append({"name": f"utf8_{auto_idx}", "type": "utf8", "max_length": ml})
+                elif "BYTE_ARRAY" in tok:
+                    normalized_fields.append({"name": f"bytes_{auto_idx}", "type": "byte_array", "max_length": None})
+                elif "byteArray" in tok:
+                    normalized_fields.append({"name": f"bytes_{auto_idx}", "type": "byte_array", "max_length": int(m.group(4))})
+                elif "readByteArray" in tok:
+                    ml = int(m.group(5)) if m.group(5) else None
+                    normalized_fields.append({"name": f"bytes_{auto_idx}", "type": "byte_array", "max_length": ml})
+                elif "VAR_INT" in tok or "readVarInt" in tok:
+                    normalized_fields.append({"name": f"varint_{auto_idx}", "type": "varint", "max_length": None})
+                elif "VAR_LONG" in tok or "readVarLong" in tok:
+                    normalized_fields.append({"name": f"varlong_{auto_idx}", "type": "varlong", "max_length": None})
+                elif "UUID" in tok:
+                    normalized_fields.append({"name": f"uuid_{auto_idx}", "type": "uuid", "max_length": None})
+                elif "BlockPos" in tok:
+                    normalized_fields.append({"name": f"pos_{auto_idx}", "type": "blockpos", "max_length": None})
+                elif "ItemStack" in tok:
+                    normalized_fields.append({"name": f"item_{auto_idx}", "type": "item_stack", "max_length": 65536})
+                elif "COMPOUND_TAG" in tok or "readNbt" in tok:
+                    normalized_fields.append({"name": f"nbt_{auto_idx}", "type": "nbt", "max_length": None})
+
+        # Evaluate field wire-byte bounds and NETTY-001 unbounded variable-length primitives
+        field_breakdown: list[dict[str, Any]] = []
+        min_payload_bytes = 0
+        max_payload_bytes = 0
+        unbounded_field_count = 0
+
+        for f in normalized_fields:
+            fname = f["name"]
+            ftype = f["type"]
+            if ftype == "collection":
+                max_count = f.get("max_count")
+                elem_type = str(f.get("element_type") or "varint")
+                elem_max_len = f.get("element_max_length")
+                _, elem_max, elem_unbounded = self._primitive_wire_bounds(elem_type, elem_max_len)
+                if max_count is None:
+                    eff_count = 65_536
+                    f_min = 1
+                    f_max = self._varint_wire_bytes(eff_count) + eff_count * elem_max
+                    is_unbounded = True
+                else:
+                    f_min = 1
+                    f_max = self._varint_wire_bytes(max_count) + max_count * elem_max
+                    is_unbounded = elem_unbounded
+            else:
+                f_min, f_max, is_unbounded = self._primitive_wire_bounds(ftype, f.get("max_length"))
+
+            min_payload_bytes += f_min
+            max_payload_bytes += f_max
+            if is_unbounded:
+                unbounded_field_count += 1
+                sev = "critical" if direction in {"serverbound", "velocity_plugin_message"} else "medium"
+                add_finding(
+                    "NETTY-001",
+                    "UnboundedServerboundDecode",
+                    sev,
+                    fname,
+                    f"Field '{fname}' ({ftype}) has no explicit max length/count cap (worst-case {f_max:,} wire bytes on {direction} path).",
+                    "Replace ByteBufCodecs.STRING_UTF8 / readUtf() / BYTE_ARRAY / unbounded collection with ByteBufCodecs.stringUtf8(maxChars), ByteBufCodecs.byteArray(maxBytes), or ByteBufCodecs.collection(ArrayList::new, elemCodec, maxElements).",
+                )
+
+            field_breakdown.append({
+                "name": fname,
+                "type": ftype,
+                "min_bytes": f_min,
+                "max_bytes": f_max,
+                "unbounded": is_unbounded,
+            })
+
+        # Also catch unbounded collection in raw source if fields were not explicitly passed
+        if source and raw_fields is None and re.search(r"ByteBufCodecs\.collection\s*\([^)]+\)", source):
+            for m_col in re.finditer(r"ByteBufCodecs\.collection\s*\(([^)]+)\)", source):
+                args_inside = [part.strip() for part in m_col.group(1).split(",") if part.strip()]
+                if len(args_inside) < 3:
+                    unbounded_field_count += 1
+                    sev = "critical" if direction in {"serverbound", "velocity_plugin_message"} else "medium"
+                    add_finding(
+                        "NETTY-001",
+                        "UnboundedCollectionStreamCodec",
+                        sev,
+                        "ByteBufCodecs.collection",
+                        "ByteBufCodecs.collection(factory, elementCodec) omits the 3rd maxSize argument, permitting unbounded list allocation during packet decode.",
+                        "Pass an explicit upper bound as the 3rd argument: ByteBufCodecs.collection(ArrayList::new, elementCodec, 64).",
+                    )
+
+        total_max_wire_bytes = channel_header_bytes + max_payload_bytes
+        total_min_wire_bytes = channel_header_bytes + min_payload_bytes
+
+        # NETTY-002: Wire-byte budget overflow against direction cap
+        if total_max_wire_bytes > cap_bytes:
+            add_finding(
+                "NETTY-002",
+                "PayloadWireBudgetOverflow",
+                "critical",
+                channel or direction,
+                f"Worst-case wire size ({total_max_wire_bytes:,} bytes) exceeds {direction} limit ({cap_bytes:,} bytes) by {total_max_wire_bytes - cap_bytes:,} bytes, causing DecoderException disconnect.",
+                f"Tighten string/array/collection bounds or chunk large payloads across multi-part frames so worst-case wire size stays <= {cap_bytes:,} bytes.",
+            )
+
+        if source:
+            cleaned_src = _strip_gradle_comments(source)
+            low_src = cleaned_src.lower()
+
+            # NETTY-003: Netty IO thread world mutation or blocking call inside packet listener / channelRead
+            is_netty_context = any(
+                kw in low_src
+                for kw in (
+                    "channelread",
+                    "channelread0",
+                    "packetreceiveevent",
+                    "packetsendevent",
+                    "onpacketreceive",
+                    "onpacketsend",
+                    "simplechannelinboundhandler",
+                    "bytetomessagedecoder",
+                )
+            )
+            world_or_blocking_hits = [
+                tok
+                for tok in (
+                    "getblockat",
+                    "settype",
+                    "setblockdata",
+                    "spawnentity",
+                    ".teleport(",
+                    "openinventory",
+                    "getinventory().",
+                    "hikaridatasource",
+                    "getconnection(",
+                    "executequery(",
+                    "completablefuture.join",
+                    ".join()",
+                )
+                if tok in low_src
+            ]
+            has_scheduler_handoff = any(
+                s in low_src
+                for s in (
+                    "getregionscheduler()",
+                    "getscheduler().run",
+                    "getglobalregionscheduler()",
+                    "runtask(",
+                    "execute(",
+                )
+            )
+            if is_netty_context and world_or_blocking_hits and not has_scheduler_handoff:
+                add_finding(
+                    "NETTY-003",
+                    "NettyEventLoopWorldOrBlockingHazard",
+                    "critical",
+                    "NettyPacketHandler",
+                    f"Netty I/O listener directly invokes world/blocking operation ({world_or_blocking_hits[0]}) on the EventLoop without scheduler handoff, stalling all connections on that Epoll worker and violating Folia region ownership.",
+                    "Decode packet bytes into an immutable DTO on the Netty thread, then hop onto player.getScheduler().run(plugin, task -> ..., null) or Bukkit.getRegionScheduler().execute(...) before touching world state.",
+                )
+
+            # NETTY-004: ByteBuf reference-count leak
+            alloc_match = re.search(
+                r"\b(Unpooled\.(?:buffer|directBuffer|copiedBuffer)|alloc\(\)\.(?:buffer|ioBuffer|directBuffer)|"
+                r"\.retainedSlice\s*\(|\.readRetainedSlice\s*\(|\.retainedDuplicate\s*\()",
+                cleaned_src,
+            )
+            has_release = bool(
+                re.search(r"\b(?:ReferenceCountUtil\.release|ReferenceCountUtil\.safeRelease|\.release\s*\()", cleaned_src)
+            )
+            if alloc_match and not has_release:
+                add_finding(
+                    "NETTY-004",
+                    "ByteBufRefCountLeak",
+                    "high",
+                    alloc_match.group(1),
+                    f"Allocated or retained ByteBuf via '{alloc_match.group(1)}' without a matching .release() or ReferenceCountUtil.release() guard, leaking pooled direct memory.",
+                    "Wrap custom ByteBuf allocations in try { ... } finally { ReferenceCountUtil.safeRelease(buf); } unless ownership is transferred to channel.writeAndFlush(buf).",
+                )
+
+            # NETTY-006: Asymmetric manual encode/write* vs decode/read* order
+            write_ops = [
+                m.group(1).lower()
+                for m in re.finditer(
+                    r"\.write(Boolean|Byte|Short|Int|Long|Float|Double|VarInt|VarLong|Utf|UUID|BlockPos|ByteArray)\s*\(",
+                    cleaned_src,
+                )
+            ]
+            read_ops = [
+                m.group(1).lower()
+                for m in re.finditer(
+                    r"\.read(Boolean|Byte|Short|Int|Long|Float|Double|VarInt|VarLong|Utf|UUID|BlockPos|ByteArray)\s*\(",
+                    cleaned_src,
+                )
+            ]
+            if write_ops and read_ops and write_ops != read_ops:
+                add_finding(
+                    "NETTY-006",
+                    "AsymmetricCodecReadWriteOrder",
+                    "critical",
+                    "encode/decode",
+                    f"Manual ByteBuf write sequence {write_ops} does not match read sequence {read_ops}, corrupting readerIndex framing at runtime.",
+                    "Prefer declarative StreamCodec.composite(...) or align write* and read* primitive calls in identical field order.",
+                )
+
+            # NETTY-007: CONFIGURATION phase sending PLAY-only world/entity/container packets
+            play_only_tokens = (
+                "clientboundsetentitydatapacket",
+                "clientboundopenscreenpacket",
+                "clientboundcontainer",
+                "clientboundlevelchunk",
+                "clientboundaddentitypacket",
+                "openinventory",
+            )
+            if phase == "configuration" and any(tok in low_src for tok in play_only_tokens):
+                add_finding(
+                    "NETTY-007",
+                    "ConfigurationPhasePlayPacketMismatch",
+                    "high",
+                    "configuration-phase",
+                    "PLAY-state entity/chunk/container packet dispatched while connection is still in CONFIGURATION phase before AcknowledgeFinishConfiguration.",
+                    "Defer world, entity, and container packet emission until PlayerJoinEvent / ServerboundFinishConfigurationPacket transitions the connection into PLAY state.",
+                )
+
+            # NETTY-008: Registry-dependent 1.20.5+ codecs bound to plain FriendlyByteBuf/ByteBuf
+            uses_registry_codec = any(
+                tok in cleaned_src
+                for tok in (
+                    "ItemStack.STREAM_CODEC",
+                    "ItemStack.OPTIONAL_STREAM_CODEC",
+                    "ComponentSerialization.STREAM_CODEC",
+                    "DataComponentPatch.STREAM_CODEC",
+                )
+            )
+            uses_plain_buf = bool(
+                re.search(r"StreamCodec\s*<\s*(?:FriendlyByteBuf|ByteBuf)\s*,", cleaned_src)
+            ) and "RegistryFriendlyByteBuf" not in cleaned_src
+            if uses_registry_codec and uses_plain_buf:
+                add_finding(
+                    "NETTY-008",
+                    "PlainFriendlyByteBufForRegistryCodec",
+                    "high",
+                    "StreamCodec<FriendlyByteBuf, ...>",
+                    "ItemStack / Component / DataComponentPatch StreamCodec requires RegistryFriendlyByteBuf in 1.20.5+ through 26.3+, but codec is typed against plain FriendlyByteBuf/ByteBuf.",
+                    "Parameterize your payload codec as StreamCodec<RegistryFriendlyByteBuf, MyPayload> so HolderLookup.Provider registry context is available during serialization.",
+                )
+
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for f in findings:
+            sev = f.get("severity", "low")
+            if sev in severity_counts:
+                severity_counts[sev] += 1
+
+        utilization_pct = round((total_max_wire_bytes / cap_bytes) * 100.0, 2) if cap_bytes > 0 else 0.0
+        out: dict[str, Any] = {
+            "status": "fail" if (severity_counts["critical"] + severity_counts["high"]) > 0 else ("warn" if findings else "pass"),
+            "direction": direction,
+            "phase": phase,
+            "channel": channel or None,
+            "wire_budget": {
+                "cap_bytes": cap_bytes,
+                "channel_header_bytes": channel_header_bytes,
+                "min_payload_bytes": min_payload_bytes,
+                "max_payload_bytes": max_payload_bytes,
+                "min_total_wire_bytes": total_min_wire_bytes,
+                "max_total_wire_bytes": total_max_wire_bytes,
+                "headroom_bytes": cap_bytes - total_max_wire_bytes,
+                "utilization_pct": utilization_pct,
+                "unbounded_field_count": unbounded_field_count,
+                "fields": field_breakdown,
+            },
+            "finding_count": len(findings),
+            "severity_counts": severity_counts,
+            "findings": findings,
+            "remediation_snippets": remediation_snippets,
+        }
+        if sarif:
+            out["sarif_report"] = self._build_sarif_report(findings)
+        return ToolOutcome(_pretty_json(out))
+
+    def _tool_audit_sql_persistence(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_source = args.get("source")
+        raw_cfg = args.get("hikari_config")
+        if raw_source is None and raw_cfg is None:
+            return ToolOutcome(
+                "Provide at least 'source' (Java/Kotlin persistence code) or 'hikari_config' (pool settings).",
+                is_error=True,
+            )
+        source = str(raw_source or "")
+        cfg = raw_cfg if isinstance(raw_cfg, dict) else {}
+        folia = bool(args.get("folia", True))
+        sarif = bool(args.get("sarif", False))
+
+        cleaned_src = _strip_gradle_comments(source) if source else ""
+        low_src = cleaned_src.lower()
+
+        # Infer JDBC URL and Hikari parameters from config + code fallback
+        jdbc_url = str(cfg.get("jdbc_url") or "").strip()
+        if not jdbc_url and cleaned_src:
+            m_url = re.search(r"(jdbc:(?:mysql|mariadb|sqlite|postgresql|h2):[^\s\"']+)", cleaned_src, re.IGNORECASE)
+            if m_url:
+                jdbc_url = m_url.group(1)
+        low_url = jdbc_url.lower()
+        is_sqlite = "jdbc:sqlite:" in low_url or "org.sqlite" in low_src
+        is_mysql_family = any(k in low_url for k in ("jdbc:mysql:", "jdbc:mariadb:")) or "com.mysql" in low_src or "mariadb" in low_src
+
+        max_pool = cfg.get("maximum_pool_size")
+        if max_pool is None and cleaned_src:
+            m_mp = re.search(r"setMaximumPoolSize\s*\(\s*(\d+)\s*\)|maximumPoolSize\s*=\s*(\d+)", cleaned_src)
+            if m_mp:
+                max_pool = int(m_mp.group(1) or m_mp.group(2))
+        if max_pool is None:
+            max_pool = 1 if is_sqlite else 10
+
+        max_lifetime_ms = cfg.get("max_lifetime_ms")
+        if max_lifetime_ms is None and cleaned_src:
+            m_ml = re.search(r"setMaxLifetime\s*\(\s*(\d+)L?\s*\)|maxLifetime\s*=\s*(\d+)L?", cleaned_src)
+            if m_ml:
+                max_lifetime_ms = int(m_ml.group(1) or m_ml.group(2))
+        if max_lifetime_ms is None:
+            max_lifetime_ms = 1_800_000  # HikariCP default 30m
+
+        conn_timeout_ms = cfg.get("connection_timeout_ms")
+        if conn_timeout_ms is None and cleaned_src:
+            m_ct = re.search(r"setConnectionTimeout\s*\(\s*(\d+)L?\s*\)|connectionTimeout\s*=\s*(\d+)L?", cleaned_src)
+            if m_ct:
+                conn_timeout_ms = int(m_ct.group(1) or m_ct.group(2))
+        if conn_timeout_ms is None:
+            conn_timeout_ms = 30_000  # HikariCP default 30s
+
+        wait_timeout_sec = int(cfg.get("mysql_wait_timeout_sec") or 600)
+        server_count = int(cfg.get("server_count") or 1)
+        wait_timeout_ms = wait_timeout_sec * 1000
+        recommended_max_lifetime_ms = max(30_000, wait_timeout_ms - 60_000)
+        fleet_connections = max_pool * server_count
+
+        findings: list[dict[str, Any]] = []
+        remediation_snippets: list[str] = []
+
+        def add_finding(
+            rule_id: str,
+            name: str,
+            severity: str,
+            location: str,
+            message: str,
+            remediation: str,
+        ) -> None:
+            findings.append({
+                "rule_id": rule_id,
+                "name": name,
+                "severity": severity,
+                "location": location,
+                "message": message,
+                "remediation": remediation,
+            })
+            if remediation not in remediation_snippets:
+                remediation_snippets.append(remediation)
+
+        # SQL-002: HikariCP timeout & fleet connection math
+        if is_mysql_family and max_lifetime_ms >= wait_timeout_ms - 30_000:
+            add_finding(
+                "SQL-002",
+                "HikariMaxLifetimeExceedsWaitTimeout",
+                "high",
+                "HikariConfig.maxLifetime",
+                f"HikariCP maxLifetime ({max_lifetime_ms:,} ms) is not safely below MySQL wait_timeout ({wait_timeout_ms:,} ms), causing server-closed socket CommunicationsException failures.",
+                f"Set hikariConfig.setMaxLifetime({recommended_max_lifetime_ms}L) (at least 60 seconds below MySQL wait_timeout).",
+            )
+        if conn_timeout_ms > 5_000 and (raw_cfg is not None or "connectiontimeout" in low_src):
+            add_finding(
+                "SQL-002",
+                "ExcessiveHikariConnectionTimeout",
+                "medium",
+                "HikariConfig.connectionTimeout",
+                f"connectionTimeout ({conn_timeout_ms:,} ms) exceeds 5,000 ms; under database brownouts, waiting callers saturate async worker threads for {conn_timeout_ms / 1000.0:.1f}s.",
+                "Set hikariConfig.setConnectionTimeout(3000L) and fail fast with cached fallback state rather than stalling async executors for 30 seconds.",
+            )
+        if fleet_connections > 150:
+            add_finding(
+                "SQL-002",
+                "FleetMySqlConnectionExhaustion",
+                "high",
+                "HikariConfig.maximumPoolSize",
+                f"Fleet pool budget ({max_pool} connections x {server_count} servers = {fleet_connections}) exceeds typical MySQL default max_connections=151.",
+                "Cap per-plugin maximumPoolSize to 4-8 across proxy networks (using formula ((core_count * 2) + effective_spindle_count)) or raise MySQL max_connections.",
+            )
+
+        # SQL-003: SQLite multi-pool contention without WAL & busy_timeout
+        has_wal = "journal_mode=wal" in low_url or "journal_mode = wal" in low_src or "journal_mode=wal" in low_src
+        has_busy = "busy_timeout" in low_url or "busy_timeout" in low_src
+        if is_sqlite and (max_pool > 1 or not has_wal or not has_busy):
+            add_finding(
+                "SQL-003",
+                "SqliteMultiPoolWithoutWal",
+                "high",
+                "SQLiteConfig",
+                f"SQLite persistence configured with maximumPoolSize={max_pool}, WAL={has_wal}, busy_timeout={has_busy}; concurrent Folia async writes throw SQLITE_BUSY: database is locked.",
+                "For SQLite, enforce maximumPoolSize=1 (or serialize writes on a single-thread executor) and run 'PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA busy_timeout=5000;' on connection init.",
+            )
+
+        # SQL-007: Missing MySQL/MariaDB server prepared-statement cache properties
+        explicit_prep_cache = cfg.get("cache_prep_stmts")
+        src_has_prep_cache = "cacheprepstmts" in low_src
+        if is_mysql_family and explicit_prep_cache is not True and not src_has_prep_cache and (raw_cfg is not None or "hikariconfig" in low_src):
+            add_finding(
+                "SQL-007",
+                "MissingPrepStmtCacheProperties",
+                "medium",
+                "HikariConfig.dataSourceProperties",
+                "MySQL/MariaDB HikariConfig omits cachePrepStmts / useServerPrepStmts dataSource properties, re-parsing identical SQL statements on every query.",
+                'Add addDataSourceProperty("cachePrepStmts", "true"), ("prepStmtCacheSize", "250"), ("prepStmtCacheSqlLimit", "2048"), and ("useServerPrepStmts", "true").',
+            )
+
+        if cleaned_src:
+            has_jdbc_exec = any(
+                tok in low_src
+                for tok in (
+                    ".getconnection(",
+                    "drivermanager.getconnection(",
+                    ".executequery(",
+                    ".executeupdate(",
+                    ".executebatch(",
+                )
+            )
+            is_sync_entry = any(
+                tok in low_src
+                for tok in (
+                    "@eventhandler",
+                    "oncommand(",
+                    "onenable(",
+                    "getregionscheduler()",
+                    "getglobalregionscheduler()",
+                )
+            ) and "asyncplayerpreloginevent" not in low_src
+            has_async_dispatch = any(
+                tok in low_src
+                for tok in (
+                    "supplyasync(",
+                    "runasync(",
+                    "getasyncscheduler()",
+                    "runtaskasynchronously(",
+                    "withcontext(dispatchers.io)",
+                )
+            )
+
+            # SQL-001: Synchronous JDBC on tick thread (either no async dispatch at all, or JDBC invoked before async boundary)
+            jdbc_tokens = (
+                ".getconnection(",
+                "drivermanager.getconnection(",
+                ".executequery(",
+                ".executeupdate(",
+                ".executebatch(",
+            )
+            async_tokens = (
+                "supplyasync(",
+                "runasync(",
+                "getasyncscheduler()",
+                "runtaskasynchronously(",
+                "withcontext(dispatchers.io)",
+            )
+            jdbc_positions = [low_src.find(tok) for tok in jdbc_tokens if low_src.find(tok) >= 0]
+            async_positions = [low_src.find(tok) for tok in async_tokens if low_src.find(tok) >= 0]
+            sync_jdbc_before_async = bool(jdbc_positions) and (
+                not async_positions or min(jdbc_positions) < min(async_positions)
+            )
+            if has_jdbc_exec and is_sync_entry and sync_jdbc_before_async:
+                add_finding(
+                    "SQL-001",
+                    "SyncTickThreadJdbcExecution",
+                    "critical",
+                    "SyncTickEntrypoint",
+                    "Synchronous JDBC call (getConnection / executeQuery / executeUpdate) runs directly inside an EventHandler, command, or region tick entrypoint without async offloading.",
+                    "Offload all JDBC I/O onto CompletableFuture.supplyAsync(..., dbExecutor) or Bukkit.getAsyncScheduler().runNow(plugin, task -> ...), then hop back to entity/region scheduler.",
+                )
+
+            # SQL-004: Unclosed Connection / PreparedStatement leak
+            acquires_conn_or_stmt = bool(
+                re.search(r"\b(?:getConnection|prepareStatement)\s*\(", cleaned_src)
+            )
+            uses_try_with_resources = bool(
+                re.search(r"\btry\s*\([^)]*(?:getConnection|prepareStatement)", cleaned_src, re.DOTALL)
+            )
+            uses_kotlin_use = ".use" in cleaned_src
+            if acquires_conn_or_stmt and not (uses_try_with_resources or uses_kotlin_use):
+                add_finding(
+                    "SQL-004",
+                    "UnclosedJdbcResourceLeak",
+                    "critical",
+                    "Connection/PreparedStatement",
+                    "JDBC Connection or PreparedStatement is opened without Java try-with-resources or Kotlin .use { }, leaking pooled connections on exceptions until HikariPool starves.",
+                    "Wrap every Connection, PreparedStatement, and ResultSet in try (Connection conn = ds.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) { ... } or conn.use { ... }.",
+                )
+
+            # SQL-005: Non-parameterized SQL string concatenation / interpolation
+            sql_concat = re.search(
+                r'(?:prepareStatement|executeQuery|executeUpdate)\s*\(\s*"[^"]*(?:SELECT|INSERT|UPDATE|DELETE)[^"]*"\s*\+'
+                r'|(?:prepareStatement|executeQuery|executeUpdate)\s*\(\s*"[^"]*(?:SELECT|INSERT|UPDATE|DELETE)[^"]*\$\{?[A-Za-z_]',
+                cleaned_src,
+                re.IGNORECASE,
+            )
+            if sql_concat:
+                add_finding(
+                    "SQL-005",
+                    "NonParameterizedSqlConcatenation",
+                    "critical",
+                    "SQLStatement",
+                    "SQL statement is constructed via runtime string concatenation or Kotlin template interpolation instead of '?' PreparedStatement placeholders, enabling SQL injection and defeating statement caching.",
+                    "Use static parameterized SQL ('SELECT coins FROM accounts WHERE uuid = ?') and bind parameters via ps.setString(1, uuid.toString()).",
+                )
+
+            # SQL-006: Async DB completion callback mutating live Bukkit/Folia state without scheduler hop
+            has_async_callback = any(
+                tok in low_src for tok in ("thenaccept(", "thenacceptasync(", "whencomplete(", "supplyasync(", "runasync(")
+            )
+            mutates_bukkit_live = any(
+                tok in low_src
+                for tok in (
+                    "player.getinventory()",
+                    ".setitem(",
+                    ".additem(",
+                    ".openinventory(",
+                    ".teleport(",
+                    ".teleportasync(",
+                    ".sendmessage(",
+                    "getblockat(",
+                    ".settype(",
+                    ".sethealth(",
+                    "addpotioneffect(",
+                )
+            ) and not (
+                # sendMessage alone on Adventure Audience is thread-safe, so require non-sendMessage or inventory/world/entity mutation
+                all(
+                    tok not in low_src
+                    for tok in (
+                        "player.getinventory()",
+                        ".setitem(",
+                        ".additem(",
+                        ".openinventory(",
+                        ".teleport(",
+                        "getblockat(",
+                        ".settype(",
+                        ".sethealth(",
+                        "addpotioneffect(",
+                    )
+                )
+            )
+            hops_back_to_tick = any(
+                tok in low_src
+                for tok in (
+                    "player.getscheduler().run",
+                    "entity.getscheduler().run",
+                    "getregionscheduler().execute",
+                    "getregionscheduler().run",
+                    "runtask(plugin",
+                )
+            )
+            if folia and has_async_callback and mutates_bukkit_live and not hops_back_to_tick:
+                add_finding(
+                    "SQL-006",
+                    "AsyncCallbackDirectBukkitMutation",
+                    "critical",
+                    "AsyncCompletionCallback",
+                    "Database async completion callback directly mutates live Player/Entity/Inventory/Block state on the DB worker thread without hopping onto EntityScheduler or RegionScheduler.",
+                    "After supplyAsync loads the DTO, apply game state inside player.getScheduler().run(plugin, task -> applyProfile(player, dto), null).",
+                )
+
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for f in findings:
+            sev = f.get("severity", "low")
+            if sev in severity_counts:
+                severity_counts[sev] += 1
+
+        engine = "sqlite" if is_sqlite else ("mysql_mariadb" if is_mysql_family else "generic_jdbc")
+        out: dict[str, Any] = {
+            "status": "fail" if (severity_counts["critical"] + severity_counts["high"]) > 0 else ("warn" if findings else "pass"),
+            "engine": engine,
+            "folia_mode": folia,
+            "pool_sizing_report": {
+                "jdbc_url": jdbc_url or None,
+                "maximum_pool_size": max_pool,
+                "server_count": server_count,
+                "fleet_total_connections": fleet_connections,
+                "max_lifetime_ms": max_lifetime_ms,
+                "mysql_wait_timeout_ms": wait_timeout_ms if is_mysql_family else None,
+                "recommended_max_lifetime_ms": recommended_max_lifetime_ms if is_mysql_family else None,
+                "connection_timeout_ms": conn_timeout_ms,
+            },
+            "finding_count": len(findings),
+            "severity_counts": severity_counts,
+            "findings": findings,
+            "remediation_snippets": remediation_snippets,
+        }
+        if sarif:
+            out["sarif_report"] = self._build_sarif_report(findings)
         return ToolOutcome(_pretty_json(out))
 
     @staticmethod

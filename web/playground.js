@@ -73,6 +73,54 @@
           "    at io.papermc.paper.threadedregions.TickRegions$ConcreteRegionSection.tickRegion(TickRegions.java:390)"
         ].join("\n")
       }
+    ],
+    protocol_sql: [
+      {
+        label: "Netty: Unbounded Serverbound + Skewed Codec",
+        text: [
+          "public record SpellCastPayload(int spellId, UUID caster, String macro, ItemStack icon) implements CustomPacketPayload {",
+          "    public static final Type<SpellCastPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(\"MyRPG\", \"SpellCast\"));",
+          "    public static final StreamCodec<FriendlyByteBuf, SpellCastPayload> CODEC = StreamCodec.of(",
+          "        (buf, msg) -> { buf.writeVarInt(msg.spellId()); buf.writeUUID(msg.caster()); buf.writeUtf(msg.macro()); },",
+          "        buf -> new SpellCastPayload(buf.readUUID().hashCode(), new UUID(0L, 0L), buf.readUtf(), null)",
+          "    );",
+          "    public void onPacketReceive(PacketReceiveEvent event, Player player) {",
+          "        ByteBuf scratch = Unpooled.buffer(256);",
+          "        player.getWorld().getBlockAt(0, 64, 0).setType(Material.DIAMOND_BLOCK);",
+          "    }",
+          "}"
+        ].join("\n")
+      },
+      {
+        label: "SQL: Sync JDBC + Leak + Folia Callback Escape",
+        text: [
+          "HikariConfig cfg = new HikariConfig();",
+          "cfg.setJdbcUrl(\"jdbc:mysql://db.internal:3306/rpg\");",
+          "cfg.setMaximumPoolSize(24);",
+          "cfg.setMaxLifetime(1800000L);",
+          "@EventHandler",
+          "public void onPlayerJoin(PlayerJoinEvent event) {",
+          "    Connection conn = dataSource.getConnection();",
+          "    PreparedStatement ps = conn.prepareStatement(\"SELECT * FROM profiles WHERE name = '\" + event.getPlayer().getName() + \"'\");",
+          "    ps.executeQuery();",
+          "    CompletableFuture.supplyAsync(() -> loadKit(event.getPlayer().getUniqueId())).thenAccept(kit -> {",
+          "        event.getPlayer().getInventory().addItem(kit);",
+          "    });",
+          "}"
+        ].join("\n")
+      },
+      {
+        label: "Clean Bounded RegistryCodec + Async .use{}",
+        text: [
+          "public static final CustomPacketPayload.Type<RuneSyncPayload> TYPE =",
+          "    new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(\"myrpg\", \"rune_sync\"));",
+          "public static final StreamCodec<RegistryFriendlyByteBuf, RuneSyncPayload> CODEC = StreamCodec.composite(",
+          "    ByteBufCodecs.VAR_INT, RuneSyncPayload::slot,",
+          "    ByteBufCodecs.stringUtf8(64), RuneSyncPayload::runeId,",
+          "    RuneSyncPayload::new",
+          ");"
+        ].join("\n")
+      }
     ]
   };
 
@@ -425,6 +473,137 @@
     };
   }
 
+  function varintBytes(n) {
+    if (n < 128) { return 1; }
+    if (n < 16384) { return 2; }
+    if (n < 2097152) { return 3; }
+    if (n < 268435456) { return 4; }
+    return 5;
+  }
+
+  function analyzeProtocolAndSql(raw) {
+    var findings = [];
+    var src = String(raw || "");
+    var low = src.toLowerCase();
+    var maxWireBytes = 0;
+
+    var mChan = src.match(/(?:ResourceLocation\.fromNamespaceAndPath|Key\.key)\s*\(\s*"([^"]+)"\s*,\s*"([^"]+)"\s*\)/);
+    if (mChan) {
+      var ns = mChan[1];
+      var pathPart = mChan[2];
+      var chan = ns + ":" + pathPart;
+      maxWireBytes += varintBytes(chan.length) + chan.length;
+      if (!/^[a-z0-9_.-]+$/.test(ns) || !/^[a-z0-9/._-]+$/.test(pathPart)) {
+        findings.push({
+          rule_id: "NETTY-005", severity: "high", frame: chan, domain: "NETTY",
+          message: "Channel '" + chan + "' violates lowercase ResourceLocation character rules and throws ResourceLocationException.",
+          remediation: "Normalize CustomPacketPayload.Type namespace and path to lowercase [a-z0-9_.-] and [a-z0-9/._-]."
+        });
+      }
+    }
+
+    var utfMatches = src.match(/ByteBufCodecs\.STRING_UTF8|\.readUtf\s*\(\s*\)/g);
+    if (utfMatches) {
+      var ub = varintBytes(32767 * 3) + 32767 * 3;
+      maxWireBytes += ub * utfMatches.length;
+      findings.push({
+        rule_id: "NETTY-001", severity: "critical", frame: "readUtf/STRING_UTF8", domain: "NETTY",
+        message: "Unbounded UTF-8 decode permits up to " + ub + " wire bytes per field on serverbound Netty path.",
+        remediation: "Use ByteBufCodecs.stringUtf8(maxChars) or buf.readUtf(maxChars) with an explicit bound."
+      });
+    }
+    var boundedUtf = /ByteBufCodecs\.stringUtf8\s*\(\s*(\d+)\s*\)|\.readUtf\s*\(\s*(\d+)\s*\)/g;
+    var bm;
+    while ((bm = boundedUtf.exec(src)) !== null) {
+      var nChars = parseInt(bm[1] || bm[2], 10);
+      maxWireBytes += varintBytes(nChars * 3) + nChars * 3;
+    }
+    if (maxWireBytes > 32767) {
+      findings.push({
+        rule_id: "NETTY-002", severity: "critical", frame: "ServerboundCustomPayloadPacket", domain: "NETTY",
+        message: "Worst-case wire size (" + maxWireBytes + " B) exceeds 32,767 B serverbound custom payload cap.",
+        remediation: "Cap string/array lengths so worst-case wire size stays <= 32,767 bytes."
+      });
+    }
+
+    var writes = (src.match(/\.write(VarInt|VarLong|Int|Long|Utf|UUID|BlockPos|ByteArray)\s*\(/g) || []).map(function (s) { return s.replace(/^\.write|\($|\s+/g, "").toLowerCase(); });
+    var reads = (src.match(/\.read(VarInt|VarLong|Int|Long|Utf|UUID|BlockPos|ByteArray)\s*\(/g) || []).map(function (s) { return s.replace(/^\.read|\($|\s+/g, "").toLowerCase(); });
+    if (writes.length && reads.length && writes.join(",") !== reads.join(",")) {
+      findings.push({
+        rule_id: "NETTY-006", severity: "critical", frame: "encode/decode", domain: "NETTY",
+        message: "Manual write order [" + writes.join(", ") + "] mismatches read order [" + reads.join(", ") + "], corrupting readerIndex.",
+        remediation: "Use StreamCodec.composite(...) or align write* and read* calls in identical order."
+      });
+    }
+
+    if ((low.indexOf("onpacketreceive") >= 0 || low.indexOf("channelread") >= 0) && (low.indexOf("getblockat") >= 0 || low.indexOf("settype") >= 0) && low.indexOf("getscheduler") < 0) {
+      findings.push({
+        rule_id: "NETTY-003", severity: "critical", frame: "NettyPacketHandler", domain: "NETTY",
+        message: "Netty EventLoop listener mutates live world state directly without RegionScheduler or EntityScheduler handoff.",
+        remediation: "Decode into an immutable record on Netty I/O, then dispatch via player.getScheduler().run(...)."
+      });
+    }
+
+    if (/Unpooled\.(?:buffer|directBuffer)|\.retainedSlice\s*\(/.test(src) && !/release\s*\(/.test(src)) {
+      findings.push({
+        rule_id: "NETTY-004", severity: "high", frame: "Unpooled.buffer", domain: "NETTY",
+        message: "ByteBuf allocated or retained without matching ReferenceCountUtil.safeRelease() in finally block.",
+        remediation: "Release temporary ByteBuf instances inside try/finally to avoid direct memory leaks."
+      });
+    }
+
+    if (low.indexOf("@eventhandler") >= 0 && low.indexOf("getconnection(") >= 0 && low.indexOf("supplyasync(") < 0) {
+      findings.push({
+        rule_id: "SQL-001", severity: "critical", frame: "EventHandler", domain: "SQL",
+        message: "Synchronous JDBC getConnection/executeQuery runs on tick thread inside EventHandler.",
+        remediation: "Offload JDBC queries to CompletableFuture.supplyAsync(..., dbExecutor) or AsyncScheduler."
+      });
+    } else if (low.indexOf("@eventhandler") >= 0 && low.indexOf("executequery(") >= 0) {
+      var idxConn = low.indexOf("getconnection(");
+      var idxAsync = low.indexOf("supplyasync(");
+      if (idxConn >= 0 && (idxAsync < 0 || idxConn < idxAsync)) {
+        findings.push({
+          rule_id: "SQL-001", severity: "critical", frame: "EventHandler", domain: "SQL",
+          message: "Synchronous JDBC getConnection/executeQuery executes before async boundary inside EventHandler.",
+          remediation: "Move getConnection() inside CompletableFuture.supplyAsync(..., dbExecutor)."
+        });
+      }
+    }
+
+    if (/getConnection\s*\(/.test(src) && !/\btry\s*\([^)]*getConnection/.test(src) && src.indexOf(".use") < 0) {
+      findings.push({
+        rule_id: "SQL-004", severity: "critical", frame: "Connection", domain: "SQL",
+        message: "JDBC Connection acquired without Java try-with-resources or Kotlin .use {}, leaking HikariPool slots.",
+        remediation: "Wrap getConnection() and prepareStatement() inside try (...) { ... } or .use { ... }."
+      });
+    }
+
+    if (/prepareStatement\s*\(\s*"[^"]*(?:SELECT|INSERT|UPDATE|DELETE)[^"]*"\s*\+/i.test(src)) {
+      findings.push({
+        rule_id: "SQL-005", severity: "critical", frame: "prepareStatement", domain: "SQL",
+        message: "SQL query concatenates untrusted runtime strings instead of '?' bind parameters.",
+        remediation: "Use parameterized '?' placeholders and PreparedStatement#setString."
+      });
+    }
+
+    if (low.indexOf("thenaccept(") >= 0 && low.indexOf("getinventory()") >= 0 && low.indexOf("getscheduler().run") < 0) {
+      findings.push({
+        rule_id: "SQL-006", severity: "critical", frame: "CompletableFuture.thenAccept", domain: "SQL",
+        message: "Async DB completion callback mutates Player inventory on worker thread without EntityScheduler hop.",
+        remediation: "Marshal post-query Bukkit/Folia mutations onto player.getScheduler().run(plugin, task -> ..., null)."
+      });
+    }
+
+    return {
+      tool: "mc_audit_packet_codec+mc_audit_sql_persistence",
+      status: findings.length ? "fail" : "pass",
+      max_wire_bytes: maxWireBytes,
+      wire_cap_bytes: 32767,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
   function toSarif(report) {
     return {
       version: "2.1.0",
@@ -433,7 +612,7 @@
           tool: {
             driver: {
               name: "minecraftkit",
-              semanticVersion: "2.8.0",
+              semanticVersion: "2.9.0",
               rules: report.findings.map(function (f) {
                 return { id: f.rule_id, shortDescription: { text: f.message } };
               })
@@ -458,6 +637,7 @@
 
   var tabSpark = document.getElementById("tab-spark");
   var tabFolia = document.getElementById("tab-folia");
+  var tabProtoSql = document.getElementById("tab-protocol-sql");
   var presetBox = document.getElementById("preset-buttons");
   var inputHeading = document.getElementById("input-heading");
   var inputSubtitle = document.getElementById("input-subtitle");
@@ -497,11 +677,18 @@
         [report.finding_count, "Hotspots"],
         [report.benign_idle_workers, "Idle Async Parked"]
       ]);
-    } else {
+    } else if (mode === "folia") {
       renderMetrics([
         [report.status.toUpperCase(), "Verdict"],
         [report.threads_analyzed, "Threads"],
         [report.domains_detected.join(", ") || "NONE", "Domains"],
+        [report.finding_count, "Violations"]
+      ]);
+    } else {
+      renderMetrics([
+        [report.status.toUpperCase(), "Verdict"],
+        [report.max_wire_bytes + " B", "Worst-Case Wire"],
+        [report.wire_cap_bytes + " B", "Serverbound Cap"],
         [report.finding_count, "Violations"]
       ]);
     }
@@ -535,8 +722,10 @@
     if (mode === "spark") {
       var thr = parseFloat(thresholdInput.value) || 5.0;
       renderReport(analyzeSpark(traceInput.value, thr));
-    } else {
+    } else if (mode === "folia") {
       renderReport(analyzeFolia(traceInput.value, domainSelect.value));
+    } else {
+      renderReport(analyzeProtocolAndSql(traceInput.value));
     }
   }
 
@@ -558,16 +747,28 @@
   function switchMode(nextMode) {
     mode = nextMode;
     var isSpark = mode === "spark";
+    var isFolia = mode === "folia";
+    var isProtoSql = mode === "protocol_sql";
     tabSpark.classList.toggle("is-active", isSpark);
     tabSpark.setAttribute("aria-selected", String(isSpark));
-    tabFolia.classList.toggle("is-active", !isSpark);
-    tabFolia.setAttribute("aria-selected", String(!isSpark));
+    tabFolia.classList.toggle("is-active", isFolia);
+    tabFolia.setAttribute("aria-selected", String(isFolia));
+    if (tabProtoSql) {
+      tabProtoSql.classList.toggle("is-active", isProtoSql);
+      tabProtoSql.setAttribute("aria-selected", String(isProtoSql));
+    }
     thresholdWrap.hidden = !isSpark;
-    domainWrap.hidden = isSpark;
-    inputHeading.textContent = isSpark ? "Spark Collapsed Stack or Call-Tree Input" : "Folia Stack Trace or Multi-Thread Dump";
-    inputSubtitle.textContent = isSpark
-      ? "Zero-upload browser analysis. Distinguishes sync tick bottlenecks and HikariCP starvation from idle worker parking."
-      : "Verifies Folia 4-domain state ownership across REGION, ENTITY, GLOBAL, ASYNC, and NETTY threads.";
+    domainWrap.hidden = !isFolia;
+    if (isSpark) {
+      inputHeading.textContent = "Spark Collapsed Stack or Call-Tree Input";
+      inputSubtitle.textContent = "Zero-upload browser analysis. Distinguishes sync tick bottlenecks and HikariCP starvation from idle worker parking.";
+    } else if (isFolia) {
+      inputHeading.textContent = "Folia Stack Trace or Multi-Thread Dump";
+      inputSubtitle.textContent = "Verifies Folia 4-domain state ownership across REGION, ENTITY, GLOBAL, ASYNC, and NETTY threads.";
+    } else {
+      inputHeading.textContent = "Netty StreamCodec or HikariCP / SQL Persistence Snippet";
+      inputSubtitle.textContent = "Computes worst-case LEB128/UTF-8 wire-byte budgets (NETTY-001..008) and audits sync JDBC, resource leaks, and Folia callbacks (SQL-001..007).";
+    }
     renderPresets();
     traceInput.value = PRESETS[mode][0].text;
     runAudit();
@@ -575,6 +776,9 @@
 
   tabSpark.addEventListener("click", function () { switchMode("spark"); });
   tabFolia.addEventListener("click", function () { switchMode("folia"); });
+  if (tabProtoSql) {
+    tabProtoSql.addEventListener("click", function () { switchMode("protocol_sql"); });
+  }
   runBtn.addEventListener("click", runAudit);
   sarifBtn.addEventListener("click", function () {
     showSarif = !showSarif;

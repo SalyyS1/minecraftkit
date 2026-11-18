@@ -97,7 +97,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_seventeen_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_nineteen_readonly_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -122,6 +122,8 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_audit_datapack",
                 "mc_audit_spark_flamegraph",
                 "mc_analyze_folia_scheduler_trace",
+                "mc_audit_packet_codec",
+                "mc_audit_sql_persistence",
             ],
         )
         for tool in tools:
@@ -276,7 +278,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 17)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 19)
 
     def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
         res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
@@ -1188,6 +1190,157 @@ dependencies:
             "    at io.papermc.paper.threadedregions.TickRegions$ConcreteRegionSection.tickRegion(TickRegions.java:390)",
         ])
         clean_res, clean_err = self.call_tool("mc_analyze_folia_scheduler_trace", {"trace": clean_trace})
+        self.assertFalse(clean_err)
+        self.assertEqual(clean_res["status"], "pass")
+        self.assertEqual(clean_res["finding_count"], 0)
+
+    def test_mc_audit_packet_codec_wire_budget_and_netty_rules(self) -> None:
+        bad_codec = "\n".join([
+            'public record SpellCastPayload(int spellId, UUID caster, String macro, ItemStack icon) implements CustomPacketPayload {',
+            '    public static final Type<SpellCastPayload> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath("MyRPG", "SpellCast"));',
+            "    public static final StreamCodec<FriendlyByteBuf, SpellCastPayload> CODEC = StreamCodec.of(",
+            "        (buf, msg) -> { buf.writeVarInt(msg.spellId()); buf.writeUUID(msg.caster()); buf.writeUtf(msg.macro()); },",
+            "        buf -> new SpellCastPayload(buf.readUUID().hashCode(), new UUID(0L, 0L), buf.readUtf(), ItemStack.STREAM_CODEC.decode(buf))",
+            "    );",
+            "    public void onPacketReceive(PacketReceiveEvent event, Player player) {",
+            "        ByteBuf scratch = Unpooled.buffer(256);",
+            "        ClientboundSetEntityDataPacket pkt = null;",
+            "        player.getWorld().getBlockAt(0, 64, 0).setType(Material.DIAMOND_BLOCK);",
+            "    }",
+            "}",
+        ])
+        res, err = self.call_tool(
+            "mc_audit_packet_codec",
+            {"source": bad_codec, "direction": "serverbound", "phase": "configuration", "sarif": True},
+        )
+        self.assertFalse(err)
+        self.assertEqual(res["status"], "fail")
+        self.assertEqual(res["wire_budget"]["cap_bytes"], 32767)
+        self.assertGreater(res["wire_budget"]["max_total_wire_bytes"], 32767)
+        codes = {f["rule_id"] for f in res["findings"]}
+        for expected in (
+            "NETTY-001",
+            "NETTY-002",
+            "NETTY-003",
+            "NETTY-004",
+            "NETTY-005",
+            "NETTY-006",
+            "NETTY-007",
+            "NETTY-008",
+        ):
+            self.assertIn(expected, codes)
+        self.assertEqual(res["sarif_report"]["version"], "2.1.0")
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "2.9.0")
+
+        # Clean bounded RegistryFriendlyByteBuf codec with exact field wire math
+        clean_codec = "\n".join([
+            "public static final CustomPacketPayload.Type<RuneSyncPayload> TYPE =",
+            '    new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("myrpg", "rune_sync"));',
+            "public static final StreamCodec<RegistryFriendlyByteBuf, RuneSyncPayload> CODEC = StreamCodec.composite(",
+            "    ByteBufCodecs.VAR_INT, RuneSyncPayload::slot,",
+            "    ByteBufCodecs.stringUtf8(64), RuneSyncPayload::runeId,",
+            "    RuneSyncPayload::new",
+            ");",
+        ])
+        clean_res, clean_err = self.call_tool(
+            "mc_audit_packet_codec",
+            {
+                "source": clean_codec,
+                "direction": "serverbound",
+                "fields": [
+                    {"name": "slot", "type": "varint"},
+                    {"name": "caster", "type": "uuid"},
+                    {"name": "rune_id", "type": "utf8", "max_length": 64},
+                    {"name": "tags", "type": "collection", "max_count": 8, "element_type": "varint"},
+                ],
+            },
+        )
+        self.assertFalse(clean_err)
+        self.assertEqual(clean_res["status"], "pass")
+        self.assertEqual(clean_res["finding_count"], 0)
+        # Channel 'myrpg:rune_sync' = 15 bytes + 1 VarInt = 16
+        # slot = 5, caster = 16, rune_id = 64*3 (192) + 2 VarInt = 194, tags = 1 VarInt + 8*5 = 41 -> payload = 256, total = 272
+        self.assertEqual(clean_res["wire_budget"]["channel_header_bytes"], 16)
+        self.assertEqual(clean_res["wire_budget"]["max_payload_bytes"], 256)
+        self.assertEqual(clean_res["wire_budget"]["max_total_wire_bytes"], 272)
+
+    def test_mc_audit_sql_persistence_hikari_sqlite_and_folia_rules(self) -> None:
+        bad_dao = "\n".join([
+            "HikariConfig cfg = new HikariConfig();",
+            'cfg.setJdbcUrl("jdbc:mysql://db.internal:3306/rpg");',
+            "@EventHandler",
+            "public void onPlayerJoin(PlayerJoinEvent event) {",
+            "    Connection conn = dataSource.getConnection();",
+            '    PreparedStatement ps = conn.prepareStatement("SELECT * FROM profiles WHERE name = \'" + event.getPlayer().getName() + "\'");',
+            "    ps.executeQuery();",
+            "    CompletableFuture.supplyAsync(() -> loadKit(event.getPlayer().getUniqueId())).thenAccept(kit -> {",
+            "        event.getPlayer().getInventory().addItem(kit);",
+            "    });",
+            "}",
+        ])
+        res, err = self.call_tool(
+            "mc_audit_sql_persistence",
+            {
+                "source": bad_dao,
+                "hikari_config": {
+                    "jdbc_url": "jdbc:mysql://db.internal:3306/rpg",
+                    "maximum_pool_size": 20,
+                    "max_lifetime_ms": 600_000,
+                    "connection_timeout_ms": 15_000,
+                    "mysql_wait_timeout_sec": 600,
+                    "server_count": 10,
+                },
+                "folia": True,
+                "sarif": True,
+            },
+        )
+        self.assertFalse(err)
+        self.assertEqual(res["status"], "fail")
+        self.assertEqual(res["pool_sizing_report"]["fleet_total_connections"], 200)
+        self.assertEqual(res["pool_sizing_report"]["recommended_max_lifetime_ms"], 540_000)
+        codes = {f["rule_id"] for f in res["findings"]}
+        for expected in ("SQL-001", "SQL-002", "SQL-004", "SQL-005", "SQL-006", "SQL-007"):
+            self.assertIn(expected, codes)
+        self.assertEqual(res["sarif_report"]["version"], "2.1.0")
+
+        # SQLite multi-pool contention without WAL
+        sqlite_res, sqlite_err = self.call_tool(
+            "mc_audit_sql_persistence",
+            {"hikari_config": {"jdbc_url": "jdbc:sqlite:plugins/MyRPG/data.db", "maximum_pool_size": 4}},
+        )
+        self.assertFalse(sqlite_err)
+        self.assertEqual(sqlite_res["status"], "fail")
+        self.assertIn("SQL-003", {f["rule_id"] for f in sqlite_res["findings"]})
+
+        # Clean Folia async Kotlin .use {} + EntityScheduler hop + tuned MySQL Hikari pool
+        clean_dao = "\n".join([
+            "CompletableFuture.supplyAsync({",
+            '    dataSource.getConnection().use { conn ->',
+            '        conn.prepareStatement("SELECT coins FROM accounts WHERE uuid = ?").use { ps ->',
+            "            ps.setString(1, player.uniqueId.toString())",
+            "            ps.executeQuery()",
+            "        }",
+            "    }",
+            "}, dbExecutor).thenAccept { dto ->",
+            "    player.getScheduler().run(plugin, { _ -> player.getInventory().addItem(dto.reward) }, null)",
+            "}",
+        ])
+        clean_res, clean_err = self.call_tool(
+            "mc_audit_sql_persistence",
+            {
+                "source": clean_dao,
+                "hikari_config": {
+                    "jdbc_url": "jdbc:mysql://db.internal:3306/rpg",
+                    "maximum_pool_size": 6,
+                    "max_lifetime_ms": 540_000,
+                    "connection_timeout_ms": 3_000,
+                    "mysql_wait_timeout_sec": 600,
+                    "server_count": 8,
+                    "cache_prep_stmts": True,
+                },
+                "folia": True,
+            },
+        )
         self.assertFalse(clean_err)
         self.assertEqual(clean_res["status"], "pass")
         self.assertEqual(clean_res["finding_count"], 0)
