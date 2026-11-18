@@ -788,6 +788,78 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_spark_flamegraph",
+        "title": "Audit Spark & JFR Flamegraph Stacks and Async Pool Starvation",
+        "description": (
+            "Parse and classify Minecraft Spark and JFR CPU/wall-clock profiles in either collapsed "
+            "flamegraph format ('frame1;frame2;leaf 120') or indented call-tree format ('|-- 42.5% pkg.Class.method()'). "
+            "Computes deduplicated inclusive and exclusive (self) frame weights, demangles JDK 21+ hidden lambdas, "
+            "attributes hotspots back to initiating plugins (including indexed RPG plugins such as ModelEngine, "
+            "MMOItems, MMOCore, and MythicDungeons), classifies 7 tick bottleneck categories (sync chunk I/O, "
+            "sync JDBC/HTTP I/O, entity AI/collision, hopper/block-entity ticks, Netty codecs, worldgen structure "
+            "search, and plugin reflection), and distinguishes genuine async worker pool starvation (HikariCP pool "
+            "exhaustion, socket stalls, lock convoys, nested future deadlocks) from benign idle worker parking. "
+            "Supports optional OASIS SARIF v2.1.0 output."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "profile": {
+                    "type": "string",
+                    "description": "Collapsed flamegraph stack lines ('frame1;frame2 45') or indented Spark/JFR call-tree text.",
+                },
+                "hotspot_threshold_pct": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 100.0,
+                    "description": "Minimum inclusive or self sample percentage required to report a hotspot (default 5.0).",
+                },
+                "sarif": {
+                    "type": "boolean",
+                    "description": "Whether to include an OASIS SARIF v2.1.0 report under sarif_report (default false).",
+                },
+            },
+            "required": ["profile"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_analyze_folia_scheduler_trace",
+        "title": "Verify 4-Domain Folia Scheduler Thread Affinity & Trace Safety",
+        "description": (
+            "Verify Folia regionized multithreading contracts across single stack traces, multi-thread JVM dumps, "
+            "or scheduled execution traces. Classifies each trace into Folia's 4 scheduler domains (REGION, ENTITY, "
+            "GLOBAL, ASYNC) plus NETTY network I/O and evaluates the state-ownership matrix to catch off-region "
+            "world/entity/inventory mutations (FOLIA-TRC-001), GlobalRegionScheduler chunk/block/entity escapes "
+            "(FOLIA-TRC-002), cross-region player/entity iteration and synchronous teleport calls (FOLIA-TRC-003), "
+            "Netty packet-thread world access (FOLIA-TRC-004), blocking CompletableFuture.join/get deadlocks on "
+            "tick threads (FOLIA-TRC-005), legacy BukkitScheduler calls (FOLIA-TRC-006), and missing EntityScheduler "
+            "retired callbacks (FOLIA-TRC-007). Returns remediation snippets and optional OASIS SARIF v2.1.0 output."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "trace": {
+                    "type": "string",
+                    "description": "Stack trace, multi-thread JVM dump, or Folia TickThread crash snippet.",
+                },
+                "declared_domain": {
+                    "type": "string",
+                    "enum": ["auto", "region", "entity", "global", "async", "netty"],
+                    "description": "Explicit scheduler domain override when analyzing an isolated snippet without thread headers (default 'auto').",
+                },
+                "sarif": {
+                    "type": "boolean",
+                    "description": "Whether to include an OASIS SARIF v2.1.0 report under sarif_report (default false).",
+                },
+            },
+            "required": ["trace"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -1776,6 +1848,8 @@ class MinecraftKitMcpServer:
             "mc_validate_item_components": self._tool_validate_item_components,
             "mc_diagnose_crash_report": self._tool_diagnose_crash_report,
             "mc_audit_datapack": self._tool_audit_datapack,
+            "mc_audit_spark_flamegraph": self._tool_audit_spark_flamegraph,
+            "mc_analyze_folia_scheduler_trace": self._tool_analyze_folia_scheduler_trace,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -1853,8 +1927,9 @@ class MinecraftKitMcpServer:
                 "hierarchies and signatures, mc_generate_pack_overlay, mc_validate_item_components, and mc_audit_datapack "
                 "for multi-version pack.mcmeta, Paper 26.3 item components, and datapack recipe/tag validation, "
                 "and mc_audit_gradle_build / mc_audit_paper_plugin_yml / mc_audit_server_properties / "
-                "mc_folia_migration_advisor / mc_diagnose_server_log / mc_diagnose_crash_report for static build, "
-                "descriptor, network/Netty config, region-threading, and crash-log/report verification."
+                "mc_folia_migration_advisor / mc_analyze_folia_scheduler_trace / mc_audit_spark_flamegraph / "
+                "mc_diagnose_server_log / mc_diagnose_crash_report for static build, descriptor, network/Netty config, "
+                "4-domain Folia scheduler affinity, Spark flamegraph hotspots, and crash-log/report verification."
             ),
         }
 
@@ -5293,6 +5368,1058 @@ class MinecraftKitMcpServer:
             "findings": findings,
             "schema_resource_uri": "minecraftkit://catalog/overview",
         }))
+
+    @staticmethod
+    def _demangle_jvm_frame(raw_frame: str) -> str:
+        frame = raw_frame.strip()
+        frame = re.sub(r"^(?:at\s+)", "", frame)
+        frame = re.sub(r"^[a-zA-Z0-9_.]+@[0-9A-Za-z_.+-]+/", "", frame)
+        frame = re.sub(r"\$\$Lambda(?:\$0x[0-9a-fA-F]+)?(?:/0x[0-9a-fA-F]+)?", "::Lambda", frame)
+        frame = re.sub(r"\.lambda\$([A-Za-z0-9_$]+)\$\d+", r"::lambda$\1", frame)
+        frame = re.sub(r"\([^)]*\)$", "()", frame)
+        return frame.strip()
+
+    @staticmethod
+    def _attribute_frame_owner(frame: str) -> tuple[str, str | None]:
+        clean = frame.lstrip("[")
+        rpg_prefixes = (
+            ("com.ticxo.modelengine", "ModelEngine"),
+            ("net.Indyuce.mmoitems", "MMOItems"),
+            ("net.indyuce.mmoitems", "MMOItems"),
+            ("net.Indyuce.mmocore", "MMOCore"),
+            ("net.indyuce.mmocore", "MMOCore"),
+            ("net.Indyuce.mmoinventory", "MMOInventory"),
+            ("net.indyuce.mmoinventory", "MMOInventory"),
+            ("fr.phoenixdevt.mmoprofiles", "MMOProfiles"),
+            ("io.lumine.mythiccrucible", "MythicCrucible"),
+            ("net.playavalon.mythicdungeons", "MythicDungeons"),
+            ("io.lumine.mythicenchants", "MythicEnchants"),
+            ("io.lumine.mythicrpg", "MythicRPG"),
+            ("io.lumine.mythic.core", "CoreTools"),
+            ("com.coretools", "CoreTools"),
+        )
+        for prefix, plugin_name in rpg_prefixes:
+            if clean.startswith(prefix):
+                return ("indexed_rpg_plugin", plugin_name)
+
+        engine_prefixes = (
+            "net.minecraft.",
+            "com.mojang.",
+            "io.papermc.",
+            "ca.spottedleaf.",
+            "org.bukkit.",
+            "org.spigotmc.",
+            "com.destroystokyo.paper.",
+            "gg.pufferfish.",
+            "org.purpurmc.",
+            "java.",
+            "javax.",
+            "jdk.",
+            "sun.",
+            "com.sun.",
+            "io.netty.",
+            "it.unimi.dsi.",
+            "com.google.common.",
+            "com.google.gson.",
+            "org.apache.logging.",
+            "org.slf4j.",
+            "kotlin.",
+            "kotlinx.",
+            "com.zaxxer.hikari.",
+            "com.mysql.",
+            "org.mariadb.",
+            "org.postgresql.",
+            "org.sqlite.",
+            "okhttp3.",
+            "org.spongepowered.asm.",
+        )
+        if clean.startswith(engine_prefixes):
+            return ("engine", None)
+
+        pkg_match = re.match(r"^([a-z][a-z0-9_]*)\.([a-zA-Z0-9_]+)(?:\.([a-zA-Z0-9_]+))?\.[A-Z]", clean)
+        if pkg_match:
+            tld, vendor, sub = pkg_match.group(1), pkg_match.group(2), pkg_match.group(3)
+            if tld in {"com", "net", "org", "io", "me", "dev", "de", "fr", "pl", "ru", "uk", "gg", "xyz"}:
+                if vendor.lower() in {"github", "gitlab"} and sub:
+                    return ("third_party_plugin", sub)
+                return ("third_party_plugin", vendor)
+        return ("runtime", None)
+
+    @classmethod
+    def _is_thread_name(cls, label: str) -> bool:
+        lower = label.strip().strip('"').lower()
+        thread_markers = (
+            "server thread",
+            "region scheduler",
+            "global region",
+            "entity scheduler",
+            "async scheduler",
+            "craft async",
+            "folia async",
+            "netty ",
+            "forkjoinpool",
+            "worker-main",
+            "tuinity chunk",
+            "moonrise ",
+            "hikaripool",
+            "pool-",
+            "thread-",
+        )
+        return any(marker in lower for marker in thread_markers)
+
+    @classmethod
+    def _is_async_worker_thread(cls, thread_name: str) -> bool:
+        lower = thread_name.lower()
+        return any(
+            token in lower
+            for token in (
+                "async scheduler",
+                "craft async",
+                "folia async",
+                "forkjoinpool",
+                "completablefuture",
+                "worker-main",
+                "async chat",
+                "pool-",
+            )
+        )
+
+    @classmethod
+    def _is_tick_or_region_thread(cls, thread_name: str) -> bool:
+        lower = thread_name.lower()
+        if cls._is_async_worker_thread(lower) or "netty" in lower:
+            return False
+        return any(
+            token in lower
+            for token in (
+                "server thread",
+                "region scheduler",
+                "global region",
+                "entity scheduler",
+                "profile root",
+            )
+        )
+
+    def _build_sarif_report(self, findings: list[dict[str, Any]]) -> dict[str, Any]:
+        seen_rules: dict[str, dict[str, Any]] = {}
+        for f in findings:
+            rid = str(f["rule_id"])
+            if rid not in seen_rules:
+                sev = f.get("severity", "medium")
+                level = "error" if sev in {"critical", "high"} else ("warning" if sev == "medium" else "note")
+                seen_rules[rid] = {
+                    "id": rid,
+                    "name": str(f.get("name", rid)),
+                    "shortDescription": {"text": str(f.get("message", ""))},
+                    "defaultConfiguration": {"level": level},
+                }
+        results = []
+        for f in findings:
+            sev = f.get("severity", "medium")
+            level = "error" if sev in {"critical", "high"} else ("warning" if sev == "medium" else "note")
+            entry: dict[str, Any] = {
+                "ruleId": str(f["rule_id"]),
+                "level": level,
+                "message": {"text": str(f.get("message", ""))},
+            }
+            loc_target = f.get("frame") or f.get("violating_frame") or f.get("thread")
+            if loc_target:
+                entry["locations"] = [
+                    {
+                        "logicalLocations": [
+                            {
+                                "fullyQualifiedName": str(loc_target),
+                                "kind": "function",
+                            }
+                        ]
+                    }
+                ]
+            results.append(entry)
+        return {
+            "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+            "version": "2.1.0",
+            "runs": [
+                {
+                    "tool": {
+                        "driver": {
+                            "name": "minecraftkit",
+                            "semanticVersion": self.store.kit_version(),
+                            "rules": list(seen_rules.values()),
+                        }
+                    },
+                    "results": results,
+                }
+            ],
+        }
+
+    def _tool_audit_spark_flamegraph(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_profile = args.get("profile")
+        if not isinstance(raw_profile, str) or not raw_profile.strip():
+            raise ValueError("'profile' must be a non-empty Spark/JFR collapsed stack or call-tree string.")
+
+        raw_threshold = args.get("hotspot_threshold_pct", 5.0)
+        if isinstance(raw_threshold, bool) or not isinstance(raw_threshold, (int, float)):
+            raise ValueError("'hotspot_threshold_pct' must be a number between 0.1 and 100.0.")
+        threshold_pct = float(raw_threshold)
+        if not (0.1 <= threshold_pct <= 100.0):
+            raise ValueError("'hotspot_threshold_pct' must be between 0.1 and 100.0.")
+
+        sarif = bool(args.get("sarif", False))
+
+        lines = [ln.rstrip("\r") for ln in raw_profile.splitlines() if ln.strip() and not ln.lstrip().startswith("#")]
+        if not lines:
+            raise ValueError("'profile' contains no parseable stack samples or call-tree nodes.")
+
+        collapsed_re = re.compile(r"^([^;\s][^;]*(?:;[^;]+)+)\s+([0-9]+(?:\.[0-9]+)?)\s*$")
+        collapsed_matches = [collapsed_re.match(ln.strip()) for ln in lines]
+        is_collapsed = sum(1 for m in collapsed_matches if m is not None) >= max(1, len(lines) // 2)
+
+        # Unified sample representation: list of (thread_name, stack_frames_root_to_leaf, leaf_self_weight)
+        samples: list[tuple[str, list[str], float]] = []
+        inclusive_weights: dict[str, float] = {}
+        self_weights: dict[str, float] = {}
+        frame_threads: dict[str, set[str]] = {}
+        frame_callers: dict[str, tuple[str, str]] = {}  # frame -> (owner_kind, plugin_name)
+        total_weight = 0.0
+        detected_format = "collapsed" if is_collapsed else "call_tree"
+
+        if is_collapsed:
+            for ln in lines:
+                m = collapsed_re.match(ln.strip())
+                if not m:
+                    continue
+                raw_chain, weight_str = m.group(1), m.group(2)
+                weight = float(weight_str)
+                if weight <= 0:
+                    continue
+                parts = [p.strip() for p in raw_chain.split(";") if p.strip()]
+                if not parts:
+                    continue
+                if self._is_thread_name(parts[0]) and len(parts) > 1:
+                    thread_name = parts[0].strip('"')
+                    raw_frames = parts[1:]
+                else:
+                    thread_name = "Server thread"
+                    raw_frames = parts
+                norm_frames = [self._demangle_jvm_frame(f) for f in raw_frames if f.strip()]
+                if not norm_frames:
+                    continue
+                total_weight += weight
+                samples.append((thread_name, norm_frames, weight))
+
+                active_plugin: tuple[str, str] | None = None
+                seen_in_sample: set[str] = set()
+                for fr in norm_frames:
+                    owner_kind, owner_name = self._attribute_frame_owner(fr)
+                    if owner_kind in {"indexed_rpg_plugin", "third_party_plugin"} and owner_name:
+                        active_plugin = (owner_kind, owner_name)
+                    if fr not in seen_in_sample:
+                        seen_in_sample.add(fr)
+                        inclusive_weights[fr] = inclusive_weights.get(fr, 0.0) + weight
+                    frame_threads.setdefault(fr, set()).add(thread_name)
+                    if active_plugin and fr not in frame_callers:
+                        frame_callers[fr] = active_plugin
+                leaf = norm_frames[-1]
+                self_weights[leaf] = self_weights.get(leaf, 0.0) + weight
+        else:
+            # Parse indented Spark / JFR call tree and compute exact child-subtracted self weights
+            tree_nodes: list[dict[str, Any]] = []
+            stack: list[int] = []  # indices into tree_nodes
+
+            pct_prefix_re = re.compile(r"^\[?\s*([0-9]+(?:\.[0-9]+)?)%\s*\]?\s*(?:\([0-9.,]+\s*(?:ms|s|samples)?\)\s*)?(.+?)\s*$")
+            pct_suffix_re = re.compile(r"^(.+?)\s+([0-9]+(?:\.[0-9]+)?)%\s*(?:\([0-9.,]+\s*(?:ms|s|samples)?\))?\s*$")
+
+            for ln in lines:
+                prefix_match = re.match(r"^([\s│|├└─+`\\-]*)", ln)
+                prefix = prefix_match.group(1) if prefix_match else ""
+                body = ln[len(prefix):].strip()
+                if not body:
+                    continue
+                depth = len(prefix.expandtabs(2))
+
+                pct_val: float | None = None
+                label = body
+                m_pre = pct_prefix_re.match(body)
+                if m_pre:
+                    pct_val = float(m_pre.group(1))
+                    label = m_pre.group(2).strip()
+                else:
+                    m_suf = pct_suffix_re.match(body)
+                    if m_suf:
+                        label = m_suf.group(1).strip()
+                        pct_val = float(m_suf.group(2))
+
+                if pct_val is None:
+                    continue
+
+                while stack and tree_nodes[stack[-1]]["depth"] >= depth:
+                    stack.pop()
+
+                parent_idx = stack[-1] if stack else None
+                clean_label = label.strip('"')
+                is_thread_root = parent_idx is None and self._is_thread_name(clean_label)
+                node_idx = len(tree_nodes)
+                node = {
+                    "idx": node_idx,
+                    "depth": depth,
+                    "raw_label": clean_label,
+                    "frame": clean_label if is_thread_root else self._demangle_jvm_frame(clean_label),
+                    "is_thread_root": is_thread_root,
+                    "weight": pct_val,
+                    "parent": parent_idx,
+                    "children": [],
+                }
+                tree_nodes.append(node)
+                if parent_idx is not None:
+                    tree_nodes[parent_idx]["children"].append(node_idx)
+                stack.append(node_idx)
+
+            if not tree_nodes:
+                raise ValueError("Unable to parse Spark/JFR call-tree percentages or collapsed stack weights from 'profile'.")
+
+            root_nodes = [n for n in tree_nodes if n["parent"] is None]
+            tick_roots = [n for n in root_nodes if not self._is_async_worker_thread(n["raw_label"])]
+            total_weight = sum(n["weight"] for n in (tick_roots or root_nodes))
+            if total_weight <= 0:
+                total_weight = 100.0
+
+            for node in tree_nodes:
+                if node["is_thread_root"] and node["children"]:
+                    continue
+                child_sum = sum(tree_nodes[ch]["weight"] for ch in node["children"])
+                node_self = max(0.0, node["weight"] - child_sum)
+
+                # Reconstruct root-to-node path
+                chain: list[dict[str, Any]] = []
+                cur: int | None = node["idx"]
+                while cur is not None:
+                    chain.append(tree_nodes[cur])
+                    cur = tree_nodes[cur]["parent"]
+                chain.reverse()
+
+                thread_name = chain[0]["raw_label"] if chain[0]["is_thread_root"] else "Server thread"
+                frames = [c["frame"] for c in chain if not c["is_thread_root"]]
+                if not frames:
+                    continue
+
+                fr_leaf = frames[-1]
+                inclusive_weights[fr_leaf] = inclusive_weights.get(fr_leaf, 0.0) + node["weight"]
+                self_weights[fr_leaf] = self_weights.get(fr_leaf, 0.0) + node_self
+                frame_threads.setdefault(fr_leaf, set()).add(thread_name)
+
+                active_plugin = None
+                for fr in frames:
+                    owner_kind, owner_name = self._attribute_frame_owner(fr)
+                    if owner_kind in {"indexed_rpg_plugin", "third_party_plugin"} and owner_name:
+                        active_plugin = (owner_kind, owner_name)
+                if active_plugin and fr_leaf not in frame_callers:
+                    frame_callers[fr_leaf] = active_plugin
+
+                if node_self > 0 or not node["children"]:
+                    samples.append((thread_name, frames, max(node_self, 0.01)))
+
+        if total_weight <= 0:
+            raise ValueError("'profile' total sample weight must be greater than zero.")
+
+        # Aggregate plugin attribution across self weights and inclusive leaf chains
+        plugin_attribution: dict[str, dict[str, Any]] = {}
+        for thread_name, frames, leaf_w in samples:
+            if not self._is_tick_or_region_thread(thread_name):
+                continue
+            initiating: tuple[str, str] | None = None
+            top_plugin_frame: str | None = None
+            for fr in frames:
+                kind, pname = self._attribute_frame_owner(fr)
+                if kind in {"indexed_rpg_plugin", "third_party_plugin"} and pname:
+                    initiating = (kind, pname)
+                    top_plugin_frame = fr
+            if initiating and top_plugin_frame:
+                kind, pname = initiating
+                bucket = plugin_attribution.setdefault(
+                    pname,
+                    {
+                        "plugin": pname,
+                        "indexed_in_minecraftkit": kind == "indexed_rpg_plugin",
+                        "attributed_weight": 0.0,
+                        "top_frame": top_plugin_frame,
+                    },
+                )
+                bucket["attributed_weight"] += leaf_w
+
+        plugin_breakdown = []
+        for entry in sorted(plugin_attribution.values(), key=lambda x: x["attributed_weight"], reverse=True):
+            pct = round((entry["attributed_weight"] / total_weight) * 100.0, 2)
+            plugin_breakdown.append({
+                "plugin": entry["plugin"],
+                "indexed_in_minecraftkit": entry["indexed_in_minecraftkit"],
+                "attributed_pct": min(100.0, pct),
+                "top_frame": entry["top_frame"],
+            })
+
+        # Classify 7 tick hotspot categories + async pool starvation
+        findings: list[dict[str, Any]] = []
+        emitted_rules: set[tuple[str, str]] = set()
+
+        def add_finding(
+            rule_id: str,
+            name: str,
+            category: str,
+            severity: str,
+            frame: str,
+            inc_pct: float,
+            self_pct: float,
+            thread_label: str,
+            plugin_owner: str | None,
+            message: str,
+            remediation: str,
+        ) -> None:
+            dedup_key = (rule_id, plugin_owner or frame)
+            if dedup_key in emitted_rules:
+                return
+            emitted_rules.add(dedup_key)
+            findings.append({
+                "rule_id": rule_id,
+                "name": name,
+                "category": category,
+                "severity": severity,
+                "frame": frame,
+                "thread": thread_label,
+                "plugin": plugin_owner,
+                "inclusive_pct": round(min(100.0, inc_pct), 2),
+                "self_pct": round(min(100.0, self_pct), 2),
+                "message": message,
+                "remediation": remediation,
+            })
+
+        for fr, inc_w in sorted(inclusive_weights.items(), key=lambda kv: kv[1], reverse=True):
+            inc_pct = (inc_w / total_weight) * 100.0
+            self_pct = (self_weights.get(fr, 0.0) / total_weight) * 100.0
+            threads = frame_threads.get(fr, {"Server thread"})
+            on_tick = any(self._is_tick_or_region_thread(t) for t in threads)
+            primary_thread = sorted(threads)[0]
+            caller_info = frame_callers.get(fr)
+            caller_plugin = caller_info[1] if caller_info else None
+            lower_fr = fr.lower()
+
+            if on_tick and max(inc_pct, self_pct) >= threshold_pct:
+                if any(tok in lower_fr for tok in (
+                    "serverchunkcache.getchunk",
+                    "syncload",
+                    "blockingload",
+                    "getchunkat(",
+                    "getchunkat()",
+                    "chunksystem.schedulechunkload",
+                    "chunkmap.save",
+                )):
+                    add_finding(
+                        "SPARK-001",
+                        "SyncChunkIoOnTickThread",
+                        "SYNC_CHUNK_IO",
+                        "critical",
+                        fr,
+                        inc_pct,
+                        self_pct,
+                        primary_thread,
+                        caller_plugin,
+                        f"Synchronous chunk load '{fr}' consumes {inc_pct:.1f}% of tick budget on '{primary_thread}'"
+                        + (f" (triggered by plugin '{caller_plugin}')." if caller_plugin else "."),
+                        "Replace synchronous World.getChunkAt / Location.getChunk calls with World.getChunkAtAsync(x, z).thenAccept(...) and pre-generate world borders with Chunky.",
+                    )
+                elif any(tok in lower_fr for tok in (
+                    "java.sql.",
+                    "hikaripool",
+                    "preparedstatement",
+                    "drivermanager.getconnection",
+                    "mysql",
+                    "mariadb",
+                    "postgresql",
+                    "sqlite",
+                    "socketinputstream.socketread",
+                    "sun.net.www.protocol.http",
+                    "jdk.internal.net.http",
+                    "okhttp3.",
+                )):
+                    add_finding(
+                        "SPARK-002",
+                        "SyncJdbcOrNetworkIoOnTickThread",
+                        "SYNCHRONOUS_JDBC_OR_HTTP_IO",
+                        "critical",
+                        fr,
+                        inc_pct,
+                        self_pct,
+                        primary_thread,
+                        caller_plugin,
+                        f"Blocking JDBC or network I/O '{fr}' stalls '{primary_thread}' for {inc_pct:.1f}% of profile samples"
+                        + (f" (initiated by '{caller_plugin}')." if caller_plugin else "."),
+                        "Move all database queries and HTTP calls onto Bukkit.getAsyncScheduler() (or CompletableFuture.supplyAsync) and marshal results back via RegionScheduler or EntityScheduler.",
+                    )
+                elif any(tok in lower_fr for tok in (
+                    "goalselector",
+                    "brain.tick",
+                    "pathnavigation",
+                    "walknodeevaluator",
+                    "voxelshapes",
+                    "entitylookup",
+                    "pushentities",
+                    "livingentity.aistep",
+                )):
+                    add_finding(
+                        "SPARK-003",
+                        "EntityAiOrCollisionHotspot",
+                        "ENTITY_AI_PATHFINDING",
+                        "high",
+                        fr,
+                        inc_pct,
+                        self_pct,
+                        primary_thread,
+                        caller_plugin,
+                        f"Entity AI pathfinding or voxel collision '{fr}' accounts for {inc_pct:.1f}% inclusive ({self_pct:.1f}% self) tick time.",
+                        "Tighten entity-activation-range and max-entity-collisions in spigot.yml/paper-world-defaults.yml, and disable per-tick path recalculation on stationary custom mobs.",
+                    )
+                elif any(tok in lower_fr for tok in (
+                    "hopperblockentity",
+                    "boundtickingblockentity",
+                    "pistonmovingblockentity",
+                    "furnaceblockentity",
+                )):
+                    add_finding(
+                        "SPARK-004",
+                        "HopperOrBlockEntityTickHotspot",
+                        "HOPPER_BLOCK_ENTITY_TICK",
+                        "high",
+                        fr,
+                        inc_pct,
+                        self_pct,
+                        primary_thread,
+                        caller_plugin,
+                        f"Block-entity ticking '{fr}' consumes {inc_pct:.1f}% of tick budget.",
+                        "Enable Paper hopper.disable-move-event when InventoryMoveItemEvent listeners are unnecessary, increase ticks-per.hopper-check, and cap concentrated hopper chains.",
+                    )
+                elif any(tok in lower_fr for tok in (
+                    "packetencoder",
+                    "packetdecoder",
+                    "trackedentity.broadcast",
+                    "deflater.deflate",
+                    "streamcodec",
+                )):
+                    add_finding(
+                        "SPARK-005",
+                        "NettyPacketCodecPressure",
+                        "NETTY_PACKET_SERIALIZATION",
+                        "medium",
+                        fr,
+                        inc_pct,
+                        self_pct,
+                        primary_thread,
+                        caller_plugin,
+                        f"Packet serialization/compression '{fr}' consumes {inc_pct:.1f}% of sampled time.",
+                        "Raise network-compression-threshold to 256 or 512 (or -1 behind Velocity on localhost) and throttle high-frequency entity metadata/equipment packet broadcasts.",
+                    )
+                elif any(tok in lower_fr for tok in (
+                    "findnearestmapstructure",
+                    "noisebasedchunkgenerator",
+                    "biomesource",
+                    "surfacebuilders",
+                    "structurecheck",
+                )):
+                    add_finding(
+                        "SPARK-006",
+                        "WorldgenOrStructureSearchHotspot",
+                        "WORLDGEN_NOISE_BIOME",
+                        "high",
+                        fr,
+                        inc_pct,
+                        self_pct,
+                        primary_thread,
+                        caller_plugin,
+                        f"World generation or synchronous structure search '{fr}' consumes {inc_pct:.1f}% of tick time.",
+                        "Pre-generate exploration worlds, disable treasure-maps.enabled for ungenerated oceans/mansions if /locate stalls occur, and avoid calling World.locateNearestStructure on high-frequency events.",
+                    )
+                else:
+                    owner_kind, owner_name = self._attribute_frame_owner(fr)
+                    if owner_kind in {"indexed_rpg_plugin", "third_party_plugin"} and self_pct >= threshold_pct:
+                        add_finding(
+                            "SPARK-007",
+                            "PluginExecutionOrReflectionHotspot",
+                            "PLUGIN_EVENT_REFLECTION_HOTSPOT",
+                            "high",
+                            fr,
+                            inc_pct,
+                            self_pct,
+                            primary_thread,
+                            owner_name,
+                            f"Plugin frame '{fr}' ({owner_name}) consumes {self_pct:.1f}% self ({inc_pct:.1f}% inclusive) on '{primary_thread}'.",
+                            f"Cache reflective lookups or NBT/DataComponent reads in '{owner_name}', debounce PlayerMoveEvent/EntityDamageByEntityEvent handlers, and offload pure computation to AsyncScheduler.",
+                        )
+
+        # Inspect async worker pool samples: distinguish benign idle park from real starvation
+        async_starvation_events: list[dict[str, Any]] = []
+        benign_idle_workers = 0
+        active_async_workers = 0
+
+        for thread_name, frames, leaf_w in samples:
+            if not self._is_async_worker_thread(thread_name):
+                continue
+            joined_lower = " ; ".join(frames).lower()
+            has_plugin_task = any(
+                self._attribute_frame_owner(f)[0] in {"indexed_rpg_plugin", "third_party_plugin"}
+                for f in frames
+            )
+            is_idle_queue_park = any(
+                idle_tok in joined_lower
+                for idle_tok in (
+                    "threadpoolexecutor.gettask",
+                    "delayedworkqueue.take",
+                    "synchronousqueue.transfer",
+                    "forkjoinpool.runworker",
+                    "forkjoinpool.scan",
+                )
+            ) and not has_plugin_task
+
+            if is_idle_queue_park:
+                benign_idle_workers += 1
+                continue
+
+            active_async_workers += 1
+            plugin_caller = next(
+                (self._attribute_frame_owner(f)[1] for f in reversed(frames) if self._attribute_frame_owner(f)[1]),
+                None,
+            )
+            leaf_fr = frames[-1]
+
+            starvation_kind: str | None = None
+            remediation_hint = ""
+            if "hikaripool.getconnection" in joined_lower:
+                starvation_kind = "HIKARICP_POOL_EXHAUSTION"
+                remediation_hint = "HikariCP connection pool is exhausted across async workers; check leaked ResultSet/Connection handles, add indexes to slow SQL queries, and align maximumPoolSize with database max_connections."
+            elif "socketread0" in joined_lower or "socketchannelimpl.read" in joined_lower or "http2clientimpl" in joined_lower:
+                starvation_kind = "UNTIMED_SOCKET_STALL"
+                remediation_hint = "Async scheduler worker is pinned on a blocking socket read; configure explicit connectTimeout and readTimeout (e.g. 3000-5000ms) and isolate external HTTP webhooks on a dedicated bounded executor."
+            elif any(tok in joined_lower for tok in ("reentrantlock.lock", "object.wait", "monitorenter", "synchronized")):
+                starvation_kind = "ASYNC_LOCK_CONVOY"
+                remediation_hint = "Async workers are serialized on a shared lock or monitor; replace coarse synchronized caches with ConcurrentHashMap.computeIfAbsent or striped locks."
+            elif any(tok in joined_lower for tok in ("completablefuture.waitingget", "completablefuture.join", "futuretask.awaitdone")):
+                starvation_kind = "NESTED_FUTURE_DEADLOCK"
+                remediation_hint = "Async worker blocks on CompletableFuture.join()/get(), risking thread-pool starvation deadlock when child tasks target the same bounded pool; compose stages with thenCompose/thenCombine instead."
+
+            if starvation_kind:
+                async_starvation_events.append({
+                    "thread": thread_name,
+                    "starvation_type": starvation_kind,
+                    "plugin": plugin_caller,
+                    "blocking_frame": leaf_fr,
+                    "weight": round(leaf_w, 2),
+                })
+                add_finding(
+                    "SPARK-008",
+                    "AsyncWorkerPoolStarvation",
+                    "ASYNC_POOL_STARVATION",
+                    "critical" if starvation_kind in {"HIKARICP_POOL_EXHAUSTION", "NESTED_FUTURE_DEADLOCK"} else "high",
+                    leaf_fr,
+                    (leaf_w / total_weight) * 100.0,
+                    (leaf_w / total_weight) * 100.0,
+                    thread_name,
+                    plugin_caller,
+                    f"Async worker '{thread_name}' exhibits {starvation_kind} at '{leaf_fr}'"
+                    + (f" inside plugin '{plugin_caller}'." if plugin_caller else "."),
+                    remediation_hint,
+                )
+
+        top_self_frames = [
+            {
+                "frame": fr,
+                "self_pct": round(min(100.0, (sw / total_weight) * 100.0), 2),
+                "inclusive_pct": round(min(100.0, (inclusive_weights.get(fr, sw) / total_weight) * 100.0), 2),
+                "owner_type": self._attribute_frame_owner(fr)[0],
+                "plugin": self._attribute_frame_owner(fr)[1] or (frame_callers.get(fr, (None, None))[1]),
+            }
+            for fr, sw in sorted(self_weights.items(), key=lambda kv: kv[1], reverse=True)[:10]
+            if sw > 0
+        ]
+
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for f in findings:
+            sev = f.get("severity", "low")
+            if sev in severity_counts:
+                severity_counts[sev] += 1
+
+        report: dict[str, Any] = {
+            "status": "fail" if (severity_counts["critical"] + severity_counts["high"]) > 0 else ("warn" if findings else "pass"),
+            "profile_format": detected_format,
+            "total_sample_weight": round(total_weight, 2),
+            "sample_paths_analyzed": len(samples),
+            "hotspot_threshold_pct": threshold_pct,
+            "top_self_hotspots": top_self_frames,
+            "plugin_attribution": plugin_breakdown,
+            "async_pool_summary": {
+                "active_async_samples": active_async_workers,
+                "benign_idle_parked_workers": benign_idle_workers,
+                "starvation_events": async_starvation_events,
+            },
+            "finding_count": len(findings),
+            "severity_counts": severity_counts,
+            "findings": findings,
+        }
+        if sarif:
+            report["sarif_report"] = self._build_sarif_report(findings)
+
+        return ToolOutcome(_pretty_json(report))
+
+    def _tool_analyze_folia_scheduler_trace(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_trace = args.get("trace")
+        if not isinstance(raw_trace, str) or not raw_trace.strip():
+            raise ValueError("'trace' must be a non-empty stack trace, thread dump, or Folia crash log string.")
+
+        declared = str(args.get("declared_domain", "auto")).strip().lower()
+        if declared not in {"auto", "region", "entity", "global", "async", "netty"}:
+            raise ValueError("'declared_domain' must be one of: auto, region, entity, global, async, netty.")
+        sarif = bool(args.get("sarif", False))
+
+        # Split multi-thread JVM dumps on quoted thread headers ("Thread Name" ...), else single block
+        thread_header_re = re.compile(r'^"([^"]+)"(?:\s+#\d+)?.*$')
+        blocks: list[tuple[str, list[str]]] = []
+        current_header: str | None = None
+        current_lines: list[str] = []
+
+        for raw_ln in raw_trace.splitlines():
+            stripped = raw_ln.strip()
+            if not stripped:
+                continue
+            m_hdr = thread_header_re.match(stripped)
+            if m_hdr:
+                if current_lines or current_header is not None:
+                    blocks.append((current_header or "Trace Snippet", current_lines))
+                current_header = m_hdr.group(1)
+                current_lines = [stripped]
+                continue
+            inline_thr = re.search(r"Thread\s+(Region Scheduler Thread #[0-9]+|Global Region Scheduler[^\n:]*|Folia Async Scheduler[^\n:]*|Craft Async Scheduler[^\n:]*|Netty [^\n:]+|Server thread)", stripped)
+            if inline_thr and current_header is None:
+                current_header = inline_thr.group(1).strip()
+            current_lines.append(stripped)
+
+        if current_lines or current_header is not None:
+            blocks.append((current_header or "Trace Snippet", current_lines))
+        if not blocks:
+            raise ValueError("'trace' contains no parseable stack frames.")
+
+        def infer_domain(header: str, frames: list[str]) -> str:
+            if declared != "auto":
+                return declared.upper()
+            h_low = header.lower()
+            joined = " \n ".join(frames).lower()
+            if "netty" in h_low or "epollserver" in h_low or "nioeventloop.run" in joined or "epolleventloop.run" in joined:
+                # Check if packet was already handed off to a Folia scheduler/tick thread
+                if not any(k in joined for k in ("tickregions", "regionizedtaskqueue", "entityscheduler.executetick", "globalregionscheduler")):
+                    return "NETTY"
+            if "global region" in h_low or "globalregionscheduler" in joined or "regionizedserver.globaltick" in joined:
+                return "GLOBAL"
+            if "entityscheduler.executetick" in joined or "craftentityscheduler" in joined or "entity.getscheduler()" in joined:
+                return "ENTITY"
+            if "region scheduler" in h_low or "tickregions" in joined or "regionizedtaskqueue" in joined or "craftregionscheduler" in joined:
+                return "REGION"
+            if (
+                "async scheduler" in h_low
+                or "craft async" in h_low
+                or "folia async" in h_low
+                or "foliaasyncscheduler" in joined
+                or "craftasyncscheduler" in joined
+                or "completablefuture$async" in joined
+                or "forkjoinworkerthread" in joined
+            ):
+                return "ASYNC"
+            if "server thread" in h_low:
+                return "LEGACY_MAIN"
+            return "UNKNOWN"
+
+        findings: list[dict[str, Any]] = []
+        thread_reports: list[dict[str, Any]] = []
+        remediation_snippets: list[str] = []
+        emitted: set[tuple[str, str, str]] = set()
+
+        def record_violation(
+            rule_id: str,
+            name: str,
+            severity: str,
+            domain: str,
+            thread_label: str,
+            violating_frame: str,
+            plugin_frame: str | None,
+            plugin_name: str | None,
+            message: str,
+            snippet: str,
+        ) -> None:
+            key = (rule_id, domain, violating_frame)
+            if key in emitted:
+                return
+            emitted.add(key)
+            findings.append({
+                "rule_id": rule_id,
+                "name": name,
+                "severity": severity,
+                "active_domain": domain,
+                "thread": thread_label,
+                "violating_frame": violating_frame,
+                "initiating_plugin_frame": plugin_frame,
+                "plugin": plugin_name,
+                "message": message,
+                "remediation": snippet,
+            })
+            if snippet not in remediation_snippets:
+                remediation_snippets.append(snippet)
+
+        spatial_world_tokens = (
+            "getblockat",
+            "settype",
+            "setblockdata",
+            "setblock(",
+            "getchunkat(",
+            "getchunkat()",
+            "loadchunk",
+            "unloadchunk",
+            "breaknaturally",
+            "tilestate",
+            "blockstate.update",
+            "createexplosion",
+            "generatechunk",
+        )
+        entity_mutation_tokens = (
+            ".teleport(",
+            ".teleport()",
+            ".damage(",
+            ".damage()",
+            "addpotioneffect",
+            "setvelocity",
+            "spawnentity",
+            "addpassenger",
+            "removepassenger",
+            "openinventory",
+            "closeinventory",
+            "getinventory().setitem",
+            "getinventory().additem",
+            "entity.remove",
+        )
+        global_iteration_tokens = (
+            "bukkit.getonlineplayers",
+            "server.getonlineplayers",
+            "world.getplayers",
+            "world.getentities",
+            "world.getlivingentities",
+        )
+        blocking_wait_tokens = (
+            "completablefuture.join",
+            "completablefuture.waitingget",
+            "futuretask.get",
+            "abstractqueuedsynchronizer.acquire",
+            "countdownlatch.await",
+            "semaphore.acquire",
+        )
+        legacy_scheduler_tokens = (
+            "bukkit.getscheduler()",
+            "craftscheduler.runtask",
+            "craftscheduler.schedulesync",
+            "bukkitrunnable.runtask",
+        )
+
+        domains_detected: list[str] = []
+
+        for header, raw_lines in blocks:
+            frames = [
+                self._demangle_jvm_frame(ln)
+                for ln in raw_lines
+                if ln != f'"{header}"' and not ln.startswith('"')
+            ]
+            domain = infer_domain(header, frames)
+            if domain not in domains_detected:
+                domains_detected.append(domain)
+
+            plugin_frame: str | None = None
+            plugin_name: str | None = None
+            for fr in frames:
+                kind, pname = self._attribute_frame_owner(fr)
+                if kind in {"indexed_rpg_plugin", "third_party_plugin"} and pname:
+                    plugin_frame = fr
+                    plugin_name = pname
+                    break
+
+            block_violations = 0
+            for fr in frames:
+                low = fr.lower()
+
+                # Rule 6: Legacy BukkitScheduler on Folia (applies in any domain)
+                if any(tok in low for tok in legacy_scheduler_tokens):
+                    block_violations += 1
+                    record_violation(
+                        "FOLIA-TRC-006",
+                        "LegacyBukkitSchedulerOnFolia",
+                        "critical",
+                        domain,
+                        header,
+                        fr,
+                        plugin_frame,
+                        plugin_name,
+                        f"Legacy BukkitScheduler call '{fr}' throws UnsupportedOperationException on Folia.",
+                        "Declare folia-supported: true in paper-plugin.yml/plugin.yml and dispatch via Bukkit.getRegionScheduler(), entity.getScheduler(), Bukkit.getGlobalRegionScheduler(), or Bukkit.getAsyncScheduler().",
+                    )
+
+                # Rule 1: ASYNC mutating or reading regional world/entity/inventory state
+                if domain == "ASYNC" and any(tok in low for tok in spatial_world_tokens + entity_mutation_tokens + global_iteration_tokens):
+                    block_violations += 1
+                    record_violation(
+                        "FOLIA-TRC-001",
+                        "AsyncWorldOrEntityMutation",
+                        "critical",
+                        domain,
+                        header,
+                        fr,
+                        plugin_frame,
+                        plugin_name,
+                        f"ASYNC scheduler domain ('{header}') illegally accesses live world/entity state at '{fr}'.",
+                        "Compute pure data asynchronously, then marshal world mutations to Bukkit.getRegionScheduler().execute(plugin, location, () -> ...) or entity mutations to entity.getScheduler().run(plugin, task -> ..., null).",
+                    )
+
+                # Rule 2: GLOBAL scheduler touching chunk/block/entity spatial state
+                if domain == "GLOBAL" and any(tok in low for tok in spatial_world_tokens + entity_mutation_tokens):
+                    block_violations += 1
+                    record_violation(
+                        "FOLIA-TRC-002",
+                        "GlobalSchedulerSpatialEscape",
+                        "critical",
+                        domain,
+                        header,
+                        fr,
+                        plugin_frame,
+                        plugin_name,
+                        f"GlobalRegionScheduler ('{header}') accesses chunk/block/entity spatial state at '{fr}'; GlobalRegionScheduler owns zero chunks or entities.",
+                        "Do not treat GlobalRegionScheduler as a main-thread replacement for world edits. Dispatch block/chunk work via Bukkit.getRegionScheduler().execute(plugin, world, chunkX, chunkZ, () -> ...) and entity work via entity.getScheduler().",
+                    )
+
+                # Rule 3: REGION or ENTITY cross-region global iteration or synchronous teleport
+                if domain in {"REGION", "ENTITY"}:
+                    if any(tok in low for tok in global_iteration_tokens):
+                        block_violations += 1
+                        record_violation(
+                            "FOLIA-TRC-003",
+                            "CrossRegionCollectionIteration",
+                            "high",
+                            domain,
+                            header,
+                            fr,
+                            plugin_frame,
+                            plugin_name,
+                            f"{domain} thread ('{header}') iterates global player/entity collection '{fr}' across foreign regions.",
+                            "Snapshot player references safely and hop onto each player's owning region via player.getScheduler().run(plugin, task -> ..., null) before reading inventory, health, or location.",
+                        )
+                    elif (".teleport(" in low or ".teleport()" in low) and "teleportasync" not in low:
+                        block_violations += 1
+                        record_violation(
+                            "FOLIA-TRC-003",
+                            "SynchronousTeleportOnFolia",
+                            "critical",
+                            domain,
+                            header,
+                            fr,
+                            plugin_frame,
+                            plugin_name,
+                            f"{domain} thread ('{header}') invokes synchronous '{fr}', which violates cross-region entity handoff on Folia.",
+                            "Replace entity.teleport(destination) with entity.teleportAsync(destination).thenAccept(success -> ...) and run post-teleport logic inside entity.getScheduler().",
+                        )
+
+                # Rule 4: NETTY network I/O thread directly accessing world/entity/inventory
+                if domain == "NETTY" and any(tok in low for tok in spatial_world_tokens + entity_mutation_tokens):
+                    block_violations += 1
+                    record_violation(
+                        "FOLIA-TRC-004",
+                        "NettyThreadSyncWorldAccess",
+                        "critical",
+                        domain,
+                        header,
+                        fr,
+                        plugin_frame,
+                        plugin_name,
+                        f"Netty network EventLoop ('{header}') directly accesses live world/entity state at '{fr}' without scheduler handoff.",
+                        "Decode packet fields into an immutable record on the Netty thread, then schedule world/player interaction onto player.getScheduler().run(plugin, task -> ..., null).",
+                    )
+
+                # Rule 5: Blocking future .join() / .get() / latch wait on REGION, ENTITY, or GLOBAL tick thread
+                if domain in {"REGION", "ENTITY", "GLOBAL"} and any(tok in low for tok in blocking_wait_tokens):
+                    block_violations += 1
+                    record_violation(
+                        "FOLIA-TRC-005",
+                        "BlockingFutureWaitOnTickThread",
+                        "critical",
+                        domain,
+                        header,
+                        fr,
+                        plugin_frame,
+                        plugin_name,
+                        f"Tick domain {domain} ('{header}') blocks synchronously on '{fr}', risking a ThreadedRegionizer merge/split barrier deadlock.",
+                        "Never call CompletableFuture.join() or Future.get() on a Folia region, entity, or global tick thread; attach .thenAccept(...) and schedule the continuation back onto RegionScheduler or EntityScheduler.",
+                    )
+
+                # Rule 7: EntityScheduler delayed/repeating lifecycle hazard (null retired callback)
+                if ("entityscheduler.rundelayed" in low or "entityscheduler.runatfixedrate" in low) and "null" in raw_trace.lower():
+                    block_violations += 1
+                    record_violation(
+                        "FOLIA-TRC-007",
+                        "EntitySchedulerMissingRetiredCallback",
+                        "medium",
+                        domain,
+                        header,
+                        fr,
+                        plugin_frame,
+                        plugin_name,
+                        f"Delayed/repeating EntityScheduler registration '{fr}' detected alongside null retired callback; tasks silently drop cleanup if the entity dies or unloads before firing.",
+                        "Pass an explicit Runnable retired callback (entity.getScheduler().runDelayed(plugin, task -> ..., () -> cleanupState(), delayTicks)) to release cooldowns, locks, or bossbars when the entity retires.",
+                    )
+
+            thread_reports.append({
+                "thread": header,
+                "inferred_domain": domain,
+                "frame_count": len(frames),
+                "initiating_plugin": plugin_name,
+                "violations": block_violations,
+            })
+
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for f in findings:
+            sev = f.get("severity", "low")
+            if sev in severity_counts:
+                severity_counts[sev] += 1
+
+        ownership_matrix = {
+            "REGION": {
+                "owns": ["Chunks, blocks, and TileStates inside current region section", "Entities currently located inside region bounds"],
+                "forbidden": ["Cross-world or distant chunk access", "Synchronous Entity.teleport()", "Blocking Future.join()/get()"],
+            },
+            "ENTITY": {
+                "owns": ["Bound Entity instance across region splits, merges, and teleports", "Local chunk surrounding the bound entity while ticking"],
+                "forbidden": ["Arbitrary distant coordinates", "Bukkit.getOnlinePlayers() direct iteration", "Blocking Future.join()/get()"],
+            },
+            "GLOBAL": {
+                "owns": ["WorldBorder, weather, daytime, gamerules", "Console commands, global scoreboards/bossbars, PluginManager"],
+                "forbidden": ["ALL chunks, blocks, block-entities, and entities"],
+            },
+            "ASYNC": {
+                "owns": ["JDBC/HTTP I/O, cryptographic/JSON serialization, pure off-heap or immutable math"],
+                "forbidden": ["ALL live Bukkit/NMS world, chunk, block, entity, and inventory APIs"],
+            },
+        }
+
+        out: dict[str, Any] = {
+            "status": "fail" if (severity_counts["critical"] + severity_counts["high"]) > 0 else ("warn" if findings else "pass"),
+            "domains_detected": domains_detected,
+            "threads_analyzed": len(thread_reports),
+            "thread_traces": thread_reports,
+            "state_ownership_matrix": ownership_matrix,
+            "finding_count": len(findings),
+            "severity_counts": severity_counts,
+            "findings": findings,
+            "remediation_snippets": remediation_snippets,
+        }
+        if sarif:
+            out["sarif_report"] = self._build_sarif_report(findings)
+
+        return ToolOutcome(_pretty_json(out))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

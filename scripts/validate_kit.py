@@ -83,7 +83,7 @@ ALLOWED_DIRECTORY_EXTENSIONS = {
     "web": {".html", ".css", ".js", ".webp"},
 }
 EXCLUDED_DIRECTORY_NAMES = {
-    "dist", "npm", "__pycache__", ".git", ".github", ".gitignore", ".gitattributes",
+    "dist", "npm", "__pycache__", ".pytest_cache", ".git", ".github", ".gitignore", ".gitattributes",
     "Dockerfile", "glama.json", "smithery.yaml", "server.json",
 }
 EXCLUDED_DIRECTORY_PREFIXES = (".api-stage-", ".web-stage-", ".minecraft-rpg-kit-stage-", ".minecraftkit-stage-")
@@ -425,13 +425,15 @@ def validate(root: Path) -> list[str]:
             "index.html", "styles.css", "app.js", "ecosystem.html",
             "ecosystem.css", "ecosystem-app.js", "ecosystem-renderers.js", "shell.css", "shell.js",
             "wiki.html", "wiki.css", "wiki-app.js",
+            "playground.html", "playground.css", "playground.js",
         )
     )
     if re.search(r"https?://|\bfetch\s*\(", web_text, re.IGNORECASE):
         errors.append("offline web contains a remote URL or fetch call")
-    wiki_runtime = (root / "web/wiki-app.js").read_text(encoding="utf-8")
-    if re.search(r"innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(", wiki_runtime):
-        errors.append("wiki runtime contains an unsafe DOM or evaluation sink")
+    for safe_js in ("web/wiki-app.js", "web/playground.js"):
+        js_runtime = (root / safe_js).read_text(encoding="utf-8")
+        if re.search(r"innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(", js_runtime):
+            errors.append(f"{safe_js} contains an unsafe DOM or evaluation sink")
 
     errors.extend(validate_minecraftkit(root))
 

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Offline Spark flamegraph hotspot classifier and 4-domain Folia scheduler thread-affinity verifier for Minecraft Paper and Folia servers.">
+  <title>Salyyy Minecraft Kit | Diagnostics Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2306141b'/%3E%3Cpath d='M14 14h36v36H14z' fill='none' stroke='%2352edc5' stroke-width='4'/%3E%3Cpath d='M22 40V24h6l4 7 4-7h6v16h-5V31l-5 8-5-8v9z' fill='%2383f7dc'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="playground.css">
+  <link rel="stylesheet" href="shell.css">
+  <script src="shell.js" defer></script>
+</head>
+<body data-page="playground">
+  <main id="lab-main" class="lab-main" tabindex="-1">
+    <section class="lab-toolbar" aria-label="Analyzer mode selection">
+      <div class="mode-tabs" role="tablist" aria-label="Diagnostic engines">
+        <button id="tab-spark" class="mode-tab is-active" type="button" role="tab" aria-selected="true" data-mode="spark">
+          Spark Flamegraph Auditor (mc_audit_spark_flamegraph)
+        </button>
+        <button id="tab-folia" class="mode-tab" type="button" role="tab" aria-selected="false" data-mode="folia">
+          Folia 4-Domain Trace Verifier (mc_analyze_folia_scheduler_trace)
+        </button>
+      </div>
+
+      <div class="preset-strip" aria-label="Sample presets">
+        <span class="preset-label">Presets:</span>
+        <div id="preset-buttons" class="preset-buttons"></div>
+      </div>
+    </section>
+
+    <section class="lab-grid" aria-label="Interactive diagnostics workspace">
+      <div class="lab-pane input-pane">
+        <div class="pane-header">
+          <div>
+            <h2 id="input-heading">Spark Collapsed Stack or Call-Tree Input</h2>
+            <p id="input-subtitle">Zero-upload browser analysis. Supports collapsed flamegraph stacks and indented Spark or JFR trees.</p>
+          </div>
+          <div class="controls-row">
+            <label id="threshold-wrap" class="inline-control" for="threshold-input">
+              <span>Threshold %</span>
+              <input id="threshold-input" type="number" min="0.5" max="100" step="0.5" value="5.0">
+            </label>
+            <label id="domain-wrap" class="inline-control" for="domain-select" hidden>
+              <span>Domain</span>
+              <select id="domain-select">
+                <option value="auto">auto</option>
+                <option value="region">region</option>
+                <option value="entity">entity</option>
+                <option value="global">global</option>
+                <option value="async">async</option>
+                <option value="netty">netty</option>
+              </select>
+            </label>
+            <button id="run-audit-btn" class="primary-btn" type="button">Run Audit</button>
+          </div>
+        </div>
+        <textarea id="trace-input" class="trace-textarea" spellcheck="false" aria-label="Profile or stack trace input"></textarea>
+      </div>
+
+      <div class="lab-pane output-pane">
+        <div class="pane-header">
+          <div>
+            <h2>Structured Findings &amp; Remediation</h2>
+            <p id="summary-line" aria-live="polite">Ready to analyze local profile or trace.</p>
+          </div>
+          <div class="controls-row">
+            <button id="toggle-sarif-btn" class="secondary-btn" type="button">View SARIF v2.1.0</button>
+            <button id="copy-json-btn" class="secondary-btn" type="button">Copy JSON</button>
+          </div>
+        </div>
+
+        <div id="metrics-row" class="metrics-row"></div>
+        <div id="findings-list" class="findings-list" aria-live="polite"></div>
+        <pre id="json-preview" class="json-preview" hidden></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="lab-footer">
+    <p>Salyyy Minecraft Kit v2.8.0 Diagnostics Lab. Client-side execution only; zero network calls.</p>
+  </footer>
+
+  <script src="playground.js"></script>
+</body>
+</html>

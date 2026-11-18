@@ -17,6 +17,7 @@ class UnifiedWebShellTests(unittest.TestCase):
             "wiki.html": "wiki",
             "ecosystem.html": "ecosystem",
             "index.html": "api",
+            "playground.html": "playground",
         }.items():
             document = (WEB / name).read_text(encoding="utf-8")
             self.assertIn('href="shell.css"', document)
@@ -30,13 +31,14 @@ class UnifiedWebShellTests(unittest.TestCase):
         self.assertIn("localStorage", shell)
         self.assertIn("mk-loader", shell)
         self.assertNotRegex(shell + styles, r"https?://|innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(")
-        result = subprocess.run(
-            ["node", "--check", str(WEB / "shell.js")],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        self.assertEqual(result.returncode, 0, result.stderr)
+        for script_name in ("shell.js", "playground.js"):
+            result = subprocess.run(
+                ["node", "--check", str(WEB / script_name)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
 
 
 if __name__ == "__main__":

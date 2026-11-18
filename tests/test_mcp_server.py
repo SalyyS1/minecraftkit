@@ -97,7 +97,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_fifteen_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_seventeen_readonly_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -120,6 +120,8 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_validate_item_components",
                 "mc_diagnose_crash_report",
                 "mc_audit_datapack",
+                "mc_audit_spark_flamegraph",
+                "mc_analyze_folia_scheduler_trace",
             ],
         )
         for tool in tools:
@@ -274,7 +276,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 15)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 17)
 
     def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
         res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
@@ -1072,6 +1074,123 @@ dependencies:
         self.assertIn("DP003", rules)
         self.assertIn("DP005", rules)
         self.assertIn("DP009", rules)
+
+    def test_mc_audit_spark_flamegraph_collapsed_and_call_tree_with_starvation(self) -> None:
+        collapsed_profile = "\n".join([
+            "Server thread;net.minecraft.server.MinecraftServer.tickServer;com.myrpg.guild.GuildListener.onJoin;com.zaxxer.hikari.pool.HikariPool.getConnection;com.mysql.cj.jdbc.ClientPreparedStatement.executeQuery 350",
+            "Server thread;net.minecraft.server.MinecraftServer.tickServer;net.minecraft.server.level.ServerChunkCache.getChunk;com.myrpg.dungeon.ArenaLoader.loadArena 200",
+            "Server thread;net.minecraft.server.MinecraftServer.tickServer;com.ticxo.modelengine.core.tick.ModelTicker.tickBones 150",
+            "Server thread;net.minecraft.server.MinecraftServer.tickServer;net.minecraft.world.entity.ai.goal.GoalSelector.tick 100",
+            "Craft Async Scheduler Management Thread - 1;java.util.concurrent.ThreadPoolExecutor.runWorker;java.util.concurrent.ThreadPoolExecutor.getTask 200",
+        ])
+        col_report, col_err = self.call_tool(
+            "mc_audit_spark_flamegraph",
+            {"profile": collapsed_profile, "hotspot_threshold_pct": 5.0, "sarif": True},
+        )
+        self.assertFalse(col_err)
+        self.assertEqual(col_report["status"], "fail")
+        self.assertEqual(col_report["profile_format"], "collapsed")
+        self.assertEqual(col_report["async_pool_summary"]["benign_idle_parked_workers"], 1)
+        self.assertEqual(len(col_report["async_pool_summary"]["starvation_events"]), 0)
+        col_rules = {f["rule_id"] for f in col_report["findings"]}
+        self.assertIn("SPARK-001", col_rules)
+        self.assertIn("SPARK-002", col_rules)
+        self.assertIn("SPARK-003", col_rules)
+        self.assertIn("SPARK-007", col_rules)
+        plugins_attr = {p["plugin"]: p for p in col_report["plugin_attribution"]}
+        self.assertIn("ModelEngine", plugins_attr)
+        self.assertTrue(plugins_attr["ModelEngine"]["indexed_in_minecraftkit"])
+        self.assertIn("myrpg", plugins_attr)
+        self.assertEqual(col_report["sarif_report"]["version"], "2.1.0")
+
+        call_tree_profile = "\n".join([
+            "Server thread 100.00% (5000ms)",
+            "  |-- net.minecraft.server.MinecraftServer.tickChildren() 86.00% (4300ms)",
+            "  |   |-- net.minecraft.world.level.block.entity.HopperBlockEntity.pushItemsTick() 34.00% (1700ms)",
+            "  |   `-- net.Indyuce.mmoitems.listener.PlayerListener$$Lambda$0x00007f/0x12ab.lambda$onAttack$0() 18.00% (900ms)",
+            "Folia Async Scheduler Thread #2 65.00% (3250ms)",
+            "  `-- com.myrpg.economy.LedgerSync.flushBatch() 65.00% (3250ms)",
+            "      `-- com.zaxxer.hikari.pool.HikariPool.getConnection() 64.00% (3200ms)",
+        ])
+        tree_report, tree_err = self.call_tool(
+            "mc_audit_spark_flamegraph",
+            {"profile": call_tree_profile, "hotspot_threshold_pct": 5.0},
+        )
+        self.assertFalse(tree_err)
+        self.assertEqual(tree_report["status"], "fail")
+        self.assertEqual(tree_report["profile_format"], "call_tree")
+        tree_rules = {f["rule_id"] for f in tree_report["findings"]}
+        self.assertIn("SPARK-004", tree_rules)
+        self.assertIn("SPARK-007", tree_rules)
+        self.assertIn("SPARK-008", tree_rules)
+        self.assertEqual(
+            tree_report["async_pool_summary"]["starvation_events"][0]["starvation_type"],
+            "HIKARICP_POOL_EXHAUSTION",
+        )
+
+    def test_mc_analyze_folia_scheduler_trace_verifies_four_domains_and_netty(self) -> None:
+        multi_dump = "\n".join([
+            '"Global Region Scheduler" #29 prio=5 runnable',
+            "    at net.minecraft.world.level.Level.getBlockAt(Level.java:412)",
+            "    at org.bukkit.craftbukkit.block.CraftBlock.setType(CraftBlock.java:198)",
+            "    at com.myrpg.events.MeteorBossTask.spawnCrater(MeteorBossTask.java:87)",
+            "    at io.papermc.paper.threadedregions.scheduler.FoliaGlobalRegionScheduler$GlobalScheduledTask.run(FoliaGlobalRegionScheduler.java:144)",
+            "",
+            '"Folia Async Scheduler Thread #3" #41 daemon prio=5 runnable',
+            "    at org.bukkit.craftbukkit.entity.CraftPlayer.openInventory(CraftPlayer.java:512)",
+            "    at net.Indyuce.mmoitems.gui.CraftingStationView.openAsync(CraftingStationView.java:64)",
+            "    at io.papermc.paper.threadedregions.scheduler.FoliaAsyncScheduler$AsyncScheduledTask.run(FoliaAsyncScheduler.java:118)",
+            "",
+            '"Region Scheduler Thread #1" #24 prio=5 waiting',
+            "    at java.base@25.0.1/java.util.concurrent.CompletableFuture.join(CompletableFuture.java:2118)",
+            "    at org.bukkit.Bukkit.getOnlinePlayers(Bukkit.java:190)",
+            "    at org.bukkit.craftbukkit.entity.CraftEntity.teleport(CraftEntity.java:320)",
+            "    at com.myrpg.claim.RegionClaimService.verifyChunkOwner(RegionClaimService.java:103)",
+            "    at io.papermc.paper.threadedregions.TickRegions$ConcreteRegionSection.tickRegion(TickRegions.java:390)",
+            "",
+            '"Netty Epoll Server IO #1" #18 daemon prio=5 runnable',
+            "    at org.bukkit.craftbukkit.block.CraftBlock.setBlockData(CraftBlock.java:210)",
+            "    at com.myrpg.packet.CustomPacketHandler.channelRead(CustomPacketHandler.java:55)",
+            "    at io.netty.channel.epoll.EpollEventLoop.run(EpollEventLoop.java:410)",
+        ])
+        res, err = self.call_tool("mc_analyze_folia_scheduler_trace", {"trace": multi_dump, "sarif": True})
+        self.assertFalse(err)
+        self.assertEqual(res["status"], "fail")
+        self.assertEqual(res["threads_analyzed"], 4)
+        self.assertEqual(set(res["domains_detected"]), {"GLOBAL", "ASYNC", "REGION", "NETTY"})
+        codes = {f["rule_id"] for f in res["findings"]}
+        self.assertIn("FOLIA-TRC-001", codes)
+        self.assertIn("FOLIA-TRC-002", codes)
+        self.assertIn("FOLIA-TRC-003", codes)
+        self.assertIn("FOLIA-TRC-004", codes)
+        self.assertIn("FOLIA-TRC-005", codes)
+        self.assertEqual(res["sarif_report"]["version"], "2.1.0")
+
+        # Legacy BukkitScheduler + missing retired callback
+        legacy_snippet = "\n".join([
+            "at org.bukkit.Bukkit.getScheduler()(Bukkit.java:162)",
+            "at io.papermc.paper.threadedregions.scheduler.EntityScheduler.runDelayed(EntityScheduler.java:70)",
+            "// entity.getScheduler().runDelayed(plugin, task -> {}, null, 20L)",
+        ])
+        leg_res, leg_err = self.call_tool(
+            "mc_analyze_folia_scheduler_trace",
+            {"trace": legacy_snippet, "declared_domain": "entity"},
+        )
+        self.assertFalse(leg_err)
+        leg_codes = {f["rule_id"] for f in leg_res["findings"]}
+        self.assertIn("FOLIA-TRC-006", leg_codes)
+        self.assertIn("FOLIA-TRC-007", leg_codes)
+
+        # Clean region trace passes
+        clean_trace = "\n".join([
+            '"Region Scheduler Thread #0" #22 prio=5 runnable',
+            "    at com.ticxo.modelengine.core.ModelUpdater.stepRegionModels(ModelUpdater.java:74)",
+            "    at io.papermc.paper.threadedregions.TickRegions$ConcreteRegionSection.tickRegion(TickRegions.java:390)",
+        ])
+        clean_res, clean_err = self.call_tool("mc_analyze_folia_scheduler_trace", {"trace": clean_trace})
+        self.assertFalse(clean_err)
+        self.assertEqual(clean_res["status"], "pass")
+        self.assertEqual(clean_res["finding_count"], 0)
 
     def test_cli_subprocess_serves_stdio_end_to_end(self) -> None:
         request = json.dumps({"jsonrpc": "2.0", "id": 7, "method": "initialize", "params": {}}) + "\n"

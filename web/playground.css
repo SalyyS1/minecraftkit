@@ -1,0 +1,293 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #06141b;
+  color: #e9fbf7;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+.lab-main {
+  width: min(100% - 32px, 1380px);
+  margin: 18px auto 36px;
+  display: grid;
+  gap: 18px;
+}
+
+.lab-toolbar {
+  padding: 18px 22px;
+  border: 1px solid #20505a;
+  background: rgba(10, 32, 40, 0.92);
+  display: grid;
+  gap: 14px;
+}
+
+.mode-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mode-tab {
+  padding: 10px 16px;
+  border: 1px solid #2f7480;
+  background: #081b22;
+  color: #9abdbd;
+  font: 700 0.78rem/1.2 "Cascadia Code", Consolas, monospace;
+  cursor: pointer;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease;
+}
+
+.mode-tab.is-active,
+.mode-tab:hover {
+  border-color: #52edc5;
+  color: #06141b;
+  background: #52edc5;
+}
+
+.preset-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-label {
+  color: #f5c76e;
+  font: 700 0.74rem/1 "Cascadia Code", Consolas, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.preset-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.preset-btn {
+  padding: 6px 11px;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  background: rgba(28, 22, 59, 0.55);
+  color: #e9fbf7;
+  font: 600 0.72rem/1.2 "Cascadia Code", Consolas, monospace;
+  cursor: pointer;
+}
+
+.preset-btn:hover {
+  border-color: #f5c76e;
+  color: #f5c76e;
+}
+
+.lab-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.lab-pane {
+  padding: 20px;
+  border: 1px solid #20505a;
+  background: #0a2028;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 540px;
+}
+
+.pane-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pane-header h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  letter-spacing: 0.01em;
+}
+
+.pane-header p {
+  margin: 4px 0 0;
+  color: #9abdbd;
+  font-size: 0.84rem;
+}
+
+.controls-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 0.74rem/1 "Cascadia Code", Consolas, monospace;
+  color: #9abdbd;
+}
+
+.inline-control input,
+.inline-control select {
+  padding: 6px 8px;
+  border: 1px solid #2f7480;
+  background: #06141b;
+  color: #e9fbf7;
+  font: 600 0.76rem/1 "Cascadia Code", Consolas, monospace;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 8px 14px;
+  font: 700 0.75rem/1 "Cascadia Code", Consolas, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+
+.primary-btn {
+  border: 1px solid #52edc5;
+  background: #52edc5;
+  color: #041218;
+}
+
+.secondary-btn {
+  border: 1px solid #2f7480;
+  background: #081b22;
+  color: #e9fbf7;
+}
+
+.secondary-btn:hover {
+  border-color: #f5c76e;
+  color: #f5c76e;
+}
+
+.trace-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 410px;
+  padding: 14px;
+  border: 1px solid #20505a;
+  background: #051117;
+  color: #d8f8f1;
+  font: 500 0.78rem/1.5 "Cascadia Code", Consolas, monospace;
+  resize: vertical;
+}
+
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.metric-box {
+  padding: 10px 12px;
+  border: 1px solid #20505a;
+  background: #071820;
+}
+
+.metric-box strong {
+  display: block;
+  font: 700 1.15rem/1.1 "Cascadia Code", Consolas, monospace;
+  color: #52edc5;
+}
+
+.metric-box span {
+  font-size: 0.73rem;
+  color: #9abdbd;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.findings-list {
+  display: grid;
+  gap: 10px;
+}
+
+.finding-card {
+  padding: 13px 15px;
+  border: 1px solid #2f7480;
+  border-left: 4px solid #52edc5;
+  background: #07171f;
+  display: grid;
+  gap: 6px;
+}
+
+.finding-card.sev-critical {
+  border-left-color: #fb7185;
+}
+
+.finding-card.sev-high {
+  border-left-color: #f5c76e;
+}
+
+.finding-card.sev-pass {
+  border-left-color: #52edc5;
+}
+
+.finding-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font: 700 0.76rem/1.2 "Cascadia Code", Consolas, monospace;
+}
+
+.finding-badge {
+  color: #f5c76e;
+}
+
+.finding-card.sev-critical .finding-badge {
+  color: #fb7185;
+}
+
+.finding-msg {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #e9fbf7;
+}
+
+.finding-fix {
+  margin: 0;
+  padding: 8px 10px;
+  background: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  color: #c7d9d8;
+  font: 500 0.75rem/1.45 "Cascadia Code", Consolas, monospace;
+}
+
+.json-preview {
+  margin: 0;
+  padding: 14px;
+  max-height: 430px;
+  overflow: auto;
+  border: 1px solid #20505a;
+  background: #040f14;
+  color: #83f7dc;
+  font: 500 0.74rem/1.45 "Cascadia Code", Consolas, monospace;
+}
+
+.lab-footer {
+  width: min(100% - 32px, 1380px);
+  margin: 0 auto 32px;
+  color: #6e9998;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 980px) {
+  .lab-grid {
+    grid-template-columns: 1fr;
+  }
+  .metrics-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

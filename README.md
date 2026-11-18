@@ -1,9 +1,9 @@
 # Salyyy Minecraft Kit
 
-[Tiếng Việt (README.vi.md)](README.vi.md) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [npm](https://www.npmjs.com/package/minecraftkit)
+[Tiếng Việt (README.vi.md)](README.vi.md) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v2.7.0](https://img.shields.io/badge/version-v2.7.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v2.7.0)
+[![Version: v2.8.0](https://img.shields.io/badge/version-v2.8.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v2.8.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
@@ -87,6 +87,8 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_validate_item_components` | Validate Minecraft and Paper `1.20.5` through `26.3+` structured item data components, component patches, and companion client `assets/<namespace>/items/<id>.json` definitions (`custom_model_data` typed channels, `tooltip_display` vs removed `show_in_tooltip`, `food`/`consumable`/`use_remainder` splits, `equippable.asset_id` renames, `max_damage` + `max_stack_size` mutual exclusion, and client selector channel index bounds). |
 | `mc_diagnose_crash_report` | Parse and triage Minecraft server and client crash reports (Vanilla, Paper, Folia, Fabric, Forge, NeoForge) for ticking entities (exact block coords and `/minecraft:kill` commands), ticking block entities (`/setblock air`), mixin application conflicts, classloader NoSuchMethodError/NoClassDefFoundError linkage faults, JVM OOM/Metaspace exhaustion, and corrupted chunk I/O boundaries with optional OASIS SARIF v2.1.0 output. |
 | `mc_audit_datapack` | Audit Minecraft `1.20.5` through `26.3+` datapacks for `pack.mcmeta` format compliance (`pack_format` 41 through 97, integer or `[min, max]` range tuples), modern recipe component syntax (replacing legacy `result.item` and raw `tag` strings with structured component patches), recipe pattern bounds, cyclical tag reference graph loops, namespace validity, and `.mcfunction` command hygiene. |
+| `mc_audit_spark_flamegraph` | Parse collapsed flamegraph stacks and indented Spark/JFR call-trees (`SPARK-001` through `SPARK-008`), compute deduplicated inclusive and child-subtracted exclusive self weights, demangle JDK 21+ hidden lambdas, attribute hotspots back to initiating plugins (including indexed RPG plugins), and separate genuine async worker pool starvation (`HikariPool`, socket stalls, lock convoys, nested future deadlocks) from benign idle worker parking, with optional OASIS SARIF v2.1.0 output. |
+| `mc_analyze_folia_scheduler_trace` | Verify Folia 4-domain scheduler thread-affinity contracts (`REGION`, `ENTITY`, `GLOBAL`, `ASYNC`, plus `NETTY`) across stack traces and multi-thread dumps (`FOLIA-TRC-001` through `FOLIA-TRC-007`), catching `GlobalRegionScheduler` spatial escapes, async world/entity mutations, Netty packet-thread world access, blocking `CompletableFuture.join()` barrier deadlocks, synchronous teleports, and missing `EntityScheduler` retired callbacks, with optional OASIS SARIF v2.1.0 output. |
 
 ### Exposed MCP Resources & Slash Prompts
 
@@ -123,6 +125,7 @@ minecraftkit version
 ## Web Explorers
 
 - **[RPG API Explorer](https://salyys1.github.io/minecraftkit/)**: Search indexed plugin classes, methods, fields, and architectural insights in the browser.
+- **[Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html)**: Run client-side Spark flamegraph hotspot classification (`SPARK-001`..`SPARK-008`), Folia 4-domain scheduler trace verification (`FOLIA-TRC-001`..`FOLIA-TRC-007`), and SARIF v2.1.0 export with zero uploads.
 - **[Minecraft Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html)**: Browse 103 reviewed upstream repositories, Mojang version history, and release capability profiles.
 - **[Bilingual Wiki (VI/EN)](https://salyys1.github.io/minecraftkit/wiki.html)**: Step-by-step installation guides, route overviews, and engineering checklists.
 

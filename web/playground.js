@@ -1,0 +1,593 @@
+(function () {
+  "use strict";
+
+  var PRESETS = {
+    spark: [
+      {
+        label: "Collapsed: Sync JDBC + ModelEngine",
+        threshold: 5.0,
+        text: [
+          "Server thread;net.minecraft.server.MinecraftServer.tickServer;com.myrpg.guild.GuildListener.onJoin;com.zaxxer.hikari.pool.HikariPool.getConnection;com.mysql.cj.jdbc.ClientPreparedStatement.executeQuery 340",
+          "Server thread;net.minecraft.server.MinecraftServer.tickServer;net.minecraft.server.level.ServerChunkCache.getChunk;com.myrpg.dungeon.RoomSpawner.loadArena 190",
+          "Server thread;net.minecraft.server.MinecraftServer.tickServer;com.ticxo.modelengine.core.tick.ModelTicker.tickBones 140",
+          "Server thread;net.minecraft.server.MinecraftServer.tickServer;net.minecraft.world.entity.ai.goal.GoalSelector.tick 130",
+          "Craft Async Scheduler Management Thread - 1;java.util.concurrent.ThreadPoolExecutor.runWorker;java.util.concurrent.ThreadPoolExecutor.getTask 200"
+        ].join("\n")
+      },
+      {
+        label: "Call-Tree: HikariCP Async Starvation",
+        threshold: 5.0,
+        text: [
+          "Server thread 100.00% (5000ms)",
+          "  |-- net.minecraft.server.MinecraftServer.tickChildren() 88.00% (4400ms)",
+          "  |   |-- net.minecraft.world.level.block.entity.HopperBlockEntity.pushItemsTick() 34.00% (1700ms)",
+          "  |   `-- net.Indyuce.mmoitems.listener.PlayerListener$$Lambda$0x00007f/0x12ab.lambda$onAttack$0() 18.50% (925ms)",
+          "Folia Async Scheduler Thread #2 65.00% (3250ms)",
+          "  `-- com.myrpg.economy.LedgerSync.flushBatch() 65.00% (3250ms)",
+          "      `-- com.zaxxer.hikari.pool.HikariPool.getConnection() 64.00% (3200ms)"
+        ].join("\n")
+      },
+      {
+        label: "Clean Tick + Benign Idle Pool",
+        threshold: 10.0,
+        text: [
+          "Server thread;net.minecraft.server.MinecraftServer.tickServer;net.minecraft.server.MinecraftServer.waitUntilNextTick 940",
+          "Server thread;net.minecraft.server.MinecraftServer.tickServer;net.minecraft.server.level.ServerLevel.tick 60",
+          "Folia Async Scheduler Thread #1;java.util.concurrent.ForkJoinPool.runWorker;java.util.concurrent.ForkJoinPool.scan 400"
+        ].join("\n")
+      }
+    ],
+    folia: [
+      {
+        label: "GlobalRegionScheduler Spatial Escape",
+        domain: "auto",
+        text: [
+          "\"Global Region Scheduler\" #29 prio=5 os_prio=0 runnable",
+          "    at net.minecraft.world.level.Level.getBlockAt(Level.java:412)",
+          "    at org.bukkit.craftbukkit.block.CraftBlock.setType(CraftBlock.java:198)",
+          "    at com.myrpg.events.MeteorBossTask.spawnCrater(MeteorBossTask.java:87)",
+          "    at io.papermc.paper.threadedregions.scheduler.FoliaGlobalRegionScheduler$GlobalScheduledTask.run(FoliaGlobalRegionScheduler.java:144)"
+        ].join("\n")
+      },
+      {
+        label: "Multi-Thread: Async + Blocking .join()",
+        domain: "auto",
+        text: [
+          "\"Folia Async Scheduler Thread #3\" #41 daemon prio=5 runnable",
+          "    at org.bukkit.craftbukkit.entity.CraftPlayer.openInventory(CraftPlayer.java:512)",
+          "    at net.Indyuce.mmoitems.gui.CraftingStationView.openAsync(CraftingStationView.java:64)",
+          "    at io.papermc.paper.threadedregions.scheduler.FoliaAsyncScheduler$AsyncScheduledTask.run(FoliaAsyncScheduler.java:118)",
+          "",
+          "\"Region Scheduler Thread #1\" #24 prio=5 waiting",
+          "    at java.base@25.0.1/java.util.concurrent.CompletableFuture.join(CompletableFuture.java:2118)",
+          "    at com.myrpg.claim.RegionClaimService.verifyChunkOwner(RegionClaimService.java:103)",
+          "    at io.papermc.paper.threadedregions.TickRegions$ConcreteRegionSection.tickRegion(TickRegions.java:390)"
+        ].join("\n")
+      },
+      {
+        label: "Clean Region + Entity Handoff",
+        domain: "auto",
+        text: [
+          "\"Region Scheduler Thread #0\" #22 prio=5 runnable",
+          "    at com.ticxo.modelengine.core.ModelUpdater.stepRegionModels(ModelUpdater.java:74)",
+          "    at io.papermc.paper.threadedregions.TickRegions$ConcreteRegionSection.tickRegion(TickRegions.java:390)"
+        ].join("\n")
+      }
+    ]
+  };
+
+  var RPG_PREFIXES = [
+    ["com.ticxo.modelengine", "ModelEngine"],
+    ["net.Indyuce.mmoitems", "MMOItems"],
+    ["net.indyuce.mmoitems", "MMOItems"],
+    ["net.Indyuce.mmocore", "MMOCore"],
+    ["net.Indyuce.mmoinventory", "MMOInventory"],
+    ["fr.phoenixdevt.mmoprofiles", "MMOProfiles"],
+    ["io.lumine.mythiccrucible", "MythicCrucible"],
+    ["net.playavalon.mythicdungeons", "MythicDungeons"],
+    ["io.lumine.mythicenchants", "MythicEnchants"],
+    ["io.lumine.mythicrpg", "MythicRPG"],
+    ["io.lumine.mythic.core", "CoreTools"]
+  ];
+
+  var ENGINE_PREFIXES = [
+    "net.minecraft.", "com.mojang.", "io.papermc.", "ca.spottedleaf.",
+    "org.bukkit.", "org.spigotmc.", "java.", "javax.", "jdk.", "sun.",
+    "io.netty.", "it.unimi.", "com.zaxxer.hikari.", "com.mysql.",
+    "org.mariadb.", "org.postgresql.", "org.sqlite.", "okhttp3."
+  ];
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) { node.className = className; }
+    if (text !== undefined && text !== null) { node.textContent = String(text); }
+    return node;
+  }
+
+  function demangleFrame(raw) {
+    return raw
+      .trim()
+      .replace(/^at\s+/, "")
+      .replace(/^[a-zA-Z0-9_.]+@[0-9A-Za-z_.+-]+\//, "")
+      .replace(/\$\$Lambda(?:\$0x[0-9a-fA-F]+)?(?:\/0x[0-9a-fA-F]+)?/g, "::Lambda")
+      .replace(/\.lambda\$([A-Za-z0-9_$]+)\$\d+/g, "::lambda$$$1")
+      .replace(/\([^)]*\)$/, "()");
+  }
+
+  function attributeOwner(frame) {
+    var i;
+    for (i = 0; i < RPG_PREFIXES.length; i += 1) {
+      if (frame.indexOf(RPG_PREFIXES[i][0]) === 0) {
+        return { kind: "indexed_rpg_plugin", plugin: RPG_PREFIXES[i][1] };
+      }
+    }
+    for (i = 0; i < ENGINE_PREFIXES.length; i += 1) {
+      if (frame.indexOf(ENGINE_PREFIXES[i]) === 0) {
+        return { kind: "engine", plugin: null };
+      }
+    }
+    var m = /^([a-z][a-z0-9_]*)\.([a-zA-Z0-9_]+)(?:\.([a-zA-Z0-9_]+))?\.[A-Z]/.exec(frame);
+    if (m) {
+      return { kind: "third_party_plugin", plugin: m[2] };
+    }
+    return { kind: "runtime", plugin: null };
+  }
+
+  function isAsyncThread(name) {
+    var low = name.toLowerCase();
+    return low.indexOf("async scheduler") >= 0 ||
+      low.indexOf("craft async") >= 0 ||
+      low.indexOf("folia async") >= 0 ||
+      low.indexOf("forkjoinpool") >= 0;
+  }
+
+  function isThreadHeader(label) {
+    var low = label.toLowerCase();
+    return low.indexOf("server thread") >= 0 ||
+      low.indexOf("region scheduler") >= 0 ||
+      low.indexOf("global region") >= 0 ||
+      low.indexOf("entity scheduler") >= 0 ||
+      isAsyncThread(low) ||
+      low.indexOf("netty ") >= 0;
+  }
+
+  function analyzeSpark(rawText, thresholdPct) {
+    var lines = rawText.split(/\r?\n/).filter(function (l) {
+      var s = l.trim();
+      return s.length > 0 && s.charAt(0) !== "#";
+    });
+    var collapsedRe = /^([^;\s][^;]*(?:;[^;]+)+)\s+([0-9]+(?:\.[0-9]+)?)\s*$/;
+    var collapsedHits = lines.filter(function (l) { return collapsedRe.test(l.trim()); }).length;
+    var isCollapsed = collapsedHits >= Math.max(1, Math.floor(lines.length / 2));
+
+    var samples = [];
+    var inc = {};
+    var selfW = {};
+    var callers = {};
+    var threads = {};
+    var totalWeight = 0;
+
+    if (isCollapsed) {
+      lines.forEach(function (ln) {
+        var m = collapsedRe.exec(ln.trim());
+        if (!m) { return; }
+        var w = parseFloat(m[2]);
+        if (!(w > 0)) { return; }
+        var parts = m[1].split(";").map(function (p) { return p.trim(); }).filter(Boolean);
+        var threadName = "Server thread";
+        if (parts.length > 1 && isThreadHeader(parts[0])) {
+          threadName = parts[0];
+          parts = parts.slice(1);
+        }
+        var frames = parts.map(demangleFrame);
+        totalWeight += w;
+        samples.push({ thread: threadName, frames: frames, weight: w });
+        var seen = {};
+        var activePlugin = null;
+        frames.forEach(function (fr) {
+          var own = attributeOwner(fr);
+          if (own.plugin) { activePlugin = own.plugin; }
+          if (!seen[fr]) {
+            seen[fr] = true;
+            inc[fr] = (inc[fr] || 0) + w;
+          }
+          threads[fr] = threadName;
+          if (activePlugin && !callers[fr]) { callers[fr] = activePlugin; }
+        });
+        var leaf = frames[frames.length - 1];
+        selfW[leaf] = (selfW[leaf] || 0) + w;
+      });
+    } else {
+      var nodes = [];
+      var stack = [];
+      var preRe = /^\[?\s*([0-9]+(?:\.[0-9]+)?)%\s*\]?\s*(?:\([0-9.,]+\s*(?:ms|s|samples)?\)\s*)?(.+?)\s*$/;
+      var sufRe = /^(.+?)\s+([0-9]+(?:\.[0-9]+)?)%\s*(?:\([0-9.,]+\s*(?:ms|s|samples)?\))?\s*$/;
+
+      lines.forEach(function (ln) {
+        var pm = /^([\s\u2502|\u251c\u2514\u2500+`\\-]*)/.exec(ln);
+        var prefix = pm ? pm[1] : "";
+        var body = ln.slice(prefix.length).trim();
+        if (!body) { return; }
+        var depth = prefix.length;
+        var pct = null;
+        var label = body;
+        var a = preRe.exec(body);
+        var b = !a ? sufRe.exec(body) : null;
+        if (a) { pct = parseFloat(a[1]); label = a[2]; }
+        else if (b) { label = b[1]; pct = parseFloat(b[2]); }
+        if (pct === null) { return; }
+        while (stack.length > 0 && nodes[stack[stack.length - 1]].depth >= depth) {
+          stack.pop();
+        }
+        var parent = stack.length > 0 ? stack[stack.length - 1] : null;
+        var clean = label.replace(/^"|"$/g, "");
+        var isRoot = parent === null && isThreadHeader(clean);
+        var idx = nodes.length;
+        nodes.push({ idx: idx, depth: depth, label: clean, frame: isRoot ? clean : demangleFrame(clean), isRoot: isRoot, weight: pct, parent: parent, children: [] });
+        if (parent !== null) { nodes[parent].children.push(idx); }
+        stack.push(idx);
+      });
+
+      nodes.forEach(function (n) {
+        if (n.parent === null && !isAsyncThread(n.label)) {
+          totalWeight += n.weight;
+        }
+      });
+      if (!(totalWeight > 0)) { totalWeight = 100; }
+
+      nodes.forEach(function (n) {
+        if (n.isRoot && n.children.length > 0) { return; }
+        var childSum = n.children.reduce(function (acc, c) { return acc + nodes[c].weight; }, 0);
+        var sw = Math.max(0, n.weight - childSum);
+        var chain = [];
+        var cur = n.idx;
+        while (cur !== null) { chain.unshift(nodes[cur]); cur = nodes[cur].parent; }
+        var thr = chain[0].isRoot ? chain[0].label : "Server thread";
+        var frs = chain.filter(function (x) { return !x.isRoot; }).map(function (x) { return x.frame; });
+        if (!frs.length) { return; }
+        var leaf = frs[frs.length - 1];
+        inc[leaf] = (inc[leaf] || 0) + n.weight;
+        selfW[leaf] = (selfW[leaf] || 0) + sw;
+        threads[leaf] = thr;
+        frs.forEach(function (f) {
+          var own = attributeOwner(f);
+          if (own.plugin && !callers[leaf]) { callers[leaf] = own.plugin; }
+        });
+        if (sw > 0 || n.children.length === 0) {
+          samples.push({ thread: thr, frames: frs, weight: Math.max(sw, 0.01) });
+        }
+      });
+    }
+
+    if (!(totalWeight > 0)) { totalWeight = 100; }
+    var findings = [];
+    var seenRule = {};
+
+    function pushFinding(ruleId, sev, frame, pct, plugin, msg, fix) {
+      var key = ruleId + ":" + (plugin || frame);
+      if (seenRule[key]) { return; }
+      seenRule[key] = true;
+      findings.push({ rule_id: ruleId, severity: sev, frame: frame, pct: Number(pct.toFixed(1)), plugin: plugin || null, message: msg, remediation: fix });
+    }
+
+    Object.keys(inc).sort(function (a, b) { return inc[b] - inc[a]; }).forEach(function (fr) {
+      var incPct = Math.min(100, (inc[fr] / totalWeight) * 100);
+      var selfPct = Math.min(100, ((selfW[fr] || 0) / totalWeight) * 100);
+      var thr = threads[fr] || "Server thread";
+      if (isAsyncThread(thr) || Math.max(incPct, selfPct) < thresholdPct) { return; }
+      var low = fr.toLowerCase();
+      var plug = callers[fr] || attributeOwner(fr).plugin;
+
+      if (low.indexOf("serverchunkcache.getchunk") >= 0 || low.indexOf("syncload") >= 0 || low.indexOf("getchunkat") >= 0) {
+        pushFinding("SPARK-001", "critical", fr, incPct, plug,
+          "Synchronous chunk load '" + fr + "' consumes " + incPct.toFixed(1) + "% on " + thr + (plug ? " (plugin: " + plug + ")." : "."),
+          "Switch to World.getChunkAtAsync(x, z).thenAccept(...) and pre-generate worlds.");
+      } else if (low.indexOf("hikaripool") >= 0 || low.indexOf("java.sql.") >= 0 || low.indexOf("mysql") >= 0 || low.indexOf("sqlite") >= 0 || low.indexOf("socketread") >= 0) {
+        pushFinding("SPARK-002", "critical", fr, incPct, plug,
+          "Synchronous JDBC or network I/O '" + fr + "' blocks " + thr + " for " + incPct.toFixed(1) + "%" + (plug ? " (initiated by " + plug + ")." : "."),
+          "Dispatch database and HTTP queries on Bukkit.getAsyncScheduler() and hop back to RegionScheduler/EntityScheduler.");
+      } else if (low.indexOf("goalselector") >= 0 || low.indexOf("pathnavigation") >= 0 || low.indexOf("voxelshapes") >= 0) {
+        pushFinding("SPARK-003", "high", fr, incPct, plug,
+          "Entity AI or collision hotspot '" + fr + "' takes " + incPct.toFixed(1) + "% tick budget.",
+          "Tune entity-activation-range and max-entity-collisions in paper-world-defaults.yml.");
+      } else if (low.indexOf("hopperblockentity") >= 0 || low.indexOf("boundtickingblockentity") >= 0) {
+        pushFinding("SPARK-004", "high", fr, incPct, plug,
+          "Hopper or block-entity tick '" + fr + "' takes " + incPct.toFixed(1) + "% tick budget.",
+          "Enable hopper.disable-move-event when InventoryMoveItemEvent is unused and raise ticks-per.hopper-check.");
+      } else if (attributeOwner(fr).plugin && selfPct >= thresholdPct) {
+        pushFinding("SPARK-007", "high", fr, selfPct, attributeOwner(fr).plugin,
+          "Plugin hotspot '" + fr + "' (" + attributeOwner(fr).plugin + ") consumes " + selfPct.toFixed(1) + "% self time.",
+          "Cache component/reflection lookups and debounce high-frequency event listeners.");
+      }
+    });
+
+    var idleWorkers = 0;
+    samples.forEach(function (s) {
+      if (!isAsyncThread(s.thread)) { return; }
+      var joined = s.frames.join(";").toLowerCase();
+      var plug = null;
+      s.frames.forEach(function (f) { var o = attributeOwner(f); if (o.plugin) { plug = o.plugin; } });
+      var isIdle = (joined.indexOf("gettask") >= 0 || joined.indexOf("delayedworkqueue.take") >= 0 || joined.indexOf("forkjoinpool.scan") >= 0) && !plug;
+      if (isIdle) { idleWorkers += 1; return; }
+      if (joined.indexOf("hikaripool.getconnection") >= 0) {
+        pushFinding("SPARK-008", "critical", s.frames[s.frames.length - 1], (s.weight / totalWeight) * 100, plug,
+          "Async worker '" + s.thread + "' starved on HIKARICP_POOL_EXHAUSTION" + (plug ? " in " + plug : "") + ".",
+          "Close leaked SQL connections, index slow queries, and align Hikari maximumPoolSize.");
+      }
+    });
+
+    return {
+      tool: "mc_audit_spark_flamegraph",
+      status: findings.length ? "fail" : "pass",
+      profile_format: isCollapsed ? "collapsed" : "call_tree",
+      samples_analyzed: samples.length,
+      benign_idle_workers: idleWorkers,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
+  function analyzeFolia(rawText, declaredDomain) {
+    var lines = rawText.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    var blocks = [];
+    var curHeader = null;
+    var curLines = [];
+
+    lines.forEach(function (ln) {
+      var m = /^"([^"]+)"/.exec(ln);
+      if (m) {
+        if (curLines.length || curHeader) { blocks.push({ header: curHeader || "Trace Snippet", lines: curLines }); }
+        curHeader = m[1];
+        curLines = [];
+      } else {
+        curLines.push(demangleFrame(ln));
+      }
+    });
+    if (curLines.length || curHeader) {
+      blocks.push({ header: curHeader || "Trace Snippet", lines: curLines });
+    }
+
+    var findings = [];
+    var domains = [];
+
+    blocks.forEach(function (b) {
+      var lowH = b.header.toLowerCase();
+      var joined = b.lines.join(" ").toLowerCase();
+      var domain = declaredDomain !== "auto" ? declaredDomain.toUpperCase() : (
+        lowH.indexOf("netty") >= 0 || joined.indexOf("epolleventloop") >= 0 ? "NETTY" :
+        lowH.indexOf("global region") >= 0 || joined.indexOf("globalregionscheduler") >= 0 ? "GLOBAL" :
+        joined.indexOf("entityscheduler") >= 0 ? "ENTITY" :
+        lowH.indexOf("region scheduler") >= 0 || joined.indexOf("tickregions") >= 0 ? "REGION" :
+        isAsyncThread(lowH) || joined.indexOf("foliaasyncscheduler") >= 0 ? "ASYNC" : "UNKNOWN"
+      );
+      if (domains.indexOf(domain) < 0) { domains.push(domain); }
+
+      var plug = null;
+      b.lines.forEach(function (fr) { var own = attributeOwner(fr); if (!plug && own.plugin) { plug = own.plugin; } });
+
+      b.lines.forEach(function (fr) {
+        var low = fr.toLowerCase();
+        var isSpatial = low.indexOf("getblockat") >= 0 || low.indexOf("settype") >= 0 || low.indexOf("getchunkat") >= 0 ||
+          low.indexOf("openinventory") >= 0 || low.indexOf("spawnentity") >= 0 || low.indexOf(".damage(") >= 0;
+
+        if (low.indexOf("bukkit.getscheduler()") >= 0 || low.indexOf("bukkitrunnable.runtask") >= 0) {
+          findings.push({
+            rule_id: "FOLIA-TRC-006", severity: "critical", frame: fr, plugin: plug, domain: domain,
+            message: "Legacy BukkitScheduler call '" + fr + "' throws UnsupportedOperationException on Folia.",
+            remediation: "Dispatch onto RegionScheduler, EntityScheduler, GlobalRegionScheduler, or AsyncScheduler."
+          });
+        }
+        if (domain === "ASYNC" && isSpatial) {
+          findings.push({
+            rule_id: "FOLIA-TRC-001", severity: "critical", frame: fr, plugin: plug, domain: domain,
+            message: "ASYNC thread '" + b.header + "' mutates or reads regional world/entity state at '" + fr + "'.",
+            remediation: "Marshal world work to Bukkit.getRegionScheduler().execute(...) or entity work to entity.getScheduler().run(...)."
+          });
+        }
+        if (domain === "GLOBAL" && isSpatial) {
+          findings.push({
+            rule_id: "FOLIA-TRC-002", severity: "critical", frame: fr, plugin: plug, domain: domain,
+            message: "GlobalRegionScheduler accesses spatial chunk/block/entity state at '" + fr + "' (owns zero chunks/entities).",
+            remediation: "Route spatial coordinates through Bukkit.getRegionScheduler().execute(plugin, world, chunkX, chunkZ, task)."
+          });
+        }
+        if ((domain === "REGION" || domain === "ENTITY") && (low.indexOf("getonlineplayers") >= 0 || (low.indexOf(".teleport(") >= 0 && low.indexOf("teleportasync") < 0))) {
+          findings.push({
+            rule_id: "FOLIA-TRC-003", severity: "high", frame: fr, plugin: plug, domain: domain,
+            message: domain + " thread performs cross-region player iteration or synchronous teleport at '" + fr + "'.",
+            remediation: "Use entity.teleportAsync(loc) and dispatch per-player mutations via player.getScheduler().run(...)."
+          });
+        }
+        if (domain === "NETTY" && isSpatial) {
+          findings.push({
+            rule_id: "FOLIA-TRC-004", severity: "critical", frame: fr, plugin: plug, domain: domain,
+            message: "Netty EventLoop accesses live world/entity state directly at '" + fr + "'.",
+            remediation: "Copy packet payload into an immutable value and schedule onto player.getScheduler()."
+          });
+        }
+        if ((domain === "REGION" || domain === "ENTITY" || domain === "GLOBAL") && (low.indexOf("completablefuture.join") >= 0 || low.indexOf("futuretask.get") >= 0)) {
+          findings.push({
+            rule_id: "FOLIA-TRC-005", severity: "critical", frame: fr, plugin: plug, domain: domain,
+            message: "Tick domain " + domain + " blocks synchronously on '" + fr + "', risking a region merge barrier deadlock.",
+            remediation: "Chain .thenAccept(...) asynchronously and hop back to RegionScheduler or EntityScheduler."
+          });
+        }
+      });
+    });
+
+    return {
+      tool: "mc_analyze_folia_scheduler_trace",
+      status: findings.length ? "fail" : "pass",
+      threads_analyzed: blocks.length,
+      domains_detected: domains,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
+  function toSarif(report) {
+    return {
+      version: "2.1.0",
+      runs: [
+        {
+          tool: {
+            driver: {
+              name: "minecraftkit",
+              semanticVersion: "2.8.0",
+              rules: report.findings.map(function (f) {
+                return { id: f.rule_id, shortDescription: { text: f.message } };
+              })
+            }
+          },
+          results: report.findings.map(function (f) {
+            return {
+              ruleId: f.rule_id,
+              level: f.severity === "critical" || f.severity === "high" ? "error" : "warning",
+              message: { text: f.message },
+              locations: [{ logicalLocations: [{ fullyQualifiedName: f.frame, kind: "function" }] }]
+            };
+          })
+        }
+      ]
+    };
+  }
+
+  var mode = "spark";
+  var showSarif = false;
+  var lastReport = null;
+
+  var tabSpark = document.getElementById("tab-spark");
+  var tabFolia = document.getElementById("tab-folia");
+  var presetBox = document.getElementById("preset-buttons");
+  var inputHeading = document.getElementById("input-heading");
+  var inputSubtitle = document.getElementById("input-subtitle");
+  var thresholdWrap = document.getElementById("threshold-wrap");
+  var thresholdInput = document.getElementById("threshold-input");
+  var domainWrap = document.getElementById("domain-wrap");
+  var domainSelect = document.getElementById("domain-select");
+  var traceInput = document.getElementById("trace-input");
+  var runBtn = document.getElementById("run-audit-btn");
+  var sarifBtn = document.getElementById("toggle-sarif-btn");
+  var copyBtn = document.getElementById("copy-json-btn");
+  var summaryLine = document.getElementById("summary-line");
+  var metricsRow = document.getElementById("metrics-row");
+  var findingsList = document.getElementById("findings-list");
+  var jsonPreview = document.getElementById("json-preview");
+
+  function clearNode(node) {
+    while (node.firstChild) { node.removeChild(node.firstChild); }
+  }
+
+  function renderMetrics(items) {
+    clearNode(metricsRow);
+    items.forEach(function (it) {
+      var box = el("div", "metric-box");
+      box.append(el("strong", "", it[0]), el("span", "", it[1]));
+      metricsRow.append(box);
+    });
+  }
+
+  function renderReport(report) {
+    lastReport = report;
+    summaryLine.textContent = "Status: " + report.status.toUpperCase() + " | " + report.finding_count + " finding(s)";
+    if (mode === "spark") {
+      renderMetrics([
+        [report.status.toUpperCase(), "Verdict"],
+        [report.profile_format, "Format"],
+        [report.finding_count, "Hotspots"],
+        [report.benign_idle_workers, "Idle Async Parked"]
+      ]);
+    } else {
+      renderMetrics([
+        [report.status.toUpperCase(), "Verdict"],
+        [report.threads_analyzed, "Threads"],
+        [report.domains_detected.join(", ") || "NONE", "Domains"],
+        [report.finding_count, "Violations"]
+      ]);
+    }
+
+    clearNode(findingsList);
+    if (report.findings.length === 0) {
+      var okCard = el("article", "finding-card sev-pass");
+      okCard.append(
+        el("div", "finding-head", "PASS :: Zero hazards above threshold"),
+        el("p", "finding-msg", "All sampled frames and Folia scheduler domain boundaries satisfy thread-affinity and tick-budget invariants.")
+      );
+      findingsList.append(okCard);
+    } else {
+      report.findings.forEach(function (f) {
+        var card = el("article", "finding-card sev-" + f.severity);
+        var head = el("div", "finding-head");
+        head.append(
+          el("span", "finding-badge", f.rule_id + " [" + f.severity.toUpperCase() + "]" + (f.plugin ? " :: " + f.plugin : "")),
+          el("span", "", f.domain ? ("Domain: " + f.domain) : (f.pct !== undefined ? (f.pct + "%") : ""))
+        );
+        card.append(head, el("p", "finding-msg", f.message), el("p", "finding-fix", "Fix: " + f.remediation));
+        findingsList.append(card);
+      });
+    }
+
+    jsonPreview.textContent = JSON.stringify(showSarif ? toSarif(report) : report, null, 2);
+    jsonPreview.hidden = !showSarif;
+  }
+
+  function runAudit() {
+    if (mode === "spark") {
+      var thr = parseFloat(thresholdInput.value) || 5.0;
+      renderReport(analyzeSpark(traceInput.value, thr));
+    } else {
+      renderReport(analyzeFolia(traceInput.value, domainSelect.value));
+    }
+  }
+
+  function renderPresets() {
+    clearNode(presetBox);
+    PRESETS[mode].forEach(function (p) {
+      var b = el("button", "preset-btn", p.label);
+      b.type = "button";
+      b.addEventListener("click", function () {
+        traceInput.value = p.text;
+        if (p.threshold) { thresholdInput.value = String(p.threshold); }
+        if (p.domain) { domainSelect.value = p.domain; }
+        runAudit();
+      });
+      presetBox.append(b);
+    });
+  }
+
+  function switchMode(nextMode) {
+    mode = nextMode;
+    var isSpark = mode === "spark";
+    tabSpark.classList.toggle("is-active", isSpark);
+    tabSpark.setAttribute("aria-selected", String(isSpark));
+    tabFolia.classList.toggle("is-active", !isSpark);
+    tabFolia.setAttribute("aria-selected", String(!isSpark));
+    thresholdWrap.hidden = !isSpark;
+    domainWrap.hidden = isSpark;
+    inputHeading.textContent = isSpark ? "Spark Collapsed Stack or Call-Tree Input" : "Folia Stack Trace or Multi-Thread Dump";
+    inputSubtitle.textContent = isSpark
+      ? "Zero-upload browser analysis. Distinguishes sync tick bottlenecks and HikariCP starvation from idle worker parking."
+      : "Verifies Folia 4-domain state ownership across REGION, ENTITY, GLOBAL, ASYNC, and NETTY threads.";
+    renderPresets();
+    traceInput.value = PRESETS[mode][0].text;
+    runAudit();
+  }
+
+  tabSpark.addEventListener("click", function () { switchMode("spark"); });
+  tabFolia.addEventListener("click", function () { switchMode("folia"); });
+  runBtn.addEventListener("click", runAudit);
+  sarifBtn.addEventListener("click", function () {
+    showSarif = !showSarif;
+    sarifBtn.textContent = showSarif ? "Hide SARIF v2.1.0" : "View SARIF v2.1.0";
+    if (lastReport) { renderReport(lastReport); }
+  });
+  copyBtn.addEventListener("click", function () {
+    if (!lastReport || !navigator.clipboard) { return; }
+    var payload = JSON.stringify(showSarif ? toSarif(lastReport) : lastReport, null, 2);
+    navigator.clipboard.writeText(payload);
+    copyBtn.textContent = "Copied";
+    window.setTimeout(function () { copyBtn.textContent = "Copy JSON"; }, 1200);
+  });
+
+  switchMode("spark");
+}());
