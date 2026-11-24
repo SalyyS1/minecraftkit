@@ -16,6 +16,7 @@ from typing import Any
 import bot_engine
 import hosting_bridge
 import plugin_conflict_auditor
+import protocol_version_matrix
 import qa_report_html
 
 
@@ -36,6 +37,14 @@ def run_full_qa_lifecycle(
     html_output_path: str = "",
 ) -> dict[str, Any]:
     """Run a unified, non-destructive end-to-end QA lifecycle plan & proof generator."""
+    # Phase 0: Protocol Compatibility Matrix (1.20.4..26.3)
+    proto_matrix = protocol_version_matrix.probe_protocol_matrix(
+        server_version=mc_version,
+        client_versions=[mc_version, "1.21.4", "26.3"],
+        has_viaversion=True,
+        has_viabackwards=True,
+    )
+
     # Phase 1: Resource Governor
     fleet_plan = bot_engine.plan_bot_resources(
         bot_count=bot_count,
@@ -102,6 +111,11 @@ def run_full_qa_lifecycle(
         "mc_version": mc_version,
         "screen_lock_free": True,
         "phases": {
+            "0_protocol_matrix": {
+                "server_mc": proto_matrix["server"]["mc"],
+                "recommended_bot_protocol": proto_matrix["recommended_bot_protocol"],
+                "warnings": proto_matrix["warnings"],
+            },
             "1_resource_governor": fleet_plan,
             "2_plugin_matrix_audit": plugin_audit,
             "3_hosting_preflight": hosting_plan,

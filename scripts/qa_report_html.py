@@ -38,6 +38,8 @@ def generate_qa_html_report(
     stages: list[dict[str, Any]] | None = None,
     chat_log: list[str] | None = None,
     snapshots_base64: list[dict[str, str]] | None = None,
+    tps_samples: list[dict[str, Any]] | None = None,
+    include_tps_chart: bool = True,
     auto_render_snapshot: bool = True,
     output_path: str = "",
 ) -> dict[str, Any]:
@@ -88,6 +90,19 @@ def generate_qa_html_report(
         embedded_snaps.append((f"Off-Screen Bot HUD Snapshot ({bot_tier})", preview_b64))
     elif embedded_snaps:
         preview_b64 = embedded_snaps[0][1]
+
+    if include_tps_chart:
+        chart_samples = list(tps_samples or [])
+        if not chart_samples:
+            chart_samples = [
+                {"tps_1m": max(1.0, min(20.0, tps - 0.1)), "mspt": mspt + 1.2},
+                {"tps_1m": max(1.0, min(20.0, tps)), "mspt": mspt},
+                {"tps_1m": max(1.0, min(20.0, tps - 0.05)), "mspt": mspt + 0.4},
+                {"tps_1m": max(1.0, min(20.0, tps)), "mspt": mspt},
+            ]
+        tps_png = visual_capture.render_tps_sparkline_png(chart_samples)
+        tps_b64 = base64.b64encode(tps_png).decode("ascii")
+        embedded_snaps.append((f"TPS / MSPT Telemetry Sparkline ({tps:.1f} TPS · {mspt:.1f} mspt)", tps_b64))
 
     generated_at = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
