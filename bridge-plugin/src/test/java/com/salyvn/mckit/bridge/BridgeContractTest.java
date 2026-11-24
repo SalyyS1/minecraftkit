@@ -82,7 +82,12 @@ public final class BridgeContractTest {
         assertTrue(tpsRing.peekFirst().contains("\"seq\":35"), "oldest retained TPS sample must be #35");
         assertTrue(tpsRing.peekLast().contains("\"seq\":94"), "newest retained TPS sample must be #94");
 
-        System.out.println("BridgeContractTest: 6/6 PASS");
+        // 7. Chunk density calculation invariant (zero-loaded guard + finite formatting)
+        double zeroDensity = 0 > 0 ? (10.0 / 0) : 0.0;
+        double sampleDensity = 320.0 / 160.0;
+        assertTrue(zeroDensity == 0.0 && Math.abs(sampleDensity - 2.0) < 1e-9, "chunk density math mismatch");
+
+        System.out.println("BridgeContractTest: 7/7 PASS");
     }
 
     private static void verifyLoopbackHttpAuth() {

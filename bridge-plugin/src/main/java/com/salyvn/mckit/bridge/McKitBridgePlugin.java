@@ -162,6 +162,7 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.createContext("/api/v1/metrics", ex -> handleGuarded(ex, this::buildMetricsJson));
             httpServer.createContext("/api/v1/tps-history", ex -> handleGuarded(ex, this::buildTpsHistoryJson));
             httpServer.createContext("/api/v1/entities", ex -> handleGuarded(ex, this::buildEntitiesJson));
+            httpServer.createContext("/api/v1/chunks", ex -> handleGuarded(ex, this::buildChunksJson));
             httpServer.createContext("/api/v1/players", ex -> handleGuarded(ex, this::buildPlayersJson));
             httpServer.createContext("/api/v1/gui", ex -> handleGuarded(ex, () -> buildGuiJson(ex)));
             httpServer.createContext("/api/v1/worlds", ex -> handleGuarded(ex, this::buildWorldsJson));
@@ -302,6 +303,32 @@ public final class McKitBridgePlugin extends JavaPlugin {
             }
         }
         sb.append("]}");
+        return sb.toString();
+    }
+
+    private String buildChunksJson() {
+        StringBuilder sb = new StringBuilder("{\"worlds\":[");
+        boolean first = true;
+        int totalLoaded = 0;
+        int totalForceLoaded = 0;
+        for (World world : Bukkit.getWorlds()) {
+            if (!first) sb.append(",");
+            first = false;
+            int loaded = world.getLoadedChunks().length;
+            int forced = world.getForceLoadedChunks().size();
+            int entities = world.getEntityCount();
+            double density = loaded > 0 ? ((double) entities / loaded) : 0.0;
+            totalLoaded += loaded;
+            totalForceLoaded += forced;
+            sb.append("{\"world\":\"").append(esc(world.getName()))
+                .append("\",\"loaded_chunks\":").append(loaded)
+                .append(",\"force_loaded_chunks\":").append(forced)
+                .append(",\"entity_count\":").append(entities)
+                .append(",\"entities_per_chunk\":").append(String.format("%.2f", density))
+                .append("}");
+        }
+        sb.append("],\"total_loaded_chunks\":").append(totalLoaded)
+            .append(",\"total_force_loaded_chunks\":").append(totalForceLoaded).append("}");
         return sb.toString();
     }
 

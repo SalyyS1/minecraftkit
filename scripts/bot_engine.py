@@ -948,6 +948,7 @@ def query_bridge_plugin(
         "metrics": "/api/v1/metrics",
         "tps-history": "/api/v1/tps-history",
         "entities": "/api/v1/entities",
+        "chunks": "/api/v1/chunks",
         "players": "/api/v1/players",
         "errors": "/api/v1/errors",
         "plugins": "/api/v1/plugins",
