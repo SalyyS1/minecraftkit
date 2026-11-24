@@ -240,6 +240,96 @@ class V51LoopbackE2ETests(unittest.TestCase):
             comp2 = subprocess.run([javac, "-d", tmp, str(client_mod)], capture_output=True, text=True, check=False)
             self.assertEqual(comp2.returncode, 0, comp2.stderr)
 
+    def test_bridge_tps_history_and_entities_e2e_with_inline_png_sparkline(self) -> None:
+        import base64
+        import mcp_server
+
+        expected_tok = "tok_bridge_sparkline_test"
+
+        class _BridgeHandler(http.server.BaseHTTPRequestHandler):
+            def log_message(self, format: str, *args: object) -> None:  # noqa: A002
+                return
+
+            def do_GET(self) -> None:  # noqa: N802
+                if self.headers.get("X-MCKit-Token") != expected_tok:
+                    body = b'{"error":"unauthorized"}'
+                    self.send_response(401)
+                elif self.path == "/api/v1/tps-history":
+                    body = json.dumps({
+                        "max_samples": 60,
+                        "samples": [
+                            {"ts": "2026-11-25T00:00:01Z", "tps_1m": 20.0, "mspt": 18.2, "players": 4},
+                            {"ts": "2026-11-25T00:00:02Z", "tps_1m": 19.4, "mspt": 28.5, "players": 5},
+                            {"ts": "2026-11-25T00:00:03Z", "tps_1m": 17.8, "mspt": 46.1, "players": 6},
+                            {"ts": "2026-11-25T00:00:04Z", "tps_1m": 19.9, "mspt": 21.0, "players": 6},
+                        ],
+                    }).encode("utf-8")
+                    self.send_response(200)
+                elif self.path == "/api/v1/entities":
+                    body = json.dumps({
+                        "worlds": [{"world": "world", "total": 412, "top_types": [{"type": "ITEM", "count": 190}, {"type": "ZOMBIE", "count": 84}]}]
+                    }).encode("utf-8")
+                    self.send_response(200)
+                else:
+                    body = b'{"error":"not_found"}'
+                    self.send_response(404)
+                self.send_header("Content-Type", "application/json")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+        httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), _BridgeHandler)
+        port = httpd.server_address[1]
+        th = threading.Thread(target=httpd.serve_forever, daemon=True)
+        th.start()
+        try:
+            srv = mcp_server.MinecraftKitMcpServer(ROOT)
+            raw_tps = srv.handle_message(json.dumps({
+                "jsonrpc": "2.0",
+                "id": 901,
+                "method": "tools/call",
+                "params": {
+                    "name": "mc_bridge_plugin_query",
+                    "arguments": {
+                        "base_url": f"http://127.0.0.1:{port}",
+                        "token": expected_tok,
+                        "endpoint": "tps-history",
+                    },
+                },
+            }))
+            assert raw_tps is not None
+            resp_tps = json.loads(raw_tps)
+            content = resp_tps["result"]["content"]
+            payload = json.loads(content[0]["text"])
+            self.assertTrue(payload["reachable"])
+            self.assertTrue(payload["inline_chart_attached"])
+            imgs = [c for c in content if c.get("type") == "image"]
+            self.assertEqual(len(imgs), 1)
+            self.assertEqual(imgs[0]["mimeType"], "image/png")
+            png_raw = base64.b64decode(imgs[0]["data"])
+            self.assertTrue(png_raw.startswith(b"\x89PNG\r\n\x1a\n"))
+
+            raw_ent = srv.handle_message(json.dumps({
+                "jsonrpc": "2.0",
+                "id": 902,
+                "method": "tools/call",
+                "params": {
+                    "name": "mc_bridge_plugin_query",
+                    "arguments": {
+                        "base_url": f"http://127.0.0.1:{port}",
+                        "token": expected_tok,
+                        "endpoint": "entities",
+                    },
+                },
+            }))
+            assert raw_ent is not None
+            resp_ent = json.loads(raw_ent)
+            ent_payload = json.loads(resp_ent["result"]["content"][0]["text"])
+            self.assertEqual(ent_payload["data"]["worlds"][0]["top_types"][0]["type"], "ITEM")
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
 
 if __name__ == "__main__":
     unittest.main()

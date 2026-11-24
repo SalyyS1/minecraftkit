@@ -604,3 +604,58 @@ def compare_snapshots_png(
         "changed_bbox": None if changed_pixels == 0 else {"x0": min_x, "y0": min_y, "x1": max_x, "y1": max_y},
         "diff_png_base64": encode_png_base64(diff_png),
     }
+
+
+def render_tps_sparkline_png(
+    samples: list[dict[str, Any]],
+    *,
+    width: int = 640,
+    height: int = 240,
+    title: str = "MCKIT BRIDGE TPS / MSPT TELEMETRY",
+) -> bytes:
+    """Render a zero-dependency dark-mode PNG sparkline chart for 60s TPS & MSPT history."""
+    canvas = PixelCanvas(width, height, BG_BASE)
+    canvas.draw_rect(0, 0, width, height, BORDER_SUBTLE, 1)
+    canvas.fill_rect(1, 1, width - 2, 28, BG_PANEL)
+    canvas.draw_text(12, 10, title, ACCENT_EMERALD, scale=1, max_chars=56)
+
+    tps_vals = [float(s.get("tps_1m", 20.0)) for s in samples if isinstance(s, dict)]
+    mspt_vals = [float(s.get("mspt", 0.0)) for s in samples if isinstance(s, dict)]
+    cur_tps = tps_vals[-1] if tps_vals else 20.0
+    cur_mspt = mspt_vals[-1] if mspt_vals else 0.0
+    min_tps = min(tps_vals) if tps_vals else 20.0
+
+    badge_col = ACCENT_EMERALD if cur_tps >= 19.0 else (ACCENT_AMBER if cur_tps >= 16.0 else ACCENT_RED)
+    canvas.draw_text(width - 210, 10, f"TPS {cur_tps:4.1f}  MSPT {cur_mspt:4.1f}", badge_col, scale=1)
+
+    gx, gy, gw, gh = 48, 42, width - 66, height - 86
+    canvas.fill_rect(gx, gy, gw, gh, BG_PANEL)
+    canvas.draw_rect(gx, gy, gw, gh, BORDER_SUBTLE, 1)
+
+    # Horizontal TPS reference guides (20, 15, 10, 5)
+    for mark in (20, 15, 10, 5):
+        my = gy + gh - int((mark / 20.0) * (gh - 8)) - 4
+        canvas.draw_line(gx + 1, my, gx + gw - 2, my, BORDER_SUBTLE)
+        canvas.draw_text(10, my - 3, f"{mark:2d}", TEXT_MUTED, scale=1)
+
+    if len(tps_vals) >= 2:
+        step_x = (gw - 12) / float(len(tps_vals) - 1)
+        prev_pt: tuple[int, int] | None = None
+        for idx, tval in enumerate(tps_vals):
+            clamped = max(0.0, min(20.0, tval))
+            px = gx + 6 + int(round(idx * step_x))
+            py = gy + gh - 4 - int(round((clamped / 20.0) * (gh - 8)))
+            pt_col = ACCENT_EMERALD if clamped >= 19.0 else (ACCENT_AMBER if clamped >= 16.0 else ACCENT_RED)
+            if prev_pt is not None:
+                canvas.draw_line(prev_pt[0], prev_pt[1], px, py, pt_col)
+                canvas.draw_line(prev_pt[0], prev_pt[1] + 1, px, py + 1, pt_col)
+            canvas.draw_circle(px, py, 2, pt_col)
+            prev_pt = (px, py)
+    elif len(tps_vals) == 1:
+        clamped = max(0.0, min(20.0, tps_vals[0]))
+        py = gy + gh - 4 - int(round((clamped / 20.0) * (gh - 8)))
+        canvas.draw_line(gx + 6, py, gx + gw - 6, py, ACCENT_EMERALD)
+
+    footer = f"SAMPLES: {len(tps_vals)}   MIN TPS: {min_tps:.2f}   STATUS: {'HEALTHY' if min_tps >= 18.5 else 'DEGRADED'}"
+    canvas.draw_text(12, height - 22, footer, TEXT_MUTED, scale=1, max_chars=74)
+    return canvas.to_png_bytes()

@@ -1370,8 +1370,9 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
             "properties": {
                 "base_url": {"type": "string", "description": "Bridge plugin base URL (default http://127.0.0.1:25590)."},
                 "token": {"type": "string", "description": "X-MCKit-Token auth secret."},
-                "endpoint": {"type": "string", "enum": ["health", "metrics", "players", "errors", "plugins", "gui", "worlds"], "description": "Bridge endpoint to query (default health)."},
+                "endpoint": {"type": "string", "enum": ["health", "metrics", "tps-history", "entities", "players", "errors", "plugins", "gui", "worlds"], "description": "Bridge endpoint to query (default health)."},
                 "player": {"type": "string", "description": "Optional player username when endpoint='gui'."},
+                "attach_chart": {"type": "boolean", "description": "When endpoint='tps-history', attach an inline dark-mode PNG TPS sparkline chart to chat (default true)."},
                 "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "description": "HTTP timeout in seconds (default 3.0)."},
             },
             "additionalProperties": False,
@@ -9772,14 +9773,27 @@ class MinecraftKitMcpServer:
         return ToolOutcome(_pretty_json(payload))
 
     def _tool_bridge_plugin_query(self, args: dict[str, Any]) -> ToolOutcome:
+        endpoint = str(args.get("endpoint", "health"))
         payload = bot_engine.query_bridge_plugin(
             base_url=str(args.get("base_url", "http://127.0.0.1:25590")),
             token=str(args.get("token", "")),
-            endpoint=str(args.get("endpoint", "health")),
+            endpoint=endpoint,
             player=str(args.get("player", "")),
             timeout_seconds=float(args.get("timeout_seconds", 3.0)),
         )
-        return ToolOutcome(_pretty_json(payload))
+        images: tuple[tuple[str, str], ...] = ()
+        if (
+            endpoint == "tps-history"
+            and bool(args.get("attach_chart", True))
+            and payload.get("reachable")
+            and isinstance(payload.get("data"), dict)
+        ):
+            samples = payload["data"].get("samples")
+            if isinstance(samples, list) and samples:
+                png_bytes = visual_capture.render_tps_sparkline_png(samples)
+                images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
+                payload["inline_chart_attached"] = True
+        return ToolOutcome(_pretty_json(payload), images=images)
 
     def _tool_run_qa_pipeline(self, args: dict[str, Any]) -> ToolOutcome:
         payload = toolchain_bridge.run_qa_pipeline(

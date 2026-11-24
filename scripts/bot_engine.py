@@ -876,6 +876,8 @@ def query_bridge_plugin(
     allowed_endpoints = {
         "health": "/api/v1/health",
         "metrics": "/api/v1/metrics",
+        "tps-history": "/api/v1/tps-history",
+        "entities": "/api/v1/entities",
         "players": "/api/v1/players",
         "errors": "/api/v1/errors",
         "plugins": "/api/v1/plugins",
