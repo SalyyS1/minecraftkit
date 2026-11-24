@@ -38,6 +38,7 @@ import geyser_config_auditor  # noqa: E402
 import gif_recorder  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
+import mythic_mmo_auditor  # noqa: E402
 import pack_auditor  # noqa: E402
 import pack_parity  # noqa: E402
 import paper_config_auditor  # noqa: E402
@@ -2547,6 +2548,25 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_mythic_mmo_yaml",
+        "title": "MythicMobs & MMOItems/MythicCrucible YAML Lag & Exploit Auditor",
+        "description": (
+            "Audit MythicMobs skill/mob and MMOItems/Crucible YAML offline for sub-5-tick ~onTimer loops (RPG-001), "
+            "oversized @EIR/@PIR >64-block chunk scans (RPG-002), >500 particle packet floods (RPG-003), "
+            "extreme/negative combat or economy stats (RPG-004), and unthrottled spam triggers missing Cooldown (RPG-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "yaml_text": {"type": "string"},
+                "ecosystem": {"type": "string", "default": "auto"},
+            },
+            "required": ["yaml_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3606,6 +3626,7 @@ class MinecraftKitMcpServer:
             "mc_ops_audit_geyser_config": self._tool_ops_audit_geyser_config,
             "mc_bot_audit_anti_cheat_compat": self._tool_bot_audit_anti_cheat_compat,
             "mc_ops_audit_jvm_gc_log": self._tool_ops_audit_jvm_gc_log,
+            "mc_audit_mythic_mmo_yaml": self._tool_audit_mythic_mmo_yaml,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10781,6 +10802,14 @@ class MinecraftKitMcpServer:
         else:
             payload["chart_attached"] = False
         return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_audit_mythic_mmo_yaml(self, args: dict[str, Any]) -> ToolOutcome:
+        yaml_text = args.get("yaml_text")
+        if not isinstance(yaml_text, str) or not yaml_text.strip():
+            raise ValueError("'yaml_text' must be a non-empty MythicMobs or MMOItems YAML string.")
+        ecosystem = str(args.get("ecosystem", "auto"))
+        payload = mythic_mmo_auditor.audit_mythic_mmo_yaml(yaml_text, ecosystem=ecosystem)
+        return ToolOutcome(_pretty_json(payload))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

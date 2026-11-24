@@ -379,7 +379,9 @@
       var fitMsg = (hybridMb / 1024) <= (hostGb * 0.65)
         ? "Fits safely inside your 65% host RAM budget (" + safeBudgetGb + " GB)."
         : "Exceeds local 65% budget (" + safeBudgetGb + " GB) — offload Tier-2 visual container to Cloud Docker Grid.";
-      strategyBox.textContent = "Active Strategy: " + (visual ? "Hybrid 1 Visual Docker/Xvfb + " + Math.max(0, n - 1) + " Headless Protocol" : "Pure Tier-1 Headless Protocol Pool") + ". " + fitMsg;
+      var oracleHeadroom = Math.max(0, 24 - (hybridMb / 1024)).toFixed(1);
+      var hetznerNote = (hybridMb / 1024) <= 6.5 ? "Hetzner CX32 8GB ($7/mo: FITS)" : "Hetzner CX42 16GB ($16/mo: FITS)";
+      strategyBox.textContent = "Active Strategy: " + (visual ? "Hybrid 1 Visual Docker/Xvfb + " + Math.max(0, n - 1) + " Headless Protocol" : "Pure Tier-1 Headless Protocol Pool") + ". " + fitMsg + " Cloud Offload: Oracle Always-Free ARM64 24GB ($0/mo · " + oracleHeadroom + " GB free) | " + hetznerNote + ".";
     }
 
     botsInput.addEventListener("input", update);
@@ -723,6 +725,7 @@
       { id: "mc_ops_audit_paper_config", cat: "audit", desc: "Paper/Spigot/Folia config auditor (CFG-001..005) for sync-chunk-writes, compression & view-distance." },
       { id: "mc_ops_audit_velocity_config", cat: "audit", desc: "Velocity/BungeeCord forwarding security auditor (VEL-001..005) with strict secret redaction." },
       { id: "mc_ops_audit_geyser_config", cat: "audit", desc: "GeyserMC/Floodgate Bedrock cross-play auditor (GEY-001..005) for UDP, auth-type & MOTD hygiene." },
+      { id: "mc_audit_mythic_mmo_yaml", cat: "audit", desc: "MythicMobs & MMOItems/Crucible YAML lag/exploit linter catching ~onTimer:1 & >64-block @EIR bombs." },
       { id: "mc_audit_proxy_topology", cat: "audit", desc: "Velocity, Paper, BungeeCord & Geyser-Floodgate forwarding secret & IP spoofing auditor." },
       { id: "mc_audit_permissions_rbac", cat: "audit", desc: "LuckPerms, Vault & plugin.yml wildcard/OP escalation privilege auditor (PERM-001..005)." },
       { id: "mc_audit_database_pool", cat: "audit", desc: "HikariCP, MySQL & SQLite connection pool leak & main-thread blocking auditor (DB-001..005)." },
@@ -747,7 +750,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 85 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 86 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {

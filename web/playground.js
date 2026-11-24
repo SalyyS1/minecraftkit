@@ -226,6 +226,39 @@
           "\"pack_format\": 46"
         ].join("\n")
       }
+    ],
+    mythic_mmo: [
+      {
+        label: "Lag-Bomb Boss Skill + Exploit Sword",
+        text: [
+          "LagBoss:",
+          "  Type: WITHER_SKELETON",
+          "  Health: 500",
+          "  Skills:",
+          "  - effect:particles{p=flame;amount=2500} @EIR{r=180} ~onTimer:1",
+          "  - damage{amount=50} @PIR{r=120} ~onAttack",
+          "BrokenSword:",
+          "  base:",
+          "    material: NETHERITE_SWORD",
+          "    attack-damage: 999999",
+          "    mana: -50"
+        ].join("\n")
+      },
+      {
+        label: "Clean Balanced MythicMobs FrostKnight",
+        text: [
+          "FrostKnight:",
+          "  Type: STRAY",
+          "  Health: 180",
+          "  Skills:",
+          "  - skill{s=FrostNova} @EIR{r=12} ~onTimer:40",
+          "FrostNova:",
+          "  Cooldown: 6",
+          "  Skills:",
+          "  - effect:particles{p=snowflake;amount=40} @Self",
+          "  - damage{amount=12} @PIR{r=8} ~onAttack"
+        ].join("\n")
+      }
     ]
   };
 
@@ -871,6 +904,7 @@
   var tabChunkJfr = document.getElementById("tab-chunk-jfr");
   var tabBotOps = document.getElementById("tab-bot-ops");
   var tabPackCfg = document.getElementById("tab-pack-cfg");
+  var tabMythicMmo = document.getElementById("tab-mythic-mmo");
   var presetBox = document.getElementById("preset-buttons");
   var inputHeading = document.getElementById("input-heading");
   var inputSubtitle = document.getElementById("input-subtitle");
@@ -1048,6 +1082,66 @@
     };
   }
 
+  function analyzeMythicMmo(raw) {
+    var findings = [];
+    var timers = raw.match(/~onTimer\s*:\s*([0-4])\b/gi);
+    if (timers && timers.length) {
+      findings.push({
+        rule_id: "RPG-001",
+        severity: "critical",
+        message: "Sub-5-tick ~onTimer trigger (" + timers[0] + ") risks main-thread & Folia region TPS collapse.",
+        remediation: "Raise ~onTimer to >= 10-20 ticks (0.5s-1s) or gate behind cooldowns."
+      });
+    }
+    var radM = raw.match(/(?:@(?:EIR|EntitiesInRadius|PIR|PlayersInRadius)\{[^}]*\br(?:adius)?\s*=\s*(\d+)|\bradius\s*[:=]\s*(\d+))/i);
+    if (radM && Number(radM[1] || radM[2]) > 64) {
+      findings.push({
+        rule_id: "RPG-002",
+        severity: "critical",
+        message: "Oversized entity targeter radius (" + (radM[1] || radM[2]) + " blocks > 64) causes chunk-scan lag bombs.",
+        remediation: "Cap @EIR / @PIR / radius to <= 32-48 blocks with target limiters."
+      });
+    }
+    var partM = raw.match(/(?:particles?|effect:particles?)\{[^}]*\b(?:a|amount|count|points)\s*=\s*(\d+)/i);
+    if (partM && Number(partM[1]) > 500) {
+      findings.push({
+        rule_id: "RPG-003",
+        severity: "high",
+        message: "Excessive particle burst (" + partM[1] + " > 500) risks Netty bandwidth spikes and Geyser kicks.",
+        remediation: "Keep particle counts <= 120 per burst."
+      });
+    }
+    if (/(?:attack-damage|damage|max-health)\s*[:=]\s*(?:-\d+|\d{5,})/i.test(raw) || /(?:cooldown|mana|stamina|price|cost)\s*[:=]\s*-\d+/i.test(raw)) {
+      findings.push({
+        rule_id: "RPG-004",
+        severity: "critical",
+        message: "Combat or economy stat exploit detected (negative cost/mana or >10,000 damage).",
+        remediation: "Clamp damage/health to server tier bounds and enforce strictly non-negative costs."
+      });
+    }
+    if (/~on(?:Swing|Attack|Use|RightClick|Interact)\b/i.test(raw) && !/\bcooldown\s*[:=]\s*[1-9]\d*/i.test(raw)) {
+      findings.push({
+        rule_id: "RPG-005",
+        severity: "medium",
+        message: "Spam-able interaction trigger (~onAttack/~onUse/~onSwing) lacks a positive Cooldown.",
+        remediation: "Add Cooldown: 2 (or skill-level cooldown) to block auto-clicker skill spam."
+      });
+    }
+    var score = Math.max(0, 100 - findings.reduce(function (acc, f) {
+      return acc + (f.severity === "critical" ? 30 : (f.severity === "high" ? 15 : 8));
+    }, 0));
+    var grade = score >= 90 ? "A" : (score >= 78 ? "B" : (score >= 62 ? "C" : (score >= 45 ? "D" : "F")));
+    var status = findings.some(function (f) { return f.severity === "critical" || f.severity === "high"; }) ? "fail" : (findings.length ? "warn" : "pass");
+    return {
+      mode: "mythic_mmo",
+      status: status,
+      grade: grade,
+      score: score,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
   function renderReport(report) {
     lastReport = report;
     summaryLine.textContent = "Status: " + report.status.toUpperCase() + " | " + report.finding_count + " finding(s)";
@@ -1079,11 +1173,11 @@
         [report.estimated_ram_mb + " MB", "Est. RAM"],
         [report.screen_lock_free ? "ZERO LOCK" : "FOCUS LOCK", "Desktop Impact"]
       ]);
-    } else if (mode === "pack_cfg") {
+    } else if (mode === "pack_cfg" || mode === "mythic_mmo") {
       renderMetrics([
         [report.status.toUpperCase(), "Verdict"],
         ["Grade " + report.grade, "Health Grade"],
-        [report.score + "/100", "Tuning Score"],
+        [report.score + "/100", "Safety Score"],
         [report.finding_count, "Findings"]
       ]);
     } else {
@@ -1132,6 +1226,8 @@
       renderReport(analyzeBotAndOps(traceInput.value));
     } else if (mode === "pack_cfg") {
       renderReport(analyzePackAndConfig(traceInput.value));
+    } else if (mode === "mythic_mmo") {
+      renderReport(analyzeMythicMmo(traceInput.value));
     } else {
       renderReport(analyzeProtocolAndSql(traceInput.value));
     }
@@ -1160,6 +1256,7 @@
     var isChunkJfr = mode === "chunk_jfr";
     var isBotOps = mode === "bot_ops";
     var isPackCfg = mode === "pack_cfg";
+    var isMythicMmo = mode === "mythic_mmo";
     tabSpark.classList.toggle("is-active", isSpark);
     tabSpark.setAttribute("aria-selected", String(isSpark));
     tabFolia.classList.toggle("is-active", isFolia);
@@ -1180,6 +1277,10 @@
       tabPackCfg.classList.toggle("is-active", isPackCfg);
       tabPackCfg.setAttribute("aria-selected", String(isPackCfg));
     }
+    if (tabMythicMmo) {
+      tabMythicMmo.classList.toggle("is-active", isMythicMmo);
+      tabMythicMmo.setAttribute("aria-selected", String(isMythicMmo));
+    }
     thresholdWrap.hidden = !isSpark;
     domainWrap.hidden = !isFolia;
     if (isSpark) {
@@ -1197,6 +1298,9 @@
     } else if (isPackCfg) {
       inputHeading.textContent = "Paper/Purpur/Folia Anti-Lag Config & 1.21.4+ Resource Pack Linter";
       inputSubtitle.textContent = "Catches sync-chunk-writes, mob-farm/hopper lag, treasure-map freezes, and legacy pack_format/overrides offline (CFG-001..005, PACK-001..005).";
+    } else if (isMythicMmo) {
+      inputHeading.textContent = "MythicMobs Skill/Mob & MMOItems/Crucible YAML Linter";
+      inputSubtitle.textContent = "Detects sub-5-tick ~onTimer loops, >64-block @EIR chunk scans, >500 particle floods, negative costs, and missing cooldowns offline (RPG-001..005).";
     } else {
       inputHeading.textContent = "Netty StreamCodec or HikariCP / SQL Persistence Snippet";
       inputSubtitle.textContent = "Computes worst-case LEB128/UTF-8 wire-byte budgets (NETTY-001..008) and audits sync JDBC, resource leaks, and Folia callbacks (SQL-001..007).";
@@ -1219,6 +1323,9 @@
   }
   if (tabPackCfg) {
     tabPackCfg.addEventListener("click", function () { switchMode("pack_cfg"); });
+  }
+  if (tabMythicMmo) {
+    tabMythicMmo.addEventListener("click", function () { switchMode("mythic_mmo"); });
   }
   runBtn.addEventListener("click", runAudit);
   sarifBtn.addEventListener("click", function () {
