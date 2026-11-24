@@ -1,22 +1,25 @@
 #!/usr/bin/env node
 /**
  * Salyyy MinecraftKit — Tier-1 Headless Protocol Bot Worker (~42 MB RAM/bot).
- * Zero desktop GUI, zero screen lock, auto-register/login with password redaction,
- * stage-driven assertions, and live GUI/Inventory/Scoreboard/Entity capture.
+ * Zero desktop GUI, zero screen lock, auto-register/login (AuthMe, nLogin,
+ * OpeNLogin, LimboAuth, Vietnamese/English prompts) with strict password redaction,
+ * stage-driven assertions (chat, GUI, inventory, scoreboard, movement), and live
+ * HUD/GUI/Scoreboard/Entity capture.
  *
  * Reads a JSON stage plan from stdin and writes structured JSON results to stdout.
  */
 
 import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 
 const require = createRequire(import.meta.url);
 
-const REGISTER_RE = /(\/register\b|\/reg\b|đăng\s*ký|dang\s*ky|please\s+register)/i;
-const LOGIN_RE = /(\/login\b|\/l\s+<|đăng\s*nhập|dang\s*nhap|please\s+login)/i;
-const AUTH_OK_RE = /(successfully\s+(logged\s+in|registered)|đăng\s*(nhập|ký)\s*thành\s*công|welcome\s+back)/i;
-const SECRET_CMD_RE = /(\/(?:login|l|register|reg|changepassword|cpw)\s+)(.+)$/i;
+export const REGISTER_RE = /(\/register\b|\/reg\b|đăng\s*ký|dang\s*ky|please\s+register|create\s+a\s+password)/i;
+export const LOGIN_RE = /(\/login\b|\/l\s+<|đăng\s*nhập|dang\s*nhap|please\s+login|authenticate\s+with\s+\/login)/i;
+export const AUTH_OK_RE = /(successfully\s+(logged\s+in|registered)|đăng\s*(nhập|ký)\s*thành\s*công|welcome\s+back|authenticated)/i;
+export const SECRET_CMD_RE = /(\/(?:login|l|register|reg|changepassword|cpw|email\s+add)\s+)(.+)$/i;
 
-function redact(text, secret) {
+export function redact(text, secret = "") {
   let out = String(text ?? "").replace(SECRET_CMD_RE, "$1[REDACTED_PASSWORD]");
   if (secret && secret.length >= 3) {
     out = out.split(secret).join("[REDACTED_PASSWORD]");
@@ -24,20 +27,15 @@ function redact(text, secret) {
   return out;
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+export function classifyAuthPrompt(text) {
+  const sample = String(text ?? "");
+  if (AUTH_OK_RE.test(sample)) return "authenticated";
+  if (REGISTER_RE.test(sample)) return "register";
+  if (LOGIN_RE.test(sample)) return "login";
+  return "none";
 }
 
-async function readStdinJson() {
-  const chunks = [];
-  for await (const chunk of process.stdin) {
-    chunks.push(chunk);
-  }
-  const raw = Buffer.concat(chunks).toString("utf8").trim();
-  return raw ? JSON.parse(raw) : {};
-}
-
-function serializeWindow(win) {
+export function serializeWindow(win) {
   if (!win) return null;
   const slots = [];
   for (let i = 0; i < (win.slots?.length || 0); i++) {
@@ -57,6 +55,57 @@ function serializeWindow(win) {
     type: win.type || "container",
     slots,
   };
+}
+
+export function evaluateStageAssertion(action, stage, snapshot) {
+  const pattern = String(stage.pattern || stage.item || "");
+  if (action === "assert_chat") {
+    const re = new RegExp(pattern, "i");
+    const ok = (snapshot.chat || []).some((line) => re.test(line));
+    return { passed: ok, detail: ok ? `Matched chat /${pattern}/` : `Chat did not match /${pattern}/` };
+  }
+  if (action === "assert_no_chat") {
+    const re = new RegExp(pattern, "i");
+    const ok = !(snapshot.chat || []).some((line) => re.test(line));
+    return { passed: ok, detail: ok ? `Forbidden /${pattern}/ absent` : `Forbidden /${pattern}/ detected` };
+  }
+  if (action === "assert_inventory") {
+    const re = new RegExp(pattern, "i");
+    const minCount = Math.max(1, Number(stage.min_count || 1));
+    const matched = (snapshot.inventory || []).filter((it) => re.test(it.item || "") || re.test(it.name || ""));
+    const total = matched.reduce((acc, it) => acc + Number(it.count || 0), 0);
+    const ok = total >= minCount;
+    return {
+      passed: ok,
+      detail: ok
+        ? `Inventory contains ${total}x matching /${pattern}/`
+        : `Inventory missing /${pattern}/ (found ${total}, need >= ${minCount})`,
+    };
+  }
+  if (action === "assert_scoreboard") {
+    const re = new RegExp(pattern, "i");
+    const sb = snapshot.scoreboard || { title: "", lines: [] };
+    const hay = [sb.title || "", ...(sb.lines || [])];
+    const ok = hay.some((line) => re.test(String(line)));
+    return {
+      passed: ok,
+      detail: ok ? `Scoreboard matched /${pattern}/` : `Scoreboard did not match /${pattern}/`,
+    };
+  }
+  return { passed: true, detail: `No-op assertion '${action}'` };
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function readStdinJson() {
+  const chunks = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(chunk);
+  }
+  const raw = Buffer.concat(chunks).toString("utf8").trim();
+  return raw ? JSON.parse(raw) : {};
 }
 
 function snapshotState(bot, ctx) {
@@ -203,8 +252,9 @@ async function main() {
       if (action === "join") {
         detail = `Spawned as ${bot.username} on ${host}:${port} (MC ${bot.version})`;
       } else if (action === "auth") {
-        const recent = ctx.chat.slice(-10).join("\n") + "\n" + ctx.title;
-        if (REGISTER_RE.test(recent)) {
+        const recent = ctx.chat.slice(-10).join("\n") + "\n" + ctx.title + "\n" + ctx.actionbar;
+        const kind = classifyAuthPrompt(recent);
+        if (kind === "register") {
           if (!password) {
             passed = false;
             detail = "Server asked for /register but no password provided.";
@@ -214,7 +264,7 @@ async function main() {
             ctx.authState = "AUTHENTICATED";
             detail = "Auto-registered via /register (password redacted).";
           }
-        } else if (LOGIN_RE.test(recent)) {
+        } else if (kind === "login") {
           if (!password) {
             passed = false;
             detail = "Server asked for /login but no password provided.";
@@ -233,6 +283,15 @@ async function main() {
         bot.chat(message);
         await sleep(Number(stage.wait_ms || 750));
         detail = `Sent ${redact(message, password)}`;
+      } else if (action === "move") {
+        const dir = String(stage.direction || "forward").toLowerCase();
+        const allowed = new Set(["forward", "back", "left", "right", "jump", "sprint"]);
+        const ctrl = allowed.has(dir) ? dir : "forward";
+        const dur = Math.min(5000, Math.max(100, Number(stage.ms || 600)));
+        bot.setControlState(ctrl, true);
+        await sleep(dur);
+        bot.setControlState(ctrl, false);
+        detail = `Moved '${ctrl}' for ${dur}ms`;
       } else if (action === "wait") {
         await sleep(Math.min(15000, Math.max(50, Number(stage.ms || 1000))));
         detail = `Waited ${stage.ms || 1000}ms`;
@@ -246,14 +305,15 @@ async function main() {
           await sleep(500);
           detail = `Clicked slot ${slot}`;
         }
-      } else if (action === "assert_chat") {
-        const re = new RegExp(String(stage.pattern || ""), "i");
-        passed = ctx.chat.some((line) => re.test(line));
-        detail = passed ? `Matched chat /${stage.pattern}/` : `Chat did not match /${stage.pattern}/`;
-      } else if (action === "assert_no_chat") {
-        const re = new RegExp(String(stage.pattern || ""), "i");
-        passed = !ctx.chat.some((line) => re.test(line));
-        detail = passed ? `Forbidden /${stage.pattern}/ absent` : `Forbidden /${stage.pattern}/ detected`;
+      } else if (
+        action === "assert_chat" ||
+        action === "assert_no_chat" ||
+        action === "assert_inventory" ||
+        action === "assert_scoreboard"
+      ) {
+        const res = evaluateStageAssertion(action, stage, snapshotState(bot, ctx));
+        passed = res.passed;
+        detail = res.detail;
       } else if (action === "assert_gui") {
         const win = serializeWindow(bot.currentWindow);
         if (!win) {
@@ -294,4 +354,7 @@ async function main() {
   }
 }
 
-main();
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  main();
+}
