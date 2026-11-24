@@ -11,7 +11,8 @@ Don't pitch "just another docs repo." Lead with the **3 unmistakable painkillers
    - Show the visual benchmark: **10 Headless Protocol Bots = 420 MB RAM (0 desktop focus lock)** vs **10 Desktop Minecraft Clients = 26 GB RAM**.
 2. **"Your AI coding agent can now join your server, `/login`, open `/shop`, take a screenshot, read the console crash, and fix the Java bug automatically."**
    - Record a 45-second screen recording showing Claude Code / Cursor calling `mc_run_qa_pipeline`, receiving an inline PNG GUI snapshot in chat, spotting a broken MythicMobs/MMOItems slot, patching the plugin, deploying via SFTP, and passing on the second run.
-3. **"One MCP install unlocks 74 tools, 14 `/mc:*` skills, 41,887 bytecode-verified RPG APIs, and 10 specialized SalyVn CLI tools (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, ...)."**
+3. **"One MCP install unlocks 75 tools, 6 anti-OOM cloud bot grids (including Oracle Cloud Always-Free 24 GB ARM64), 14 `/mc:*` skills, 41,887 bytecode-verified RPG APIs, and 10 specialized SalyVn CLI tools (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, ...)."**
+   - Shareable deep-dive guides ready for Reddit/Discord/Facebook links: [HOSTING_2FA_SFTP_GUIDE.md](HOSTING_2FA_SFTP_GUIDE.md) & [BOT_OPTIMIZATION_BENCHMARKS.md](BOT_OPTIMIZATION_BENCHMARKS.md).
 
 ---
 

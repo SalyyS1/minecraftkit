@@ -218,7 +218,7 @@
   ];
 
   var SUITE_TOOLS = [
-    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 15-tool stdio MCP server with crash-guard MCS001-MCS023, probe/check-world/inspect-jar/preflight CLI, 4 init presets, HTML diffs, JUnit & SARIF.", cmd: "java -jar mcstage.jar test mcstage.yml --accept-eula --html matrix.html --sarif mcstage.sarif" },
+    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 15-tool stdio MCP server with crash-guard MCS001-MCS023, budget/probe/check-world/inspect-jar/preflight CLI, 4 init presets, HTML diffs, JUnit & SARIF.", cmd: "java -jar mcstage.jar budget mcstage.yml --host-ram-gb 7 --max-shards 4" },
     { id: "shadersmith", cat: "shaders", lang: "Kotlin", desc: "GLSL core & post-effect shader contract validator, std140 UBO layout checker, and 26.3 migrator.", cmd: "java -jar shadersmith.jar check ./pack --target 26.3 --sarif shaders.sarif" },
     { id: "packmigrate", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic 1.20..26.3 CustomModelData & overlay migrator with perceptual asset dedup.", cmd: "java -jar packmigrate.jar migrate ./old ./new --to 26.3" },
     { id: "packmerge", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic resource pack union compiler for 1.21.4+ item models, fonts, sounds, lang, and atlases.", cmd: "java -jar packmerge.jar merge a.zip b.zip -o merged.zip" },
@@ -486,6 +486,114 @@
     initConfigBuilder();
     initToolExplorer();
     initVpsPlanner();
+    initTpsSparklineLab();
+  }
+
+  function initTpsSparklineLab() {
+    var tabs = document.getElementById("tps-lab-tabs");
+    var canvas = document.getElementById("tps-canvas");
+    var stats = document.getElementById("tps-stats");
+    if (!tabs || !canvas) { return; }
+
+    var PROFILES = [
+      {
+        id: "healthy-folia",
+        label: "Healthy Folia (20.0 TPS)",
+        tps: [20.0, 20.0, 19.98, 20.0, 19.99, 20.0, 19.97, 20.0, 20.0, 19.98, 20.0, 20.0],
+        mspt: [11.2, 11.8, 12.1, 11.5, 12.4, 11.9, 12.6, 11.4, 11.7, 12.0, 11.3, 11.6],
+        topEntity: "ITEM (18), VILLAGER (14), ARMOR_STAND (9)",
+        verdict: "HEALTHY — Bridge /api/v1/tps-history + /api/v1/entities PASS"
+      },
+      {
+        id: "chunk-spike",
+        label: "Chunk Gen Spike (17.4 TPS)",
+        tps: [20.0, 19.9, 19.6, 18.8, 17.4, 17.9, 18.7, 19.3, 19.8, 19.9, 20.0, 20.0],
+        mspt: [14.0, 16.5, 22.1, 34.8, 48.2, 41.0, 29.4, 21.2, 16.9, 15.1, 14.3, 13.8],
+        topEntity: "FALLING_BLOCK (112), ITEM (84), BOAT (16)",
+        verdict: "WARN — Pre-generate world chunks (Chunky) before launch"
+      },
+      {
+        id: "mob-farm-lag",
+        label: "Entity Mob-Farm Lag (14.2 TPS)",
+        tps: [19.8, 19.1, 18.2, 16.9, 15.6, 14.8, 14.2, 14.5, 14.3, 14.7, 15.0, 14.9],
+        mspt: [19.2, 27.4, 38.9, 52.1, 61.8, 68.4, 73.2, 70.1, 71.5, 66.8, 64.2, 65.0],
+        topEntity: "ZOMBIFIED_PIGLIN (428), ITEM (319), XP_ORB (204)",
+        verdict: "ALERT — Triggered /api/v1/entities top-10 lag diagnostics!"
+      }
+    ];
+
+    function draw(id) {
+      var p = PROFILES.find(function (x) { return x.id === id; }) || PROFILES[0];
+      tabs.querySelectorAll(".sc-chip").forEach(function (b) {
+        b.classList.toggle("is-active", b.getAttribute("data-tps") === p.id);
+      });
+      var ctx = canvas.getContext("2d");
+      var w = canvas.width;
+      var h = canvas.height;
+      ctx.fillStyle = "#081018";
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = "#1b2c3d";
+      ctx.lineWidth = 1;
+      for (var gy = 36; gy <= h - 30; gy += 36) {
+        ctx.beginPath();
+        ctx.moveTo(42, gy);
+        ctx.lineTo(w - 16, gy);
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#8aa5be";
+      ctx.font = "11px monospace";
+      ctx.fillText("20 TPS", 4, 40);
+      ctx.fillText("15 TPS", 4, 112);
+      ctx.fillText("10 TPS", 4, 184);
+
+      ctx.fillStyle = "#48e8b2";
+      ctx.font = "bold 12px monospace";
+      ctx.fillText("mckit-bridge-plugin :: /api/v1/tps-history (" + p.label + ")", 44, 20);
+
+      var minTps = Math.min.apply(null, p.tps);
+      var lineColor = minTps >= 19.0 ? "#48e8b2" : (minTps >= 16.5 ? "#fbbf24" : "#f85149");
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      p.tps.forEach(function (val, idx) {
+        var x = 48 + idx * ((w - 72) / (p.tps.length - 1));
+        var norm = Math.max(0, Math.min(1, (val - 10) / 10));
+        var y = (h - 32) - norm * (h - 72);
+        if (idx === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+      });
+      ctx.stroke();
+
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      p.mspt.forEach(function (val, idx) {
+        var x = 48 + idx * ((w - 72) / (p.mspt.length - 1));
+        var norm = Math.max(0, Math.min(1, val / 80));
+        var y = (h - 32) - norm * (h - 72);
+        if (idx === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+      });
+      ctx.stroke();
+
+      ctx.fillStyle = lineColor;
+      ctx.fillText("TPS line", w - 150, 20);
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillText("MSPT line", w - 80, 20);
+
+      if (stats) {
+        var avgMspt = (p.mspt.reduce(function (a, b) { return a + b; }, 0) / p.mspt.length).toFixed(1);
+        stats.textContent = p.verdict + " | Min TPS: " + minTps.toFixed(2) + " | Avg MSPT: " + avgMspt + "ms | Top Entities: " + p.topEntity;
+      }
+    }
+
+    PROFILES.forEach(function (p) {
+      var btn = el("button", "sc-chip", p.label);
+      btn.type = "button";
+      btn.setAttribute("data-tps", p.id);
+      btn.addEventListener("click", function () { draw(p.id); });
+      tabs.append(btn);
+    });
+    draw("healthy-folia");
   }
 
   function initVpsPlanner() {
@@ -550,6 +658,7 @@
     if (!searchIn || !catRow || !listEl) { return; }
 
     var FEATURED_TOOLS = [
+      { id: "mc_bot_fingerprint_server", cat: "bot", desc: "1-call ~15MB Java SLP + Bedrock UDP + Bridge health + protocol matrix + ready-to-run bot config." },
       { id: "mc_bot_run_stages", cat: "bot", desc: "Headless ~42MB Mineflayer bot: auto-join, AuthMe/nLogin auto-auth, stage YAML & inline PNG proof." },
       { id: "mc_bot_play_command_probe", cat: "bot", desc: "Zero-dependency ~18MB pure-Python wire bot traversing Login -> Config -> Play -> ChatCommand." },
       { id: "mc_bot_probe_protocol_matrix", cat: "bot", desc: "1.20.4..26.3 native vs ViaVersion / ViaBackwards / Geyser protocol compatibility matrix." },
@@ -590,7 +699,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 74 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 75 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {

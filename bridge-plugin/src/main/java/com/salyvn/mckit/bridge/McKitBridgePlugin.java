@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Base64;
 import java.util.Deque;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -47,6 +48,7 @@ public final class McKitBridgePlugin extends JavaPlugin {
     private static final int MAX_TPS_HISTORY = 60;
 
     private HttpServer httpServer;
+    private ExecutorService httpExecutor;
     private byte[] authTokenBytes;
     private boolean allowRemoteCommands;
     private java.util.List<String> blockedCommandPrefixes = java.util.List.of("op", "deop", "stop", "restart", "ban", "pardon", "whitelist", "execute");
@@ -106,6 +108,10 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.stop(1);
             httpServer = null;
         }
+        if (httpExecutor != null) {
+            httpExecutor.shutdownNow();
+            httpExecutor = null;
+        }
     }
 
     private void installErrorCollector() {
@@ -146,7 +152,12 @@ public final class McKitBridgePlugin extends JavaPlugin {
         try {
             // Strictly loopback 127.0.0.1 so test telemetry is never exposed to the public internet.
             httpServer = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 16);
-            httpServer.setExecutor(Executors.newFixedThreadPool(2));
+            httpExecutor = Executors.newFixedThreadPool(2, r -> {
+                Thread t = new Thread(r, "mckit-bridge-http");
+                t.setDaemon(true);
+                return t;
+            });
+            httpServer.setExecutor(httpExecutor);
             httpServer.createContext("/api/v1/health", ex -> handleGuarded(ex, this::buildHealthJson));
             httpServer.createContext("/api/v1/metrics", ex -> handleGuarded(ex, this::buildMetricsJson));
             httpServer.createContext("/api/v1/tps-history", ex -> handleGuarded(ex, this::buildTpsHistoryJson));

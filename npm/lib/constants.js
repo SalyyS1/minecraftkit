@@ -6,6 +6,9 @@ export const PACKAGE_DIRECTORY = fileURLToPath(new URL("../", import.meta.url));
 export const BUNDLED_BOOTSTRAP_PATH = join(PACKAGE_DIRECTORY, "lib", "install-from-github.ps1");
 export const POSIX_INSTALLER_PATH = join(PACKAGE_DIRECTORY, "lib", "posix-installer.js");
 export const WIKI_URL = "https://salyys1.github.io/minecraftkit/wiki.html";
+export const SHOWCASE_URL = "https://salyys1.github.io/minecraftkit/showcase.html";
+export const ATLAS_URL = "https://salyys1.github.io/minecraftkit/ecosystem.html";
+export const PLAYGROUND_URL = "https://salyys1.github.io/minecraftkit/playground.html";
 export const REPOSITORY_URL = "https://github.com/SalyyS1/minecraftkit";
 export const TARGETS = ["codex", "claude", "both"];
 

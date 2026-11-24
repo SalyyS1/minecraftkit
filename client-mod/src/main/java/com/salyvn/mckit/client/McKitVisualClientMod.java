@@ -12,6 +12,7 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,11 +34,17 @@ public final class McKitVisualClientMod {
     private final AtomicReference<String> lastPackError = new AtomicReference<>("");
     private final Deque<String> errorRing = new ArrayDeque<>(MAX_ERROR_RING);
     private HttpServer server;
+    private ExecutorService executor;
 
     public void startBridge(int port, String token, Path captureDir) throws IOException {
         byte[] expected = token.getBytes(StandardCharsets.UTF_8);
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 8);
-        server.setExecutor(Executors.newSingleThreadExecutor());
+        executor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "mckit-visual-bridge");
+            t.setDaemon(true);
+            return t;
+        });
+        server.setExecutor(executor);
         server.createContext("/api/v1/status", exchange -> handleAuth(exchange, expected, () ->
             "{\"ok\":true,\"mod\":\"mckit_visual_client\",\"screen\":\"" + esc(lastScreen.get())
                 + "\",\"capture_dir\":\"" + esc(captureDir.toString())
@@ -49,6 +56,10 @@ public final class McKitVisualClientMod {
             "{\"ok\":true,\"queued\":true,\"offscreen\":true,\"capture_dir\":\"" + esc(captureDir.toString()) + "\"}"
         ));
         server.start();
+    }
+
+    public int getBoundPort() {
+        return server == null ? -1 : server.getAddress().getPort();
     }
 
     public void recordScreen(String screenClass) {
@@ -92,8 +103,12 @@ public final class McKitVisualClientMod {
 
     public void stopBridge() {
         if (server != null) {
-            server.stop(1);
+            server.stop(0);
             server = null;
+        }
+        if (executor != null) {
+            executor.shutdownNow();
+            executor = null;
         }
     }
 

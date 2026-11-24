@@ -1818,7 +1818,8 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         "title": "Off-Screen Cloud & Docker Bot Grid Deployment Generator",
         "description": (
             "Generate anti-OOM resource-capped off-screen cloud/VPS deployment templates "
-            "(github_actions, fly_io 256MB micro-VM, vps_systemd MemoryMax, kubernetes_job) so "
+            "(github_actions, fly_io 256MB micro-VM, vps_systemd MemoryMax, kubernetes_job, "
+            "oracle_free_arm64 $0/mo 24GB ARM64, hetzner_docker_vps 4GB VPS) so "
             "autonomous Minecraft test bots run off your local laptop with zero desktop load."
         ),
         "inputSchema": {

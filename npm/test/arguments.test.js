@@ -23,7 +23,26 @@ test("mcp command accepts --print-config and --root", () => {
   });
 });
 
+test("bot-plan and showcase commands parse cleanly", () => {
+  assert.deepEqual(parseCliArguments(["bot-plan", "--bots", "10", "--ram", "8", "--visual", "--json"]), {
+    command: "bot-plan",
+    target: "both",
+    dryRun: false,
+    json: true,
+    bots: 10,
+    ramGb: 8,
+    visual: true
+  });
+  assert.deepEqual(parseCliArguments(["showcase", "--json"]), {
+    command: "showcase",
+    target: "both",
+    dryRun: false,
+    json: true
+  });
+});
+
 test("invalid targets and versions fail closed", () => {
   assert.throws(() => parseCliArguments(["install", "cursor"]), /Invalid target/);
   assert.throws(() => parseCliArguments(["install", "--version", "latest"]), /SemVer/);
+  assert.throws(() => parseCliArguments(["bot-plan", "--bots", "0"]), />= 1/);
 });

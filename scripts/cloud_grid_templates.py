@@ -3,17 +3,26 @@
 Generates ready-to-deploy, anti-OOM resource-capped configurations for running
 MinecraftKit autonomous test bots on remote cloud/CI infrastructure instead of
 opening heavy desktop Minecraft tabs on a developer's laptop:
-  - github_actions : Zero-display Ubuntu CI runner executing Tier-1 protocol bots + HTML proof artifact
-  - fly_io         : Ultra-cheap 256 MB micro-VM running 4-6 headless Tier-1 protocol bots
-  - vps_systemd    : Headless Linux VPS systemd unit with MemoryMax anti-OOM cgroup cap
-  - kubernetes_job : Isolated K8s batch QA Job with CPU/RAM resource limits & secret env refs
+  - github_actions     : Zero-display Ubuntu CI runner executing Tier-1 protocol bots + HTML proof artifact
+  - fly_io             : Ultra-cheap 256 MB micro-VM running 4-6 headless Tier-1 protocol bots
+  - vps_systemd        : Headless Linux VPS systemd unit with MemoryMax anti-OOM cgroup cap
+  - kubernetes_job     : Isolated K8s batch QA Job with CPU/RAM resource limits & secret env refs
+  - oracle_free_arm64  : Oracle Cloud Always-Free Ampere A1 (24 GB RAM / 4 OCPU, $0/mo) bot + Xvfb grid
+  - hetzner_docker_vps : Low-cost 4 GB Linux VPS Docker Compose off-screen bot grid with cgroup limits
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-SUPPORTED_TARGETS = ("github_actions", "fly_io", "vps_systemd", "kubernetes_job")
+SUPPORTED_TARGETS = (
+    "github_actions",
+    "fly_io",
+    "vps_systemd",
+    "kubernetes_job",
+    "oracle_free_arm64",
+    "hetzner_docker_vps",
+)
 
 
 def generate_cloud_bot_deploy(
@@ -110,6 +119,69 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 """
+    elif tgt == "oracle_free_arm64":
+        filename = "oracle-arm64-mckit-setup.sh"
+        content = f"""#!/usr/bin/env bash
+# Oracle Cloud Always-Free ARM64 (4 OCPU / 24 GB RAM / $0/mo) Off-Screen Bot Grid
+# Runs {bots} headless bot(s) for {server_host}:{port} (MC {mc_version}) with zero laptop load!
+set -euo pipefail
+
+sudo apt-get update -y
+sudo apt-get install -y docker.io docker-compose-v2 xvfb ffmpeg python3 nodejs
+
+mkdir -p ~/mckit-grid && cd ~/mckit-grid
+cat > docker-compose.yml <<'YAML'
+services:
+  mckit-protocol-pool:
+    image: ghcr.io/salyys1/minecraftkit-protocol-bot:latest
+    init: true
+    mem_limit: {mem_limit_mb}m
+    environment:
+      MC_HOST: "{server_host}"
+      MC_PORT: "{port}"
+      MC_VERSION: "{mc_version}"
+      MCKIT_BOT_COUNT: "{bots}"
+      MCKIT_BOT_PASS: "${{MCKIT_BOT_PASS:-}}"
+    restart: unless-stopped
+YAML
+
+echo "Oracle Always-Free ARM64 Grid ready (Budget cap: {mem_limit_mb} MB / 24576 MB)."
+echo "Export MCKIT_BOT_PASS and run: docker compose up -d"
+"""
+    elif tgt == "hetzner_docker_vps":
+        filename = "docker-compose.hetzner-mckit.yml"
+        visual_block = (
+            f"""
+  mckit-visual-xvfb:
+    image: ghcr.io/salyys1/minecraftkit-visual-bot:latest
+    init: true
+    shm_size: "512m"
+    mem_limit: 1600m
+    environment:
+      MC_HOST: "{server_host}"
+      MC_PORT: "{port}"
+      MC_VERSION: "{mc_version}"
+    volumes:
+      - ./captures:/captures
+"""
+            if include_visual_xvfb
+            else ""
+        )
+        content = f"""# Hetzner / DigitalOcean 4 GB VPS (~$4/mo) Off-Screen MinecraftKit Bot Grid
+services:
+  mckit-protocol-pool:
+    image: ghcr.io/salyys1/minecraftkit-protocol-bot:latest
+    init: true
+    mem_limit: {max(256, bots * 48 + 96)}m
+    environment:
+      MC_HOST: "{server_host}"
+      MC_PORT: "{port}"
+      MC_VERSION: "{mc_version}"
+      MCKIT_BOT_COUNT: "{bots}"
+      MCKIT_BOT_PASS: "${{MCKIT_BOT_PASS:-}}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+{visual_block}"""
     else:
         filename = "k8s-mckit-qa-job.yaml"
         content = f"""apiVersion: batch/v1

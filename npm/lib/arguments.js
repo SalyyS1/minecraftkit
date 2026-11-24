@@ -1,12 +1,19 @@
 import { TARGETS } from "./constants.js";
 
-const COMMANDS = new Set(["install", "update", "doctor", "commands", "mcp", "wiki", "version", "help"]);
+const COMMANDS = new Set(["install", "update", "doctor", "commands", "mcp", "wiki", "showcase", "bot-plan", "version", "help"]);
 const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
 
 function requireValue(argv, index, flag) {
   const value = argv[index + 1];
   if (!value || value.startsWith("-")) throw new Error(`${flag} requires a value.`);
   return value;
+}
+
+function parsePositiveInt(raw, flag) {
+  if (!/^\d+$/.test(raw)) throw new Error(`${flag} must be a positive integer.`);
+  const parsed = Number.parseInt(raw, 10);
+  if (parsed < 1) throw new Error(`${flag} must be >= 1.`);
+  return parsed;
 }
 
 export function parseCliArguments(argv) {
@@ -24,6 +31,14 @@ export function parseCliArguments(argv) {
     } else if (token === "--root") {
       options.kitRoot = requireValue(argv, index, token);
       index += 1;
+    } else if (token === "--bots") {
+      options.bots = parsePositiveInt(requireValue(argv, index, token), token);
+      index += 1;
+    } else if (token === "--ram") {
+      options.ramGb = parsePositiveInt(requireValue(argv, index, token), token);
+      index += 1;
+    } else if (token === "--visual") {
+      options.visual = true;
     } else if (token === "--print-config") {
       options.printConfig = true;
     } else if (token === "--dry-run") {
@@ -61,6 +76,8 @@ Usage:
   minecraftkit install [codex|claude|both] [--dry-run] [--version x.y.z]
   minecraftkit update [codex|claude|both]
   minecraftkit mcp [--print-config] [--root <dir>]
+  minecraftkit bot-plan [--bots <N>] [--ram <GB>] [--visual] [--json]
+  minecraftkit showcase [--json]
   minecraftkit doctor [--json]
   minecraftkit commands [--json]
   minecraftkit wiki
@@ -68,7 +85,8 @@ Usage:
 
 Examples:
   npx minecraftkit install --target both
-  minecraftkit install codex --dry-run
-  minecraftkit mcp --print-config
-  minecraftkit doctor --json`;
+  npx minecraftkit mcp --print-config
+  npx minecraftkit bot-plan --bots 10 --ram 8 --visual
+  npx minecraftkit showcase
+  npx minecraftkit doctor --json`;
 }
