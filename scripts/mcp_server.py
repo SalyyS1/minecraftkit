@@ -24,10 +24,12 @@ import cloud_grid_templates  # noqa: E402
 import datapack_auditor  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
 import exploit_auditor  # noqa: E402
+import fabric_capture_bridge  # noqa: E402
 import gif_recorder  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
 import pack_parity  # noqa: E402
+import permissions_auditor  # noqa: E402
 import plugin_conflict_auditor  # noqa: E402
 import profile_vault  # noqa: E402
 import proxy_topology_auditor  # noqa: E402
@@ -2036,6 +2038,48 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_generate_fabric_capture_script",
+        "title": "Off-Screen Fabric 1.21.4+ Xvfb Visual Capture & Orbit Recipe Generator",
+        "description": (
+            "Generate a memory-capped off-screen Xvfb + Fabric mckit-client-mod capture manifest and shell "
+            "runner for real shader/CustomModelData/ModelEngine/GUI PNG+MP4 verification with zero desktop "
+            "window focus hijacking."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_host": {"type": "string", "default": "127.0.0.1"},
+                "server_port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25565},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+                "resolution": {"type": "string", "default": "1280x720"},
+                "bridge_socket_port": {"type": "integer", "minimum": 1024, "maximum": 65535, "default": 25595},
+                "captures": {"type": "array", "items": {"type": "object"}},
+                "record_mp4": {"type": "boolean", "default": True},
+                "memory_limit_mb": {"type": "integer", "minimum": 1024, "maximum": 4096, "default": 1600},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_audit_permissions_rbac",
+        "title": "LuckPerms / Vault / plugin.yml RBAC & Privilege-Escalation Security Auditor",
+        "description": (
+            "Audit plugin.yml permission defaults and LuckPerms group hierarchies for wildcard '*' leaks "
+            "(PERM-001), admin permissions with default: true (PERM-002), non-admin -> admin inheritance "
+            "escalation (PERM-003), cyclic group loops (PERM-004), and unguarded op/stop nodes (PERM-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "plugin_yml": {"type": "string", "default": ""},
+                "groups": {"type": "object"},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3072,6 +3116,8 @@ class MinecraftKitMcpServer:
             "mc_bot_generate_ci_workflow": self._tool_bot_generate_ci_workflow,
             "mc_bot_record_stage_gif": self._tool_bot_record_stage_gif,
             "mc_ops_vps_ssh_preflight": self._tool_ops_vps_ssh_preflight,
+            "mc_bot_generate_fabric_capture_script": self._tool_bot_generate_fabric_capture_script,
+            "mc_audit_permissions_rbac": self._tool_audit_permissions_rbac,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9955,6 +10001,28 @@ class MinecraftKitMcpServer:
             rcon_enabled=bool(args.get("rcon_enabled", False)),
             concurrent_bots=int(args.get("concurrent_bots", 5)),
             enable_visual_docker_bot=bool(args.get("enable_visual_docker_bot", False)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_generate_fabric_capture_script(self, args: dict[str, Any]) -> ToolOutcome:
+        caps = args.get("captures")
+        payload = fabric_capture_bridge.build_fabric_capture_recipe(
+            server_host=str(args.get("server_host", "127.0.0.1")),
+            server_port=int(args.get("server_port", 25565)),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+            resolution=str(args.get("resolution", "1280x720")),
+            bridge_socket_port=int(args.get("bridge_socket_port", 25595)),
+            captures=caps if isinstance(caps, list) else None,
+            record_mp4=bool(args.get("record_mp4", True)),
+            memory_limit_mb=int(args.get("memory_limit_mb", 1600)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_audit_permissions_rbac(self, args: dict[str, Any]) -> ToolOutcome:
+        groups = args.get("groups")
+        payload = permissions_auditor.audit_permissions_rbac(
+            plugin_yml=str(args.get("plugin_yml", "")),
+            groups=groups if isinstance(groups, dict) else None,
         )
         return ToolOutcome(_pretty_json(payload))
 
