@@ -46,6 +46,7 @@ import query_api  # noqa: E402
 import query_sources  # noqa: E402
 import rcon_client  # noqa: E402
 import release_notes_generator  # noqa: E402
+import server_fingerprint  # noqa: E402
 import shader_pack_auditor  # noqa: E402
 import spark_profile_auditor  # noqa: E402
 import toolchain_bridge  # noqa: E402
@@ -2300,6 +2301,29 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_fingerprint_server",
+        "title": "1-Call Live Server Stack Fingerprinter (Java SLP + Bedrock UDP + Bridge + Bot Config)",
+        "description": (
+            "Fingerprint a live Minecraft server in one zero-GUI call (~15 MB RAM): probes Java TCP SLP, "
+            "optional Bedrock/Geyser RakNet UDP, and optional mckit-bridge-plugin health, then outputs the "
+            "detected brand (Paper/Folia/Purpur/Velocity), protocol ID, and ready-to-run headless bot config."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string", "description": "Server hostname or IP (default 127.0.0.1)."},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25565},
+                "probe_bedrock": {"type": "boolean", "default": False},
+                "bedrock_port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 19132},
+                "bridge_url": {"type": "string", "description": "Optional loopback mckit-bridge-plugin URL."},
+                "bridge_token": {"type": "string", "description": "Optional X-MCKit-Token for bridge check."},
+                "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 10.0, "default": 2.5},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
 )
 
 
@@ -3348,6 +3372,7 @@ class MinecraftKitMcpServer:
             "mc_bot_compare_stage_runs": self._tool_bot_compare_stage_runs,
             "mc_bot_probe_protocol_matrix": self._tool_bot_probe_protocol_matrix,
             "mc_suite_full_ecosystem_doctor": self._tool_suite_full_ecosystem_doctor,
+            "mc_bot_fingerprint_server": self._tool_bot_fingerprint_server,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10377,6 +10402,18 @@ class MinecraftKitMcpServer:
 
     def _tool_suite_full_ecosystem_doctor(self, args: dict[str, Any]) -> ToolOutcome:
         return ToolOutcome(_pretty_json(ecosystem_doctor.run_full_ecosystem_doctor(self.store.root)))
+
+    def _tool_bot_fingerprint_server(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = server_fingerprint.fingerprint_server_stack(
+            host=str(args.get("host", "127.0.0.1")),
+            port=int(args.get("port", 25565)),
+            probe_bedrock=bool(args.get("probe_bedrock", False)),
+            bedrock_port=int(args.get("bedrock_port", 19132)),
+            bridge_url=str(args.get("bridge_url", "")),
+            bridge_token=str(args.get("bridge_token", "")),
+            timeout_seconds=float(args.get("timeout_seconds", 2.5)),
+        )
+        return ToolOutcome(_pretty_json(payload))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

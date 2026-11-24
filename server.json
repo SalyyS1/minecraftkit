@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.SalyyS1/minecraftkit",
   "description": "Flagship v5.0.0 MAJOR EDITION all-in-one Minecraft engineering & autonomous QA MCP server (74 tools): Paper 26.3, Folia, ViaVersion/Geyser protocol matrix, headless test bots (Play-phase wire bot, bounded multi-bot stress benchmark, AuthMe/nLogin auto-auth auditor, economy arbitrage & concurrent dupe-race stress planner, stage replay regression diff, multi-turn sessions, off-screen storyboard PNG & animated GIF recorder, Fabric Xvfb capture recipes, full-stack Docker/Fly.io/K8s/GHA grids & CI workflow generator), 1.21+ GLSL shader, Spark/Timings tick-lag & HikariCP/SQL pool auditors, bilingual Modrinth/Hangar/Discord QA release-notes generator, visual regression PNG diff, MP4 timelapse, self-contained HTML QA proof reports & 5-phase lifecycle orchestrator, pure-Python Anvil world integrity, 1.21+ datapack, LuckPerms RBAC & Velocity/Paper/Geyser proxy security auditors, plugin anti-dupe/exploit & pack-parity auditors, headless hosting/VPS/2FA/SFTP/RCON/firewall preflight, companion Paper/Folia bridge plugin & Fabric visual mod, and unified 10-tool SalyyS1 suite doctor (74 tools, 27 resources, 14 prompts).",
-  "version": "5.8.0",
+  "version": "5.9.0",
   "repository": {
     "url": "https://github.com/SalyyS1/minecraftkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "minecraftkit",
-      "version": "5.8.0",
+      "version": "5.9.0",
       "transport": {
         "type": "stdio"
       },

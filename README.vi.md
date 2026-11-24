@@ -1,9 +1,9 @@
-# Salyyy Minecraft Kit (v5.8.0)
+# Salyyy Minecraft Kit (v5.9.0 — Cột Mốc 75 Công Cụ MCP!)
 
 [English (README.md)](README.md) · [**Trang Giới Thiệu Chính (Showcase)**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Wiki Song Ngữ](https://salyys1.github.io/minecraftkit/wiki.html) · [Chiến Lược Cộng Đồng](docs/GROWTH_STRATEGY.md)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v5.8.0](https://img.shields.io/badge/version-v5.8.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v5.8.0)
+[![Version: v5.9.0](https://img.shields.io/badge/version-v5.9.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v5.9.0)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
 Bộ công cụ **AI Engineering, Autonomous Bot QA & Server Ops** toàn diện cho hệ sinh thái Minecraft (`Paper`, `Folia`, `Purpur`, `Velocity`, `Geyser/Bedrock`, `Fabric`, RPG Plugins) với **74 công cụ MCP chuẩn JSON-RPC 2.0**, **14 lệnh/kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ (~18–42 MB RAM/bot, không cần mở app Minecraft, không chiếm màn hình)**, **Kết nối Hosting/VPS có 2FA TOTP & SFTP ngầm**, **Plugin/Mod Companion Java 21**, và **tích hợp trọn bộ 10 repo Minecraft của SalyVn / Salyyy**.
