@@ -16,12 +16,14 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from catalog_io import strict_json_file  # noqa: E402
+import auth_plugin_auditor  # noqa: E402
 import bot_engine  # noqa: E402
 import bot_session_hub  # noqa: E402
 import bot_stress_harness  # noqa: E402
 import ci_workflow_generator  # noqa: E402
 import cloud_grid_templates  # noqa: E402
 import datapack_auditor  # noqa: E402
+import docker_stack_generator  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
 import exploit_auditor  # noqa: E402
 import fabric_capture_bridge  # noqa: E402
@@ -2080,6 +2082,48 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_diagnose_auth_plugin",
+        "title": "AuthMe / nLogin / OpeNLogin Security & Autonomous Bot-QA Auditor",
+        "description": (
+            "Audit AuthMe/nLogin/OpeNLogin/LimboAuth config.yml for weak password hashing (AUTH-001), "
+            "pre-auth chat/movement bypasses (AUTH-002), IP caps blocking multi-bot stress tests (AUTH-003), "
+            "excessive session timeouts (AUTH-004), and emit a redacted auto-auth bot profile."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "config_yml": {"type": "string"},
+                "plugin_type": {"type": "string", "default": "authme"},
+                "staging_bot_testing": {"type": "boolean", "default": True},
+            },
+            "required": ["config_yml"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_ops_generate_docker_stack",
+        "title": "Full-Stack Anti-OOM Minecraft Server + Headless Bot Grid Docker Compose Generator",
+        "description": (
+            "Generate a complete docker-compose.mckit-full.yml pairing Paper/Folia/Purpur + loopback "
+            "mckit-bridge-plugin + optional Velocity proxy + memory-capped Tier-1 protocol bot pool + "
+            "optional single Tier-2 Xvfb visual capture bot (zero desktop tabs, zero focus lock)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_type": {"type": "string", "enum": ["PAPER", "FOLIA", "PURPUR"], "default": "PAPER"},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+                "server_memory": {"type": "string", "default": "2G"},
+                "concurrent_bots": {"type": "integer", "minimum": 1, "maximum": 25, "default": 8},
+                "include_velocity": {"type": "boolean", "default": False},
+                "include_visual_bot": {"type": "boolean", "default": True},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3118,6 +3162,8 @@ class MinecraftKitMcpServer:
             "mc_ops_vps_ssh_preflight": self._tool_ops_vps_ssh_preflight,
             "mc_bot_generate_fabric_capture_script": self._tool_bot_generate_fabric_capture_script,
             "mc_audit_permissions_rbac": self._tool_audit_permissions_rbac,
+            "mc_bot_diagnose_auth_plugin": self._tool_bot_diagnose_auth_plugin,
+            "mc_ops_generate_docker_stack": self._tool_ops_generate_docker_stack,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10023,6 +10069,28 @@ class MinecraftKitMcpServer:
         payload = permissions_auditor.audit_permissions_rbac(
             plugin_yml=str(args.get("plugin_yml", "")),
             groups=groups if isinstance(groups, dict) else None,
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_diagnose_auth_plugin(self, args: dict[str, Any]) -> ToolOutcome:
+        cfg = str(args.get("config_yml", ""))
+        if not cfg.strip():
+            raise ValueError("'config_yml' must be a non-empty string.")
+        payload = auth_plugin_auditor.audit_auth_plugin_config(
+            config_yml=cfg,
+            plugin_type=str(args.get("plugin_type", "authme")),
+            staging_bot_testing=bool(args.get("staging_bot_testing", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_generate_docker_stack(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = docker_stack_generator.generate_full_docker_stack(
+            server_type=str(args.get("server_type", "PAPER")),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+            server_memory=str(args.get("server_memory", "2G")),
+            concurrent_bots=int(args.get("concurrent_bots", 8)),
+            include_velocity=bool(args.get("include_velocity", False)),
+            include_visual_bot=bool(args.get("include_visual_bot", True)),
         )
         return ToolOutcome(_pretty_json(payload))
 
