@@ -92,6 +92,34 @@ export function evaluateStageAssertion(action, stage, snapshot) {
       detail: ok ? `Scoreboard matched /${pattern}/` : `Scoreboard did not match /${pattern}/`,
     };
   }
+  if (action === "assert_title") {
+    const re = new RegExp(pattern, "i");
+    const hay = `${snapshot.title || ""}\n${snapshot.actionbar || ""}`;
+    const ok = re.test(hay);
+    return {
+      passed: ok,
+      detail: ok ? `Title/ActionBar matched /${pattern}/` : `Title/ActionBar did not match /${pattern}/`,
+    };
+  }
+  if (action === "assert_entity_nearby") {
+    const re = new RegExp(pattern, "i");
+    const maxDist = Math.max(1, Number(stage.max_distance || 32));
+    const pos = snapshot.position || { x: 0, y: 64, z: 0 };
+    const hits = (snapshot.entities || []).filter((e) => {
+      if (!re.test(String(e.name || ""))) return false;
+      const dx = Number(e.x || 0) - Number(pos.x || 0);
+      const dy = Number(e.y || 0) - Number(pos.y || 0);
+      const dz = Number(e.z || 0) - Number(pos.z || 0);
+      return Math.hypot(dx, dy, dz) <= maxDist;
+    });
+    const ok = hits.length > 0;
+    return {
+      passed: ok,
+      detail: ok
+        ? `Found ${hits.length} entity matching /${pattern}/ within ${maxDist}m`
+        : `No entity matching /${pattern}/ within ${maxDist}m`,
+    };
+  }
   return { passed: true, detail: `No-op assertion '${action}'` };
 }
 
@@ -309,7 +337,9 @@ async function main() {
         action === "assert_chat" ||
         action === "assert_no_chat" ||
         action === "assert_inventory" ||
-        action === "assert_scoreboard"
+        action === "assert_scoreboard" ||
+        action === "assert_title" ||
+        action === "assert_entity_nearby"
       ) {
         const res = evaluateStageAssertion(action, stage, snapshotState(bot, ctx));
         passed = res.passed;

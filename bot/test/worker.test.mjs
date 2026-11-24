@@ -83,6 +83,22 @@ test("evaluateStageAssertion() verifies chat, inventory, and scoreboard assertio
   assert.equal(evaluateStageAssertion("assert_inventory", { pattern: "netherite_ingot", min_count: 2 }, snap).passed, false);
 });
 
+test("evaluateStageAssertion() verifies assert_title and assert_entity_nearby for Boss/NPC QA", () => {
+  const snap = {
+    position: { x: 10, y: 64, z: 10 },
+    title: "BOSS SPAWNED: Crimson Dragon",
+    actionbar: "HP: 2500/2500",
+    entities: [
+      { name: "Crimson_Dragon", x: 16, y: 64, z: 14 },
+      { name: "Far_Villager", x: 200, y: 64, z: 200 },
+    ],
+  };
+  assert.equal(evaluateStageAssertion("assert_title", { pattern: "Crimson Dragon" }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_title", { pattern: "HP: 2500" }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_entity_nearby", { pattern: "Crimson_Dragon", max_distance: 15 }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_entity_nearby", { pattern: "Far_Villager", max_distance: 20 }, snap).passed, false);
+});
+
 test("pool-runner summarizePoolResults() calculates p50/p95 latency and enforces RAM budget", () => {
   const summary = summarizePoolResults(
     [
