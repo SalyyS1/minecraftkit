@@ -98,6 +98,72 @@ class McProtoClientTests(unittest.TestCase):
         self.assertIn("[REDACTED_PASSWORD]", body["yaml"])
         self.assertIn("screen_lock_free: true", body["yaml"])
 
+    def test_loopback_full_play_phase_command_dispatch_and_redaction(self) -> None:
+        srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        srv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        srv.bind(("127.0.0.1", 0))
+        srv.listen(1)
+        port = srv.getsockname()[1]
+        received_cmds: list[str] = []
+
+        def handle() -> None:
+            try:
+                conn, _ = srv.accept()
+                with conn:
+                    # Handshake + LoginStart
+                    mc_proto_client.read_packet(conn)
+                    _, p2 = mc_proto_client.read_packet(conn)
+                    uname, pos = mc_proto_client.decode_mc_string(p2, 0)
+                    u_bytes = p2[pos : pos + 16]
+                    # SetCompression (threshold=16) + LoginSuccess
+                    conn.sendall(mc_proto_client.frame_packet(0x03, mc_proto_client.encode_varint(16)))
+                    conn.sendall(mc_proto_client.frame_packet(
+                        0x02,
+                        u_bytes + mc_proto_client.encode_mc_string(uname) + mc_proto_client.encode_varint(0),
+                        compression_threshold=16,
+                    ))
+                    # Read LoginAcknowledged (0x03)
+                    pid_ack, _ = mc_proto_client.read_packet(conn, compression_threshold=16)
+                    assert pid_ack == 0x03
+                    # Configuration: send KeepAlive (0x04), expect 0x04
+                    conn.sendall(mc_proto_client.frame_packet(0x04, b"\x00\x00\x00\x00\x00\x00\x00\x2a", compression_threshold=16))
+                    pid_ka, _ = mc_proto_client.read_packet(conn, compression_threshold=16)
+                    assert pid_ka == 0x04
+                    # Configuration: send FinishConfiguration (0x03), expect Acknowledge (0x03)
+                    conn.sendall(mc_proto_client.frame_packet(0x03, b"", compression_threshold=16))
+                    pid_fin, _ = mc_proto_client.read_packet(conn, compression_threshold=16)
+                    assert pid_fin == 0x03
+                    # Play: read 2 ChatCommand (0x04) packets
+                    for _ in range(2):
+                        pid_c, payload_c = mc_proto_client.read_packet(conn, compression_threshold=16)
+                        assert pid_c == 0x04
+                        cmd_txt, _ = mc_proto_client.decode_mc_string(payload_c, 0)
+                        received_cmds.append(cmd_txt)
+                    # Send SystemChat reply (0x6C)
+                    conn.sendall(mc_proto_client.frame_packet(
+                        0x6C,
+                        mc_proto_client.encode_mc_string("[AuthMe] Welcome MCKitPlayBot!"),
+                        compression_threshold=16,
+                    ))
+            finally:
+                srv.close()
+
+        t = threading.Thread(target=handle, daemon=True)
+        t.start()
+        res = mc_proto_client.run_offline_play_probe(
+            "127.0.0.1",
+            port,
+            username="MCKitPlayBot",
+            commands=["/login SecretPass42", "/tps"],
+            timeout_seconds=3.0,
+        )
+        t.join(timeout=3.0)
+        self.assertTrue(res["ok"], res)
+        self.assertEqual(res["phase_reached"], "play")
+        self.assertEqual(received_cmds, ["login SecretPass42", "tps"])
+        self.assertEqual(res["commands_sent"], ["/login [REDACTED_PASSWORD]", "/tps"])
+        self.assertTrue(any("Welcome MCKitPlayBot" in m for m in res["chat_messages"]))
+
 
 if __name__ == "__main__":
     unittest.main()

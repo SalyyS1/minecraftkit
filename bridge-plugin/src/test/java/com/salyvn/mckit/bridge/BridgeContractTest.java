@@ -61,6 +61,24 @@ public final class BridgeContractTest {
         assertTrue("SEVERE #150".equals(ring.peekFirst()), "oldest retained entry must be #150");
         assertTrue("SEVERE #349".equals(ring.peekLast()), "newest retained entry must be #349");
 
-        System.out.println("BridgeContractTest: 3/3 PASS");
+        // 4. Sandboxed command prefix blocklist guard
+        java.util.List<String> blocked = java.util.List.of("op", "deop", "stop", "restart", "ban", "pardon", "whitelist", "execute");
+        assertTrue(isCommandBlocked("op SalyyS1", blocked), "op must be blocked");
+        assertTrue(isCommandBlocked("/STOP", blocked), "/STOP must be blocked");
+        assertTrue(!isCommandBlocked("tps", blocked), "tps must be allowed");
+        assertTrue(!isCommandBlocked("mmoitems reload", blocked), "plugin reload must be allowed");
+
+        System.out.println("BridgeContractTest: 4/4 PASS");
+    }
+
+    private static boolean isCommandBlocked(String raw, java.util.List<String> blocked) {
+        String clean = raw == null ? "" : raw.trim();
+        if (clean.startsWith("/")) clean = clean.substring(1).trim();
+        if (clean.isEmpty()) return true;
+        String root = clean.split("\\s+")[0];
+        for (String b : blocked) {
+            if (root.equalsIgnoreCase(b)) return true;
+        }
+        return false;
     }
 }

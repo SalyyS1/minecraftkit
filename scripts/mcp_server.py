@@ -20,6 +20,7 @@ import bot_engine  # noqa: E402
 import bot_session_hub  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
+import pack_parity  # noqa: E402
 import profile_vault  # noqa: E402
 import qa_report_html  # noqa: E402
 import query_api  # noqa: E402
@@ -1719,6 +1720,51 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True, "openWorldHint": True},
     },
+    {
+        "name": "mc_bot_play_command_probe",
+        "title": "Pure-Python Offline Wire Bot (Login -> Config -> Play -> Commands)",
+        "description": (
+            "Run a ~18 MB RAM zero-GUI pure-Python Minecraft Java wire bot through Handshake, Login, "
+            "SetCompression, Configuration (KeepAlive + ResourcePackPush auto-accept + Finish), and PLAY "
+            "phase to dispatch commands (e.g. /login, /shop, /tps) and capture SystemChat replies with "
+            "strict password redaction."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string"},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25565},
+                "username": {"type": "string", "default": "MCKitPlayBot"},
+                "protocol_version": {"type": "integer", "default": 769},
+                "commands": {"type": "array", "items": {"type": "string"}},
+                "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "default": 4.0},
+            },
+            "required": ["host"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
+    {
+        "name": "mc_pack_verify_parity",
+        "title": "Client/Server Resource Pack & Plugin Item Model Parity Checker",
+        "description": (
+            "Cross-check server plugin item definitions (MMOItems, ItemsAdder, Nexo, Oraxen) against "
+            "client resource pack files (assets/<ns>/items/*.json and legacy custom_model_data overrides) "
+            "to catch missing models and broken ResourceLocations before deploy (PARITY-001..PARITY-004)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_items": {"type": "array", "items": {"type": "object"}},
+                "resource_pack_dir": {"type": "string"},
+                "client_item_definitions": {"type": "object"},
+                "client_models": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["server_items"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -2741,6 +2787,8 @@ class MinecraftKitMcpServer:
             "mc_ops_rcon_execute": self._tool_ops_rcon_execute,
             "mc_qa_generate_html_report": self._tool_qa_generate_html_report,
             "mc_hosting_backup_verify": self._tool_hosting_backup_verify,
+            "mc_bot_play_command_probe": self._tool_bot_play_command_probe,
+            "mc_pack_verify_parity": self._tool_pack_verify_parity,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9450,6 +9498,34 @@ class MinecraftKitMcpServer:
             max_age_hours=float(args.get("max_age_hours", 24.0)),
             min_size_bytes=int(args.get("min_size_bytes", 1024)),
             dry_run=bool(args.get("dry_run", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_play_command_probe(self, args: dict[str, Any]) -> ToolOutcome:
+        host = str(args.get("host", "")).strip()
+        if not host:
+            raise ValueError("'host' must be a non-empty string.")
+        raw_cmds = args.get("commands")
+        cmds = [str(c) for c in raw_cmds] if isinstance(raw_cmds, list) else []
+        payload = mc_proto_client.run_offline_play_probe(
+            host=host,
+            port=int(args.get("port", 25565)),
+            username=str(args.get("username", "MCKitPlayBot")),
+            protocol_version=int(args.get("protocol_version", 769)),
+            commands=cmds,
+            timeout_seconds=float(args.get("timeout_seconds", 4.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_pack_verify_parity(self, args: dict[str, Any]) -> ToolOutcome:
+        items = args.get("server_items")
+        if not isinstance(items, list) or not items:
+            raise ValueError("'server_items' must be a non-empty list.")
+        payload = pack_parity.verify_pack_parity(
+            server_items=items,
+            resource_pack_dir=str(args.get("resource_pack_dir", "")),
+            client_item_definitions=args.get("client_item_definitions") if isinstance(args.get("client_item_definitions"), dict) else None,
+            client_models=args.get("client_models") if isinstance(args.get("client_models"), list) else None,
         )
         return ToolOutcome(_pretty_json(payload))
 

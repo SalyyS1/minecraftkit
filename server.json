@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.SalyyS1/minecraftkit",
-  "description": "All-in-one Minecraft engineering & autonomous QA MCP server: Paper 26.3, Folia, headless test bots with wire login, auto-auth, multi-turn freeform sessions, visual regression PNG diff, MP4 timelapse, self-contained HTML QA proof reports, hosting panel 2FA/SFTP/RCON/backup audit, companion Paper/Folia bridge plugin & Fabric visual mod, and unified 10-tool SalyyS1 suite (48 tools, 27 resources, 14 prompts).",
-  "version": "3.7.0",
+  "description": "All-in-one Minecraft engineering & autonomous QA MCP server: Paper 26.3, Folia, headless test bots with full Login->Config->Play wire command probe, auto-auth, multi-turn freeform sessions, visual regression PNG diff, MP4 timelapse, self-contained HTML QA proof reports, client/server pack parity checker, hosting panel 2FA/SFTP/RCON/backup audit, companion Paper/Folia bridge plugin & Fabric visual mod, and unified 10-tool SalyyS1 suite (50 tools, 27 resources, 14 prompts).",
+  "version": "3.8.0",
   "repository": {
     "url": "https://github.com/SalyyS1/minecraftkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "minecraftkit",
-      "version": "3.7.0",
+      "version": "3.8.0",
       "transport": {
         "type": "stdio"
       },

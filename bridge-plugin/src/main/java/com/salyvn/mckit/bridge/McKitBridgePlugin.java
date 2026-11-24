@@ -45,6 +45,8 @@ public final class McKitBridgePlugin extends JavaPlugin {
 
     private HttpServer httpServer;
     private byte[] authTokenBytes;
+    private boolean allowRemoteCommands;
+    private java.util.List<String> blockedCommandPrefixes = java.util.List.of("op", "deop", "stop", "restart", "ban", "pardon", "whitelist", "execute");
     private final Deque<String> errorRing = new ArrayDeque<>(MAX_ERROR_RING);
     private Handler julErrorHandler;
 
@@ -62,6 +64,11 @@ public final class McKitBridgePlugin extends JavaPlugin {
             getLogger().info("[MCKitBridge] Generated new loopback auth token in plugins/MCKitBridge/config.yml");
         }
         this.authTokenBytes = configuredToken.getBytes(StandardCharsets.UTF_8);
+        this.allowRemoteCommands = getConfig().getBoolean("allow-remote-commands", false);
+        java.util.List<String> cfgBlocked = getConfig().getStringList("blocked-command-prefixes");
+        if (cfgBlocked != null && !cfgBlocked.isEmpty()) {
+            this.blockedCommandPrefixes = cfgBlocked;
+        }
 
         installErrorCollector();
         startLoopbackServer(port);
@@ -125,6 +132,7 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.createContext("/api/v1/worlds", ex -> handleGuarded(ex, this::buildWorldsJson));
             httpServer.createContext("/api/v1/plugins", ex -> handleGuarded(ex, this::buildPluginsJson));
             httpServer.createContext("/api/v1/errors", ex -> handleGuarded(ex, this::buildErrorsJson));
+            httpServer.createContext("/api/v1/command", this::handleCommandDispatch);
             httpServer.start();
             getLogger().info("[MCKitBridge] Listening on http://127.0.0.1:" + port + "/api/v1/* (Folia-safe)");
         } catch (IOException ex) {
@@ -153,6 +161,62 @@ public final class McKitBridgePlugin extends JavaPlugin {
         } catch (Exception err) {
             writeJson(exchange, 500, "{\"error\":\"" + esc(err.getClass().getSimpleName() + ": " + err.getMessage()) + "\"}");
         }
+    }
+
+    private void handleCommandDispatch(HttpExchange exchange) throws IOException {
+        if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+            writeJson(exchange, 405, "{\"error\":\"Method Not Allowed (use POST)\"}");
+            return;
+        }
+        String supplied = exchange.getRequestHeaders().getFirst("X-MCKit-Token");
+        byte[] suppliedBytes = supplied == null ? new byte[0] : supplied.getBytes(StandardCharsets.UTF_8);
+        if (!MessageDigest.isEqual(authTokenBytes, suppliedBytes)) {
+            writeJson(exchange, 401, "{\"error\":\"Unauthorized: missing or invalid X-MCKit-Token\"}");
+            return;
+        }
+        if (!allowRemoteCommands) {
+            writeJson(exchange, 403, "{\"error\":\"Remote command dispatch is disabled (set allow-remote-commands: true in config.yml)\"}");
+            return;
+        }
+        String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8).trim();
+        String cmd = extractJsonField(body, "command").trim();
+        if (cmd.startsWith("/")) cmd = cmd.substring(1).trim();
+        if (cmd.isEmpty() || cmd.length() > 256 || cmd.contains("\n") || cmd.contains("\r")) {
+            writeJson(exchange, 400, "{\"error\":\"Invalid command payload\"}");
+            return;
+        }
+        String rootWord = cmd.split("\\s+")[0].toLowerCase(java.util.Locale.ROOT);
+        for (String blocked : blockedCommandPrefixes) {
+            if (rootWord.equalsIgnoreCase(blocked)) {
+                writeJson(exchange, 403, "{\"error\":\"Command prefix blocked by safety policy: " + esc(rootWord) + "\"}");
+                return;
+            }
+        }
+        final String finalCmd = cmd;
+        Bukkit.getGlobalRegionScheduler().execute(this, () -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCmd));
+        writeJson(exchange, 202, "{\"ok\":true,\"queued\":true,\"command\":\"" + esc(finalCmd) + "\"}");
+    }
+
+    private static String extractJsonField(String json, String key) {
+        String needle = "\"" + key + "\"";
+        int k = json.indexOf(needle);
+        if (k < 0) return "";
+        int colon = json.indexOf(':', k + needle.length());
+        if (colon < 0) return "";
+        int q1 = json.indexOf('"', colon + 1);
+        if (q1 < 0) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = q1 + 1; i < json.length(); i++) {
+            char c = json.charAt(i);
+            if (c == '\\' && i + 1 < json.length()) {
+                sb.append(json.charAt(++i));
+            } else if (c == '"') {
+                break;
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     private void writeJson(HttpExchange exchange, int code, String body) throws IOException {

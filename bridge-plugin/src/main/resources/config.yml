@@ -2,3 +2,14 @@
 # Strictly binds to localhost (127.0.0.1). Leave token empty to auto-generate a secure 24-byte URL-safe token.
 port: 25590
 token: ""
+# Remote sandboxed command dispatch via POST /api/v1/command is DISABLED by default for safety.
+allow-remote-commands: false
+blocked-command-prefixes:
+  - op
+  - deop
+  - stop
+  - restart
+  - ban
+  - pardon
+  - whitelist
+  - execute

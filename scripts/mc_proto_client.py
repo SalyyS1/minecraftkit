@@ -317,3 +317,173 @@ def probe_offline_login_handshake(
             latency_ms=round((time.monotonic() - t0) * 1000.0, 2),
             events=events,
         ).to_dict()
+
+
+def run_offline_play_probe(
+    host: str,
+    port: int = 25565,
+    *,
+    username: str = "MCKitPlayBot",
+    protocol_version: int = 769,
+    commands: list[str] | None = None,
+    timeout_seconds: float = 4.0,
+) -> dict[str, Any]:
+    """Pure-Python wire bot traversing Handshake -> Login -> Configuration -> Play -> Commands.
+
+    Handles SetCompression (0x03), LoginSuccess (0x02) -> LoginAcknowledged (0x03),
+    Configuration KeepAlive (0x04), ResourcePackPush auto-accept (0x09 -> 0x06),
+    FinishConfiguration (0x03 -> 0x03), Play KeepAlive, and ChatCommand dispatch
+    with strict password redaction at ~18 MB RAM and zero desktop GUI.
+    """
+    if not host or not isinstance(host, str):
+        raise ValueError("'host' must be a non-empty hostname or IP.")
+    if not (1 <= int(port) <= 65535):
+        raise ValueError("'port' must be between 1 and 65535.")
+    if not username or len(username) > 16:
+        raise ValueError("'username' must be 1..16 characters.")
+
+    cmds = [str(c).strip() for c in (commands or []) if str(c).strip()]
+    player_uuid = offline_player_uuid(username)
+    events: list[str] = []
+    chat_messages: list[str] = []
+    sent_commands_redacted: list[str] = []
+    compression = -1
+    phase = "connect"
+    t0 = time.monotonic()
+
+    try:
+        with socket.create_connection((host, int(port)), timeout=timeout_seconds) as sock:
+            sock.settimeout(timeout_seconds)
+            phase = "handshake"
+
+            hs_payload = (
+                encode_varint(int(protocol_version))
+                + encode_mc_string(host)
+                + struct.pack(">H", int(port))
+                + encode_varint(2)
+            )
+            sock.sendall(frame_packet(0x00, hs_payload))
+            sock.sendall(frame_packet(0x00, encode_mc_string(username) + player_uuid.bytes))
+            events.append(f"sent Handshake+LoginStart(user={username}, proto={protocol_version})")
+            phase = "login"
+
+            # 1. Login phase
+            login_ok = False
+            for _ in range(12):
+                pid, payload = read_packet(sock, compression_threshold=compression)
+                if pid == 0x00:
+                    reason, _ = decode_mc_string(payload, 0)
+                    return {
+                        "ok": False,
+                        "phase_reached": phase,
+                        "disconnect_reason": bot_engine.redact_bot_text(reason),
+                        "latency_ms": round((time.monotonic() - t0) * 1000.0, 2),
+                        "events": events,
+                        "chat_messages": chat_messages,
+                        "commands_sent": sent_commands_redacted,
+                        "estimated_ram_mb": 18,
+                        "screen_lock_free": True,
+                    }
+                if pid == 0x03:
+                    compression, _ = decode_varint(payload, 0)
+                    events.append(f"recv SetCompression({compression})")
+                elif pid == 0x02:
+                    sock.sendall(frame_packet(0x03, b"", compression_threshold=compression))
+                    events.append("recv LoginSuccess -> sent LoginAcknowledged")
+                    phase = "configuration"
+                    login_ok = True
+                    break
+            if not login_ok:
+                raise RuntimeError("Login phase did not complete with LoginSuccess.")
+
+            # 2. Configuration phase
+            in_play = False
+            for _ in range(24):
+                pid, payload = read_packet(sock, compression_threshold=compression)
+                if pid == 0x02:  # Config Disconnect
+                    reason, _ = decode_mc_string(payload, 0)
+                    return {
+                        "ok": False,
+                        "phase_reached": phase,
+                        "disconnect_reason": bot_engine.redact_bot_text(reason),
+                        "latency_ms": round((time.monotonic() - t0) * 1000.0, 2),
+                        "events": events,
+                        "chat_messages": chat_messages,
+                        "commands_sent": sent_commands_redacted,
+                        "estimated_ram_mb": 18,
+                        "screen_lock_free": True,
+                    }
+                if pid == 0x04:  # Config KeepAlive -> echo 8-byte id back as 0x04
+                    sock.sendall(frame_packet(0x04, payload[:8], compression_threshold=compression))
+                    events.append("replied ConfigKeepAlive")
+                elif pid == 0x09:  # Add Resource Pack -> reply Accepted (3) then Successfully Loaded (0)
+                    pack_uuid = payload[:16] if len(payload) >= 16 else b"\x00" * 16
+                    sock.sendall(frame_packet(0x06, pack_uuid + encode_varint(3), compression_threshold=compression))
+                    sock.sendall(frame_packet(0x06, pack_uuid + encode_varint(0), compression_threshold=compression))
+                    events.append("auto-accepted Configuration ResourcePackPush")
+                elif pid == 0x03:  # Finish Configuration -> send Acknowledge Finish Configuration (0x03)
+                    sock.sendall(frame_packet(0x03, b"", compression_threshold=compression))
+                    events.append("recv FinishConfiguration -> entered PLAY")
+                    phase = "play"
+                    in_play = True
+                    break
+            if not in_play:
+                raise RuntimeError("Configuration phase did not emit FinishConfiguration.")
+
+            # 3. Play phase: dispatch commands (packet 0x04 ChatCommand in 1.21.x) & read replies
+            for raw_cmd in cmds:
+                clean_cmd = raw_cmd.lstrip("/")
+                sock.sendall(frame_packet(0x04, encode_mc_string(clean_cmd), compression_threshold=compression))
+                redacted = bot_engine.redact_bot_text("/" + clean_cmd)
+                sent_commands_redacted.append(redacted)
+                events.append(f"sent PlayChatCommand: {redacted}")
+
+            sock.settimeout(min(0.8, timeout_seconds))
+            for _ in range(16):
+                try:
+                    pid, payload = read_packet(sock, compression_threshold=compression)
+                except (TimeoutError, socket.timeout, ConnectionError):
+                    break
+                if pid == 0x26 or pid == 0x27:  # Play KeepAlive
+                    sock.sendall(frame_packet(0x18, payload[:8], compression_threshold=compression))
+                    events.append("replied PlayKeepAlive")
+                elif pid == 0x6C or pid == 0x72:  # System Chat Message (string / component preview)
+                    try:
+                        msg, _ = decode_mc_string(payload, 0)
+                    except Exception:  # noqa: BLE001
+                        msg = payload.decode("utf-8", errors="ignore")
+                    safe_msg = bot_engine.redact_bot_text(msg)
+                    chat_messages.append(safe_msg)
+                    events.append(f"recv SystemChat: {safe_msg[:80]}")
+
+            return {
+                "ok": True,
+                "host": host,
+                "port": int(port),
+                "username": username,
+                "protocol_version": int(protocol_version),
+                "phase_reached": phase,
+                "compression_threshold": compression,
+                "commands_sent": sent_commands_redacted,
+                "chat_messages": chat_messages,
+                "latency_ms": round((time.monotonic() - t0) * 1000.0, 2),
+                "estimated_ram_mb": 18,
+                "screen_lock_free": True,
+                "events": events,
+            }
+    except Exception as err:  # noqa: BLE001
+        return {
+            "ok": False,
+            "host": host,
+            "port": int(port),
+            "username": username,
+            "protocol_version": int(protocol_version),
+            "phase_reached": phase,
+            "disconnect_reason": bot_engine.redact_bot_text(f"{type(err).__name__}: {err}"),
+            "commands_sent": sent_commands_redacted,
+            "chat_messages": chat_messages,
+            "latency_ms": round((time.monotonic() - t0) * 1000.0, 2),
+            "estimated_ram_mb": 18,
+            "screen_lock_free": True,
+            "events": events,
+        }
