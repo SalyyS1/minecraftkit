@@ -16,6 +16,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from catalog_io import strict_json_file  # noqa: E402
+import anticheat_auditor  # noqa: E402
 import auth_plugin_auditor  # noqa: E402
 import bot_engine  # noqa: E402
 import bot_replay_diff  # noqa: E402
@@ -2503,6 +2504,28 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_audit_anti_cheat_compat",
+        "title": "GrimAC / Vulcan / Matrix / Polar Anti-Cheat, RPG Skill & QA Bot Compatibility Auditor",
+        "description": (
+            "Audit anti-cheat stacks offline for stacked movement-check conflicts (AC-001), missing "
+            "PacketEvents dependencies (AC-002), MythicMobs/MMOCore/ModelEngine skill false kicks (AC-003), "
+            "Geyser/Floodgate Bedrock exemption gaps (AC-004), and QA bot LuckPerms bypass perms (AC-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "plugins": {"type": "array", "items": {"type": "string"}},
+                "has_bedrock_geyser": {"type": "boolean", "default": False},
+                "floodgate_exempt_configured": {"type": "boolean", "default": False},
+                "bot_bypass_configured": {"type": "boolean", "default": False},
+                "config_text": {"type": "string", "default": ""},
+            },
+            "required": ["plugins"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3560,6 +3583,7 @@ class MinecraftKitMcpServer:
             "mc_ops_generate_systemd_unit": self._tool_ops_generate_systemd_unit,
             "mc_ops_plan_disaster_recovery": self._tool_ops_plan_disaster_recovery,
             "mc_ops_audit_geyser_config": self._tool_ops_audit_geyser_config,
+            "mc_bot_audit_anti_cheat_compat": self._tool_bot_audit_anti_cheat_compat,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10704,6 +10728,19 @@ class MinecraftKitMcpServer:
         payload = geyser_config_auditor.audit_geyser_config(
             config_text,
             behind_velocity_or_bungee=bool(args.get("behind_velocity_or_bungee", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_audit_anti_cheat_compat(self, args: dict[str, Any]) -> ToolOutcome:
+        plugins = args.get("plugins")
+        if not isinstance(plugins, list) or not plugins:
+            raise ValueError("'plugins' must be a non-empty list of installed plugin names.")
+        payload = anticheat_auditor.audit_anticheat_compat(
+            [str(p) for p in plugins],
+            has_bedrock_geyser=bool(args.get("has_bedrock_geyser", False)),
+            floodgate_exempt_configured=bool(args.get("floodgate_exempt_configured", False)),
+            bot_bypass_configured=bool(args.get("bot_bypass_configured", False)),
+            config_text=str(args.get("config_text", "")),
         )
         return ToolOutcome(_pretty_json(payload))
 
