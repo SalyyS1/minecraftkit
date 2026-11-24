@@ -229,8 +229,8 @@
       "sha256": "1aa9a39d5d4ab625326848f4674313797a389a45729fc60dd9b1ef2c73f82e9e"
     },
     "tests/test_install_layout.py": {
-      "bytes": 23357,
-      "sha256": "c27b296aedc0600ddf8ce801108f2f118c3ec9fc3964ab9ce02a65ef4313b5cb"
+      "bytes": 23385,
+      "sha256": "2a629e65d539b0a9744a2b12d9b14a6b1da318f3a570bc6fd65171c4aaf01479"
     },
     "tests/test_github_bootstrap_installer.py": {
       "bytes": 16614,

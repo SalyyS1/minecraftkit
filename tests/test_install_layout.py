@@ -255,10 +255,10 @@ class MinecraftKitInstallerTests(unittest.TestCase):
                     for path in selected_skill_root.iterdir()
                     if path.is_dir() and (path / "SKILL.md").is_file()
                 ]
-                self.assertEqual(len(installed_skills), 11)
+                self.assertEqual(len(installed_skills), len(domains) + 1)
                 if target == "claude":
                     self.assertTrue((commands / "mc").is_dir())
-                    self.assertEqual(len(installed_skills) + int((commands / "mc").is_dir()), 12)
+                    self.assertEqual(len(installed_skills) + int((commands / "mc").is_dir()), len(domains) + 2)
                 self.assertFalse((source / "minecraftkit").exists())
 
     def test_script_location_is_the_default_source_root(self) -> None:
