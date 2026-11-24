@@ -19,6 +19,7 @@ from catalog_io import strict_json_file  # noqa: E402
 import anticheat_auditor  # noqa: E402
 import auth_plugin_auditor  # noqa: E402
 import backup_cron_auditor  # noqa: E402
+import bot_ci_workflow_gen  # noqa: E402
 import bot_engine  # noqa: E402
 import bot_load_test_report  # noqa: E402
 import bot_replay_diff  # noqa: E402
@@ -61,6 +62,7 @@ import release_notes_generator  # noqa: E402
 import server_fingerprint  # noqa: E402
 import shader_pack_auditor  # noqa: E402
 import skript_auditor  # noqa: E402
+import spark_heap_auditor  # noqa: E402
 import spark_profile_auditor  # noqa: E402
 import systemd_generator  # noqa: E402
 import toolchain_bridge  # noqa: E402
@@ -2697,6 +2699,48 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_spark_heap_summary",
+        "title": "Spark /spark heapsummary Memory Leak & Retainer Auditor",
+        "description": (
+            "Audit Spark /spark heapsummary output offline for leaked CraftPlayer references (HEAP-001), "
+            ">35% heap single-class retainers (HEAP-002), excessive LevelChunk retention (HEAP-003), "
+            "ArmorStand/Display/ModelEngine entity leaks (HEAP-004), and unclosed JDBC/HikariCP handles (HEAP-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "heap_text": {"type": "string"},
+                "online_players": {"type": "integer", "default": 20},
+                "total_heap_mb": {"type": "number", "default": 4096.0},
+            },
+            "required": ["heap_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_generate_ci_matrix_workflow",
+        "title": "GitHub Actions Autonomous Headless Bot QA Workflow Generator",
+        "description": (
+            "Generate a ready-to-commit .github/workflows/mckit-bot-qa.yml running Tier-1 headless protocol bots "
+            "(~42 MB RAM, 0 GUI) against an ephemeral Paper/Folia server with secret-safe AuthMe handling and HTML/PNG artifact uploads."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "plugin_name": {"type": "string", "default": "MyPlugin"},
+                "build_tool": {"type": "string", "default": "gradle"},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+                "server_type": {"type": "string", "default": "paper"},
+                "stage_file": {"type": "string", "default": ".mckit-stages.yml"},
+                "concurrent_bots": {"type": "integer", "default": 2},
+                "upload_html_proof": {"type": "boolean", "default": True},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3763,6 +3807,8 @@ class MinecraftKitMcpServer:
             "mc_ops_audit_crontab_backups": self._tool_ops_audit_crontab_backups,
             "mc_ops_audit_skript_code": self._tool_ops_audit_skript_code,
             "mc_bot_plan_multiserver_mesh": self._tool_bot_plan_multiserver_mesh,
+            "mc_ops_audit_spark_heap_summary": self._tool_ops_audit_spark_heap_summary,
+            "mc_bot_generate_ci_matrix_workflow": self._tool_bot_generate_ci_matrix_workflow,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -11014,6 +11060,29 @@ class MinecraftKitMcpServer:
             include_visual_xvfb=bool(args.get("include_visual_xvfb", False)),
             has_bedrock_geyser=bool(args.get("has_bedrock_geyser", False)),
             mc_version=str(args.get("mc_version", "1.21.4")),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_spark_heap_summary(self, args: dict[str, Any]) -> ToolOutcome:
+        heap_text = args.get("heap_text")
+        if not isinstance(heap_text, str) or not heap_text.strip():
+            raise ValueError("'heap_text' must be a non-empty Spark heapsummary output string.")
+        payload = spark_heap_auditor.audit_spark_heap_summary(
+            heap_text,
+            online_players=int(args.get("online_players", 20)),
+            total_heap_mb=float(args.get("total_heap_mb", 4096.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_generate_ci_matrix_workflow(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = bot_ci_workflow_gen.generate_bot_ci_workflow(
+            plugin_name=str(args.get("plugin_name", "MyPlugin")),
+            build_tool=str(args.get("build_tool", "gradle")),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+            server_type=str(args.get("server_type", "paper")),
+            stage_file=str(args.get("stage_file", ".mckit-stages.yml")),
+            concurrent_bots=int(args.get("concurrent_bots", 2)),
+            upload_html_proof=bool(args.get("upload_html_proof", True)),
         )
         return ToolOutcome(_pretty_json(payload))
 

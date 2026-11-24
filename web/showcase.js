@@ -712,6 +712,7 @@
       { id: "mc_bot_audit_anti_cheat_compat", cat: "bot", desc: "Audits GrimAC/Vulcan/Matrix/Polar conflicts, PacketEvents, MythicMobs & QA bot bypass perms." },
       { id: "mc_bot_generate_load_test_report", cat: "bot", desc: "Multi-bot stress p50/p95/p99 latency & TPS correlation report with inline PNG chart." },
       { id: "mc_bot_plan_multiserver_mesh", cat: "bot", desc: "Plans Velocity + N-backend autonomous bot QA meshes with staggered /server transfers." },
+      { id: "mc_bot_generate_ci_matrix_workflow", cat: "bot", desc: "Generates .github/workflows/mckit-bot-qa.yml running Tier-1 headless bots in CI." },
       { id: "mc_hosting_connect_plan", cat: "ops", desc: "Zero-screen-lock Pterodactyl, Pelican, Crafty & PufferPanel plan with RFC 6238 TOTP 2FA." },
       { id: "mc_hosting_server_action", cat: "ops", desc: "Headless start/stop/restart/console/status API dispatch with strict token redaction." },
       { id: "mc_sftp_operations", cat: "ops", desc: "Atomic SFTP plugin JAR deploy, safe config patching & automatic .mckit.bak backups." },
@@ -737,6 +738,7 @@
       { id: "mc_audit_database_pool", cat: "audit", desc: "HikariCP, MySQL & SQLite connection pool leak & main-thread blocking auditor (DB-001..005)." },
       { id: "mc_audit_shader_pack", cat: "audit", desc: "GLSL 1.21+ core shader, std140 UBO & legacy syntax validator (SHD-001..005)." },
       { id: "mc_ops_audit_spark_profile", cat: "audit", desc: "Spark profiler JSON/log analyzer pinpointing entity, chunk, GC & blocking-IO lag spikes." },
+      { id: "mc_ops_audit_spark_heap_summary", cat: "audit", desc: "Spark heapsummary memory-leak auditor catching CraftPlayer, LevelChunk & HikariCP leaks." },
       { id: "mc_qa_run_full_lifecycle", cat: "suite", desc: "Single-call E2E pipeline: deploy -> host restart -> bot QA stages -> bridge telemetry -> HTML proof." },
       { id: "mc_suite_full_ecosystem_doctor", cat: "suite", desc: "Unified health check across Python, Node, Java 21, Docker, ffmpeg, companion bridges & 10 repos." },
       { id: "mc_search_rpg_api", cat: "suite", desc: "Offline bytecode-verified search across 41,887 members in 10 RPG plugins (MMOItems, ModelEngine...)." }
@@ -756,7 +758,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 92 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 94 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {
