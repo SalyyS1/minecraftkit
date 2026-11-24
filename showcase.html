@@ -16,7 +16,7 @@
   <main id="showcase-main" class="sc-main">
     <section class="sc-hero">
       <div class="sc-hero-top">
-        <span class="sc-pill">v5.9.0 · 75 MCP Tools Milestone · 8 Bot QA Presets · 14 /mc:* Skills · 10 Integrated Repos · Zero-Screen-Lock Minecraft Dev &amp; Bot QA Platform</span>
+        <span class="sc-pill">v6.0.0 · 75 MCP Tools · 6 Cloud Bot Grids · 8 QA Presets · 14 /mc:* Skills · 10 Integrated Repos · Zero-Screen-Lock Minecraft Dev &amp; Bot QA Platform</span>
         <div class="sc-lang-group" role="group" aria-label="Language switcher">
           <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
           <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
@@ -210,6 +210,13 @@
       </div>
 
       <div class="sc-panel" style="margin-top:18px">
+        <h3>Live Bridge TPS / MSPT Sparkline &amp; Entity Lag Preview (640&times;240 Chat PNG)</h3>
+        <div id="tps-lab-tabs" class="sc-filter-row" style="margin-bottom:10px"></div>
+        <canvas id="tps-canvas" width="640" height="220" style="width:100%;max-width:640px;border-radius:8px;border:1px solid #24374a;background:#081018;display:block"></canvas>
+        <p id="tps-stats" class="sc-muted" style="margin-top:8px;font-family:monospace;font-size:12px"></p>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
         <h3>Interactive VPS Anti-OOM JVM &amp; Proxy Firewall Generator</h3>
         <div class="sc-filter-row" style="gap:10px;align-items:center;margin-bottom:10px">
           <label class="sc-muted">VPS RAM (GB) <input id="vps-ram" type="number" min="4" max="64" step="2" value="16" style="width:74px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
@@ -249,7 +256,7 @@
       </div>
 
       <div class="sc-panel" style="margin-top:18px">
-        <h3>Interactive MCP Tool Directory (74 Verified Tools · 1-Click Copy)</h3>
+        <h3>Interactive MCP Tool Directory (75 Verified Tools · 1-Click Copy)</h3>
         <div class="sc-filter-row" style="gap:10px;align-items:center;margin-bottom:10px">
           <input id="tool-search" type="search" placeholder="Search tools (e.g. bot, sftp, totp, shader, folia, world, gif)..." style="flex:1;min-width:220px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:6px 10px">
           <div id="tool-cats" class="sc-filter-row"></div>
