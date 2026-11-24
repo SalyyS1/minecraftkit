@@ -3,11 +3,11 @@
 [Tiếng Việt (README.vi.md)](README.vi.md) · [**Flagship Showcase**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [Growth Playbook](docs/GROWTH_STRATEGY.md) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v3.8.0](https://img.shields.io/badge/version-v3.8.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.8.0)
+[![Version: v3.9.0](https://img.shields.io/badge/version-v3.9.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.9.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
-All-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Wire-Level Login->Config->Play Command Probe + Bedrock/Geyser RakNet UDP), persistent freeform multi-turn bot sessions, off-screen PNG visual diff, MP4 timelapse & self-contained dark-mode HTML QA proof artifacts, client/server item-model pack parity checker, headless hosting/VPS/2FA/WebSocket/RCON/backup-audit & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a **50-tool stdio MCP server** by **SalyVn / Salyyy**.
+All-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Wire-Level Login->Config->Play Command Probe + Bedrock/Geyser RakNet UDP + Fly.io/K8s/GHA Cloud Grids), persistent freeform multi-turn bot sessions, off-screen PNG visual diff, MP4 timelapse & self-contained dark-mode HTML QA proof artifacts, client/server item-model pack parity & cross-plugin conflict auditor, headless hosting/VPS/2FA/WebSocket/RCON/backup-audit & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a **52-tool stdio MCP server** by **SalyVn / Salyyy**.
 
 ## What Salyyy Minecraft Kit Includes
 
@@ -131,6 +131,8 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_hosting_backup_verify` | Headlessly audit Pterodactyl/Pelican/Crafty backup endpoints or local VPS backup directories for recency compliance and truncated/0-byte archive detection. |
 | `mc_bot_play_command_probe` | Pure-Python ~18 MB wire bot traversing Handshake -> Login -> Configuration (KeepAlive + ResourcePack auto-accept + Finish) -> Play phase to dispatch commands and capture SystemChat replies with strict password redaction. |
 | `mc_pack_verify_parity` | Cross-check server plugin item configs (`MMOItems`, `ItemsAdder`, `Nexo`, `Oraxen`) against client resource pack `assets/<ns>/items/*.json` and legacy `custom_model_data` overrides (`PARITY-001`..`PARITY-004`). |
+| `mc_audit_plugin_matrix` | Audit a server plugin list or `plugins/` directory for duplicate JARs, competing Auth/Pack/Permission engines, missing MythicLib/Vault/MythicMobs dependencies, and Folia cautions. |
+| `mc_bot_generate_cloud_deploy` | Generate anti-OOM off-screen cloud/VPS deployment templates (`github_actions`, `fly_io` 256MB micro-VM, `vps_systemd` `MemoryMax`, `kubernetes_job`) so bots never burden your laptop. |
 
 ### Exposed MCP Resources & Slash Prompts
 

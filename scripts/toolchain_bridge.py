@@ -38,8 +38,8 @@ SUITE_TOOLS: tuple[dict[str, Any], ...] = (
         "sarif_capable": True,
         "env_var": "MCSTAGE_JAR",
         "binary_names": ["mcstage", "mcstage.jar"],
-        "summary": "Real-server integration test runner & 6-tool stdio MCP server for Paper, Folia, and Purpur plugins with crash-guard MCS001-MCS020, bot-probe (MCS018), companion bridge TPS/GUI checks (MCS019), baseline report comparator (MCS020), Folia recovery, RCON fault injection, JUnit XML, and SARIF v2.1.0.",
-        "example_cmd": "java -jar mcstage.jar test mcstage.yml --accept-eula --sarif build/reports/mcstage.sarif",
+        "summary": "Real-server integration test runner & 8-tool stdio MCP server for Paper, Folia, and Purpur plugins with HTML matrix reports, mcstage doctor, Anvil world integrity (MCS021), crash-guard MCS001-MCS021, bot-probe (MCS018), companion bridge TPS/GUI checks (MCS019), baseline comparator (MCS020), Folia recovery, RCON fault injection, JUnit XML, and SARIF v2.1.0.",
+        "example_cmd": "java -jar mcstage.jar test mcstage.yml --accept-eula --html build/reports/mcstage.html --sarif build/reports/mcstage.sarif",
     },
     {
         "id": "shadersmith",

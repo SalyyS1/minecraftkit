@@ -18,9 +18,11 @@ if str(SCRIPTS_DIR) not in sys.path:
 from catalog_io import strict_json_file  # noqa: E402
 import bot_engine  # noqa: E402
 import bot_session_hub  # noqa: E402
+import cloud_grid_templates  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
 import pack_parity  # noqa: E402
+import plugin_conflict_auditor  # noqa: E402
 import profile_vault  # noqa: E402
 import qa_report_html  # noqa: E402
 import query_api  # noqa: E402
@@ -1765,6 +1767,47 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_plugin_matrix",
+        "title": "Cross-Plugin Conflict, Dependency & Folia Matrix Auditor",
+        "description": (
+            "Audit a Minecraft server plugin list or plugins/ directory before deployment to catch "
+            "duplicate JARs (MATRIX-001), competing auth/pack/permission engines (CONFLICT-AUTH/PACK/PERM), "
+            "missing RPG dependencies like MythicLib/Vault/MythicMobs (MATRIX-002), and Folia cautions."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "plugins": {"type": "array", "items": {"type": "string"}},
+                "plugins_dir": {"type": "string"},
+                "platform": {"type": "string", "enum": ["paper", "folia", "purpur", "velocity"], "default": "paper"},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_generate_cloud_deploy",
+        "title": "Off-Screen Cloud & Docker Bot Grid Deployment Generator",
+        "description": (
+            "Generate anti-OOM resource-capped off-screen cloud/VPS deployment templates "
+            "(github_actions, fly_io 256MB micro-VM, vps_systemd MemoryMax, kubernetes_job) so "
+            "autonomous Minecraft test bots run off your local laptop with zero desktop load."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "target": {"type": "string", "enum": list(cloud_grid_templates.SUPPORTED_TARGETS), "default": "github_actions"},
+                "server_host": {"type": "string", "default": "play.example.net"},
+                "server_port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25565},
+                "bot_count": {"type": "integer", "minimum": 1, "maximum": 25, "default": 5},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+                "include_visual_xvfb": {"type": "boolean", "default": False},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -2789,6 +2832,8 @@ class MinecraftKitMcpServer:
             "mc_hosting_backup_verify": self._tool_hosting_backup_verify,
             "mc_bot_play_command_probe": self._tool_bot_play_command_probe,
             "mc_pack_verify_parity": self._tool_pack_verify_parity,
+            "mc_audit_plugin_matrix": self._tool_audit_plugin_matrix,
+            "mc_bot_generate_cloud_deploy": self._tool_bot_generate_cloud_deploy,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9526,6 +9571,27 @@ class MinecraftKitMcpServer:
             resource_pack_dir=str(args.get("resource_pack_dir", "")),
             client_item_definitions=args.get("client_item_definitions") if isinstance(args.get("client_item_definitions"), dict) else None,
             client_models=args.get("client_models") if isinstance(args.get("client_models"), list) else None,
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_audit_plugin_matrix(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_plugins = args.get("plugins")
+        plist = [str(p) for p in raw_plugins] if isinstance(raw_plugins, list) else None
+        payload = plugin_conflict_auditor.audit_plugin_matrix(
+            plugins=plist,
+            plugins_dir=str(args.get("plugins_dir", "")),
+            platform=str(args.get("platform", "paper")),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_generate_cloud_deploy(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = cloud_grid_templates.generate_cloud_bot_deploy(
+            target=str(args.get("target", "github_actions")),
+            server_host=str(args.get("server_host", "play.example.net")),
+            server_port=int(args.get("server_port", 25565)),
+            bot_count=int(args.get("bot_count", 5)),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+            include_visual_xvfb=bool(args.get("include_visual_xvfb", False)),
         )
         return ToolOutcome(_pretty_json(payload))
 
