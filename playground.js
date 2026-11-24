@@ -165,6 +165,37 @@
           "});"
         ].join("\n")
       }
+    ],
+    bot_ops: [
+      {
+        label: "Hardcoded Password + Exposed RCON + MD5 AuthMe",
+        text: [
+          "online-mode=false",
+          "server-ip=0.0.0.0",
+          "enable-rcon=true",
+          "rcon.password=admin123",
+          "passwordHash: MD5",
+          "bot_tier: desktop-full-client",
+          "bot_count: 10",
+          "stages:",
+          "  - command: /login MyRawPassword99"
+        ].join("\n")
+      },
+      {
+        label: "Hardened Headless Bot Grid + Argon2 + Loopback",
+        text: [
+          "online-mode=false",
+          "server-ip=127.0.0.1",
+          "enable-rcon=false",
+          "passwordHash: ARGON2",
+          "bot_tier: tier1-protocol",
+          "bot_count: 10",
+          "password: env:MCKIT_BOT_PASS",
+          "stages:",
+          "  - action: auto_auth",
+          "    redact_secrets: true"
+        ].join("\n")
+      }
     ]
   };
 
@@ -808,6 +839,7 @@
   var tabFolia = document.getElementById("tab-folia");
   var tabProtoSql = document.getElementById("tab-protocol-sql");
   var tabChunkJfr = document.getElementById("tab-chunk-jfr");
+  var tabBotOps = document.getElementById("tab-bot-ops");
   var presetBox = document.getElementById("preset-buttons");
   var inputHeading = document.getElementById("input-heading");
   var inputSubtitle = document.getElementById("input-subtitle");
@@ -837,6 +869,70 @@
     });
   }
 
+  function analyzeBotAndOps(rawText) {
+    var text = String(rawText || "");
+    var findings = [];
+    if (/^\s*online-mode\s*=\s*false\b/mi.test(text) && !/server-ip\s*=\s*127\.0\.0\.1\b/mi.test(text)) {
+      findings.push({
+        rule_id: "PROXY-001",
+        severity: "critical",
+        frame: "server.properties::online-mode",
+        message: "online-mode=false without loopback server-ip=127.0.0.1 allows direct UUID spoofing bypassing Velocity/BungeeCord.",
+        remediation: "Bind backend servers strictly to server-ip=127.0.0.1 and firewall port 25565 on backend hosts."
+      });
+    }
+    if (/^\s*enable-rcon\s*=\s*true\b/mi.test(text) && (/rcon\.password\s*=\s*(123456|admin|admin123|password|changeme)\b/mi.test(text) || !/rcon\.password\s*=\s*\S{12,}/mi.test(text))) {
+      findings.push({
+        rule_id: "OPS-RCON-001",
+        severity: "high",
+        frame: "server.properties::rcon.password",
+        message: "Source RCON is enabled with a weak or short password (plaintext TCP protocol).",
+        remediation: "Disable RCON or restrict to 127.0.0.1 / SSH tunnel with a 24+ char secret."
+      });
+    }
+    if (/passwordHash:\s*(MD5|SHA1|SHA256)\b/i.test(text)) {
+      findings.push({
+        rule_id: "AUTH-001",
+        severity: "high",
+        frame: "AuthMe::passwordHash",
+        message: "Weak AuthMe/nLogin password hash detected (fast unsalted/GPU-crackable digest).",
+        remediation: "Switch AuthMe/nLogin passwordHash to ARGON2 or BCRYPT."
+      });
+    }
+    if (/\/(?:login|l|register|reg)\s+(?!\[REDACTED|env:|\$\{)\S+/i.test(text)) {
+      findings.push({
+        rule_id: "BOT-SEC-001",
+        severity: "critical",
+        frame: "mckit-stages.yml::auto_auth",
+        message: "Hardcoded plaintext password found inside bot stage command.",
+        remediation: "Use action: auto_auth with password: env:MCKIT_BOT_PASS so secrets are never stored in YAML."
+      });
+    }
+    var botCountMatch = text.match(/bot_count:\s*(\d+)/i);
+    var bots = botCountMatch ? parseInt(botCountMatch[1], 10) : 1;
+    var isDesktop = /desktop-full-client/i.test(text);
+    var estRamMb = isDesktop ? bots * 2600 : bots * 42;
+    if (isDesktop && bots > 2) {
+      findings.push({
+        rule_id: "BOT-OOM-001",
+        severity: "high",
+        frame: "bot-fleet::ram-budget",
+        message: bots + " desktop Minecraft clients require ~" + (estRamMb / 1024).toFixed(1) + " GB RAM and hijack desktop focus.",
+        remediation: "Switch to tier1-protocol (~42 MB/bot) or hybrid 1 Xvfb + N-1 protocol bots (saves >90% RAM)."
+      });
+    }
+    var status = findings.some(function (f) { return f.severity === "critical" || f.severity === "high"; }) ? "fail" : (findings.length ? "warn" : "pass");
+    return {
+      mode: "bot_ops",
+      status: status,
+      finding_count: findings.length,
+      bots_planned: bots,
+      estimated_ram_mb: estRamMb,
+      screen_lock_free: !isDesktop,
+      findings: findings
+    };
+  }
+
   function renderReport(report) {
     lastReport = report;
     summaryLine.textContent = "Status: " + report.status.toUpperCase() + " | " + report.finding_count + " finding(s)";
@@ -860,6 +956,13 @@
         [report.stw_pause_ms + " ms", "GC + TTSP Overlap"],
         [report.pinned_ram_mb + " MiB", "Pinned Ticket RAM"],
         [report.finding_count, "Violations"]
+      ]);
+    } else if (mode === "bot_ops") {
+      renderMetrics([
+        [report.status.toUpperCase(), "Verdict"],
+        [report.bots_planned + " bot(s)", "Fleet Size"],
+        [report.estimated_ram_mb + " MB", "Est. RAM"],
+        [report.screen_lock_free ? "ZERO LOCK" : "FOCUS LOCK", "Desktop Impact"]
       ]);
     } else {
       renderMetrics([
@@ -903,6 +1006,8 @@
       renderReport(analyzeFolia(traceInput.value, domainSelect.value));
     } else if (mode === "chunk_jfr") {
       renderReport(analyzeChunkAndJfr(traceInput.value));
+    } else if (mode === "bot_ops") {
+      renderReport(analyzeBotAndOps(traceInput.value));
     } else {
       renderReport(analyzeProtocolAndSql(traceInput.value));
     }
@@ -929,6 +1034,7 @@
     var isFolia = mode === "folia";
     var isProtoSql = mode === "protocol_sql";
     var isChunkJfr = mode === "chunk_jfr";
+    var isBotOps = mode === "bot_ops";
     tabSpark.classList.toggle("is-active", isSpark);
     tabSpark.setAttribute("aria-selected", String(isSpark));
     tabFolia.classList.toggle("is-active", isFolia);
@@ -941,6 +1047,10 @@
       tabChunkJfr.classList.toggle("is-active", isChunkJfr);
       tabChunkJfr.setAttribute("aria-selected", String(isChunkJfr));
     }
+    if (tabBotOps) {
+      tabBotOps.classList.toggle("is-active", isBotOps);
+      tabBotOps.setAttribute("aria-selected", String(isBotOps));
+    }
     thresholdWrap.hidden = !isSpark;
     domainWrap.hidden = !isFolia;
     if (isSpark) {
@@ -952,6 +1062,9 @@
     } else if (isChunkJfr) {
       inputHeading.textContent = "Moonrise Chunk I/O Pipeline or Spark + JFR + GC Timeline";
       inputSubtitle.textContent = "Profiles Moonrise chunk barriers and ticket RAM (CHUNK-IO-001..008) and correlates JFR lock/I/O/GC pauses (CORR-001..007).";
+    } else if (isBotOps) {
+      inputHeading.textContent = "Bot Stage YAML, AuthMe & Proxy Security Pre-Flight";
+      inputSubtitle.textContent = "Audits hardcoded bot passwords, online-mode/proxy bypasses, weak RCON/AuthMe hashes, and desktop RAM OOM hazards completely offline.";
     } else {
       inputHeading.textContent = "Netty StreamCodec or HikariCP / SQL Persistence Snippet";
       inputSubtitle.textContent = "Computes worst-case LEB128/UTF-8 wire-byte budgets (NETTY-001..008) and audits sync JDBC, resource leaks, and Folia callbacks (SQL-001..007).";
@@ -968,6 +1081,9 @@
   }
   if (tabChunkJfr) {
     tabChunkJfr.addEventListener("click", function () { switchMode("chunk_jfr"); });
+  }
+  if (tabBotOps) {
+    tabBotOps.addEventListener("click", function () { switchMode("bot_ops"); });
   }
   runBtn.addEventListener("click", runAudit);
   sarifBtn.addEventListener("click", function () {
