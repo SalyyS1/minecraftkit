@@ -25,6 +25,7 @@ import ci_workflow_generator  # noqa: E402
 import cloud_grid_templates  # noqa: E402
 import datapack_auditor  # noqa: E402
 import db_pool_auditor  # noqa: E402
+import disaster_recovery_planner  # noqa: E402
 import docker_stack_generator  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
 import economy_stress_sim  # noqa: E402
@@ -2459,6 +2460,29 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_plan_disaster_recovery",
+        "title": "Anvil-Safe Minecraft Backup, RPO/RTO & Automated Restore-Drill Planner",
+        "description": (
+            "Generate a crash-consistent live Minecraft backup & disaster recovery plan (RCON save-off -> "
+            "save-all flush -> encrypted restic S3/R2/B2/SFTP snapshot -> trap save-on), RPO/RTO storage "
+            "sizing, and an automated restore-verification drill using mcstage check-world + headless bot QA."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_name": {"type": "string", "default": "MyRPGServer"},
+                "world_size_gb": {"type": "number", "minimum": 0.1, "default": 12.0},
+                "retention_days": {"type": "integer", "minimum": 1, "maximum": 365, "default": 14},
+                "backup_interval_hours": {"type": "integer", "minimum": 1, "maximum": 168, "default": 6},
+                "offsite_target": {"type": "string", "enum": ["s3", "r2", "b2", "sftp"], "default": "s3"},
+                "rcon_host": {"type": "string", "default": "127.0.0.1"},
+                "rcon_port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25575},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3514,6 +3538,7 @@ class MinecraftKitMcpServer:
             "mc_ops_audit_paper_config": self._tool_ops_audit_paper_config,
             "mc_ops_audit_velocity_config": self._tool_ops_audit_velocity_config,
             "mc_ops_generate_systemd_unit": self._tool_ops_generate_systemd_unit,
+            "mc_ops_plan_disaster_recovery": self._tool_ops_plan_disaster_recovery,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10636,6 +10661,18 @@ class MinecraftKitMcpServer:
             gc_engine=str(args.get("gc_engine", "zgc")),
             java_bin=str(args.get("java_bin", "/usr/bin/java")),
             include_prestart_backup=bool(args.get("include_prestart_backup", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_plan_disaster_recovery(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = disaster_recovery_planner.plan_disaster_recovery(
+            server_name=str(args.get("server_name", "MyRPGServer")),
+            world_size_gb=float(args.get("world_size_gb", 12.0)),
+            retention_days=int(args.get("retention_days", 14)),
+            backup_interval_hours=int(args.get("backup_interval_hours", 6)),
+            offsite_target=str(args.get("offsite_target", "s3")),
+            rcon_host=str(args.get("rcon_host", "127.0.0.1")),
+            rcon_port=int(args.get("rcon_port", 25575)),
         )
         return ToolOutcome(_pretty_json(payload))
 
