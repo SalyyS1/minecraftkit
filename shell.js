@@ -3,9 +3,11 @@
 
   var page = document.body.dataset.page || "wiki";
   var pages = [
+    { id: "showcase", href: "showcase.html", label: "Showcase" },
     { id: "wiki", href: "wiki.html", label: "Wiki" },
     { id: "ecosystem", href: "ecosystem.html", label: "Ecosystem" },
-    { id: "api", href: "index.html", label: "API Explorer" }
+    { id: "api", href: "index.html", label: "API Explorer" },
+    { id: "playground", href: "playground.html", label: "Diagnostics Lab" }
   ];
 
   function make(tag, className, text) {
@@ -68,7 +70,8 @@
   function addIntro() {
     var config = {
       ecosystem: ["Ecosystem atlas", "Pinned sources, exact versions, and platform contracts."],
-      api: ["RPG API explorer", "Search the deep, local symbol catalog without leaving the Kit wiki." ]
+      api: ["RPG API explorer", "Search the deep, local symbol catalog without leaving the Kit wiki."],
+      playground: ["Diagnostics lab", "Offline Spark flamegraph, 4-domain Folia trace, Netty/HikariCP persistence, and Moonrise chunk I/O + JFR correlation lab."]
     }[page];
     if (!config) { return; }
     var main = document.querySelector("main");
@@ -122,7 +125,7 @@
       var link = event.target.closest("a[href]");
       if (!link || link.target || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) { return; }
       var href = link.getAttribute("href");
-      if (!href || !/^(?:wiki\.html|ecosystem\.html|index\.html)(?:$|[?#])/.test(href)) { return; }
+      if (!href || !/^(?:wiki\.html|ecosystem\.html|index\.html|playground\.html)(?:$|[?#])/.test(href)) { return; }
       var target = new URL(link.href, window.location.href);
       if (target.pathname === window.location.pathname) { return; }
       event.preventDefault();
