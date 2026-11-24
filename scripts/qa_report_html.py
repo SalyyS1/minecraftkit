@@ -223,6 +223,14 @@ def generate_qa_html_report(
         target.write_text(html_doc, encoding="utf-8")
         written_path = str(target)
 
+    badge_color = "brightgreen" if (failed == 0 and tps >= 19.0) else ("yellow" if failed == 0 else "red")
+    badge_json = {
+        "schemaVersion": 1,
+        "label": "MinecraftKit Bot QA",
+        "message": f"{verdict} {passed}/{total} · {tps:.1f} TPS",
+        "color": badge_color,
+    }
+
     return {
         "ok": failed == 0,
         "verdict": verdict,
@@ -230,6 +238,7 @@ def generate_qa_html_report(
         "failed_stages": failed,
         "total_stages": total,
         "snapshot_count": len(embedded_snaps),
+        "badge_json": badge_json,
         "html_bytes": len(html_doc.encode("utf-8")),
         "written_path": written_path or None,
         "html": html_doc,

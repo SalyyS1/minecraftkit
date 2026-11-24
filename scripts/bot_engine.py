@@ -897,6 +897,35 @@ STAGE_PRESETS: dict[str, dict[str, Any]] = {
             {"name": "Capture off-screen boss visual PNG", "action": "capture"},
         ],
     },
+    "itemsadder_nexo_pack": {
+        "title": "ItemsAdder / Nexo Custom Resource Pack & Glyph HUD QA",
+        "recommended_tier": "tier2-hybrid",
+        "estimated_ram_mb": 1400,
+        "description": "Verifies forced resource-pack download acceptance, /ia or /nexo custom item GUI rendering, custom glyph title/actionbar HUD, and off-screen PNG visual proof.",
+        "stages": [
+            {"name": "Join custom-pack server", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Accept ItemsAdder/Nexo resource pack", "action": "accept_pack"},
+            {"name": "Open custom item catalog", "action": "command", "command": "/ia"},
+            {"name": "Verify custom menu GUI opened", "action": "assert_gui", "pattern": r"itemsadder|nexo|custom|items|menu"},
+            {"name": "Capture off-screen pack PNG", "action": "capture"},
+        ],
+    },
+    "dungeon_instance_boss": {
+        "title": "MythicDungeons / MythicMobs Instance Boss Spawn & Proximity QA",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Enters a dungeon instance, asserts custom boss entity spawns within 24 blocks, verifies Title/ActionBar boss announcement, and checks TPS stability.",
+        "stages": [
+            {"name": "Join dungeon lobby", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Enter MythicDungeons instance", "action": "command", "command": "/md play crypt"},
+            {"name": "Verify boss title/actionbar", "action": "assert_title", "pattern": r"boss|wave|dungeon|started"},
+            {"name": "Verify boss entity spawned nearby", "action": "assert_entity_nearby", "pattern": r"boss|dragon|guardian|lich", "max_distance": 24},
+            {"name": "Assert TPS >= 19.0 under boss AI", "action": "assert_tps", "min_tps": 19.0},
+            {"name": "Capture instance telemetry PNG", "action": "capture"},
+        ],
+    },
 }
 
 
