@@ -727,3 +727,51 @@ def render_entity_bar_chart_png(
     footer = f"TOP TYPES: {len(ranked)}   PEAK TYPE: {max_val}   VERDICT: {verdict}"
     canvas.draw_text(12, height - 20, footer, TEXT_MUTED, scale=1, max_chars=74)
     return canvas.to_png_bytes()
+
+
+def render_chunk_density_png(
+    chunks_payload: dict[str, Any],
+    *,
+    width: int = 640,
+    height: int = 240,
+    title: str = "MCKIT BRIDGE CHUNK & ENTITY DENSITY",
+) -> bytes:
+    """Render a zero-dependency dark-mode PNG chart for /api/v1/chunks per-world telemetry."""
+    worlds = [w for w in (chunks_payload.get("worlds") or []) if isinstance(w, dict)] if isinstance(chunks_payload, dict) else []
+    total_loaded = int(chunks_payload.get("total_loaded_chunks", 0) or 0) if isinstance(chunks_payload, dict) else 0
+    total_forced = int(chunks_payload.get("total_force_loaded_chunks", 0) or 0) if isinstance(chunks_payload, dict) else 0
+    if total_loaded == 0:
+        total_loaded = sum(int(w.get("loaded_chunks", 0) or 0) for w in worlds)
+    max_chunks = max((int(w.get("loaded_chunks", 0) or 0) for w in worlds), default=1)
+    peak_density = max((float(w.get("entities_per_chunk", 0.0) or 0.0) for w in worlds), default=0.0)
+
+    canvas = PixelCanvas(width, height, BG_BASE)
+    canvas.draw_rect(0, 0, width, height, BORDER_SUBTLE, 1)
+    canvas.fill_rect(1, 1, width - 2, 28, BG_PANEL)
+    canvas.draw_text(12, 10, title, ACCENT_EMERALD, scale=1, max_chars=48)
+    hdr_col = ACCENT_RED if peak_density >= 3.0 else (ACCENT_AMBER if peak_density >= 1.5 else ACCENT_EMERALD)
+    canvas.draw_text(width - 230, 10, f"CHUNKS {total_loaded:5d}  FORCED {total_forced:3d}", hdr_col, scale=1)
+
+    y = 44
+    bar_x = 160
+    bar_max_w = width - bar_x - 135
+    if not worlds:
+        canvas.draw_text(20, 105, "NO WORLD CHUNK SAMPLES AVAILABLE", TEXT_MUTED, scale=1)
+    else:
+        for w in worlds[:7]:
+            name = str(w.get("world", "world")).upper()[:20]
+            loaded = int(w.get("loaded_chunks", 0) or 0)
+            density = float(w.get("entities_per_chunk", 0.0) or 0.0)
+            bar_col = ACCENT_RED if density >= 3.0 else (ACCENT_AMBER if density >= 1.5 else ACCENT_CYAN)
+            canvas.draw_text(12, y + 4, name, TEXT_PRIMARY, scale=1, max_chars=20)
+            canvas.fill_rect(bar_x, y, bar_max_w, 16, BG_PANEL)
+            canvas.draw_rect(bar_x, y, bar_max_w, 16, BORDER_SUBTLE, 1)
+            fill_w = max(4, int(round((loaded / float(max(1, max_chunks))) * (bar_max_w - 2))))
+            canvas.fill_rect(bar_x + 1, y + 1, fill_w, 14, bar_col)
+            canvas.draw_text(bar_x + bar_max_w + 8, y + 4, f"{loaded:4d} ({density:.1f}/c)", bar_col, scale=1)
+            y += 24
+
+    verdict = "DENSITY ALERT" if peak_density >= 3.0 else ("ELEVATED" if peak_density >= 1.5 else "HEALTHY")
+    footer = f"WORLDS: {len(worlds)}   PEAK DENSITY: {peak_density:.2f} ENT/CHUNK   STATUS: {verdict}"
+    canvas.draw_text(12, height - 20, footer, TEXT_MUTED, scale=1, max_chars=76)
+    return canvas.to_png_bytes()

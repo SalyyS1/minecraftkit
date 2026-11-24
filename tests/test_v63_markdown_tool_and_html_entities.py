@@ -105,10 +105,17 @@ class MarkdownProofAndTriplePngV63Tests(unittest.TestCase):
                     "arguments": {"base_url": f"http://127.0.0.1:{port}", "token": token, "endpoint": "chunks"},
                 },
             }))
-            payload = json.loads(json.loads(raw or "{}")["result"]["content"][0]["text"])
+            resp_obj = json.loads(raw or "{}")
+            content = resp_obj["result"]["content"]
+            payload = json.loads(content[0]["text"])
             self.assertTrue(payload["reachable"])
+            self.assertTrue(payload["inline_chart_attached"])
             self.assertEqual(payload["data"]["total_loaded_chunks"], 220)
             self.assertEqual(payload["data"]["total_force_loaded_chunks"], 4)
+            import base64
+            imgs = [c for c in content if c.get("type") == "image"]
+            self.assertEqual(len(imgs), 1)
+            self.assertTrue(base64.b64decode(imgs[0]["data"]).startswith(b"\x89PNG\r\n\x1a\n"))
         finally:
             httpd.shutdown()
             httpd.server_close()

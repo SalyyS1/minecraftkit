@@ -9847,6 +9847,10 @@ class MinecraftKitMcpServer:
                 png_bytes = visual_capture.render_entity_bar_chart_png(payload["data"])
                 images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
                 payload["inline_chart_attached"] = True
+            elif endpoint == "chunks":
+                png_bytes = visual_capture.render_chunk_density_png(payload["data"])
+                images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
+                payload["inline_chart_attached"] = True
         return ToolOutcome(_pretty_json(payload), images=images)
 
     def _tool_run_qa_pipeline(self, args: dict[str, Any]) -> ToolOutcome:
