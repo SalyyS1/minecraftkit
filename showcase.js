@@ -426,6 +426,61 @@
     initSuite();
     initConfigBuilder();
     initToolExplorer();
+    initVpsPlanner();
+  }
+
+  function initVpsPlanner() {
+    var ramIn = document.getElementById("vps-ram");
+    var gcIn = document.getElementById("vps-gc");
+    var topoIn = document.getElementById("vps-topo");
+    var out = document.getElementById("vps-out");
+    var copyBtn = document.getElementById("vps-copy");
+    var status = document.getElementById("vps-status");
+    if (!ramIn || !out) { return; }
+
+    function render() {
+      var ram = Math.max(4, Math.min(64, Number(ramIn.value) || 16));
+      var osReserve = ram <= 8 ? 2 : Math.max(3, Math.round(ram * 0.2));
+      var heap = Math.max(2, ram - osReserve);
+      var gc = gcIn ? gcIn.value : "zgc";
+      var topo = topoIn ? topoIn.value : "velocity";
+      var gcFlags = gc === "zgc"
+        ? "-XX:+UseZGC -XX:+ZGenerational -XX:+AlwaysPreTouch"
+        : "-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=120 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch";
+      var lines = [
+        "# Safe Heap Budget: " + heap + "G JVM / " + ram + "G VPS (" + osReserve + "G OS + Netty + Bot Pool reserve)",
+        "java -Xms" + heap + "G -Xmx" + heap + "G " + gcFlags + " -jar server.jar --nogui",
+        "",
+        "# Zero-Exposure UFW Firewall Rules (Loopback Bridge 25590 & RCON 25575 stay private)",
+        "sudo ufw default deny incoming",
+        "sudo ufw allow 22/tcp"
+      ];
+      if (topo === "velocity") {
+        lines.push("sudo ufw allow 25565/tcp   # Velocity Java proxy");
+        lines.push("sudo ufw allow 19132/udp   # Geyser Bedrock UDP");
+        lines.push("# Backend Paper/Folia nodes: server-ip=127.0.0.1, online-mode=false, modern forwarding secret!");
+      } else {
+        lines.push("sudo ufw allow 25565/tcp   # Standalone Java server (online-mode=true)");
+      }
+      lines.push("sudo ufw deny 25575/tcp    # Never expose plaintext Source RCON publicly");
+      lines.push("sudo ufw deny 25590/tcp    # Keep mckit-bridge-plugin strictly 127.0.0.1");
+      out.textContent = lines.join("\n");
+      if (status) { status.textContent = ""; }
+    }
+
+    ramIn.addEventListener("input", render);
+    if (gcIn) { gcIn.addEventListener("change", render); }
+    if (topoIn) { topoIn.addEventListener("change", render); }
+    if (copyBtn) {
+      copyBtn.addEventListener("click", function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(out.textContent).then(function () {
+            if (status) { status.textContent = "Copied VPS plan!"; }
+          }).catch(function () {});
+        }
+      });
+    }
+    render();
   }
 
   function initToolExplorer() {

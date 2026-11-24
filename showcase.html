@@ -208,6 +208,20 @@
         <div id="ops-lab-tabs" class="sc-filter-row" style="margin-bottom:10px"></div>
         <pre id="ops-lab-out" class="sc-code-block"></pre>
       </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive VPS Anti-OOM JVM &amp; Proxy Firewall Generator</h3>
+        <div class="sc-filter-row" style="gap:10px;align-items:center;margin-bottom:10px">
+          <label class="sc-muted">VPS RAM (GB) <input id="vps-ram" type="number" min="4" max="64" step="2" value="16" style="width:74px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">GC Engine <select id="vps-gc" style="background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"><option value="zgc">Generational ZGC (Java 21+)</option><option value="g1gc">G1GC (Aikar Tuned)</option></select></label>
+          <label class="sc-muted">Topology <select id="vps-topo" style="background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"><option value="velocity">Velocity Modern Forwarding + Geyser</option><option value="standalone">Standalone Paper / Folia Node</option></select></label>
+        </div>
+        <pre id="vps-out" class="sc-code-block"></pre>
+        <div class="sc-copy-row">
+          <button id="vps-copy" type="button" class="sc-btn sc-btn-primary">Copy JVM + UFW Plan</button>
+          <span id="vps-status" class="sc-muted" aria-live="polite"></span>
+        </div>
+      </div>
     </section>
 
     <section id="suite" class="sc-section">
