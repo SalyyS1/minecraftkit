@@ -16,7 +16,7 @@
   <main id="showcase-main" class="sc-main">
     <section class="sc-hero">
       <div class="sc-hero-top">
-        <span class="sc-pill">v3.2.0 · 39 MCP Tools · 14 /mc:* Skills · 10 Integrated Repos · Visual Diff &amp; MP4 Timelapse</span>
+        <span class="sc-pill">v3.3.0 · 42 MCP Tools · 14 /mc:* Skills · 10 Integrated Repos · Java+Bedrock · Visual Diff &amp; MP4</span>
         <div class="sc-lang-group" role="group" aria-label="Language switcher">
           <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
           <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
@@ -37,8 +37,8 @@
 
       <div class="sc-stats-grid">
         <article class="sc-stat-card">
-          <strong>39</strong>
-          <span data-i18n="stat_mcp">Stdio MCP Tools (with PNG Diff &amp; MP4 Timelapse)</span>
+          <strong>42</strong>
+          <span data-i18n="stat_mcp">Stdio MCP Tools (PNG Diff, MP4, Bedrock &amp; Presets)</span>
         </article>
         <article class="sc-stat-card">
           <strong>42 MB</strong>
@@ -122,6 +122,10 @@
           </div>
           <div id="sim-gui-grid" class="sc-gui-grid"></div>
           <div id="sim-chat-box" class="sc-chat-box"></div>
+          <div class="sc-copy-row" style="margin-top:10px;gap:8px;display:flex;flex-wrap:wrap">
+            <input id="sim-cmd-input" type="text" placeholder="Type freeform command e.g. /shop, /login secret123, /ia..." style="flex:1;min-width:180px;padding:7px 10px;border-radius:6px;border:1px solid #2b3f52;background:#081018;color:#e6f2ff;font-family:monospace;font-size:12.5px">
+            <button id="sim-cmd-send" type="button" class="sc-btn sc-btn-primary">Run Bot Action</button>
+          </div>
         </div>
       </div>
     </section>
