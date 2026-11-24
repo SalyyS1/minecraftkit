@@ -425,6 +425,91 @@
     initOpsLab();
     initSuite();
     initConfigBuilder();
+    initToolExplorer();
+  }
+
+  function initToolExplorer() {
+    var searchIn = document.getElementById("tool-search");
+    var catRow = document.getElementById("tool-cats");
+    var listEl = document.getElementById("tool-list");
+    var countEl = document.getElementById("tool-count");
+    if (!searchIn || !catRow || !listEl) { return; }
+
+    var FEATURED_TOOLS = [
+      { id: "mc_bot_run_stages", cat: "bot", desc: "Headless ~42MB Mineflayer bot: auto-join, AuthMe/nLogin auto-auth, stage YAML & inline PNG proof." },
+      { id: "mc_bot_play_command_probe", cat: "bot", desc: "Zero-dependency ~18MB pure-Python wire bot traversing Login -> Config -> Play -> ChatCommand." },
+      { id: "mc_bot_probe_protocol_matrix", cat: "bot", desc: "1.20.4..26.3 native vs ViaVersion / ViaBackwards / Geyser protocol compatibility matrix." },
+      { id: "mc_bot_record_stage_gif", cat: "bot", desc: "Stitches off-screen bot stages into an MCP-attached PNG storyboard & ffmpeg animated GIF." },
+      { id: "mc_bot_visual_diff", cat: "bot", desc: "Pixel-exact GUI/HUD regression diff with red bounding-box overlay attached directly to chat." },
+      { id: "mc_bot_stress_benchmark", cat: "bot", desc: "Multi-bot concurrent swarm benchmark with anti-OOM RAM cap & p95 join latency metrics." },
+      { id: "mc_bot_generate_fabric_capture_script", cat: "bot", desc: "Generates memory-capped Xvfb + Fabric mckit-client-mod off-screen 3D screenshot scripts." },
+      { id: "mc_bot_compare_stage_runs", cat: "bot", desc: "Diffs baseline vs current bot QA runs to catch latency & step regressions in CI." },
+      { id: "mc_hosting_connect_plan", cat: "ops", desc: "Zero-screen-lock Pterodactyl, Pelican, Crafty & PufferPanel plan with RFC 6238 TOTP 2FA." },
+      { id: "mc_hosting_server_action", cat: "ops", desc: "Headless start/stop/restart/console/status API dispatch with strict token redaction." },
+      { id: "mc_sftp_operations", cat: "ops", desc: "Atomic SFTP plugin JAR deploy, safe config patching & automatic .mckit.bak backups." },
+      { id: "mc_ops_profile_vault", cat: "ops", desc: "chmod 0600 local credential vault for hosting/SFTP/RCON/bridge profiles (masked outputs)." },
+      { id: "mc_ops_vps_ssh_preflight", cat: "ops", desc: "Anti-OOM JVM G1GC/ZGC heap calculator & UFW firewall rules for Minecraft VPS hosts." },
+      { id: "mc_ops_generate_docker_stack", cat: "ops", desc: "Full-stack Paper/Folia/Velocity + headless protocol & Xvfb visual bot docker-compose generator." },
+      { id: "mc_audit_server_exploits", cat: "audit", desc: "Static security audit for chunk bans, command injection, packet flood & dupe exploits (EXPLOIT-001..005)." },
+      { id: "mc_world_audit_integrity", cat: "audit", desc: "Zero-JVM Anvil .mca 4096-byte sector, GZIP level.dat & playerdata corruption scanner (WORLD-001..005)." },
+      { id: "mc_audit_proxy_topology", cat: "audit", desc: "Velocity, Paper, BungeeCord & Geyser-Floodgate forwarding secret & IP spoofing auditor." },
+      { id: "mc_audit_permissions_rbac", cat: "audit", desc: "LuckPerms, Vault & plugin.yml wildcard/OP escalation privilege auditor (PERM-001..005)." },
+      { id: "mc_audit_database_pool", cat: "audit", desc: "HikariCP, MySQL & SQLite connection pool leak & main-thread blocking auditor (DB-001..005)." },
+      { id: "mc_audit_shader_pack", cat: "audit", desc: "GLSL 1.21+ core shader, std140 UBO & legacy syntax validator (SHD-001..005)." },
+      { id: "mc_ops_audit_spark_profile", cat: "audit", desc: "Spark profiler JSON/log analyzer pinpointing entity, chunk, GC & blocking-IO lag spikes." },
+      { id: "mc_qa_run_full_lifecycle", cat: "suite", desc: "Single-call E2E pipeline: deploy -> host restart -> bot QA stages -> bridge telemetry -> HTML proof." },
+      { id: "mc_suite_full_ecosystem_doctor", cat: "suite", desc: "Unified health check across Python, Node, Java 21, Docker, ffmpeg, companion bridges & 10 repos." },
+      { id: "mc_search_rpg_api", cat: "suite", desc: "Offline bytecode-verified search across 41,887 members in 10 RPG plugins (MMOItems, ModelEngine...)." }
+    ];
+
+    var activeCat = "all";
+    var cats = ["all", "bot", "ops", "audit", "suite"];
+
+    function render() {
+      var q = String(searchIn.value || "").trim().toLowerCase();
+      catRow.querySelectorAll(".sc-chip").forEach(function (b) {
+        b.classList.toggle("is-active", b.getAttribute("data-tcat") === activeCat);
+      });
+      var matches = FEATURED_TOOLS.filter(function (t) {
+        var okCat = activeCat === "all" || t.cat === activeCat;
+        var okQ = !q || t.id.toLowerCase().indexOf(q) >= 0 || t.desc.toLowerCase().indexOf(q) >= 0 || t.cat.indexOf(q) >= 0;
+        return okCat && okQ;
+      });
+      if (countEl) {
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 74 live stdio MCP tools (filter by keyword or category).";
+      }
+      clear(listEl);
+      matches.forEach(function (tool) {
+        var card = el("article", "sc-suite-card");
+        var copyBtn = el("button", "sc-chip", "Copy MCP Call");
+        copyBtn.type = "button";
+        copyBtn.addEventListener("click", function () {
+          var snippet = '{"tool":"' + tool.id + '","arguments":{}}';
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(snippet).catch(function () {});
+          }
+          copyBtn.textContent = "Copied!";
+          setTimeout(function () { copyBtn.textContent = "Copy MCP Call"; }, 1200);
+        });
+        card.append(
+          el("span", "sc-tag", tool.cat.toUpperCase()),
+          el("h3", "", tool.id),
+          el("p", "", tool.desc),
+          copyBtn
+        );
+        listEl.append(card);
+      });
+    }
+
+    cats.forEach(function (c) {
+      var btn = el("button", "sc-chip", c);
+      btn.type = "button";
+      btn.setAttribute("data-tcat", c);
+      btn.addEventListener("click", function () { activeCat = c; render(); });
+      catRow.append(btn);
+    });
+    searchIn.addEventListener("input", render);
+    render();
   }
 
   function initYamlBuilder() {
