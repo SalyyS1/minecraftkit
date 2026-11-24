@@ -6,12 +6,19 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.protocol-bot
+    init: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - MC_HOST=${MC_HOST:-host.docker.internal}
       - MC_PORT=${MC_PORT:-25565}
       - MC_VERSION=${MC_VERSION:-1.21.4}
       - BOT_POOL_SIZE=${BOT_POOL_SIZE:-8}
+      - BOT_STAGGER_MS=${BOT_STAGGER_MS:-750}
+      - BOT_MAX_RAM_MB=${BOT_MAX_RAM_MB:-512}
       - BOT_AUTH_PASSWORD=${MCKIT_BOT_PASSWORD:-}
+    mem_limit: 512m
+    cpus: 1.5
     deploy:
       resources:
         limits:
@@ -25,13 +32,22 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.visual-bot
+    init: true
+    shm_size: '512m'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - DISPLAY=:99
       - XVFB_WHD=1280x720x24
       - MC_HOST=${MC_HOST:-host.docker.internal}
       - MC_PORT=${MC_PORT:-25565}
       - CAPTURE_FPS=2
+      - CAPTURE_DURATION_SEC=${CAPTURE_DURATION_SEC:-20}
+      - CAPTURE_EMIT_GIF=${CAPTURE_EMIT_GIF:-1}
       - LIBGL_ALWAYS_SOFTWARE=1
+      - GALLIUM_DRIVER=llvmpipe
+    mem_limit: 2048m
+    cpus: 2.0
     deploy:
       resources:
         limits:

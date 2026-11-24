@@ -11,14 +11,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     curl \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -r -m -d /app mckit
 
 WORKDIR /app
-COPY docker/capture-xvfb.sh /app/capture-xvfb.sh
-RUN chmod +x /app/capture-xvfb.sh
+COPY --chown=mckit:mckit docker/capture-xvfb.sh /app/capture-xvfb.sh
+RUN chmod +x /app/capture-xvfb.sh && mkdir -p /app/captures && chown -R mckit:mckit /app
+
+USER mckit
 
 ENV DISPLAY=:99 \
     XVFB_WHD=1280x720x24 \
-    LIBGL_ALWAYS_SOFTWARE=1
+    LIBGL_ALWAYS_SOFTWARE=1 \
+    GALLIUM_DRIVER=llvmpipe \
+    CAPTURE_DIR=/app/captures
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD test -x /app/capture-xvfb.sh && command -v Xvfb >/dev/null && command -v ffmpeg >/dev/null
 
 ENTRYPOINT ["/app/capture-xvfb.sh"]

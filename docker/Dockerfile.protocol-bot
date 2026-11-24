@@ -1,9 +1,18 @@
 FROM node:22-slim
 
+RUN groupadd -r mckit && useradd -r -g mckit -d /app mckit
+
 WORKDIR /app
 COPY bot/package.json ./
-RUN npm install --omit=optional --no-audit --no-fund
-COPY bot/worker.mjs bot/pool-runner.mjs ./
+RUN npm install --omit=optional --no-audit --no-fund && chown -R mckit:mckit /app
+COPY --chown=mckit:mckit bot/worker.mjs bot/pool-runner.mjs ./
 
-ENV NODE_OPTIONS="--max-old-space-size=384"
+USER mckit
+
+ENV NODE_OPTIONS="--max-old-space-size=384" \
+    BOT_MAX_RAM_MB="512"
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD node --check /app/worker.mjs && node --check /app/pool-runner.mjs
+
 ENTRYPOINT ["node", "pool-runner.mjs"]
