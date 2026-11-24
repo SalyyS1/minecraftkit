@@ -23,6 +23,7 @@ import bot_stress_harness  # noqa: E402
 import ci_workflow_generator  # noqa: E402
 import cloud_grid_templates  # noqa: E402
 import datapack_auditor  # noqa: E402
+import db_pool_auditor  # noqa: E402
 import docker_stack_generator  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
 import economy_stress_sim  # noqa: E402
@@ -41,6 +42,7 @@ import qa_smoke_doctor  # noqa: E402
 import query_api  # noqa: E402
 import query_sources  # noqa: E402
 import rcon_client  # noqa: E402
+import release_notes_generator  # noqa: E402
 import spark_profile_auditor  # noqa: E402
 import toolchain_bridge  # noqa: E402
 import visual_capture  # noqa: E402
@@ -2167,6 +2169,53 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_database_pool",
+        "title": "HikariCP / MySQL / MariaDB / SQLite / Redis Database Pool Auditor",
+        "description": (
+            "Audit Minecraft plugin database configurations for weak/default passwords (DB-001, redacted), "
+            "multi-server connection pool exhaustion (DB-002), dangerous connection-timeout/max-lifetime "
+            "(DB-003), unencrypted remote SQL (DB-004), and split-brain SQLite across proxy networks (DB-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "config_text": {"type": "string"},
+                "network_server_count": {"type": "integer", "minimum": 1, "default": 1},
+            },
+            "required": ["config_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_qa_generate_release_notes",
+        "title": "Bilingual (EN/VI) Modrinth / Hangar / SpigotMC / Discord Release Notes & QA Proof Generator",
+        "description": (
+            "Generate ready-to-publish bilingual (English + Vietnamese) Modrinth/Hangar/SpigotMC Markdown "
+            "changelogs and Discord announcements embedding MinecraftKit autonomous bot QA stage badges, "
+            "Folia readiness, and anti-exploit grades."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "plugin_name": {"type": "string"},
+                "version": {"type": "string"},
+                "mc_versions": {"type": "array", "items": {"type": "string"}},
+                "platforms": {"type": "array", "items": {"type": "string"}},
+                "highlights": {"type": "array", "items": {"type": "string"}},
+                "fixes": {"type": "array", "items": {"type": "string"}},
+                "qa_passed_stages": {"type": "integer", "minimum": 0, "default": 0},
+                "qa_total_stages": {"type": "integer", "minimum": 0, "default": 0},
+                "folia_ready": {"type": "boolean", "default": True},
+                "exploit_audit_grade": {"type": "string", "default": "A"},
+                "language": {"type": "string", "enum": ["bilingual", "en", "vi"], "default": "bilingual"},
+            },
+            "required": ["plugin_name", "version"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3209,6 +3258,8 @@ class MinecraftKitMcpServer:
             "mc_ops_generate_docker_stack": self._tool_ops_generate_docker_stack,
             "mc_ops_audit_spark_profile": self._tool_ops_audit_spark_profile,
             "mc_bot_simulate_economy_stress": self._tool_bot_simulate_economy_stress,
+            "mc_audit_database_pool": self._tool_audit_database_pool,
+            "mc_qa_generate_release_notes": self._tool_qa_generate_release_notes,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10160,6 +10211,32 @@ class MinecraftKitMcpServer:
             recipes=recipes if isinstance(recipes, list) else None,
             tax_pct=float(args.get("tax_pct", 0.0)),
             concurrent_bots=int(args.get("concurrent_bots", 4)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_audit_database_pool(self, args: dict[str, Any]) -> ToolOutcome:
+        txt = str(args.get("config_text", ""))
+        if not txt.strip():
+            raise ValueError("'config_text' must be a non-empty string.")
+        payload = db_pool_auditor.audit_database_pool(
+            config_text=txt,
+            network_server_count=int(args.get("network_server_count", 1)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_qa_generate_release_notes(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = release_notes_generator.generate_plugin_release_notes(
+            plugin_name=str(args.get("plugin_name", "MyPlugin")),
+            version=str(args.get("version", "1.0.0")),
+            mc_versions=[str(x) for x in args["mc_versions"]] if isinstance(args.get("mc_versions"), list) else None,
+            platforms=[str(x) for x in args["platforms"]] if isinstance(args.get("platforms"), list) else None,
+            highlights=[str(x) for x in args["highlights"]] if isinstance(args.get("highlights"), list) else None,
+            fixes=[str(x) for x in args["fixes"]] if isinstance(args.get("fixes"), list) else None,
+            qa_passed_stages=int(args.get("qa_passed_stages", 0)),
+            qa_total_stages=int(args.get("qa_total_stages", 0)),
+            folia_ready=bool(args.get("folia_ready", True)),
+            exploit_audit_grade=str(args.get("exploit_audit_grade", "A")),
+            language=str(args.get("language", "bilingual")),
         )
         return ToolOutcome(_pretty_json(payload))
 
