@@ -24,6 +24,7 @@ import cloud_grid_templates  # noqa: E402
 import datapack_auditor  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
 import exploit_auditor  # noqa: E402
+import gif_recorder  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
 import pack_parity  # noqa: E402
@@ -37,6 +38,7 @@ import query_sources  # noqa: E402
 import rcon_client  # noqa: E402
 import toolchain_bridge  # noqa: E402
 import visual_capture  # noqa: E402
+import vps_ssh_preflight  # noqa: E402
 import world_audit_bridge  # noqa: E402
 
 
@@ -1988,6 +1990,52 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_record_stage_gif",
+        "title": "Off-Screen Bot Stage Storyboard PNG & Animated GIF Recorder",
+        "description": (
+            "Render a multi-stage autonomous bot QA walkthrough (join -> auto-auth -> command -> GUI -> assert) "
+            "into a stitched off-screen PNG storyboard attached directly to chat as MCP image/png, plus optional "
+            "ffmpeg palettegen animated GIF export. Automatically redacts all AuthMe/nLogin passwords."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "bot_name": {"type": "string", "default": "MCKitQA"},
+                "server_target": {"type": "string", "default": "127.0.0.1:25565"},
+                "stages": {"type": "array", "items": {"type": "object"}},
+                "fps": {"type": "number", "minimum": 0.5, "maximum": 10.0, "default": 1.0},
+                "output_gif_path": {"type": "string", "default": ""},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False},
+    },
+    {
+        "name": "mc_ops_vps_ssh_preflight",
+        "title": "Headless VPS / Dedicated Minecraft Server Anti-OOM & Firewall Hardening Planner",
+        "description": (
+            "Compute optimal Paper/Folia JVM heap & G1GC/Generational-ZGC flags leaving anti-OOM headroom "
+            "for OS + Tier-1 headless bot fleets + optional Docker Xvfb visual bots, plus ufw firewall rules "
+            "(isolating offline backends, RCON, and loopback mckit-bridge-plugin) and SFTP deployment checklist."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "vps_ram_gb": {"type": "number", "minimum": 1.0, "default": 8.0},
+                "vps_vcpu": {"type": "integer", "minimum": 1, "default": 4},
+                "proxy_mode": {"type": "string", "enum": ["standalone", "velocity-network", "bungeecord-network"], "default": "standalone"},
+                "server_port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25565},
+                "bridge_port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25590},
+                "rcon_port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25575},
+                "rcon_enabled": {"type": "boolean", "default": False},
+                "concurrent_bots": {"type": "integer", "minimum": 0, "maximum": 25, "default": 5},
+                "enable_visual_docker_bot": {"type": "boolean", "default": False},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3022,6 +3070,8 @@ class MinecraftKitMcpServer:
             "mc_audit_proxy_topology": self._tool_audit_proxy_topology,
             "mc_audit_datapack_integrity": self._tool_audit_datapack_integrity,
             "mc_bot_generate_ci_workflow": self._tool_bot_generate_ci_workflow,
+            "mc_bot_record_stage_gif": self._tool_bot_record_stage_gif,
+            "mc_ops_vps_ssh_preflight": self._tool_ops_vps_ssh_preflight,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9876,6 +9926,35 @@ class MinecraftKitMcpServer:
             concurrent_bots=int(args.get("concurrent_bots", 5)),
             include_sarif=bool(args.get("include_sarif", True)),
             include_html_proof=bool(args.get("include_html_proof", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_record_stage_gif(self, args: dict[str, Any]) -> ToolOutcome:
+        stages = args.get("stages")
+        payload = gif_recorder.record_stage_storyboard(
+            bot_name=str(args.get("bot_name", "MCKitQA")),
+            server_target=str(args.get("server_target", "127.0.0.1:25565")),
+            stages=stages if isinstance(stages, list) else None,
+            fps=float(args.get("fps", 1.0)),
+            output_gif_path=str(args.get("output_gif_path", "")),
+        )
+        b64_png = payload.pop("storyboard_png_base64", "")
+        images = ((b64_png, "image/png"),) if isinstance(b64_png, str) and b64_png else ()
+        if images:
+            payload["storyboard_attached_as_mcp_image"] = True
+        return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_ops_vps_ssh_preflight(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = vps_ssh_preflight.plan_vps_deployment(
+            vps_ram_gb=float(args.get("vps_ram_gb", 8.0)),
+            vps_vcpu=int(args.get("vps_vcpu", 4)),
+            proxy_mode=str(args.get("proxy_mode", "standalone")),
+            server_port=int(args.get("server_port", 25565)),
+            bridge_port=int(args.get("bridge_port", 25590)),
+            rcon_port=int(args.get("rcon_port", 25575)),
+            rcon_enabled=bool(args.get("rcon_enabled", False)),
+            concurrent_bots=int(args.get("concurrent_bots", 5)),
+            enable_visual_docker_bot=bool(args.get("enable_visual_docker_bot", False)),
         )
         return ToolOutcome(_pretty_json(payload))
 
