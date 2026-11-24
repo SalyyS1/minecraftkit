@@ -3,11 +3,11 @@
 [Tiếng Việt (README.vi.md)](README.vi.md) · [**Flagship Showcase**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [Growth Playbook](docs/GROWTH_STRATEGY.md) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v3.4.0](https://img.shields.io/badge/version-v3.4.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.4.0)
+[![Version: v3.5.0](https://img.shields.io/badge/version-v3.5.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.5.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
-All-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Bedrock/Geyser RakNet UDP), persistent freeform multi-turn bot sessions, off-screen PNG visual diff & MP4 timelapse capture, headless hosting/VPS/2FA/WebSocket & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 43-tool stdio MCP server by **SalyVn / Salyyy**.
+All-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Wire-Level Offline Login Probe + Bedrock/Geyser RakNet UDP), persistent freeform multi-turn bot sessions, off-screen PNG visual diff & MP4 timelapse capture, headless hosting/VPS/2FA/WebSocket & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 45-tool stdio MCP server by **SalyVn / Salyyy**.
 
 ## What Salyyy Minecraft Kit Includes
 
@@ -124,6 +124,8 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_bot_generate_stage_preset` | Generate customized autonomous bot QA stage presets for `authme_lobby`, `rpg_shop_gui`, `resource_pack_itemsadder_nexo`, `mythicmobs_dungeon`, and `folia_region_stress`. |
 | `mc_hosting_console_stream_plan` | Build or live-fetch a screen-lock-free Pterodactyl/Pelican live console WebSocket handshake & command plan with strict JWT/API-key redaction. |
 | `mc_suite_generate_mcstage_suite` | Generate a synced `mcstage.yml` (v0.9.0 `bot-probe` + `assert-bridge` TPS/GUI checks + Folia barrier checks) paired with a GitHub Actions QA workflow. |
+| `mc_bot_login_handshake_probe` | Pure-Python wire-level Minecraft 1.20.2–1.21.4+ offline Login -> zlib SetCompression -> LoginSuccess -> Configuration probe (~18 MB RAM, zero Node/client install). |
+| `mc_bot_export_stage_yaml` | Serialize a preset or custom bot QA stage list into a password-redacted `.mckit-stages.yml` recipe for CI or community sharing. |
 
 ### Exposed MCP Resources & Slash Prompts
 

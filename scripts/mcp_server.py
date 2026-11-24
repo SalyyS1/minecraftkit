@@ -19,6 +19,7 @@ from catalog_io import strict_json_file  # noqa: E402
 import bot_engine  # noqa: E402
 import bot_session_hub  # noqa: E402
 import hosting_bridge  # noqa: E402
+import mc_proto_client  # noqa: E402
 import profile_vault  # noqa: E402
 import query_api  # noqa: E402
 import query_sources  # noqa: E402
@@ -1599,6 +1600,49 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_login_handshake_probe",
+        "title": "Pure-Python Wire-Level Offline Login -> Configuration Handshake Probe (~18 MB RAM)",
+        "description": (
+            "Execute a zero-dependency pure-Python Minecraft Java Edition (1.20.2 - 1.21.4+) TCP Login Start -> "
+            "Set Compression (zlib) -> Login Success -> Login Acknowledged -> Configuration probe with zero GUI and zero Node/client install."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string"},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25565},
+                "username": {"type": "string", "default": "MCKitProtoBot"},
+                "protocol_version": {"type": "integer", "default": 769},
+                "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "default": 4.0},
+            },
+            "required": ["host"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "mc_bot_export_stage_yaml",
+        "title": "Export Autonomous Bot QA Stages to Reusable YAML Recipe",
+        "description": (
+            "Serialize a bot QA target + preset or custom stage list into a clean, password-redacted .mckit-stages.yml "
+            "recipe ready to commit to your plugin repository or share on GitHub Issues."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "host": {"type": "string"},
+                "port": {"type": "integer", "default": 25565},
+                "version": {"type": "string", "default": "1.21.4"},
+                "tier": {"type": "string", "enum": ["tier1-protocol", "tier2-docker-visual"], "default": "tier1-protocol"},
+                "preset": {"type": "string"},
+                "stages": {"type": "array", "items": {"type": "object"}},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -2616,6 +2660,8 @@ class MinecraftKitMcpServer:
             "mc_bot_generate_stage_preset": self._tool_bot_generate_stage_preset,
             "mc_hosting_console_stream_plan": self._tool_hosting_console_stream_plan,
             "mc_suite_generate_mcstage_suite": self._tool_suite_generate_mcstage_suite,
+            "mc_bot_login_handshake_probe": self._tool_bot_login_handshake_probe,
+            "mc_bot_export_stage_yaml": self._tool_bot_export_stage_yaml,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9221,6 +9267,64 @@ class MinecraftKitMcpServer:
             include_shaders=bool(args.get("include_shaders", False)),
         )
         return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_login_handshake_probe(self, args: dict[str, Any]) -> ToolOutcome:
+        host = str(args.get("host", "")).strip()
+        if not host:
+            raise ValueError("'host' must be a non-empty string.")
+        payload = mc_proto_client.probe_offline_login_handshake(
+            host=host,
+            port=int(args.get("port", 25565)),
+            username=str(args.get("username", "MCKitProtoBot")),
+            protocol_version=int(args.get("protocol_version", 769)),
+            timeout_seconds=float(args.get("timeout_seconds", 4.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_export_stage_yaml(self, args: dict[str, Any]) -> ToolOutcome:
+        name = str(args.get("name", "Autonomous Bot QA Recipe")).strip() or "Autonomous Bot QA Recipe"
+        host = str(args.get("host", "127.0.0.1")).strip() or "127.0.0.1"
+        port = int(args.get("port", 25565))
+        version = str(args.get("version", "1.21.4"))
+        tier = str(args.get("tier", "tier1-protocol"))
+        stages = args.get("stages")
+        if not isinstance(stages, list) or not stages:
+            preset_name = str(args.get("preset", "rpg_shop_gui"))
+            stages = bot_engine.build_stage_preset(preset_name)["stages"]
+        lines = [
+            f'name: "{name}"',
+            "target:",
+            f'  host: "{host}"',
+            f"  port: {port}",
+            f'  version: "{version}"',
+            f'  tier: "{tier}"',
+            '  password: "env:MCKIT_BOT_PASS"',
+            "  screen_lock_free: true",
+            "stages:",
+        ]
+        for st in stages:
+            if not isinstance(st, dict):
+                continue
+            sname = bot_engine.redact_bot_text(str(st.get("name", "Stage")))
+            sact = str(st.get("action", "wait"))
+            lines.append(f'  - name: "{sname}"')
+            lines.append(f'    action: "{sact}"')
+            for k, v in st.items():
+                if k in ("name", "action"):
+                    continue
+                if isinstance(v, str):
+                    lines.append(f'    {k}: "{bot_engine.redact_bot_text(v)}"')
+                elif isinstance(v, bool):
+                    lines.append(f"    {k}: {'true' if v else 'false'}")
+                elif isinstance(v, (int, float)):
+                    lines.append(f"    {k}: {v}")
+        yaml_text = "\n".join(lines) + "\n"
+        return ToolOutcome(_pretty_json({
+            "filename": ".mckit-stages.yml",
+            "stage_count": len(stages),
+            "tier": tier,
+            "yaml": yaml_text,
+        }))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:
