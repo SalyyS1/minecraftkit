@@ -9,6 +9,7 @@ import {
   serializeWindow,
   evaluateStageAssertion,
 } from "../worker.mjs";
+import { percentile, summarizePoolResults } from "../pool-runner.mjs";
 
 const botDir = path.resolve(import.meta.dirname, "..");
 
@@ -80,4 +81,23 @@ test("evaluateStageAssertion() verifies chat, inventory, and scoreboard assertio
   assert.equal(evaluateStageAssertion("assert_inventory", { pattern: "Excalibur", min_count: 1 }, snap).passed, true);
   assert.equal(evaluateStageAssertion("assert_scoreboard", { pattern: "Coins: 1,500" }, snap).passed, true);
   assert.equal(evaluateStageAssertion("assert_inventory", { pattern: "netherite_ingot", min_count: 2 }, snap).passed, false);
+});
+
+test("pool-runner summarizePoolResults() calculates p50/p95 latency and enforces RAM budget", () => {
+  const summary = summarizePoolResults(
+    [
+      { username: "Bot1", code: 0, duration_ms: 120, rss_mb: 38.5 },
+      { username: "Bot2", code: 0, duration_ms: 180, rss_mb: 41.2 },
+      { username: "Bot3", code: 0, duration_ms: 240, rss_mb: 40.3 },
+    ],
+    512,
+  );
+  assert.equal(summary.poolSize, 3);
+  assert.equal(summary.passed, 3);
+  assert.equal(summary.screen_lock_free, true);
+  assert.equal(summary.p50_duration_ms, 180);
+  assert.equal(summary.p95_duration_ms, 240);
+  assert.equal(summary.estimated_total_rss_mb, 120);
+  assert.equal(summary.within_ram_budget, true);
+  assert.equal(percentile([10, 20, 30, 40], 0.5), 20);
 });

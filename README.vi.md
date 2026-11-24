@@ -1,40 +1,60 @@
-# Salyyy Minecraft Kit (v4.0.0 Flagship)
+# Salyyy Minecraft Kit (v5.4.0)
 
 [English (README.md)](README.md) · [**Trang Giới Thiệu Chính (Showcase)**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Wiki Song Ngữ](https://salyys1.github.io/minecraftkit/wiki.html) · [Chiến Lược Cộng Đồng](docs/GROWTH_STRATEGY.md)
 
-Phiên bản **v4.0.0 Flagship** — Bộ công cụ AI Engineering toàn diện với **54 công cụ MCP**, **14 kỹ năng `/mc:*`**, **Chu trình QA tự động 5 pha (`mc_qa_run_full_lifecycle`)**, **Benchmark stress đa bot không chiếm màn hình (`mc_bot_stress_benchmark`, p50/p95/p99 ~18MB/bot)**, **Bot Kiểm Thử Tự Động thuần Python Login->Config->Play + Bedrock/Geyser + Mẫu triển khai Cloud Fly.io 256MB / GitHub Actions / VPS Systemd / Kubernetes**, **Kiểm tra xung đột Plugin & phụ thuộc (`mc_audit_plugin_matrix`)**, **Báo cáo kiểm thử HTML tự khép kín nhúng ảnh PNG**, **Kiểm tra đồng bộ Resource Pack & Item Model (`MMOItems`/`ItemsAdder`/`Nexo`)**, **Kiểm tra Backup Hosting/VPS**, **Sinh tự động kịch bản `mcstage v0.14.0`**, **So sánh ảnh PNG Visual Diff & Quay video MP4 Timelapse chạy ngầm**, **Kho Profile ẩn mật khẩu (`chmod 0600`)**, **Kết nối Hosting/VPS có 2FA, Console WebSocket, Source RCON & SFTP**, **Companion Testing Plugin (`/api/v1/command` sandbox) & Fabric Client Mod**, và **tích hợp trọn bộ 10 công cụ Minecraft của SalyVn / Salyyy**.
+[![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
+[![Version: v5.4.0](https://img.shields.io/badge/version-v5.4.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v5.4.0)
+[![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
-## Điểm Nổi Bật Ở Bản v3.3.0
+Bộ công cụ **AI Engineering, Autonomous Bot QA & Server Ops** toàn diện cho hệ sinh thái Minecraft (`Paper`, `Folia`, `Purpur`, `Velocity`, `Geyser/Bedrock`, `Fabric`, RPG Plugins) với **74 công cụ MCP chuẩn JSON-RPC 2.0**, **14 lệnh/kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ (~18–42 MB RAM/bot, không cần mở app Minecraft, không chiếm màn hình)**, **Kết nối Hosting/VPS có 2FA TOTP & SFTP ngầm**, **Plugin/Mod Companion Java 21**, và **tích hợp trọn bộ 10 repo Minecraft của SalyVn / Salyyy**.
 
-1. **Bedrock/Geyser UDP Ping, Preset Test Chuyên Dụng & WebSocket Console (`mc_bot_ping_bedrock`, `mc_bot_generate_stage_preset`, `mc_hosting_console_stream_plan`)**:
-   - Ping trực tiếp máy chủ crossplay Bedrock/GeyserMC qua giao thức RakNet UDP thuần Python.
-   - 5 bộ kịch bản test dựng sẵn cho máy chủ thực tế (`authme_lobby`, `rpg_shop_gui`, `resource_pack_itemsadder_nexo`, `mythicmobs_dungeon`, `folia_region_stress`).
-   - Hỗ trợ kế hoạch kết nối Live Console WebSocket không chiếm màn hình cho Pterodactyl/Pelican (ẩn hoàn toàn JWT/API key).
+```mermaid
+flowchart LR
+  AI["Trợ lý AI (Claude Code / Cursor / Codex)"] -->|JSON-RPC 2.0 Stdio| MCP["MinecraftKit MCP Server (74 Tools)"]
+  MCP --> BOT["Tier-1 Bot Protocol (18-42 MB RAM, 0 GUI)"]
+  MCP --> VIS["Tier-2 Docker/Xvfb + Fabric Visual Mod"]
+  MCP --> OPS["Hosting 2FA TOTP + SFTP + Source RCON"]
+  MCP --> BRIDGE["mckit-bridge-plugin (127.0.0.1 TPS/Entities/GUI)"]
+  BOT -->|Tự Auth + Ảnh PNG / GIF / Visual Diff| AI
+  BRIDGE -->|Biểu đồ PNG TPS 60s + Lỗi SEVERE| AI
+```
 
-1. **Phiên Bot Tự Do Nhiều Lượt, So Sánh Ảnh Visual Diff & Quay Video MP4 (`mc_bot_session_*`, `mc_bot_visual_diff`, `mc_bot_capture_timelapse`)**:
-   - AI có thể mở phiên bot sống liên tục (`mc_bot_session_start`), điều khiển từng bước (`mc_bot_session_action`: gõ lệnh, di chuyển, bấm slot GUI, nhận pack, chụp ảnh PNG trả ngay về khung chat), ghép chuỗi khung hình thành **video MP4 chạy ngầm qua `ffmpeg`**, và chạy **so sánh ảnh pixel-exact (`mc_bot_visual_diff`)** tô đỏ vùng GUI/HUD bị lệch sau khi sửa code!
-2. **Kho Profile Bảo Mật Cho Hosting / VPS / SFTP / Bot (`mc_ops_profile_vault`)**:
-   - Lưu cấu hình server tại `~/.minecraftkit/profiles.json` với quyền `chmod 0600`, hỗ trợ tham chiếu `env:TEN_BIEN` và tự động ẩn toàn bộ mật khẩu, API key, khóa TOTP 2FA khi AI đọc hồ sơ.
-3. **Bot Kiểm Thử Tự Động Tối Ưu Tài Nguyên (`bot/`, `docker/`, `mc_bot_*`)**:
-   - **Tier 1 — Bot Protocol không mở app Minecraft (~42 MB RAM/bot, không chiếm màn hình)**: Chạy cùng lúc 10–25 bot mà chỉ tốn < 1 GB RAM (tiết kiệm > 95% RAM so với mở 10 tab Minecraft!). Tự động join server, tự nhận diện & gõ `/register` `/login` (AuthMe, nLogin, LimboAuth...) với mật khẩu luôn được ẩn (`[REDACTED_PASSWORD]`), chạy theo stages hoặc tự do, tự chụp ảnh PNG giao diện HUD/GUI/Inventory/Minimap/Chat trả thẳng vào khung chat AI.
-   - **Tier 2 — Docker Xvfb Visual Client (`docker/docker-compose.testgrid.yml`)**: Chạy 1 client Fabric trong container Xvfb + Mesa + ffmpeg để test shader/resource pack/model 3D và quay video MP4 chạy ngầm 100%, kết hợp cùng N-1 bot protocol!
-4. **Tự Kết Nối Hosting/VPS 2FA & SFTP Không Chiếm Màn Hình (`mc_hosting_*`, `mc_sftp_operations`)**:
-   - Hỗ trợ **Pterodactyl, Pelican, Crafty Controller, PufferPanel, Multicraft** với domain, tài khoản/API key và bộ sinh mã **2FA TOTP chuẩn RFC 6238** tích hợp sẵn.
-   - SFTP đầy đủ: xem file, đọc `logs/latest.log` lọc lỗi tự động, sửa config có backup `.mckit.bak`, và đẩy file `.jar` an toàn qua file tạm + SHA-256.
-5. **Plugin & Mod Hỗ Trợ Test Chuyên Dụng (`bridge-plugin/`, `client-mod/`)**:
-   - `mckit-bridge-plugin` (Paper & Folia Java 21): mở cầu nối cục bộ `127.0.0.1:25590` có xác thực token `X-MCKit-Token` giúp AI đọc TPS/MSPT, RAM, GUI người chơi (`/api/v1/gui`), danh sách thế giới (`/api/v1/worlds`) và lỗi `SEVERE` theo thời gian thực.
-   - `mckit-client-mod` (Fabric 1.21.4+): hỗ trợ chụp ảnh framebuffer và bắt lỗi reload shader/resource pack trong môi trường Xvfb/Docker.
-6. **Tích Hợp Toàn Bộ 10 Repo Minecraft Của SalyVn (`mc_suite_*`, `mc_run_qa_pipeline`)**:
-   - `mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, `texlab`.
+## Vì Sao Không Cần Mở 10 Tab Minecraft?
 
-## Cài Đặt Nhanh
+| Chế độ kiểm thử | RAM cho 10 Bot | Chiếm màn hình? | Phù hợp cho |
+| :--- | :--- | :--- | :--- |
+| **10 Tab Minecraft Desktop** | ~26.0 GB (nổ máy!) | Có (cướp focus liên tục) | Không nên dùng |
+| **Tier-1 Headless Protocol (`bot/` + `mc_proto_client.py`)** | **~180–420 MB** | **Không (0 GUI)** | AuthMe/nLogin, lệnh, Shop/GUI, Inventory, Scoreboard, Stress Test |
+| **Tier-2 Hybrid (1 Docker/Xvfb Visual + 9 Protocol)** | **~1.3 GB** | **Không (chạy ngầm)** | Kiểm tra Shader GLSL, Resource Pack 3D, quay GIF/MP4 |
+
+## Các Nhóm Tính Năng Cốt Lõi (v5.4.0)
+
+1. **Bot Kiểm Thử Tự Động Không Chiếm Màn Hình (`bot/`, `mc_bot_*`)**:
+   - Tự join server Java (`1.20.4`–`26.3`, kiểm tra ma trận ViaVersion/ViaBackwards/Geyser qua `mc_bot_probe_protocol_matrix`) & Bedrock/Geyser UDP (`mc_bot_ping_bedrock`).
+   - Tự nhận diện thông báo **Tiếng Việt & Tiếng Anh** của AuthMe / nLogin / OpeNLogin / LimboAuth, tự gõ `/register` `/login` và **luôn che mật khẩu thành `[REDACTED_PASSWORD]`**.
+   - Hỗ trợ đầy đủ hành động theo **Stages** hoặc **Tự do nhiều lượt (`mc_bot_session_*`)**: gửi lệnh, di chuyển (`move`), bấm slot GUI (`click_slot`), kiểm tra Chat / GUI / Inventory / Scoreboard, tự chụp **PNG giao diện**, **so sánh pixel Visual Diff (`mc_bot_visual_diff`)**, **ghép Storyboard PNG + Animated GIF (`mc_bot_record_stage_gif`)**, và **quay video MP4 (`mc_bot_capture_timelapse`)** trả thẳng vào khung chat AI!
+   - Bộ chạy Pool đa bot (`bot/pool-runner.mjs`) có giới hạn chống tràn RAM (`max 25`), độ trễ giãn nhịp join và thống kê `p50/p95` + tổng RSS MB.
+2. **Kết Nối Hosting / VPS (Có 2FA TOTP), RCON & SFTP Ngầm (`mc_hosting_*`, `mc_sftp_operations`, `mc_ops_*`)**:
+   - Kết nối không chiếm màn hình tới **Pterodactyl, Pelican, Crafty Controller, PufferPanel, Multicraft** bằng domain, tài khoản/API key và mã **2FA TOTP chuẩn RFC 6238**.
+   - **Kho Profile mã hoá quyền `chmod 0600` (`mc_ops_profile_vault`)**: lưu cấu hình một lần, hỗ trợ `env:TEN_BIEN`, tự ẩn mọi mật khẩu/token/secret.
+   - **SFTP an toàn**: đọc `logs/latest.log` lọc lỗi, vá config có backup `.mckit.bak`, đẩy file `.jar` theo cơ chế atomic + SHA-256.
+   - **VPS Anti-OOM & Docker Stack**: tính toán cờ JVM G1GC / Generational ZGC chống OOM, quy tắc tường lửa `ufw` (`mc_ops_vps_ssh_preflight`), và sinh trọn bộ `docker-compose` (`mc_ops_generate_docker_stack`).
+3. **Companion Plugin & Fabric Client Mod (`bridge-plugin/`, `client-mod/`)**:
+   - **`mckit-bridge-plugin`** (Paper/Folia Java 21, chỉ mở cục bộ `127.0.0.1:25590` xác thực `X-MCKit-Token`): đọc TPS/MSPT, **lịch sử TPS 60 giây tự vẽ biểu đồ PNG sparkline gửi vào chat**, **top 10 thực thể gây lag theo từng thế giới (`/api/v1/entities`)**, GUI đang mở của người chơi, và bộ đệm lỗi `SEVERE`.
+   - **`mckit-client-mod`** (Fabric + Docker Xvfb): chụp ảnh khung hình 3D ngầm và thu thập lỗi tải Resource Pack / Shader (`/api/v1/errors`).
+4. **Bộ Kiểm Toán Toàn Diện Không Cần Khởi Động Server (`mc_audit_*`, `mc_world_audit_integrity`)**:
+   - Kiểm tra file thế giới Anvil `.mca` & `level.dat`, lỗ hổng dupe/exploit, bảo mật Velocity/Paper/Geyser forwarding, quyền LuckPerms RBAC, HikariCP/SQL pool, hồ sơ lag Spark/Timings, Datapack 1.21+, và Shader GLSL 1.21+.
+5. **Tích Hợp Trọn Bộ 10 Repo Minecraft Của SalyVn (`mc_suite_full_ecosystem_doctor`, `mc_qa_run_full_lifecycle`)**:
+   - `mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, `texlab` + **41.887 API plugin RPG offline** (`ModelEngine`, `MMOItems`, `MMOCore`, `MythicCrucible`, `MythicDungeons`...).
+
+## Cài Đặt Nhanh (1 Dòng)
 
 ```bash
 npx minecraftkit install --target both
 npx minecraftkit mcp --print-config
 ```
 
-Cấu hình MCP nhanh cho Claude Code / Cursor / Windsurf / Antigravity:
+Cấu hình MCP cho **Claude Code / Cursor / Windsurf / Antigravity / Codex**:
 
 ```json
 {
