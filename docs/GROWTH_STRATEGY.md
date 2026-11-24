@@ -11,7 +11,7 @@ Don't pitch "just another docs repo." Lead with the **3 unmistakable painkillers
    - Show the visual benchmark: **10 Headless Protocol Bots = 420 MB RAM (0 desktop focus lock)** vs **10 Desktop Minecraft Clients = 26 GB RAM**.
 2. **"Your AI coding agent can now join your server, `/login`, open `/shop`, take a screenshot, read the console crash, and fix the Java bug automatically."**
    - Record a 45-second screen recording showing Claude Code / Cursor calling `mc_run_qa_pipeline`, receiving an inline PNG GUI snapshot in chat, spotting a broken MythicMobs/MMOItems slot, patching the plugin, deploying via SFTP, and passing on the second run.
-3. **"One MCP install unlocks 46 tools, 14 `/mc:*` skills, 41,887 bytecode-verified RPG APIs, and 10 specialized SalyVn CLI tools (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, ...)."**
+3. **"One MCP install unlocks 74 tools, 14 `/mc:*` skills, 41,887 bytecode-verified RPG APIs, and 10 specialized SalyVn CLI tools (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, ...)."**
 
 ---
 
@@ -70,33 +70,34 @@ Submit clean, policy-compliant PRs/listings to:
 
 ### A. Awesome-MCP-Servers PR Snippet (1-line Markdown bullet)
 ```markdown
-- [SalyyS1/minecraftkit](https://github.com/SalyyS1/minecraftkit) 🐍 📇 🏠 - All-in-one Minecraft engineering & QA MCP server (46 tools): 42 MB headless test bots (Java SLP, wire-level offline Login, Bedrock/Geyser RakNet), auto-auth, inline PNG visual diff & MP4 timelapse, headless 2FA hosting/RCON/SFTP ops, 41,887 offline RPG APIs, and 10 integrated Minecraft CLI tools.
+- [SalyyS1/minecraftkit](https://github.com/SalyyS1/minecraftkit) 🐍 📇 🏠 - All-in-one Minecraft engineering & QA MCP server (74 tools): 18-42 MB headless test bots (Java SLP, wire-level Login/Play, Bedrock/Geyser RakNet), auto-auth, inline PNG visual diff/GIF/MP4 timelapse, headless 2FA hosting/RCON/SFTP ops, security/exploit/world/shader/spark auditors, 41,887 offline RPG APIs, and 10 integrated Minecraft CLI tools.
 ```
 
 ### B. Reddit (`r/admincraft` / `r/MinecraftPlugins`) & PaperMC Showcase Post
-> **Title:** I built an open-source 46-tool Minecraft MCP server + 42 MB headless QA bot so Claude Code / Cursor can auto-join my Paper/Folia server, `/login`, inspect GUIs via inline PNG diffs, and fix bugs off-screen
+> **Title:** I built an open-source 74-tool Minecraft MCP server + 42 MB headless QA bot so Claude Code / Cursor can auto-join my Paper/Folia server, `/login`, inspect GUIs via inline PNG/GIF diffs, and fix bugs off-screen
 >
 > **Body:**
 > Testing custom RPG plugins on Paper/Folia used to mean launching multiple desktop Minecraft clients (2.6 GB RAM each, stealing window focus every time) while bouncing between SFTP, Pterodactyl, and `latest.log`.
 >
-> So I built **Salyyy Minecraft Kit** (`v3.6.0`, MIT, 100% local-first):
-> - **Tier-1 Headless Protocol Bots (~42 MB RAM/bot, 0 GUI, 0 focus lock)** + pure-Python wire-level Login probe (~18 MB) + Bedrock/Geyser RakNet UDP ping. Auto-detects AuthMe/nLogin `/register` & `/login` with strict `[REDACTED_PASSWORD]` scrubbing.
-> - **Inline PNG Visual Snapshots, Pixel-Exact Diff & ffmpeg MP4 Timelapses** returned directly inside Claude Code / Cursor / Codex chat.
-> - **Headless Hosting/VPS (Pterodactyl, Pelican, Crafty, PufferPanel) with pure-Python RFC 6238 TOTP 2FA, Source RCON, Live WS Console plans & Atomic SFTP JAR Deploy** + `chmod 0600` masked profile vault.
+> So I built **Salyyy Minecraft Kit** (`v5.0.0`, MIT, 100% local-first):
+> - **Tier-1 Headless Protocol Bots (~18–42 MB RAM/bot, 0 GUI, 0 focus lock)** + pure-Python wire-level Login/Play probe + Bedrock/Geyser RakNet UDP ping + **1.20.4–26.3 Protocol Compatibility Matrix**. Auto-detects AuthMe/nLogin/OpeNLogin `/register` & `/login` with strict `[REDACTED_PASSWORD]` scrubbing.
+> - **Inline PNG Visual Snapshots, Pixel-Exact Diff, Stitched Storyboard GIFs & ffmpeg MP4 Timelapses** returned directly inside Claude Code / Cursor / Codex chat.
+> - **Headless Hosting/VPS (Pterodactyl, Pelican, Crafty, PufferPanel) with pure-Python RFC 6238 TOTP 2FA, Source RCON, Live WS Console plans, Anti-OOM JVM Preflight & Atomic SFTP JAR Deploy** + `chmod 0600` masked profile vault.
+> - **Zero-JVM Static & Runtime Auditors**: Anvil `.mca` world corruption, Velocity/Paper/Geyser proxy forwarding, exploit & dupe vectors, HikariCP/MySQL pools, LuckPerms RBAC, Spark profiler bottlenecks, datapacks, and GLSL 1.21+ shader packs.
 > - **Companion `mckit-bridge-plugin` (Paper/Folia Java 21) & `mckit-client-mod` (Fabric + Docker Xvfb)** for TPS/MSPT/GUI/SEVERE ring-buffer inspection and off-screen 3D shader/pack captures.
 > - **41,887 offline bytecode-verified RPG APIs** (ModelEngine, MMOItems, MMOCore, MythicCrucible, MythicDungeons...) + **10 integrated SalyVn CLI tools** (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, `packmigrate`, `packmerge`, `glyphsmith`, `rp-engine`, `texlab`).
 >
-> Interactive Showcase (with Bot RAM Calculator & Live Canvas Visual Diff Lab): https://salyys1.github.io/minecraftkit/showcase.html
+> Interactive Showcase (with 3-Step Quick-Start, Bot RAM Calculator, Stage YAML Builder & Live Canvas Visual Diff Lab): https://salyys1.github.io/minecraftkit/showcase.html
 > Quick install: `npx minecraftkit install --target both && npx minecraftkit mcp --print-config`
 
 ### C. Bài Đăng Cộng Đồng Minecraft Dev & AI Việt Nam (Facebook / Discord)
-> **Tiêu đề:** Chia sẻ bộ công cụ mã nguồn mở **MinecraftKit v3.6.0** — 46 công cụ MCP giúp AI (Claude Code / Cursor / Codex) tự test server Minecraft bằng Bot 42MB không chiếm màn hình!
+> **Tiêu đề:** Chia sẻ bộ công cụ mã nguồn mở **MinecraftKit v5.0.0** — 74 công cụ MCP giúp AI (Claude Code / Cursor / Codex) tự test server Minecraft bằng Bot 18–42MB không chiếm màn hình!
 >
-> Anh em dev plugin Paper/Folia/RPG chắc từng đau đầu cảnh mở 5–10 tab Minecraft test tính năng muốn nổ RAM? Mình vừa hoàn thiện **Salyyy Minecraft Kit (v3.6.0)** hoàn toàn mã nguồn mở & chạy local 100%:
-> - 🤖 **Bot tự động siêu nhẹ (~42 MB RAM/bot, không mở app Minecraft, không cướp chuột)**: tự join server (Java + Bedrock/Geyser), tự nhận diện & gõ `/register` `/login` AuthMe/nLogin (mật khẩu luôn bị ẩn `[REDACTED]`), chạy theo stages hoặc tự do, tự chụp ảnh PNG giao diện GUI/HUD/Minimap & **so sánh pixel Visual Diff + quay MP4 Timelapse** trả thẳng về khung chat AI!
+> Anh em dev plugin Paper/Folia/RPG chắc từng đau đầu cảnh mở 5–10 tab Minecraft test tính năng muốn nổ RAM? Mình vừa hoàn thiện **Salyyy Minecraft Kit (v5.0.0 Major Edition)** hoàn toàn mã nguồn mở & chạy local 100%:
+> - 🤖 **Bot tự động siêu nhẹ (~18–42 MB RAM/bot, không mở app Minecraft, không cướp chuột)**: tự join server (Java 1.20.4–26.3 + Bedrock/Geyser), tự nhận diện & gõ `/register` `/login` AuthMe/nLogin (mật khẩu luôn bị ẩn `[REDACTED]`), chạy theo stages hoặc tự do, tự chụp ảnh PNG giao diện GUI/HUD/Minimap, **quay GIF/MP4 Timelapse & so sánh pixel Visual Diff** trả thẳng về khung chat AI!
 > - 🐳 **Docker Xvfb Visual Grid + Companion Plugin/Mod**: cần test shader/resource pack 3D thì chạy 1 container Xvfb ngầm kết hợp N-1 bot protocol, tiết kiệm >90% RAM.
-> - 🔐 **Tự kết nối Hosting/VPS có 2FA TOTP, RCON & SFTP không chiếm màn hình**: hỗ trợ Pterodactyl, Pelican, Crafty, đẩy file `.jar` an toàn qua file tạm + backup `.mckit.bak`.
-> - 🧰 **Tích hợp sẵn trọn bộ 10 công cụ Minecraft** (`mcstage`, `foliascan`, `shadersmith`, `packmigrate`, `pluginscope`, `serverdoctor`, `glyphsmith`, `packmerge`, `rp-engine`, `texlab`) + **41.887 API plugin RPG offline**!
+> - 🔐 **Tự kết nối Hosting/VPS có 2FA TOTP, RCON & SFTP không chiếm màn hình**: hỗ trợ Pterodactyl, Pelican, Crafty, đẩy file `.jar` an toàn qua file tạm + backup `.mckit.bak`, tự kiểm tra JVM anti-OOM & bảo mật Velocity/Proxy.
+> - 🧰 **Tích hợp sẵn trọn bộ 10 công cụ Minecraft** (`mcstage`, `foliascan`, `shadersmith`, `packmigrate`, `pluginscope`, `serverdoctor`, `glyphsmith`, `packmerge`, `rp-engine`, `texlab`) + **41.887 API plugin RPG offline** + **bộ kiểm toán bảo mật, world `.mca`, Spark TPS, HikariCP & GLSL Shader**!
 >
 > 🌐 Trải nghiệm trực tiếp trên web (hỗ trợ Tiếng Việt / English): https://salyys1.github.io/minecraftkit/showcase.html
 > ⚡ Cài nhanh 1 dòng: `npx minecraftkit install --target both`

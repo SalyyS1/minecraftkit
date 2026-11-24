@@ -28,6 +28,7 @@ import db_pool_auditor  # noqa: E402
 import docker_stack_generator  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
 import economy_stress_sim  # noqa: E402
+import ecosystem_doctor  # noqa: E402
 import exploit_auditor  # noqa: E402
 import fabric_capture_bridge  # noqa: E402
 import gif_recorder  # noqa: E402
@@ -37,6 +38,7 @@ import pack_parity  # noqa: E402
 import permissions_auditor  # noqa: E402
 import plugin_conflict_auditor  # noqa: E402
 import profile_vault  # noqa: E402
+import protocol_version_matrix  # noqa: E402
 import proxy_topology_auditor  # noqa: E402
 import qa_report_html  # noqa: E402
 import qa_smoke_doctor  # noqa: E402
@@ -2258,6 +2260,42 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_probe_protocol_matrix",
+        "title": "Minecraft Java / ViaVersion / Bedrock-Geyser Protocol Compatibility Matrix",
+        "description": (
+            "Compute native vs ViaVersion/ViaBackwards/Geyser protocol compatibility across Minecraft "
+            "1.20.4 through 26.3, reporting exact wire protocol numbers, pack_format/datapack_format, "
+            "item_model overlay warnings, and recommended bot handshake protocol."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_version": {"type": "string", "default": "1.21.4"},
+                "client_versions": {"type": "array", "items": {"type": "string"}},
+                "has_viaversion": {"type": "boolean", "default": False},
+                "has_viabackwards": {"type": "boolean", "default": False},
+                "has_geyser": {"type": "boolean", "default": False},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_suite_full_ecosystem_doctor",
+        "title": "Unified SalyVn MinecraftKit & 10-Tool Ecosystem Readiness Scorecard",
+        "description": (
+            "Run a comprehensive health check spanning local runtimes (Python, Node, Java, Docker, FFmpeg), "
+            "companion bridge-plugin & Fabric client-mod readiness, /mc:* skills, and all 10 integrated "
+            "SalyyS1 Minecraft CLI repos."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3304,6 +3342,8 @@ class MinecraftKitMcpServer:
             "mc_qa_generate_release_notes": self._tool_qa_generate_release_notes,
             "mc_audit_shader_pack": self._tool_audit_shader_pack,
             "mc_bot_compare_stage_runs": self._tool_bot_compare_stage_runs,
+            "mc_bot_probe_protocol_matrix": self._tool_bot_probe_protocol_matrix,
+            "mc_suite_full_ecosystem_doctor": self._tool_suite_full_ecosystem_doctor,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10306,6 +10346,20 @@ class MinecraftKitMcpServer:
             max_latency_increase_pct=float(args.get("max_latency_increase_pct", 30.0)),
         )
         return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_probe_protocol_matrix(self, args: dict[str, Any]) -> ToolOutcome:
+        cvers = args.get("client_versions")
+        payload = protocol_version_matrix.probe_protocol_matrix(
+            server_version=str(args.get("server_version", "1.21.4")),
+            client_versions=[str(x) for x in cvers] if isinstance(cvers, list) else None,
+            has_viaversion=bool(args.get("has_viaversion", False)),
+            has_viabackwards=bool(args.get("has_viabackwards", False)),
+            has_geyser=bool(args.get("has_geyser", False)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_suite_full_ecosystem_doctor(self, args: dict[str, Any]) -> ToolOutcome:
+        return ToolOutcome(_pretty_json(ecosystem_doctor.run_full_ecosystem_doctor(self.store.root)))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:
