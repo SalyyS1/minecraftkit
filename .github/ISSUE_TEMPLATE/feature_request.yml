@@ -1,0 +1,18 @@
+name: Feature or Integration Request
+description: Propose a new MCP tool, hosting panel adapter, auth plugin preset, or toolchain integration
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Workflow Gap
+      placeholder: What Minecraft engineering or server QA step do you want automated?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      placeholder: Describe the MCP tool, bot stage action, hosting adapter, or skill behavior.
+    validations:
+      required: true

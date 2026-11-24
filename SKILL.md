@@ -35,6 +35,10 @@ If a value cannot be discovered locally, mark it `UNVERIFIED`; do not silently s
 | `mc:model` | Blockbench, 2D/3D models, rigs, bones, animation and runtime exporters | [Models and animation](references/models-and-animation.md) |
 | `mc:protocol` | Wire protocol, packets, codecs, ProtocolLib, PacketEvents and Via projects | [Packets and protocols](references/packets-and-protocols.md) |
 | `mc:nms` | Minecraft internals, mappings, paperweight, reflection and version modules | [NMS and mappings](references/nms-and-mappings.md) |
+| `mc:bot` | Resource-optimized headless test bots, auto-auth, stage tests, visual PNG/Docker Xvfb capture | [Autonomous bot QA](references/autonomous-bot-qa.md) |
+| `mc:ops` | Headless hosting panels (Pterodactyl/Pelican/Crafty), RFC 6238 TOTP 2FA, and SFTP operations | [Hosting, VPS and SFTP ops](references/hosting-vps-sftp-ops.md) |
+| `mc:qa` | End-to-end automated QA pipeline: static audit, deploy/mcstage, bot stages, visual proof, triage | [End-to-end QA pipeline](references/end-to-end-qa-pipeline.md) |
+| `mc:suite` | Unified 10-tool SalyyS1 toolchain (`mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, `texlab`) | [Unified SalyVn toolchain](references/unified-salyvn-toolchain.md) |
 
 For multi-domain work, choose one primary route and add dependencies explicitly. A model-backed RPG boss may need `mc:rpg` + `mc:model` + `mc:pack`; do not treat those layers as one API.
 

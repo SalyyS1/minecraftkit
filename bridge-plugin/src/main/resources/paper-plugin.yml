@@ -1,0 +1,7 @@
+name: MCKitBridge
+version: '${version}'
+main: com.salyvn.mckit.bridge.McKitBridgePlugin
+api-version: '1.21.4'
+folia-supported: true
+authors: [SalyVn, Salyyy]
+description: Lightweight localhost QA inspection & telemetry bridge for Salyyy MinecraftKit autonomous bots and MCP tools.

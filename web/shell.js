@@ -3,6 +3,7 @@
 
   var page = document.body.dataset.page || "wiki";
   var pages = [
+    { id: "showcase", href: "showcase.html", label: "Showcase" },
     { id: "wiki", href: "wiki.html", label: "Wiki" },
     { id: "ecosystem", href: "ecosystem.html", label: "Ecosystem" },
     { id: "api", href: "index.html", label: "API Explorer" },

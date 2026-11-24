@@ -1,0 +1,42 @@
+# Salyyy MinecraftKit — Hybrid Resource-Governed Off-Screen Bot Test Grid
+# Runs 8 lightweight Tier-1 headless protocol bots (~336 MB total) + 1 Tier-2
+# off-screen Xvfb visual client (~1.4 GB) = < 2 GB total vs ~24 GB for 9 desktop tabs!
+services:
+  mckit-protocol-pool:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.protocol-bot
+    environment:
+      - MC_HOST=${MC_HOST:-host.docker.internal}
+      - MC_PORT=${MC_PORT:-25565}
+      - MC_VERSION=${MC_VERSION:-1.21.4}
+      - BOT_POOL_SIZE=${BOT_POOL_SIZE:-8}
+      - BOT_AUTH_PASSWORD=${MCKIT_BOT_PASSWORD:-}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '1.50'
+    volumes:
+      - ../artifacts/bot-reports:/app/reports
+    restart: 'no'
+
+  mckit-visual-client:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.visual-bot
+    environment:
+      - DISPLAY=:99
+      - XVFB_WHD=1280x720x24
+      - MC_HOST=${MC_HOST:-host.docker.internal}
+      - MC_PORT=${MC_PORT:-25565}
+      - CAPTURE_FPS=2
+      - LIBGL_ALWAYS_SOFTWARE=1
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
+          cpus: '2.00'
+    volumes:
+      - ../artifacts/visual-captures:/app/captures
+    restart: 'no'

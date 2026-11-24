@@ -1,0 +1,24 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openjdk-21-jre-headless \
+    xvfb \
+    x11-utils \
+    libgl1-mesa-dri \
+    libglx-mesa0 \
+    libegl1 \
+    ffmpeg \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY docker/capture-xvfb.sh /app/capture-xvfb.sh
+RUN chmod +x /app/capture-xvfb.sh
+
+ENV DISPLAY=:99 \
+    XVFB_WHD=1280x720x24 \
+    LIBGL_ALWAYS_SOFTWARE=1
+
+ENTRYPOINT ["/app/capture-xvfb.sh"]

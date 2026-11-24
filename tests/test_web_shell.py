@@ -14,6 +14,7 @@ WEB = ROOT / "web"
 class UnifiedWebShellTests(unittest.TestCase):
     def test_every_explorer_uses_the_local_shell_and_logo(self) -> None:
         for name, page in {
+            "showcase.html": "showcase",
             "wiki.html": "wiki",
             "ecosystem.html": "ecosystem",
             "index.html": "api",
@@ -31,7 +32,7 @@ class UnifiedWebShellTests(unittest.TestCase):
         self.assertIn("localStorage", shell)
         self.assertIn("mk-loader", shell)
         self.assertNotRegex(shell + styles, r"https?://|innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(")
-        for script_name in ("shell.js", "playground.js"):
+        for script_name in ("shell.js", "playground.js", "showcase.js"):
             result = subprocess.run(
                 ["node", "--check", str(WEB / script_name)],
                 text=True,

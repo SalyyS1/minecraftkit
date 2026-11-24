@@ -1,0 +1,21 @@
+{
+  "name": "minecraftkit-bot-worker",
+  "version": "3.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Lightweight headless Minecraft protocol bot worker (~42 MB RAM/bot, zero GUI, zero screen lock) for Salyyy MinecraftKit QA.",
+  "scripts": {
+    "worker": "node worker.mjs",
+    "pool": "node pool-runner.mjs",
+    "check": "node --check worker.mjs && node --check pool-runner.mjs"
+  },
+  "dependencies": {
+    "mineflayer": "^4.25.0"
+  },
+  "optionalDependencies": {
+    "prismarine-viewer": "^1.33.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

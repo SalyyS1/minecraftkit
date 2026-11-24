@@ -1,0 +1,25 @@
+name: Share a Bot QA Stage Recipe
+description: Contribute a reusable headless bot stage scenario for AuthMe, RPG plugins, Dungeons, or Minigames
+labels: ["bot-recipe", "community"]
+body:
+  - type: input
+    id: plugin_or_server
+    attributes:
+      label: Target Plugin / Server Stack
+      placeholder: "e.g., Paper 26.3 + AuthMe + MMOItems + DeluxeMenus"
+    validations:
+      required: true
+  - type: textarea
+    id: stages_json
+    attributes:
+      label: Stage Recipe (JSON)
+      render: json
+      placeholder: |
+        [
+          {"name": "Join", "action": "join"},
+          {"name": "Auto Login", "action": "auth"},
+          {"name": "Open Shop", "action": "command", "command": "/shop"},
+          {"name": "Verify GUI", "action": "assert_gui", "title_pattern": "Shop"}
+        ]
+    validations:
+      required: true

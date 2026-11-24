@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "minecraftkit",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
@@ -12,7 +12,7 @@
     "parse_errors": 0,
     "addon_ideas": 30,
     "decompiled_files_inventoried": 11490,
-    "minecraft_domains": 10,
+    "minecraft_domains": 14,
     "upstream_sources": 103,
     "minecraft_versions": 901,
     "latest_minecraft_release": "26.2",
@@ -141,8 +141,8 @@
       "sha256": "c72db5bc64d522570e8c0302317d64b490261f8f9078c59132d8a3e525ec4014"
     },
     "data/minecraft-domain-catalog.json": {
-      "bytes": 3832,
-      "sha256": "4f01ad57a72be1c67ff8739bb1f3e99903a0d33c9a3462164d90c374eb6c8d08"
+      "bytes": 5162,
+      "sha256": "401a3595552f0a036819e96f6ecc9f33a5ec497cd07ccfec4fd8d047e6ff5ad8"
     },
     "data/wiki-content.json": {
       "bytes": 52066,
@@ -173,8 +173,8 @@
       "sha256": "e734a34f06014d1523b0e94a076e62691a6aea2af87b34b3785796799de51583"
     },
     "web/data/ecosystem.js": {
-      "bytes": 374459,
-      "sha256": "4eb2eb5f8408a70c94ce9f01d89d3cd9d0fba9f8d09f1886d7bd77e4bd5ff8f8"
+      "bytes": 375556,
+      "sha256": "976eb61b6367f3f30fe5be9ca6aba0220bf0313a527db92406eda261bb38b8df"
     },
     "web/data/wiki.js": {
       "bytes": 46378,
@@ -189,8 +189,8 @@
       "sha256": "ee4ef80ff9662d82e926eeca44adc2e938012db949ba8a42c4ad29475e8f2e44"
     },
     "web/ecosystem.html": {
-      "bytes": 11161,
-      "sha256": "5f2554586418eb4df8e09da7f61464132f18a371a74fb33d213737254e8a3b6f"
+      "bytes": 11166,
+      "sha256": "38a43b157bd1de14ae69fb42acef1f436fc25b579990769d2a6f6bc3c3d3f7d2"
     },
     "web/ecosystem.css": {
       "bytes": 25145,

@@ -1,42 +1,39 @@
-# Salyyy Minecraft Kit
+# Salyyy Minecraft Kit (v3.1.0)
 
-**Bộ công cụ hỗ trợ làm plugin Minecraft cho Codex và Claude — SalyVn / Salyyy.**
+[English (README.md)](README.md) · [**Trang Giới Thiệu Chính (Showcase)**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Wiki Song Ngữ](https://salyys1.github.io/minecraftkit/wiki.html) · [Chiến Lược Cộng Đồng](docs/GROWTH_STRATEGY.md)
 
-[English (README.md)](README.md)
+Bộ công cụ AI Engineering, **33 công cụ MCP**, **14 kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ không chiếm màn hình**, **Kết nối Hosting/VPS có 2FA & SFTP**, **Companion Testing Plugin & Fabric Client Mod**, và **tích hợp trọn bộ 10 công cụ Minecraft của SalyVn / Salyyy**.
 
-Minecraft Kit giúp bạn chọn đúng hướng khi làm plugin: RPG, Paper/Folia, packet, NMS, resource pack, Blockbench/model, shader, client-side và dialog. Wiki có hướng dẫn dễ đọc; API Explorer có sẵn dữ liệu để tra nhanh. Kit không thay thế việc test trên server thật, nhưng giúp bạn bắt đầu nhanh và ít sai hướng hơn.
+## Điểm Nổi Bật Ở Bản v3.1.0
 
-## Cài nhanh
+1. **Bot Kiểm Thử Tự Động Tối Ưu Tài Nguyên (`bot/`, `docker/`, `mc_bot_*`)**:
+   - **Tier 1 — Bot Protocol không mở app Minecraft (~42 MB RAM/bot, không chiếm màn hình)**: Chạy cùng lúc 10–25 bot mà chỉ tốn < 1 GB RAM (tiết kiệm > 95% RAM so với mở 10 tab Minecraft!). Tự động join server, tự nhận diện & gõ `/register` `/login` (AuthMe, nLogin, LimboAuth...) với mật khẩu luôn được ẩn (`[REDACTED_PASSWORD]`), chạy theo stages hoặc tự do, tự chụp ảnh PNG giao diện HUD/GUI/Inventory/Minimap/Chat trả thẳng vào khung chat AI.
+   - **Tier 2 — Docker Xvfb Visual Client (`docker/docker-compose.testgrid.yml`)**: Chạy 1 client Fabric trong container Xvfb + Mesa + ffmpeg để test shader/resource pack/model 3D và quay video MP4 chạy ngầm 100%, kết hợp cùng N-1 bot protocol!
+2. **Tự Kết Nối Hosting/VPS 2FA & SFTP Không Chiếm Màn Hình (`mc_hosting_*`, `mc_sftp_operations`)**:
+   - Hỗ trợ **Pterodactyl, Pelican, Crafty Controller, PufferPanel, Multicraft** với domain, tài khoản/API key và bộ sinh mã **2FA TOTP chuẩn RFC 6238** tích hợp sẵn.
+   - SFTP đầy đủ: xem file, đọc `logs/latest.log` lọc lỗi tự động, sửa config có backup `.mckit.bak`, và đẩy file `.jar` an toàn qua file tạm + SHA-256.
+3. **Plugin & Mod Hỗ Trợ Test Chuyên Dụng (`bridge-plugin/`, `client-mod/`)**:
+   - `mckit-bridge-plugin` (Paper & Folia Java 21): mở cầu nối cục bộ `127.0.0.1:25590` có xác thực token `X-MCKit-Token` giúp AI đọc TPS/MSPT, RAM, GUI người chơi và danh sách lỗi `SEVERE` theo thời gian thực.
+   - `mckit-client-mod` (Fabric 1.21.4+): hỗ trợ chụp ảnh framebuffer và bắt lỗi reload shader/resource pack trong môi trường Xvfb/Docker.
+4. **Tích Hợp Toàn Bộ 10 Repo Minecraft Của SalyVn (`mc_suite_*`, `mc_run_qa_pipeline`)**:
+   - `mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, `texlab`.
 
-```powershell
+## Cài Đặt Nhanh
+
+```bash
 npx minecraftkit install --target both
+npx minecraftkit mcp --print-config
 ```
 
-Chỉ cài cho một bên:
+Cấu hình MCP nhanh cho Claude Code / Cursor / Windsurf / Antigravity:
 
-```powershell
-npx minecraftkit install --target codex
-npx minecraftkit install --target claude
+```json
+{
+  "mcpServers": {
+    "minecraftkit": {
+      "command": "npx",
+      "args": ["-y", "minecraftkit", "mcp"]
+    }
+  }
+}
 ```
-
-Muốn dùng lệnh ở mọi thư mục:
-
-```powershell
-npm install -g minecraftkit
-minecraftkit doctor
-```
-
-`doctor` kiểm tra Node, PowerShell, Python và trạng thái cài đặt. `update` cập nhật Kit. `commands` liệt kê các route `mc:*`.
-
-## Dùng ở đâu?
-
-- [Wiki chính](https://salyys1.github.io/minecraftkit/wiki.html): hướng dẫn, cách cài và tìm kiếm theo việc bạn muốn làm.
-- [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html): nguồn tham khảo, phiên bản và nền tảng Minecraft.
-- [RPG API Explorer](https://salyys1.github.io/minecraftkit/): tra API của các plugin RPG đã được tổng hợp.
-- [npm package](https://www.npmjs.com/package/minecraftkit) · [GitHub Releases](https://github.com/SalyyS1/minecraftkit/releases)
-
-## Các lệnh Claude
-
-Claude có `/mc:build`, `/mc:core`, `/mc:rpg`, `/mc:shader`, `/mc:dialog`, `/mc:client`, `/mc:pack`, `/mc:model`, `/mc:protocol` và `/mc:nms`. Codex tự chọn skill phù hợp từ nội dung bạn yêu cầu.
-
-Xem [NOTICE.md](NOTICE.md) trước khi phân phối lại nội dung có nguồn gốc từ bên thứ ba.

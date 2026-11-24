@@ -1,0 +1,29 @@
+name: Bug Report
+description: Report a bug in MinecraftKit MCP tools, headless bot runner, hosting/SFTP bridge, or skills
+labels: ["bug", "triage"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - MCP Server (scripts/mcp_server.py)
+        - Headless Bot Engine / Visual Capture
+        - Hosting Panel / 2FA / SFTP Bridge
+        - Companion Bridge Plugin / Fabric Client Mod
+        - /mc:* Agent Skills / CLI Installer
+        - GitHub Pages Web Showcase / Explorers
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce
+      placeholder: Include exact MCP tool call or CLI command (redact any passwords/tokens!).
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      placeholder: OS, Python version, Node version, Minecraft/Paper/Folia version.

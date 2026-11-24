@@ -29,7 +29,7 @@ class MinecraftKitRouteTests(unittest.TestCase):
     def test_domain_catalog_drives_wrappers_commands_and_references(self) -> None:
         domains = self.catalog["domains"]
         self.assertEqual(self.catalog["schema_version"], 1)
-        self.assertEqual(len(domains), 10)
+        self.assertEqual(len(domains), 14)
         self.assertIn("build", {item["id"] for item in domains})
         self.assertEqual([item["id"] for item in domains], sorted(item["id"] for item in domains))
 

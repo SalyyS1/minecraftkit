@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "mckit_visual_client",
+  "version": "1.0.0",
+  "name": "MinecraftKit Visual QA Client Bridge",
+  "description": "Off-screen framebuffer screenshot, HUD/GUI layout exporter, and shader/resource-pack reload error reporter for Salyyy MinecraftKit Tier-2 Xvfb/Docker visual tests.",
+  "authors": ["SalyVn", "Salyyy"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.salyvn.mckit.client.McKitVisualClientMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": ">=1.21.4",
+    "java": ">=21"
+  }
+}

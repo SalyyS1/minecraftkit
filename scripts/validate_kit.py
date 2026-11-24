@@ -54,14 +54,18 @@ REQUIRED = (
     "references/upstream-source-catalog.md", "references/plugin-build-and-shipping.md",
     "references/kotlin-java-gradle.md", "references/database-config-and-runtime.md",
     "references/release-publishing-checklist.md",
-    "commands/mc/core.md", "commands/mc/rpg.md", "commands/mc/shader.md",
+    "references/autonomous-bot-qa.md", "references/hosting-vps-sftp-ops.md",
+    "references/end-to-end-qa-pipeline.md", "references/unified-salyvn-toolchain.md",
+    "commands/mc/bot.md", "commands/mc/core.md", "commands/mc/rpg.md", "commands/mc/shader.md",
     "commands/mc/dialog.md", "commands/mc/client.md", "commands/mc/pack.md",
     "commands/mc/model.md", "commands/mc/protocol.md", "commands/mc/nms.md", "commands/mc/build.md",
-    "skill-wrappers/mc-core/SKILL.md", "skill-wrappers/mc-rpg/SKILL.md",
+    "commands/mc/ops.md", "commands/mc/qa.md", "commands/mc/suite.md",
+    "skill-wrappers/mc-bot/SKILL.md", "skill-wrappers/mc-core/SKILL.md", "skill-wrappers/mc-rpg/SKILL.md",
     "skill-wrappers/mc-shader/SKILL.md", "skill-wrappers/mc-dialog/SKILL.md",
     "skill-wrappers/mc-client/SKILL.md", "skill-wrappers/mc-pack/SKILL.md",
     "skill-wrappers/mc-model/SKILL.md", "skill-wrappers/mc-protocol/SKILL.md",
     "skill-wrappers/mc-nms/SKILL.md", "skill-wrappers/mc-build/SKILL.md",
+    "skill-wrappers/mc-ops/SKILL.md", "skill-wrappers/mc-qa/SKILL.md", "skill-wrappers/mc-suite/SKILL.md",
     "scripts/render_ecosystem_web.py", "tests/test_render_ecosystem_web.py",
     "scripts/render_wiki_web.py", "tests/test_render_wiki_web.py",
     "scripts/install-global.ps1", "scripts/install-from-github.ps1",
@@ -83,7 +87,8 @@ ALLOWED_DIRECTORY_EXTENSIONS = {
     "web": {".html", ".css", ".js", ".webp"},
 }
 EXCLUDED_DIRECTORY_NAMES = {
-    "dist", "npm", "__pycache__", ".pytest_cache", ".git", ".github", ".gitignore", ".gitattributes",
+    "dist", "npm", "bot", "bridge-plugin", "client-mod", "docker", "__pycache__", ".pytest_cache",
+    ".git", ".github", ".gitignore", ".gitattributes",
     "Dockerfile", "glama.json", "smithery.yaml", "server.json",
 }
 EXCLUDED_DIRECTORY_PREFIXES = (".api-stage-", ".web-stage-", ".minecraft-rpg-kit-stage-", ".minecraftkit-stage-")
@@ -387,7 +392,7 @@ def validate(root: Path) -> list[str]:
             errors.append("web manifest is incomplete")
         if web_insights.get("stats", {}).get("totalMembers") != 41887:
             errors.append("web insight counts do not reconcile")
-        if len(web_ecosystem.get("domains", [])) != 10:
+        if len(web_ecosystem.get("domains", [])) != 14:
             errors.append("ecosystem web domain count does not reconcile")
         if len(web_ecosystem.get("sources", [])) != 103:
             errors.append("ecosystem web source count does not reconcile")
@@ -426,11 +431,12 @@ def validate(root: Path) -> list[str]:
             "ecosystem.css", "ecosystem-app.js", "ecosystem-renderers.js", "shell.css", "shell.js",
             "wiki.html", "wiki.css", "wiki-app.js",
             "playground.html", "playground.css", "playground.js",
+            "showcase.html", "showcase.css", "showcase.js",
         )
     )
     if re.search(r"https?://|\bfetch\s*\(", web_text, re.IGNORECASE):
         errors.append("offline web contains a remote URL or fetch call")
-    for safe_js in ("web/wiki-app.js", "web/playground.js"):
+    for safe_js in ("web/wiki-app.js", "web/playground.js", "web/showcase.js"):
         js_runtime = (root / safe_js).read_text(encoding="utf-8")
         if re.search(r"innerHTML|outerHTML|insertAdjacentHTML|document\.write|\beval\s*\(", js_runtime):
             errors.append(f"{safe_js} contains an unsafe DOM or evaluation sink")

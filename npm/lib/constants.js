@@ -10,6 +10,7 @@ export const REPOSITORY_URL = "https://github.com/SalyyS1/minecraftkit";
 export const TARGETS = ["codex", "claude", "both"];
 
 export const ROUTES = [
+  ["mc:bot", "Run headless test bots, auto-auth, stage tests & off-screen captures."],
   ["mc:build", "Build, test, version and ship Kotlin/Java plugins."],
   ["mc:core", "Resolve game, Java, fork, loader and API contracts."],
   ["mc:rpg", "Design RPG systems and verified plugin integrations."],
@@ -19,7 +20,10 @@ export const ROUTES = [
   ["mc:pack", "Build resource/data packs and delivery contracts."],
   ["mc:model", "Plan Blockbench models, rigs and animation pipelines."],
   ["mc:protocol", "Handle packets, codecs and version-safe wire contracts."],
-  ["mc:nms", "Isolate mapped internals and exact-version adapters."]
+  ["mc:nms", "Isolate mapped internals and exact-version adapters."],
+  ["mc:ops", "Connect headlessly to hosting panels (2FA) and VPS SFTP."],
+  ["mc:qa", "Orchestrate end-to-end plugin & server QA pipelines."],
+  ["mc:suite", "Coordinate all 10 integrated SalyyS1 Minecraft CLI tools."]
 ];
 
 export function packageMetadata() {

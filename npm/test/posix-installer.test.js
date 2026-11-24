@@ -195,11 +195,13 @@ test("installFromSourceRoot performs verified transactional install and preserve
       claudeCommandsRoot: claudeCommands,
       output: (line) => logs.push(line)
     });
-    assert.equal(result.installed, 12);
+    assert.equal(result.installed, 16);
     assert.equal(existsSync(join(claudeSkills, "minecraftkit", "SKILL.md")), true);
     assert.equal(existsSync(join(claudeSkills, "minecraftkit", "skill-wrappers")), false);
     assert.equal(existsSync(join(claudeSkills, "mc-core", "SKILL.md")), true);
+    assert.equal(existsSync(join(claudeSkills, "mc-bot", "SKILL.md")), true);
     assert.equal(existsSync(join(claudeCommands, "mc", "core.md")), true);
+    assert.equal(existsSync(join(claudeCommands, "mc", "qa.md")), true);
     assert.equal(readFileSync(join(legacyDir, "marker.txt"), "utf8"), "keep");
   } finally {
     rmSync(work, { recursive: true, force: true });

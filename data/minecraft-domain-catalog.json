@@ -2,6 +2,14 @@
   "schema_version": 1,
   "domains": [
     {
+      "id": "bot",
+      "name": "Autonomous Bot QA",
+      "route": "mc:bot",
+      "skill_directory": "mc-bot",
+      "reference": "references/autonomous-bot-qa.md",
+      "keywords": ["authme", "auto login", "bot", "docker grid", "headless bot", "mineflayer", "off-screen capture", "screenshot", "stage test", "xvfb"]
+    },
+    {
       "id": "build",
       "name": "Plugin Build And Shipping",
       "route": "mc:build",
@@ -50,6 +58,14 @@
       "keywords": ["internals", "mapping", "mojmap", "nms", "paperweight", "parchment", "reflection", "remap", "spigot mapping", "userdev", "yarn"]
     },
     {
+      "id": "ops",
+      "name": "Hosting VPS And SFTP Ops",
+      "route": "mc:ops",
+      "skill_directory": "mc-ops",
+      "reference": "references/hosting-vps-sftp-ops.md",
+      "keywords": ["2fa", "crafty", "hosting", "panel", "pelican", "pterodactyl", "sftp", "ssh", "totp", "vps"]
+    },
+    {
       "id": "pack",
       "name": "Resource And Data Packs",
       "route": "mc:pack",
@@ -66,6 +82,14 @@
       "keywords": ["codec", "mcprotocollib", "network", "packet", "packetevents", "protocol", "protocollib", "viarewind", "viaversion", "wire format"]
     },
     {
+      "id": "qa",
+      "name": "End-To-End QA Pipeline",
+      "route": "mc:qa",
+      "skill_directory": "mc-qa",
+      "reference": "references/end-to-end-qa-pipeline.md",
+      "keywords": ["automated testing", "bridge plugin", "ci pipeline", "crash triage", "integration test", "mcstage", "qa", "visual snapshot"]
+    },
+    {
       "id": "rpg",
       "name": "RPG Systems",
       "route": "mc:rpg",
@@ -80,6 +104,14 @@
       "skill_directory": "mc-shader",
       "reference": "references/shaders-and-rendering.md",
       "keywords": ["canvas", "core shader", "fragment shader", "glsl", "iris", "render pipeline", "shader", "sodium", "veil", "vertex shader"]
+    },
+    {
+      "id": "suite",
+      "name": "Unified SalyVn Toolchain Suite",
+      "route": "mc:suite",
+      "skill_directory": "mc-suite",
+      "reference": "references/unified-salyvn-toolchain.md",
+      "keywords": ["foliascan", "glyphsmith", "mcstage", "packmerge", "packmigrate", "pluginscope", "rp-engine", "serverdoctor", "shadersmith", "texlab"]
     }
   ],
   "evidence_classes": [

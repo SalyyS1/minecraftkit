@@ -97,7 +97,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         ping = self.rpc({"jsonrpc": "2.0", "id": "ping-1", "method": "ping"})
         self.assertEqual(ping, {"jsonrpc": "2.0", "id": "ping-1", "result": {}})
 
-    def test_tools_list_exposes_all_twenty_one_readonly_tools(self) -> None:
+    def test_tools_list_exposes_all_thirty_three_tools(self) -> None:
         response = self.rpc({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
         assert response is not None
         tools = response["result"]["tools"]
@@ -126,10 +126,22 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_audit_sql_persistence",
                 "mc_profile_chunk_io_barriers",
                 "mc_correlate_spark_jfr_traces",
+                "mc_bot_plan_resources",
+                "mc_bot_ping_server",
+                "mc_bot_run_stages",
+                "mc_bot_inspect_session",
+                "mc_bot_generate_docker_grid",
+                "mc_hosting_connect_plan",
+                "mc_hosting_server_action",
+                "mc_sftp_operations",
+                "mc_suite_catalog",
+                "mc_suite_orchestrate",
+                "mc_bridge_plugin_query",
+                "mc_run_qa_pipeline",
             ],
         )
         for tool in tools:
-            self.assertEqual(tool["annotations"], {"readOnlyHint": True})
+            self.assertIn("readOnlyHint", tool["annotations"])
             self.assertEqual(tool["inputSchema"]["type"], "object")
             self.assertFalse(tool["inputSchema"]["additionalProperties"])
 
@@ -280,7 +292,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 21)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 33)
 
     def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
         res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
@@ -313,7 +325,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         assert overview_resp is not None
         overview_data = json.loads(overview_resp["result"]["contents"][0]["text"])
         self.assertEqual(overview_data["plugin_count"], 10)
-        self.assertEqual(len(overview_data["routes"]), 10)
+        self.assertEqual(len(overview_data["routes"]), 14)
 
         handbook_resp = self.rpc({
             "jsonrpc": "2.0",
@@ -337,9 +349,13 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         prompts_resp = self.rpc({"jsonrpc": "2.0", "id": 34, "method": "prompts/list"})
         assert prompts_resp is not None
         prompt_names = {p["name"] for p in prompts_resp["result"]["prompts"]}
-        self.assertEqual(len(prompt_names), 10)
+        self.assertEqual(len(prompt_names), 14)
         self.assertIn("mc-core", prompt_names)
         self.assertIn("mc-build", prompt_names)
+        self.assertIn("mc-bot", prompt_names)
+        self.assertIn("mc-ops", prompt_names)
+        self.assertIn("mc-qa", prompt_names)
+        self.assertIn("mc-suite", prompt_names)
 
         prompt_get = self.rpc({
             "jsonrpc": "2.0",
@@ -1232,7 +1248,7 @@ dependencies:
         ):
             self.assertIn(expected, codes)
         self.assertEqual(res["sarif_report"]["version"], "2.1.0")
-        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.0.0")
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.1.0")
 
         # Clean bounded RegistryFriendlyByteBuf codec with exact field wire math
         clean_codec = "\n".join([
@@ -1409,7 +1425,7 @@ dependencies:
             "CHUNK-IO-008",
         ):
             self.assertIn(expected, codes)
-        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.0.0")
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.1.0")
 
         # Healthy sub-critical LZ4 async pipeline passes cleanly
         clean_src = "\n".join([

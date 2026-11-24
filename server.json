@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.SalyyS1/minecraftkit",
-  "description": "Offline Minecraft Paper 26.3, Folia, Moonrise chunk I/O barrier, Spark/JFR trace correlation, scheduler affinity, Netty StreamCodec, HikariCP/SQLite, item component, Gradle, crash report, datapack, and RPG plugin API MCP server (21 tools, 23 resources, 10 prompts).",
-  "version": "3.0.0",
+  "description": "All-in-one Minecraft engineering & autonomous QA MCP server: Paper 26.3, Folia, headless test bots with auto-auth & off-screen PNG visual capture, hosting panel 2FA/SFTP connector, companion Paper/Folia bridge plugin & Fabric visual mod, and unified 10-tool SalyyS1 suite (33 tools, 27 resources, 14 prompts).",
+  "version": "3.1.0",
   "repository": {
     "url": "https://github.com/SalyyS1/minecraftkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "minecraftkit",
-      "version": "3.0.0",
+      "version": "3.1.0",
       "transport": {
         "type": "stdio"
       },

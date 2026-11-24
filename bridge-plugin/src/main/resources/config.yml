@@ -1,0 +1,4 @@
+# Salyyy MinecraftKit Companion QA Bridge Plugin
+# Strictly binds to localhost (127.0.0.1). Leave token empty to auto-generate a secure 24-byte URL-safe token.
+port: 25590
+token: ""

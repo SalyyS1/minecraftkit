@@ -16,8 +16,12 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from catalog_io import strict_json_file  # noqa: E402
+import bot_engine  # noqa: E402
+import hosting_bridge  # noqa: E402
 import query_api  # noqa: E402
 import query_sources  # noqa: E402
+import toolchain_bridge  # noqa: E402
+import visual_capture  # noqa: E402
 
 
 PROTOCOL_VERSION = "2025-11-25"
@@ -87,6 +91,7 @@ DOMAIN_SYNONYM_HINTS: dict[str, tuple[str, ...]] = {
 class ToolOutcome:
     text: str
     is_error: bool = False
+    images: tuple[tuple[str, str], ...] = ()
 
 
 def _strict_loads(raw: str) -> Any:
@@ -1099,6 +1104,282 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_plan_resources",
+        "title": "Plan Resource-Optimized Headless Minecraft Bot Fleet",
+        "description": (
+            "Calculate the optimal off-screen bot tier (Tier-1 Headless Protocol ~42 MB/bot vs Hybrid 1 Visual "
+            "Docker/Xvfb + N-1 Protocol vs Cloud Grid), RAM/CPU savings versus opening desktop Minecraft tabs, "
+            "and anti-OOM governor caps."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "bot_count": {"type": "integer", "minimum": 1, "maximum": 200, "description": "Number of concurrent test bots (default 10)."},
+                "host_ram_gb": {"type": "number", "minimum": 0.5, "maximum": 1024.0, "description": "Available host RAM in GB (default 8.0)."},
+                "needs_shader_or_3d_render": {"type": "boolean", "description": "True if testing GLSL shaders or 3D client rendering."},
+                "needs_resource_pack_visuals": {"type": "boolean", "description": "True if verifying custom models/textures visually."},
+                "prefer_cloud_docker": {"type": "boolean", "description": "Prefer Cloud Docker Xvfb Grid architecture."},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_ping_server",
+        "title": "Probe Minecraft Server Status via Native SLP Protocol",
+        "description": (
+            "Perform a lightweight pure-Python Minecraft Java Edition Server List Ping (SLP) TCP handshake "
+            "to inspect server version, protocol, online/max players, MOTD, and latency without launching a client."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string", "description": "Server hostname or IP address."},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "description": "Server TCP port (default 25565)."},
+                "protocol_version": {"type": "integer", "minimum": 47, "maximum": 10000, "description": "Handshake protocol version (default 769)."},
+                "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "description": "Socket timeout in seconds (default 4.0)."},
+            },
+            "required": ["host"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "mc_bot_run_stages",
+        "title": "Run Headless Minecraft Test Bot Stages with Off-Screen Visual Capture",
+        "description": (
+            "Launch a screen-lock-free headless test bot (auto-register/login for AuthMe/nLogin/LimboAuth with "
+            "strict password redaction), run freeform or stage-driven assertions (join, auth, accept_pack, command, "
+            "move, click_slot, assert_chat, assert_no_chat, assert_gui, assert_scoreboard, assert_tps, capture), "
+            "and return an off-screen PNG visual snapshot directly into the chat."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string", "description": "Minecraft server host/IP (default 127.0.0.1)."},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "description": "Server port (default 25565)."},
+                "username": {"type": "string", "description": "Bot username (default MCKitTester)."},
+                "version": {"type": "string", "description": "Target Minecraft version (default 1.21.4)."},
+                "password": {"type": "string", "description": "Optional auth password for /register and /login (always redacted from outputs)."},
+                "tier": {"type": "string", "enum": ["tier1-protocol", "tier2-docker-visual"], "description": "Bot execution tier (default tier1-protocol)."},
+                "mode": {"type": "string", "enum": ["auto", "live-node", "simulate"], "description": "Execution backend mode (default auto)."},
+                "stages": {"type": "array", "items": {"type": "object"}, "description": "Ordered stage steps to execute."},
+                "initial_state": {"type": "object", "description": "Optional initial observed/mock state (chat, open_gui, scoreboard, entities, tps)."},
+                "capture_snapshot": {"type": "boolean", "description": "Return off-screen PNG visual snapshot in MCP image block (default true)."},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
+    {
+        "name": "mc_bot_inspect_session",
+        "title": "Render Off-Screen Visual QA Card for Bot HUD, GUI, Chat & Minimap",
+        "description": (
+            "Render a crisp off-screen PNG visual snapshot (HUD telemetry, 9x4 Chest/Inventory GUI slots with lore, "
+            "2D entity minimap, scoreboard, and redacted chat/stage verdicts) directly into the AI chat without "
+            "stealing desktop screen focus."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "state": {"type": "object", "description": "Bot telemetry, open_gui slots, chat lines, scoreboard, entities, and stage results."},
+                "title": {"type": "string", "description": "Optional header title for the rendered PNG snapshot card."},
+                "include_base64_in_json": {"type": "boolean", "description": "Also embed base64 string inside JSON response (default false; always returned as MCP image block)."},
+            },
+            "required": ["state"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_generate_docker_grid",
+        "title": "Generate Resource-Capped Off-Screen Docker/Xvfb Bot Test Grid",
+        "description": (
+            "Generate a ready-to-run docker-compose.yml for running headless protocol bots alongside optional "
+            "off-screen Xvfb visual Fabric clients with hard RAM/CPU cgroup caps."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_host": {"type": "string", "description": "Target Minecraft server host (default host.docker.internal)."},
+                "server_port": {"type": "integer", "minimum": 1, "maximum": 65535, "description": "Server port (default 25565)."},
+                "protocol_bots": {"type": "integer", "minimum": 0, "maximum": 50, "description": "Number of Tier-1 headless protocol bots (default 8)."},
+                "visual_bots": {"type": "integer", "minimum": 0, "maximum": 8, "description": "Number of Tier-2 Xvfb visual client containers (default 1)."},
+                "mc_version": {"type": "string", "description": "Target Minecraft version (default 1.21.4)."},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_hosting_connect_plan",
+        "title": "Configure Headless Hosting/VPS Panel Connection & RFC 6238 TOTP 2FA",
+        "description": (
+            "Validate hosting panel domain, panel type (Pterodactyl, Pelican, Crafty, PufferPanel, Multicraft, generic), "
+            "credentials, and RFC 6238 TOTP 2FA secret/code with strict secret redaction and zero visible browser windows."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "domain": {"type": "string", "description": "Hosting panel domain or HTTPS URL."},
+                "panel_type": {"type": "string", "enum": ["pterodactyl", "pelican", "crafty", "pufferpanel", "multicraft", "generic"]},
+                "username": {"type": "string", "description": "Panel username or email."},
+                "has_password": {"type": "boolean", "description": "Whether password auth is configured."},
+                "has_api_key": {"type": "boolean", "description": "Whether a Client API key is configured."},
+                "totp_secret": {"type": "string", "description": "Optional Base32 TOTP secret or otpauth:// URI (redacted in outputs)."},
+                "totp_code": {"type": "string", "description": "Optional 6- or 8-digit one-time 2FA code."},
+                "server_id": {"type": "string", "description": "Target server identifier on the hosting panel."},
+                "probe_reachability": {"type": "boolean", "description": "Send a headless HEAD probe to verify panel reachability (default false)."},
+            },
+            "required": ["domain"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "mc_hosting_server_action",
+        "title": "Execute Headless Hosting Panel Server Action (Power, Console, Status)",
+        "description": (
+            "Run or dry-run headless server operations on Pterodactyl/Pelican/Crafty/PufferPanel hosting panels "
+            "(status, resources, start, stop, restart, kill, command, backups) without stealing desktop screen focus."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "domain": {"type": "string", "description": "Hosting panel domain or URL."},
+                "panel_type": {"type": "string", "enum": ["pterodactyl", "pelican", "crafty", "pufferpanel", "multicraft", "generic"]},
+                "server_id": {"type": "string", "description": "Panel server identifier."},
+                "action": {"type": "string", "enum": ["status", "resources", "start", "stop", "restart", "kill", "command", "backups"]},
+                "api_key": {"type": "string", "description": "Optional Client API key (defaults to MCKIT_PANEL_TOKEN env var; always redacted)."},
+                "command": {"type": "string", "description": "Console command when action='command'."},
+                "dry_run": {"type": "boolean", "description": "Preview exact HTTP request without sending (default true)."},
+            },
+            "required": ["domain", "server_id", "action"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
+    {
+        "name": "mc_sftp_operations",
+        "title": "Headless SFTP Server File, Config Patch, Log Tail & Atomic JAR Deploy",
+        "description": (
+            "Connect to a Minecraft VPS or hosting SFTP endpoint via IP/host, port, username, and password/key "
+            "to list directories, tail latest.log with stacktrace highlighting, safely patch configs with .bak "
+            "backups, or atomically deploy plugin JARs."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string", "description": "SFTP host or IP address."},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "description": "SFTP port (default 22)."},
+                "username": {"type": "string", "description": "SFTP username."},
+                "password": {"type": "string", "description": "Optional SFTP password (redacted from outputs)."},
+                "private_key_path": {"type": "string", "description": "Optional path to SSH private key."},
+                "operation": {"type": "string", "enum": ["list", "read", "tail_log", "patch_config", "deploy_jar", "list_crashes"]},
+                "remote_path": {"type": "string", "description": "Remote POSIX path (default '/')."},
+                "local_path": {"type": "string", "description": "Local file path for deploy_jar."},
+                "tail_lines": {"type": "integer", "minimum": 1, "maximum": 500, "description": "Number of lines for tail_log (default 80)."},
+                "patch_find": {"type": "string", "description": "Exact target text to replace in patch_config."},
+                "patch_replace": {"type": "string", "description": "Replacement text in patch_config."},
+                "dry_run": {"type": "boolean", "description": "Plan and validate operation without mutating remote server (default true)."},
+            },
+            "required": ["host", "username", "operation"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
+    {
+        "name": "mc_suite_catalog",
+        "title": "Inspect Integrated SalyyS1 Minecraft Toolchain Suite",
+        "description": (
+            "Query all 10 integrated SalyyS1 Minecraft engineering tools (mcstage, shadersmith, packmigrate, "
+            "packmerge, glyphsmith, pluginscope, serverdoctor, foliascan, rp-engine, texlab), check local "
+            "installation status, and get exact CLI/SARIF/MCP invocation recipes."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "category": {"type": "string", "description": "Optional category filter (runtime-testing, shaders, resource-pack, static-audit, diagnostics, textures)."},
+                "tool_id": {"type": "string", "description": "Optional single tool ID (e.g. mcstage, shadersmith, foliascan)."},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_suite_orchestrate",
+        "title": "Build or Run Integrated SalyyS1 Toolchain Commands",
+        "description": (
+            "Construct or execute commands against any integrated SalyyS1 Minecraft CLI tool (mcstage, shadersmith, "
+            "packmigrate, packmerge, glyphsmith, pluginscope, serverdoctor, foliascan) with argv safety."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "tool_id": {"type": "string", "description": "Integrated tool ID (mcstage, shadersmith, packmigrate, packmerge, glyphsmith, pluginscope, serverdoctor, foliascan, rp-engine, texlab)."},
+                "args": {"type": "array", "items": {"type": "string"}, "description": "CLI arguments to pass to the tool."},
+                "cwd": {"type": "string", "description": "Optional working directory."},
+                "execute": {"type": "boolean", "description": "Execute locally if installed (default false: returns command plan)."},
+                "timeout_seconds": {"type": "integer", "minimum": 5, "maximum": 300, "description": "Execution timeout (default 60)."},
+            },
+            "required": ["tool_id"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
+    {
+        "name": "mc_bridge_plugin_query",
+        "title": "Query Companion mckit-bridge-plugin Server QA Telemetry",
+        "description": (
+            "Query the optional localhost token-authenticated mckit-bridge-plugin running on your test Paper/Folia "
+            "server for live TPS/MSPT, JVM heap, active player/GUI state, loaded plugins, and grouped exception traces."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "base_url": {"type": "string", "description": "Bridge plugin base URL (default http://127.0.0.1:25590)."},
+                "token": {"type": "string", "description": "X-MCKit-Token auth secret."},
+                "endpoint": {"type": "string", "enum": ["health", "metrics", "players", "errors", "plugins"], "description": "Bridge endpoint to query (default health)."},
+                "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "description": "HTTP timeout in seconds (default 3.0)."},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "mc_run_qa_pipeline",
+        "title": "Run End-to-End Automated Minecraft QA Pipeline (Audit + Deploy + Bot + Visual + Triage)",
+        "description": (
+            "Orchestrate a full Minecraft QA cycle in one call: bot fleet resource planning -> static plugin & "
+            "shader/pack audit plans (pluginscope, foliascan, shadersmith, packmigrate, glyphsmith) -> SFTP/Panel/"
+            "mcstage deployment plan -> headless bot stage test execution with off-screen PNG visual snapshot "
+            "returned directly in chat -> serverdoctor post-test diagnostics."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project_name": {"type": "string", "description": "Plugin or server project name."},
+                "target_mc_version": {"type": "string", "description": "Target Minecraft version (default 26.3)."},
+                "plugin_jar": {"type": "string", "description": "Optional path to built plugin JAR."},
+                "resource_pack_dir": {"type": "string", "description": "Optional path to resource pack directory."},
+                "server_host": {"type": "string", "description": "Test server host (default 127.0.0.1)."},
+                "server_port": {"type": "integer", "minimum": 1, "maximum": 65535, "description": "Test server port (default 25565)."},
+                "bot_username": {"type": "string", "description": "Bot username (default MCKitQABot)."},
+                "bot_password": {"type": "string", "description": "Optional bot auth password (redacted)."},
+                "bot_count": {"type": "integer", "minimum": 1, "maximum": 100, "description": "Planned bot concurrency (default 1)."},
+                "needs_visual_render": {"type": "boolean", "description": "Whether 3D/shader visual client rendering is needed."},
+                "panel_domain": {"type": "string", "description": "Optional hosting panel domain."},
+                "panel_type": {"type": "string", "enum": ["pterodactyl", "pelican", "crafty", "pufferpanel", "multicraft", "generic"]},
+                "sftp_host": {"type": "string", "description": "Optional SFTP host/IP."},
+                "sftp_user": {"type": "string", "description": "Optional SFTP username."},
+                "stages": {"type": "array", "items": {"type": "object"}, "description": "Bot QA stages to run."},
+                "initial_bot_state": {"type": "object", "description": "Optional mock/observed bot state for deterministic stage QA."},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
 )
 
 
@@ -2093,6 +2374,18 @@ class MinecraftKitMcpServer:
             "mc_audit_sql_persistence": self._tool_audit_sql_persistence,
             "mc_profile_chunk_io_barriers": self._tool_profile_chunk_io_barriers,
             "mc_correlate_spark_jfr_traces": self._tool_correlate_spark_jfr_traces,
+            "mc_bot_plan_resources": self._tool_bot_plan_resources,
+            "mc_bot_ping_server": self._tool_bot_ping_server,
+            "mc_bot_run_stages": self._tool_bot_run_stages,
+            "mc_bot_inspect_session": self._tool_bot_inspect_session,
+            "mc_bot_generate_docker_grid": self._tool_bot_generate_docker_grid,
+            "mc_hosting_connect_plan": self._tool_hosting_connect_plan,
+            "mc_hosting_server_action": self._tool_hosting_server_action,
+            "mc_sftp_operations": self._tool_sftp_operations,
+            "mc_suite_catalog": self._tool_suite_catalog,
+            "mc_suite_orchestrate": self._tool_suite_orchestrate,
+            "mc_bridge_plugin_query": self._tool_bridge_plugin_query,
+            "mc_run_qa_pipeline": self._tool_run_qa_pipeline,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -2393,10 +2686,18 @@ class MinecraftKitMcpServer:
         except Exception as error:  # noqa: BLE001
             outcome = ToolOutcome(f"{type(error).__name__}: {error}", is_error=True)
 
+        content_blocks: list[dict[str, Any]] = [{"type": "text", "text": outcome.text}]
+        for b64_data, mime_type in outcome.images:
+            content_blocks.append({
+                "type": "image",
+                "data": b64_data,
+                "mimeType": mime_type,
+            })
+
         return self._result_response(
             msg_id,
             {
-                "content": [{"type": "text", "text": outcome.text}],
+                "content": content_blocks,
                 "isError": outcome.is_error,
             },
         )
@@ -8371,6 +8672,182 @@ class MinecraftKitMcpServer:
         if sarif:
             out["sarif_report"] = self._build_sarif_report(findings)
         return ToolOutcome(_pretty_json(out))
+
+    def _tool_bot_plan_resources(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = bot_engine.plan_bot_resources(
+            bot_count=int(args.get("bot_count", 10)),
+            host_ram_gb=float(args.get("host_ram_gb", 8.0)),
+            needs_shader_or_3d_render=bool(args.get("needs_shader_or_3d_render", False)),
+            needs_resource_pack_visuals=bool(args.get("needs_resource_pack_visuals", False)),
+            prefer_cloud_docker=bool(args.get("prefer_cloud_docker", False)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_ping_server(self, args: dict[str, Any]) -> ToolOutcome:
+        host = args.get("host")
+        if not isinstance(host, str) or not host.strip():
+            raise ValueError("'host' must be a non-empty string.")
+        payload = bot_engine.ping_minecraft_server(
+            host=host.strip(),
+            port=int(args.get("port", 25565)),
+            protocol_version=int(args.get("protocol_version", 769)),
+            timeout_seconds=float(args.get("timeout_seconds", 4.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_run_stages(self, args: dict[str, Any]) -> ToolOutcome:
+        capture = bool(args.get("capture_snapshot", True))
+        payload = bot_engine.run_bot_stages(
+            host=str(args.get("host", "127.0.0.1")),
+            port=int(args.get("port", 25565)),
+            username=str(args.get("username", "MCKitTester")),
+            version=str(args.get("version", "1.21.4")),
+            password=str(args.get("password", "")),
+            tier=str(args.get("tier", "tier1-protocol")),
+            mode=str(args.get("mode", "auto")),
+            stages=args.get("stages"),
+            initial_state=args.get("initial_state"),
+            capture_snapshot=capture,
+            root_dir=self.store.root,
+        )
+        b64_png = payload.pop("snapshot_png_base64", None)
+        images: tuple[tuple[str, str], ...] = ()
+        if capture and isinstance(b64_png, str) and b64_png:
+            payload["snapshot_attached_as_mcp_image"] = True
+            images = ((b64_png, "image/png"),)
+        return ToolOutcome(_pretty_json(payload), is_error=False, images=images)
+
+    def _tool_bot_inspect_session(self, args: dict[str, Any]) -> ToolOutcome:
+        state = args.get("state")
+        if not isinstance(state, dict):
+            raise ValueError("'state' must be a JSON object.")
+        title = str(args.get("title", "MINECRAFTKIT HEADLESS BOT QA SNAPSHOT"))
+        png_bytes = visual_capture.render_bot_snapshot_png(state, title=title)
+        b64_png = visual_capture.encode_png_base64(png_bytes)
+        payload: dict[str, Any] = {
+            "rendered": True,
+            "screen_lock_free": True,
+            "mime_type": "image/png",
+            "bytes": len(png_bytes),
+            "title": title,
+            "snapshot_attached_as_mcp_image": True,
+        }
+        if bool(args.get("include_base64_in_json", False)):
+            payload["base64"] = b64_png
+        return ToolOutcome(_pretty_json(payload), images=((b64_png, "image/png"),))
+
+    def _tool_bot_generate_docker_grid(self, args: dict[str, Any]) -> ToolOutcome:
+        compose_yaml = bot_engine.generate_docker_testgrid_compose(
+            server_host=str(args.get("server_host", "host.docker.internal")),
+            server_port=int(args.get("server_port", 25565)),
+            protocol_bots=int(args.get("protocol_bots", 8)),
+            visual_bots=int(args.get("visual_bots", 1)),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+        )
+        return ToolOutcome(_pretty_json({
+            "filename": "docker-compose.testgrid.yml",
+            "screen_lock_free": True,
+            "compose_yaml": compose_yaml,
+        }))
+
+    def _tool_hosting_connect_plan(self, args: dict[str, Any]) -> ToolOutcome:
+        domain = args.get("domain")
+        if not isinstance(domain, str) or not domain.strip():
+            raise ValueError("'domain' must be a non-empty string.")
+        payload = hosting_bridge.build_hosting_connection_plan(
+            domain=domain.strip(),
+            panel_type=str(args.get("panel_type", "pterodactyl")),
+            username=str(args.get("username", "")),
+            has_password=bool(args.get("has_password", False)),
+            has_api_key=bool(args.get("has_api_key", False)),
+            totp_secret=str(args.get("totp_secret", "")),
+            totp_code=str(args.get("totp_code", "")),
+            server_id=str(args.get("server_id", "")),
+            probe_reachability=bool(args.get("probe_reachability", False)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_hosting_server_action(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = hosting_bridge.execute_hosting_action(
+            domain=str(args.get("domain", "")),
+            panel_type=str(args.get("panel_type", "pterodactyl")),
+            server_id=str(args.get("server_id", "")),
+            action=str(args.get("action", "status")),
+            api_key=str(args.get("api_key", "")),
+            command=str(args.get("command", "")),
+            dry_run=bool(args.get("dry_run", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_sftp_operations(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = hosting_bridge.sftp_operation(
+            host=str(args.get("host", "")),
+            port=int(args.get("port", 22)),
+            username=str(args.get("username", "")),
+            password=str(args.get("password", "")),
+            private_key_path=str(args.get("private_key_path", "")),
+            operation=str(args.get("operation", "list")),
+            remote_path=str(args.get("remote_path", "/")),
+            local_path=str(args.get("local_path", "")),
+            tail_lines=int(args.get("tail_lines", 80)),
+            patch_find=str(args.get("patch_find", "")),
+            patch_replace=str(args.get("patch_replace", "")),
+            dry_run=bool(args.get("dry_run", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_suite_catalog(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = toolchain_bridge.inspect_suite_catalog(
+            category=args.get("category"),
+            tool_id=args.get("tool_id"),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_suite_orchestrate(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = toolchain_bridge.orchestrate_suite_command(
+            tool_id=str(args.get("tool_id", "")),
+            args=args.get("args"),
+            cwd=args.get("cwd"),
+            execute=bool(args.get("execute", False)),
+            timeout_seconds=int(args.get("timeout_seconds", 60)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bridge_plugin_query(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = bot_engine.query_bridge_plugin(
+            base_url=str(args.get("base_url", "http://127.0.0.1:25590")),
+            token=str(args.get("token", "")),
+            endpoint=str(args.get("endpoint", "health")),
+            timeout_seconds=float(args.get("timeout_seconds", 3.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_run_qa_pipeline(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = toolchain_bridge.run_qa_pipeline(
+            project_name=str(args.get("project_name", "MinecraftPlugin")),
+            target_mc_version=str(args.get("target_mc_version", "26.3")),
+            plugin_jar=str(args.get("plugin_jar", "")),
+            resource_pack_dir=str(args.get("resource_pack_dir", "")),
+            server_host=str(args.get("server_host", "127.0.0.1")),
+            server_port=int(args.get("server_port", 25565)),
+            bot_username=str(args.get("bot_username", "MCKitQABot")),
+            bot_password=str(args.get("bot_password", "")),
+            bot_count=int(args.get("bot_count", 1)),
+            needs_visual_render=bool(args.get("needs_visual_render", False)),
+            panel_domain=str(args.get("panel_domain", "")),
+            panel_type=str(args.get("panel_type", "pterodactyl")),
+            sftp_host=str(args.get("sftp_host", "")),
+            sftp_user=str(args.get("sftp_user", "")),
+            stages=args.get("stages"),
+            initial_bot_state=args.get("initial_bot_state"),
+            root_dir=self.store.root,
+        )
+        b64_png = payload.pop("snapshot_png_base64", None)
+        images: tuple[tuple[str, str], ...] = ()
+        if isinstance(b64_png, str) and b64_png:
+            payload["snapshot_attached_as_mcp_image"] = True
+            images = ((b64_png, "image/png"),)
+        return ToolOutcome(_pretty_json(payload), images=images)
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

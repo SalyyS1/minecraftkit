@@ -1,20 +1,29 @@
 # Salyyy Minecraft Kit
 
-[Tiếng Việt (README.vi.md)](README.vi.md) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [npm](https://www.npmjs.com/package/minecraftkit)
+[Tiếng Việt (README.vi.md)](README.vi.md) · [**Flagship Showcase**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [Growth Playbook](docs/GROWTH_STRATEGY.md) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v3.0.0](https://img.shields.io/badge/version-v3.0.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.0.0)
+[![Version: v3.1.0](https://img.shields.io/badge/version-v3.1.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.1.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
-Offline Minecraft plugin engineering catalog, 10 `/mc:*` agent skills for Claude Code and Codex, interactive web explorers, and a zero-dependency stdio MCP server by **SalyVn / Salyyy**.
+All-in-one Minecraft plugin engineering, autonomous headless bot QA, off-screen visual capture, headless hosting/VPS/2FA & SFTP operations, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 33-tool stdio MCP server by **SalyVn / Salyyy**.
 
 ## What Salyyy Minecraft Kit Includes
 
-- **Offline RPG & Plugin Bytecode API Catalog**: 4,947 plugin-owned types and 41,887 bytecode-verified members across 10 major RPG and server plugins (`ModelEngine`, `MMOItems`, `MMOCore`, `MMOInventory`, `MMOProfiles`, `MythicCrucible`, `MythicDungeons`, `MythicEnchants`, `MythicRPG`, `CoreTools`), plus 103 curated Paper/Folia/Fabric/NeoForge/Velocity/pack GitHub sources and 901 Mojang release/snapshot version records.
-- **10 `/mc:*` Engineering Agent Skills**: Specialized routing skills and slash commands for Claude Code and OpenAI Codex covering Paper/Folia runtime contracts (`mc:core`), Gradle/Kotlin builds (`mc:build`), RPG integrations (`mc:rpg`), packets (`mc:protocol`), NMS adapters (`mc:nms`), resource/data packs (`mc:pack`), Blockbench rigs (`mc:model`), shaders (`mc:shader`), dialogs (`mc:dialog`), and client projections (`mc:client`).
-- **Interactive Web Explorers**: Zero-backend browser tools for instant symbol lookup, version capability inspection, and workflow search.
-- **Built-In Stdio MCP Server**: Pure Python 3.10+ JSON-RPC 2.0 Model Context Protocol server (`scripts/mcp_server.py` and `minecraftkit mcp`) for Cursor, Windsurf, Claude Desktop, and Claude Code.
+- **Resource-Optimized Autonomous Test Bot Engine (`bot/`, `docker/`, `scripts/bot_engine.py`, `scripts/visual_capture.py`)**:
+  - **Tier 1 Headless Protocol Bots (~42 MB RAM/bot, ZERO GUI, ZERO screen lock)**: Auto-joins servers, auto-completes `/register` and `/login` (AuthMe, nLogin, OpeNLogin, LimboAuth, VelocityAuth) with strict password redaction, accepts resource packs, runs stage-based or freeform gameplay assertions, and renders crisp off-screen PNG visual QA snapshots (HUD telemetry, 9×4 GUI/Chest slots, scoreboard, 2D entity minimap, redacted chat) returned directly inside MCP chat responses.
+  - **Tier 2 Hybrid Docker/Xvfb Visual Client Grid (`docker/Dockerfile.visual-bot`, `docker/docker-compose.testgrid.yml`)**: Runs 1 containerized off-screen Fabric visual client (Xvfb + Mesa + ffmpeg) alongside N-1 lightweight protocol bots — saving **> 85% RAM** vs opening 10 desktop Minecraft tabs without ever stealing window focus!
+- **Companion Testing Plugin & Client Mod (`bridge-plugin/`, `client-mod/`)**:
+  - **`mckit-bridge-plugin`** (Paper/Folia Java 21): Token-authenticated loopback (`127.0.0.1:25590`) HTTP/JSON telemetry bridge exposing live TPS/MSPT, JVM heap, loaded chunks, online player GUI states, plugins, and a bounded ring buffer of grouped `SEVERE`/exception traces.
+  - **`mckit-client-mod`** (Fabric 1.21.4+): Off-screen framebuffer capture & resource-pack/shader reload error bridge (`127.0.0.1:25591`) for Tier-2 Docker/Xvfb visual QA.
+- **Headless Hosting / VPS Panel (with RFC 6238 TOTP 2FA) & SFTP Connector (`scripts/hosting_bridge.py`)**:
+  - Connects headlessly to **Pterodactyl**, **Pelican**, **Crafty Controller**, **PufferPanel**, **Multicraft**, and generic web panels via domain, credentials/API key, and built-in pure-Python RFC 6238 TOTP 2FA — zero visible browser popups, strict secret redaction.
+  - Full SFTP operations (`list`, `read`, `tail_log` with error highlighting, safe `.mckit.bak` config patching, atomic temp-file + SHA-256 plugin JAR deployment, crash report listing) with path-traversal protection.
+- **Unified 10-Repo SalyyS1 Minecraft Toolchain (`scripts/toolchain_bridge.py`)**: Integrates `mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, and `texlab` into a single `mc_run_qa_pipeline` end-to-end automated QA loop.
+- **Offline RPG & Plugin Bytecode API Catalog**: 4,947 plugin-owned types and 41,887 bytecode-verified members across 10 major RPG and server plugins (`ModelEngine`, `MMOItems`, `MMOCore`, `MMOInventory`, `MMOProfiles`, `MythicCrucible`, `MythicDungeons`, `MythicEnchants`, `MythicRPG`, `CoreTools`), plus 103 curated GitHub sources and 901 Mojang release/snapshot records.
+- **14 `/mc:*` Engineering Agent Skills**: Specialized routing skills and slash commands for Claude Code, Cursor, Windsurf, Antigravity, and OpenAI Codex covering `mc:bot`, `mc:build`, `mc:core`, `mc:rpg`, `mc:protocol`, `mc:nms`, `mc:ops`, `mc:pack`, `mc:model`, `mc:qa`, `mc:shader`, `mc:dialog`, `mc:client`, and `mc:suite`.
+- **33-Tool Stdio MCP Server**: Pure Python 3.10+ JSON-RPC 2.0 MCP server (`scripts/mcp_server.py` and `minecraftkit mcp`) with native multimodal PNG image responses for live visual bot testing.
 
 ## Quick Install
 
@@ -93,6 +102,18 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_audit_sql_persistence` | Audit Paper, Folia, and Velocity plugin SQL persistence layers and HikariCP configurations (`SQL-001` through `SQL-007`), computing fleet MySQL connection budgets and `maxLifetime` vs `wait_timeout` safety margins, and catching synchronous tick-thread JDBC calls, SQLite multi-pool `SQLITE_BUSY` contention without WAL, unclosed JDBC resource leaks, SQL string interpolation, and direct Bukkit/Folia mutations inside async DB completion callbacks, with optional OASIS SARIF v2.1.0 output. |
 | `mc_profile_chunk_io_barriers` | Profile Paper `1.21.4` through `26.3+` Moonrise and Folia async chunk I/O pipelines, plugin chunk tickets, and worldgen worker saturation (`CHUNK-IO-001` through `CHUNK-IO-008`), computing Sakasegawa M/M/c expected barrier latency, utilization `rho`, and resident chunk RAM budgets while catching synchronous tick-thread chunk loads, `CompletableFuture.join()` self-deadlocks, unbounded ticket leaks, `sync-chunk-writes` fsync stalls, and Folia `16x16` region-section escapes, with optional OASIS SARIF v2.1.0 output. |
 | `mc_correlate_spark_jfr_traces` | Cross-correlate Spark CPU/wall/alloc flamegraphs with JDK Flight Recorder (JFR) event streams and unified HotSpot GC/safepoint/tick-spike logs (`CORR-001` through `CORR-007`), computing sweep-line interval overlap attribution, directed `JavaMonitorEnter` wait-for deadlock graphs, outside-TLAB allocation churn, JDK 21/25 virtual-thread pinning, and Folia region thread Gini skew, with optional OASIS SARIF v2.1.0 output. |
+| `mc_bot_plan_resources` | Calculate optimal off-screen bot fleet architecture (Tier-1 Headless Protocol ~42 MB/bot vs Hybrid 1 Visual Docker/Xvfb + N-1 Protocol vs Cloud Grid), RAM savings vs desktop tabs, and anti-OOM governor caps. |
+| `mc_bot_ping_server` | Native pure-Python Minecraft Java Edition Server List Ping (SLP) TCP handshake probe (version, protocol, online/max players, MOTD, latency) with zero client launch. |
+| `mc_bot_run_stages` | Launch headless screen-lock-free test bots with auto-register/login (AuthMe/nLogin/LimboAuth, redacted passwords), stage assertions (`join`, `auth`, `accept_pack`, `command`, `move`, `click_slot`, `assert_chat`, `assert_gui`, `assert_scoreboard`, `assert_tps`), and off-screen PNG visual snapshots returned directly in chat. |
+| `mc_bot_inspect_session` | Render an on-demand off-screen PNG visual QA card (HUD telemetry, 9×4 Chest/Inventory GUI grid, 2D entity minimap, scoreboard, redacted chat) directly as an MCP image block. |
+| `mc_bot_generate_docker_grid` | Generate a resource-capped `docker-compose.testgrid.yml` for off-screen Tier-1 protocol bot pools and Tier-2 Xvfb visual Fabric containers. |
+| `mc_hosting_connect_plan` | Validate headless hosting panel connections (Pterodactyl, Pelican, Crafty, PufferPanel, Multicraft, generic) with domain, credentials/API key, and built-in RFC 6238 TOTP 2FA generator (fully redacted, zero browser popups). |
+| `mc_hosting_server_action` | Execute or dry-run headless hosting panel operations (`status`, `resources`, `start`, `stop`, `restart`, `kill`, `command`, `backups`). |
+| `mc_sftp_operations` | Headless SFTP/SSH server operations (`list`, `read`, `tail_log`, safe `.mckit.bak` `patch_config`, atomic `deploy_jar`, `list_crashes`) with path-traversal guards and secret redaction. |
+| `mc_suite_catalog` | Inspect all 10 integrated SalyyS1 Minecraft tools (`mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, `texlab`), local availability, and recipes. |
+| `mc_suite_orchestrate` | Construct or safely execute CLI commands across any integrated SalyyS1 Minecraft tool. |
+| `mc_bridge_plugin_query` | Query the companion loopback token-authenticated `mckit-bridge-plugin` (TPS/MSPT, JVM heap, player GUI states, loaded plugins, grouped SEVERE error ring buffer). |
+| `mc_run_qa_pipeline` | Execute the complete 5-phase automated Minecraft QA loop: resource planning -> static plugin/pack/shader audits -> SFTP/Panel/mcstage deploy -> headless bot stage tests + visual PNG snapshot -> `serverdoctor` triage. |
 
 ### Exposed MCP Resources & Slash Prompts
 
@@ -120,6 +141,10 @@ minecraftkit version
 | `/mc:rpg` | RPG system architecture and verified bytecode integrations across 10 RPG plugins |
 | `/mc:protocol` | Netty pipelines, StreamCodec, packet listeners, and version-safe wire contracts |
 | `/mc:nms` | Mojang-mapped internals, Paperweight userdev, and multi-version adapter isolation |
+| `/mc:bot` | Resource-optimized headless test bots, auto-auth, stage tests, and off-screen PNG/Docker Xvfb visual capture |
+| `/mc:ops` | Headless hosting panels (Pterodactyl/Pelican/Crafty), RFC 6238 TOTP 2FA, and SFTP deployment/log ops |
+| `/mc:qa` | End-to-end closed-loop Minecraft QA pipeline (audit -> deploy -> headless bot -> visual proof -> auto-fix) |
+| `/mc:suite` | Unified orchestration across all 10 integrated SalyyS1 Minecraft open-source CLI/MCP tools |
 | `/mc:pack` | Resource packs, data packs, custom fonts/glyphs, item models, and delivery contracts |
 | `/mc:model` | Blockbench `.bbmodel` rigs, hitbox budgets, animations, and ModelEngine pipelines |
 | `/mc:shader` | Vanilla core/post GLSL shaders, uniforms, render targets, and client boundaries |
