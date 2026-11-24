@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.SalyyS1/minecraftkit",
   "description": "Flagship v7.3.0 all-in-one Minecraft engineering & autonomous QA MCP server (80 tools): Paper 26.3, Folia, Paper/Purpur/Spigot config anti-lag & Velocity/BungeeCord proxy forwarding auditors, 1-call server fingerprinter, ViaVersion/Geyser protocol matrix, headless test bots (18-42 MB/bot, auto-auth, Stage YAML pre-flight validator, Play-phase wire probe, 10 plugin QA presets, 6 anti-OOM cloud/Docker grids including Oracle Always-Free ARM64 & Fly.io), offline Resource Pack Bundle Auditor (pack.mcmeta/items/font glyph collisions), 3 inline Bridge PNG charts (TPS sparkline, Entity Lag, Chunk Density), triple-PNG HTML QA proof with shields.io badge & redacted Markdown proof exporters, headless hosting/VPS/2FA/SFTP (with auto-rollback)/RCON ops, companion Paper/Folia bridge plugin & Fabric visual mod, 6-engine offline Diagnostics Lab, and unified 10-tool SalyyS1 suite doctor (80 tools, 27 resources, 14 prompts).",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "repository": {
     "url": "https://github.com/SalyyS1/minecraftkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "minecraftkit",
-      "version": "8.0.0",
+      "version": "8.1.0",
       "transport": {
         "type": "stdio"
       },

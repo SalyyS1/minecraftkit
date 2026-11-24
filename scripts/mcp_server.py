@@ -27,6 +27,7 @@ import cloud_grid_templates  # noqa: E402
 import datapack_auditor  # noqa: E402
 import db_pool_auditor  # noqa: E402
 import disaster_recovery_planner  # noqa: E402
+import discord_webhook_builder  # noqa: E402
 import docker_stack_generator  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
 import economy_stress_sim  # noqa: E402
@@ -46,6 +47,7 @@ import permissions_auditor  # noqa: E402
 import plugin_conflict_auditor  # noqa: E402
 import profile_vault  # noqa: E402
 import protocol_version_matrix  # noqa: E402
+import proxy_migration_planner  # noqa: E402
 import proxy_topology_auditor  # noqa: E402
 import qa_report_html  # noqa: E402
 import qa_smoke_doctor  # noqa: E402
@@ -2567,6 +2569,51 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_qa_generate_discord_webhook_payload",
+        "title": "Secret-Redacted Discord Webhook Rich Embed QA Alert Builder",
+        "description": (
+            "Generate a ready-to-POST Discord Webhook Rich Embed JSON payload summarizing autonomous bot QA stages, "
+            "TPS/MSPT telemetry, RAM footprint, and fail-role mentions with strict password/API-key redaction."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_name": {"type": "string", "default": "MyMinecraftServer"},
+                "verdict": {"type": "string", "default": "PASS"},
+                "passed_stages": {"type": "integer", "default": 0},
+                "total_stages": {"type": "integer", "default": 0},
+                "tps": {"type": "number"},
+                "mspt_ms": {"type": "number"},
+                "bot_ram_mb": {"type": "integer", "default": 42},
+                "stage_lines": {"type": "array", "items": {"type": "string"}},
+                "report_url": {"type": "string", "default": ""},
+                "fail_mention_role_id": {"type": "string", "default": ""},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_ops_plan_proxy_migration",
+        "title": "BungeeCord / Waterfall to Velocity Modern Forwarding Migration Planner",
+        "description": (
+            "Generate a zero-downtime migration playbook from BungeeCord/Waterfall to Velocity modern forwarding, "
+            "including velocity.toml, paper-global.yml, plugin replacements, UFW backend-lock commands, and rollback plan."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source_proxy": {"type": "string", "default": "waterfall"},
+                "backend_servers": {"type": "array", "items": {"type": "string"}},
+                "plugins": {"type": "array", "items": {"type": "string"}},
+                "has_bedrock_geyser": {"type": "boolean", "default": False},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3627,6 +3674,8 @@ class MinecraftKitMcpServer:
             "mc_bot_audit_anti_cheat_compat": self._tool_bot_audit_anti_cheat_compat,
             "mc_ops_audit_jvm_gc_log": self._tool_ops_audit_jvm_gc_log,
             "mc_audit_mythic_mmo_yaml": self._tool_audit_mythic_mmo_yaml,
+            "mc_qa_generate_discord_webhook_payload": self._tool_qa_generate_discord_webhook_payload,
+            "mc_ops_plan_proxy_migration": self._tool_ops_plan_proxy_migration,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10809,6 +10858,31 @@ class MinecraftKitMcpServer:
             raise ValueError("'yaml_text' must be a non-empty MythicMobs or MMOItems YAML string.")
         ecosystem = str(args.get("ecosystem", "auto"))
         payload = mythic_mmo_auditor.audit_mythic_mmo_yaml(yaml_text, ecosystem=ecosystem)
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_qa_generate_discord_webhook_payload(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = discord_webhook_builder.build_discord_qa_webhook(
+            server_name=str(args.get("server_name", "MyMinecraftServer")),
+            verdict=str(args.get("verdict", "PASS")),
+            passed_stages=int(args.get("passed_stages", 0)),
+            total_stages=int(args.get("total_stages", 0)),
+            tps=float(args["tps"]) if args.get("tps") is not None else None,
+            mspt_ms=float(args["mspt_ms"]) if args.get("mspt_ms") is not None else None,
+            bot_ram_mb=int(args.get("bot_ram_mb", 42)),
+            stage_lines=[str(x) for x in args.get("stage_lines", [])] if isinstance(args.get("stage_lines"), list) else None,
+            report_url=str(args.get("report_url", "")),
+            fail_mention_role_id=str(args.get("fail_mention_role_id", "")),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_plan_proxy_migration(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = proxy_migration_planner.plan_proxy_migration(
+            source_proxy=str(args.get("source_proxy", "waterfall")),
+            backend_servers=[str(x) for x in args.get("backend_servers", [])] if isinstance(args.get("backend_servers"), list) else None,
+            plugins=[str(x) for x in args.get("plugins", [])] if isinstance(args.get("plugins"), list) else None,
+            has_bedrock_geyser=bool(args.get("has_bedrock_geyser", False)),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+        )
         return ToolOutcome(_pretty_json(payload))
 
     @staticmethod
