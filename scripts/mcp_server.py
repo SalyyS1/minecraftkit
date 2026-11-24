@@ -33,6 +33,7 @@ import economy_stress_sim  # noqa: E402
 import ecosystem_doctor  # noqa: E402
 import exploit_auditor  # noqa: E402
 import fabric_capture_bridge  # noqa: E402
+import gc_log_auditor  # noqa: E402
 import geyser_config_auditor  # noqa: E402
 import gif_recorder  # noqa: E402
 import hosting_bridge  # noqa: E402
@@ -2526,6 +2527,26 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_jvm_gc_log",
+        "title": "JVM G1GC / ZGC / Shenandoah GC Log Auditor & Pause Chart",
+        "description": (
+            "Audit Java 17/21 -Xlog:gc* logs offline for >50ms stop-the-world pauses (GC-001), "
+            "G1 humongous allocations/evacuation failures (GC-002), Full GC / ZGC Allocation Stalls (GC-003), "
+            "Metaspace churn (GC-004), and elevated GC overhead (GC-005) with inline PNG pause timeline chart."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "log_text": {"type": "string"},
+                "tick_budget_ms": {"type": "number", "default": 50.0},
+                "attach_chart": {"type": "boolean", "default": True},
+            },
+            "required": ["log_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3584,6 +3605,7 @@ class MinecraftKitMcpServer:
             "mc_ops_plan_disaster_recovery": self._tool_ops_plan_disaster_recovery,
             "mc_ops_audit_geyser_config": self._tool_ops_audit_geyser_config,
             "mc_bot_audit_anti_cheat_compat": self._tool_bot_audit_anti_cheat_compat,
+            "mc_ops_audit_jvm_gc_log": self._tool_ops_audit_jvm_gc_log,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10743,6 +10765,22 @@ class MinecraftKitMcpServer:
             config_text=str(args.get("config_text", "")),
         )
         return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_jvm_gc_log(self, args: dict[str, Any]) -> ToolOutcome:
+        log_text = args.get("log_text")
+        if not isinstance(log_text, str) or not log_text.strip():
+            raise ValueError("'log_text' must be a non-empty JVM -Xlog:gc* log string.")
+        tick_budget_ms = float(args.get("tick_budget_ms", 50.0))
+        attach_chart = bool(args.get("attach_chart", True))
+        payload = gc_log_auditor.audit_jvm_gc_log(log_text, tick_budget_ms=tick_budget_ms)
+        images: tuple[tuple[str, str], ...] = ()
+        if attach_chart:
+            png_bytes = visual_capture.render_gc_pause_chart_png(payload)
+            payload["chart_attached"] = True
+            images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
+        else:
+            payload["chart_attached"] = False
+        return ToolOutcome(_pretty_json(payload), images=images)
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

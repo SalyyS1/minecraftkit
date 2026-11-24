@@ -35,6 +35,8 @@ public final class VisualModRuntimeHarness {
             int port = mod.getBoundPort();
             if (port <= 0) throw new AssertionError("Expected ephemeral bound port > 0");
             mod.recordScreen("ShopInventoryScreen");
+            mod.recordPackStatus(java.util.List.of("vanilla", "SalyRPG_Pack_v2"), "ComplementaryUnbound_r5.2", 0, 1);
+            mod.recordRenderMetrics(74, 13.51);
             mod.recordPackError("Shader uniform u_FogColor missing");
 
             HttpClient client = HttpClient.newHttpClient();
@@ -54,6 +56,12 @@ public final class VisualModRuntimeHarness {
                     .GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
+            HttpResponse<String> packStatus = client.send(
+                HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/v1/pack-status"))
+                    .header("X-MCKit-Token", token)
+                    .GET().build(),
+                HttpResponse.BodyHandlers.ofString()
+            );
             HttpResponse<String> errors = client.send(
                 HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/v1/errors"))
                     .header("X-MCKit-Token", token)
@@ -66,10 +74,10 @@ public final class VisualModRuntimeHarness {
                     .GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
-            if (status.statusCode() != 200 || errors.statusCode() != 200 || shot.statusCode() != 200) {
+            if (status.statusCode() != 200 || packStatus.statusCode() != 200 || errors.statusCode() != 200 || shot.statusCode() != 200) {
                 throw new AssertionError("Expected 200 from all authorized endpoints");
             }
-            System.out.println("{\"status\":" + status.body() + ",\"errors\":" + errors.body() + ",\"shot\":" + shot.body() + "}");
+            System.out.println("{\"status\":" + status.body() + ",\"pack_status\":" + packStatus.body() + ",\"errors\":" + errors.body() + ",\"shot\":" + shot.body() + "}");
         } finally {
             mod.stopBridge();
         }
@@ -134,6 +142,11 @@ class VisualClientModAndCloudV60Tests(unittest.TestCase):
             payload = json.loads(run.stdout.strip())
             self.assertEqual(payload["status"]["screen"], "ShopInventoryScreen")
             self.assertEqual(payload["status"]["error_count"], 1)
+            self.assertEqual(payload["pack_status"]["shader_pack"], "ComplementaryUnbound_r5.2")
+            self.assertEqual(payload["pack_status"]["fps"], 74)
+            self.assertEqual(payload["pack_status"]["missing_models"], 1)
+            self.assertIn("SalyRPG_Pack_v2", payload["pack_status"]["active_packs"])
+            self.assertTrue(payload["pack_status"]["offscreen_headless"])
             self.assertIn("u_FogColor", payload["errors"]["errors"][0]["message"])
             self.assertTrue(payload["shot"]["offscreen"])
 

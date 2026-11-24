@@ -257,7 +257,7 @@
   ];
 
   var SUITE_TOOLS = [
-    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 15-tool stdio MCP server with crash-guard MCS001-MCS023, budget/probe/check-world/inspect-jar/preflight CLI, 4 init presets, HTML diffs, JUnit & SARIF.", cmd: "java -jar mcstage.jar budget mcstage.yml --host-ram-gb 7 --max-shards 4" },
+    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 21-tool stdio MCP server with crash-guard MCS001-MCS023, budget/probe/check-world/inspect-jar/preflight CLI, 4 init presets, HTML diffs, badges, JUnit & SARIF.", cmd: "java -jar mcstage.jar budget mcstage.yml --host-ram-gb 7 --max-shards 4" },
     { id: "shadersmith", cat: "shaders", lang: "Kotlin", desc: "GLSL core & post-effect shader contract validator, std140 UBO layout checker, and 26.3 migrator.", cmd: "java -jar shadersmith.jar check ./pack --target 26.3 --sarif shaders.sarif" },
     { id: "packmigrate", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic 1.20..26.3 CustomModelData & overlay migrator with perceptual asset dedup.", cmd: "java -jar packmigrate.jar migrate ./old ./new --to 26.3" },
     { id: "packmerge", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic resource pack union compiler for 1.21.4+ item models, fonts, sounds, lang, and atlases.", cmd: "java -jar packmerge.jar merge a.zip b.zip -o merged.zip" },
@@ -706,14 +706,23 @@
       { id: "mc_bot_stress_benchmark", cat: "bot", desc: "Multi-bot concurrent swarm benchmark with anti-OOM RAM cap & p95 join latency metrics." },
       { id: "mc_bot_generate_fabric_capture_script", cat: "bot", desc: "Generates memory-capped Xvfb + Fabric mckit-client-mod off-screen 3D screenshot scripts." },
       { id: "mc_bot_compare_stage_runs", cat: "bot", desc: "Diffs baseline vs current bot QA runs to catch latency & step regressions in CI." },
+      { id: "mc_bot_validate_stage_yaml", cat: "bot", desc: "Pre-flight stage YAML linter catching plaintext passwords, invalid regex & desktop OOM risks." },
+      { id: "mc_bot_audit_anti_cheat_compat", cat: "bot", desc: "Audits GrimAC/Vulcan/Matrix/Polar conflicts, PacketEvents, MythicMobs & QA bot bypass perms." },
       { id: "mc_hosting_connect_plan", cat: "ops", desc: "Zero-screen-lock Pterodactyl, Pelican, Crafty & PufferPanel plan with RFC 6238 TOTP 2FA." },
       { id: "mc_hosting_server_action", cat: "ops", desc: "Headless start/stop/restart/console/status API dispatch with strict token redaction." },
       { id: "mc_sftp_operations", cat: "ops", desc: "Atomic SFTP plugin JAR deploy, safe config patching & automatic .mckit.bak backups." },
       { id: "mc_ops_profile_vault", cat: "ops", desc: "chmod 0600 local credential vault for hosting/SFTP/RCON/bridge profiles (masked outputs)." },
       { id: "mc_ops_vps_ssh_preflight", cat: "ops", desc: "Anti-OOM JVM G1GC/ZGC heap calculator & UFW firewall rules for Minecraft VPS hosts." },
       { id: "mc_ops_generate_docker_stack", cat: "ops", desc: "Full-stack Paper/Folia/Velocity + headless protocol & Xvfb visual bot docker-compose generator." },
+      { id: "mc_ops_generate_systemd_unit", cat: "ops", desc: "Hardened Linux systemd unit generator with ZGC/G1GC, MemoryHigh/Max & ProtectSystem=strict." },
+      { id: "mc_ops_plan_disaster_recovery", cat: "ops", desc: "Anvil-safe save-off + restic S3/R2/B2/SFTP DR scripts & automated bot restore drill planner." },
+      { id: "mc_ops_audit_jvm_gc_log", cat: "ops", desc: "Java 17/21 G1GC/ZGC/Shenandoah GC log analyzer (GC-001..005) with inline PNG pause chart." },
       { id: "mc_audit_server_exploits", cat: "audit", desc: "Static security audit for chunk bans, command injection, packet flood & dupe exploits (EXPLOIT-001..005)." },
       { id: "mc_world_audit_integrity", cat: "audit", desc: "Zero-JVM Anvil .mca 4096-byte sector, GZIP level.dat & playerdata corruption scanner (WORLD-001..005)." },
+      { id: "mc_pack_audit_bundle", cat: "audit", desc: "Offline Resource Pack auditor catching invalid pack_format, ascent > height & glyph collisions." },
+      { id: "mc_ops_audit_paper_config", cat: "audit", desc: "Paper/Spigot/Folia config auditor (CFG-001..005) for sync-chunk-writes, compression & view-distance." },
+      { id: "mc_ops_audit_velocity_config", cat: "audit", desc: "Velocity/BungeeCord forwarding security auditor (VEL-001..005) with strict secret redaction." },
+      { id: "mc_ops_audit_geyser_config", cat: "audit", desc: "GeyserMC/Floodgate Bedrock cross-play auditor (GEY-001..005) for UDP, auth-type & MOTD hygiene." },
       { id: "mc_audit_proxy_topology", cat: "audit", desc: "Velocity, Paper, BungeeCord & Geyser-Floodgate forwarding secret & IP spoofing auditor." },
       { id: "mc_audit_permissions_rbac", cat: "audit", desc: "LuckPerms, Vault & plugin.yml wildcard/OP escalation privilege auditor (PERM-001..005)." },
       { id: "mc_audit_database_pool", cat: "audit", desc: "HikariCP, MySQL & SQLite connection pool leak & main-thread blocking auditor (DB-001..005)." },
@@ -738,7 +747,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 84 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 85 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {

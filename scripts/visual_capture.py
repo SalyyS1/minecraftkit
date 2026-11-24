@@ -832,3 +832,56 @@ def render_memory_gauge_png(
     verdict = "OOM RISK" if pct >= 85.0 else ("ELEVATED" if pct >= 70.0 else "HEALTHY")
     canvas.draw_text(12, height - 22, f"ANTI-OOM VERDICT: {verdict}   (USE ZGC / -XMS=-XMX FOR ZERO STALLS)", bar_col, scale=1, max_chars=78)
     return canvas.to_png_bytes()
+
+
+def render_gc_pause_chart_png(
+    gc_report: dict[str, Any],
+    *,
+    width: int = 640,
+    height: int = 240,
+    title: str = "MCKIT JVM GC PAUSE TIMELINE (MS VS 50MS TICK)",
+) -> bytes:
+    """Render a zero-dependency dark-mode PNG bar timeline for mc_ops_audit_jvm_gc_log."""
+    summary = gc_report.get("summary") or {}
+    pauses = [p for p in (gc_report.get("pauses") or []) if isinstance(p, dict)]
+    tick_ms = max(10.0, float(gc_report.get("tick_budget_ms", 50.0) or 50.0))
+    grade = str(gc_report.get("grade", "A"))
+    engine = str(gc_report.get("gc_engine", "JVM"))
+    p95_ms = float(summary.get("p95_ms", 0.0) or 0.0)
+    max_ms = float(summary.get("max_pause_ms", 0.0) or 0.0)
+
+    canvas = PixelCanvas(width, height, BG_BASE)
+    canvas.draw_rect(0, 0, width, height, BORDER_SUBTLE, 1)
+    canvas.fill_rect(1, 1, width - 2, 28, BG_PANEL)
+    canvas.draw_text(12, 10, title, ACCENT_CYAN, scale=1, max_chars=48)
+    hdr_col = ACCENT_RED if grade in ("D", "F") else (ACCENT_AMBER if grade in ("B", "C") else ACCENT_EMERALD)
+    canvas.draw_text(width - 190, 10, f"GRADE {grade}  MAX {max_ms:5.1f}MS", hdr_col, scale=1)
+
+    gx, gy, gw, gh = 48, 44, width - 68, height - 92
+    canvas.fill_rect(gx, gy, gw, gh, BG_PANEL)
+    canvas.draw_rect(gx, gy, gw, gh, BORDER_SUBTLE, 1)
+
+    y_scale_max = max(tick_ms * 1.5, max_ms * 1.15, 60.0)
+    tick_y = gy + gh - 2 - int(round((tick_ms / y_scale_max) * (gh - 6)))
+    canvas.draw_line(gx + 1, tick_y, gx + gw - 2, tick_y, ACCENT_AMBER)
+    canvas.draw_text(6, max(gy, tick_y - 4), f"{int(tick_ms)}MS", ACCENT_AMBER, scale=1)
+    canvas.draw_text(6, gy, f"{int(round(y_scale_max))}", TEXT_MUTED, scale=1)
+    canvas.draw_text(6, gy + gh - 8, "0MS", TEXT_MUTED, scale=1)
+
+    if not pauses:
+        canvas.draw_text(gx + 20, gy + gh // 2 - 4, "NO GC PAUSE EVENTS DETECTED IN LOG", TEXT_MUTED, scale=1)
+    else:
+        shown = pauses[:40]
+        slot_w = max(4, (gw - 12) // max(1, len(shown)))
+        bar_w = max(2, slot_w - 2)
+        for idx, entry in enumerate(shown):
+            ms = float(entry.get("pause_ms", 0.0) or 0.0)
+            bh = max(2, int(round((ms / y_scale_max) * (gh - 6))))
+            bx = gx + 6 + idx * slot_w
+            by = gy + gh - 2 - bh
+            bcol = ACCENT_RED if ms >= tick_ms * 3.0 else (ACCENT_AMBER if ms > tick_ms else ACCENT_EMERALD)
+            canvas.fill_rect(bx, by, bar_w, bh, bcol)
+
+    footer = f"ENGINE: {engine}   PAUSES: {len(pauses)}   P95: {p95_ms:.1f}MS   MAX: {max_ms:.1f}MS   BUDGET: {tick_ms:.0f}MS"
+    canvas.draw_text(12, height - 22, footer, TEXT_MUTED, scale=1, max_chars=78)
+    return canvas.to_png_bytes()
