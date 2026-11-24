@@ -1291,7 +1291,7 @@ dependencies:
         ):
             self.assertIn(expected, codes)
         self.assertEqual(res["sarif_report"]["version"], "2.1.0")
-        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "6.7.0")
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "6.8.0")
 
         # Clean bounded RegistryFriendlyByteBuf codec with exact field wire math
         clean_codec = "\n".join([
@@ -1468,7 +1468,7 @@ dependencies:
             "CHUNK-IO-008",
         ):
             self.assertIn(expected, codes)
-        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "6.7.0")
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "6.8.0")
 
         # Healthy sub-critical LZ4 async pipeline passes cleanly
         clean_src = "\n".join([

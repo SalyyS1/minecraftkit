@@ -40,6 +40,23 @@ class PresetsAndBadgeV67Tests(unittest.TestCase):
         self.assertEqual(badge["color"], "brightgreen")
         self.assertIn("PASS 3/3", badge["message"])
 
+    def test_sftp_rollback_config_plan_and_traversal_guard(self) -> None:
+        import hosting_bridge
+
+        plan = hosting_bridge.sftp_operation(
+            host="127.0.0.1",
+            port=2022,
+            username="srv_demo",
+            password="SecretSftpPassword99!",
+            operation="rollback_config",
+            remote_path="/plugins/MyRPG/config.yml",
+            dry_run=True,
+        )
+        self.assertTrue(plan["dry_run"])
+        self.assertEqual(plan["operation"], "rollback_config")
+        self.assertTrue(any(".mckit.bak" in step for step in plan["rollback_steps"]))
+        self.assertNotIn("SecretSftpPassword99!", str(plan))
+
 
 if __name__ == "__main__":
     unittest.main()

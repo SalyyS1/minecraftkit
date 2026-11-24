@@ -400,7 +400,7 @@ def sftp_operation(
     if not (1 <= int(port) <= 65535):
         raise ValueError("'port' must be between 1 and 65535.")
 
-    allowed_ops = ("list", "read", "tail_log", "patch_config", "deploy_jar", "list_crashes")
+    allowed_ops = ("list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "list_crashes")
     if operation not in allowed_ops:
         raise ValueError(f"'operation' must be one of {allowed_ops}.")
 
@@ -448,6 +448,13 @@ def sftp_operation(
                 f"2. Save timestamped backup {norm_remote}.mckit.bak",
                 f"3. Replace exact target text ({len(patch_find)} chars -> {len(patch_replace)} chars)",
                 "4. Validate YAML/properties syntax before atomic write",
+            ]
+        elif operation == "rollback_config":
+            plan["rollback_steps"] = [
+                f"1. Verify backup exists at {norm_remote}.mckit.bak",
+                f"2. Copy current broken file to {norm_remote}.mckit.broken",
+                f"3. Atomically restore {norm_remote}.mckit.bak -> {norm_remote}",
+                "4. Restart server headlessly via hosting panel & re-verify with bot probe",
             ]
         return plan
 
@@ -537,6 +544,20 @@ def sftp_operation(
                     "backup_path": backup_path,
                     "bytes_before": len(original.encode("utf-8")),
                     "bytes_after": len(updated.encode("utf-8")),
+                }
+
+            if operation == "rollback_config":
+                backup_path = f"{norm_remote}.mckit.bak"
+                with sftp.open(backup_path, "r") as bak_in:
+                    backup_bytes = bak_in.read(524_288)
+                with sftp.open(norm_remote, "w") as out_f:
+                    out_f.write(backup_bytes)
+                return {
+                    "ok": True,
+                    "operation": operation,
+                    "path": norm_remote,
+                    "restored_from": backup_path,
+                    "bytes_restored": len(backup_bytes),
                 }
 
             if operation == "deploy_jar":

@@ -214,6 +214,45 @@
         "[Bridge] Entities=42 TPS=19.95 MSPT=15.8ms",
         "[MCKit] Attached keyframe.png + session.gif to chat"
       ]
+    },
+    {
+      id: "itemsadder-pack",
+      label: "ItemsAdder / Nexo Pack",
+      header: "Hybrid Tier-2 Xvfb Pack QA (1.4 GB Total)",
+      badge: "PACK OK",
+      stages: [
+        ["Join Custom-Pack Server", "PASS"],
+        ["Auto-Auth /login [REDACTED]", "PASS"],
+        ["Accept Forced Resource Pack", "PASS"],
+        ["Open /ia Custom Item Menu", "PASS"],
+        ["Verify Glyph HUD Title & PNG", "PASS"]
+      ],
+      slots: { 10: "RUBY_SWORD*", 12: "CUSTOM_HAT", 14: "GLYPH_UI", 16: "EMOTE_PACK" },
+      chat: [
+        "[ItemsAdder] Resource pack loaded (SHA-1 verified)",
+        "[MCKit] assert_gui matched /itemsadder|custom/ (27 slots)",
+        "[MCKit] Attached off-screen Xvfb PNG + badge_json"
+      ]
+    },
+    {
+      id: "dungeon-boss",
+      label: "Dungeon Boss Proximity",
+      header: "MCKitBossBot @ dungeons.salyvn.net:25565 (42 MB RAM)",
+      badge: "BOSS NEAR",
+      stages: [
+        ["Join MythicDungeons Lobby", "PASS"],
+        ["Auto-Auth /login [REDACTED]", "PASS"],
+        ["Enter /md play crypt", "PASS"],
+        ["assert_title: BOSS SPAWNED", "PASS"],
+        ["assert_entity_nearby <= 24m", "PASS"],
+        ["Bridge /api/v1/chunks PNG", "PASS"]
+      ],
+      slots: { 0: "CRYPT_BLADE*", 1: "HEAL_POT", 4: "DUNGEON_KEY", 8: "MAP" },
+      chat: [
+        "[MythicDungeons] Instance crypt_04 started (1/1)",
+        "[MCKit] Found entity Crimson_Lich at 11.4m (<= 24m)",
+        "[Bridge] Chunks=184 Density=1.2/c TPS=20.00"
+      ]
     }
   ];
 
