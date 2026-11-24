@@ -51,6 +51,7 @@ import release_notes_generator  # noqa: E402
 import server_fingerprint  # noqa: E402
 import shader_pack_auditor  # noqa: E402
 import spark_profile_auditor  # noqa: E402
+import systemd_generator  # noqa: E402
 import toolchain_bridge  # noqa: E402
 import velocity_config_auditor  # noqa: E402
 import visual_capture  # noqa: E402
@@ -2433,6 +2434,31 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_generate_systemd_unit",
+        "title": "Hardened Linux systemd Service & Anti-OOM Unit Generator for Minecraft VPS",
+        "description": (
+            "Generate production-hardened Linux systemd unit files and install commands for Paper, Folia, "
+            "Purpur, and Velocity servers with Generational ZGC or Aikar G1GC flags, MemoryHigh/MemoryMax "
+            "anti-OOM ceilings, and ProtectSystem=strict non-root sandboxing."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "service_name": {"type": "string", "default": "mc-paper"},
+                "server_type": {"type": "string", "enum": ["paper", "folia", "purpur", "velocity"], "default": "paper"},
+                "work_dir": {"type": "string", "default": "/srv/minecraft/paper"},
+                "jar_name": {"type": "string", "default": "paper.jar"},
+                "user": {"type": "string", "default": "minecraft"},
+                "heap_gb": {"type": "integer", "minimum": 1, "maximum": 256, "default": 8},
+                "gc_engine": {"type": "string", "enum": ["zgc", "g1gc"], "default": "zgc"},
+                "java_bin": {"type": "string", "default": "/usr/bin/java"},
+                "include_prestart_backup": {"type": "boolean", "default": True},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3487,6 +3513,7 @@ class MinecraftKitMcpServer:
             "mc_pack_audit_bundle": self._tool_pack_audit_bundle,
             "mc_ops_audit_paper_config": self._tool_ops_audit_paper_config,
             "mc_ops_audit_velocity_config": self._tool_ops_audit_velocity_config,
+            "mc_ops_generate_systemd_unit": self._tool_ops_generate_systemd_unit,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10595,6 +10622,20 @@ class MinecraftKitMcpServer:
         payload = velocity_config_auditor.audit_velocity_config(
             config_text,
             has_auth_plugin=has_auth_plugin,
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_generate_systemd_unit(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = systemd_generator.generate_systemd_unit(
+            service_name=str(args.get("service_name", "mc-paper")),
+            server_type=str(args.get("server_type", "paper")),
+            work_dir=str(args.get("work_dir", "/srv/minecraft/paper")),
+            jar_name=str(args.get("jar_name", "paper.jar")),
+            user=str(args.get("user", "minecraft")),
+            heap_gb=int(args.get("heap_gb", 8)),
+            gc_engine=str(args.get("gc_engine", "zgc")),
+            java_bin=str(args.get("java_bin", "/usr/bin/java")),
+            include_prestart_backup=bool(args.get("include_prestart_backup", True)),
         )
         return ToolOutcome(_pretty_json(payload))
 
