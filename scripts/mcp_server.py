@@ -52,6 +52,7 @@ import server_fingerprint  # noqa: E402
 import shader_pack_auditor  # noqa: E402
 import spark_profile_auditor  # noqa: E402
 import toolchain_bridge  # noqa: E402
+import velocity_config_auditor  # noqa: E402
 import visual_capture  # noqa: E402
 import vps_ssh_preflight  # noqa: E402
 import world_audit_bridge  # noqa: E402
@@ -2412,6 +2413,26 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_velocity_config",
+        "title": "Velocity (velocity.toml) & BungeeCord Proxy Security & Forwarding Auditor",
+        "description": (
+            "Audit velocity.toml or BungeeCord config.yml offline for legacy/none forwarding spoofing "
+            "(VEL-001), unguarded offline-mode proxies (VEL-002), weak inline forwarding secrets (VEL-003, "
+            "strictly redacted), publicly exposed backend IPs (VEL-004), and kick-existing-players/"
+            "compression/failover misconfigurations (VEL-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "config_text": {"type": "string", "description": "Raw velocity.toml or BungeeCord config.yml content."},
+                "has_auth_plugin": {"type": "boolean", "default": False},
+            },
+            "required": ["config_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3465,6 +3486,7 @@ class MinecraftKitMcpServer:
             "mc_bot_validate_stage_yaml": self._tool_bot_validate_stage_yaml,
             "mc_pack_audit_bundle": self._tool_pack_audit_bundle,
             "mc_ops_audit_paper_config": self._tool_ops_audit_paper_config,
+            "mc_ops_audit_velocity_config": self._tool_ops_audit_velocity_config,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10558,6 +10580,17 @@ class MinecraftKitMcpServer:
             config_text,
             expected_players=expected_players,
             is_folia=is_folia,
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_velocity_config(self, args: dict[str, Any]) -> ToolOutcome:
+        config_text = args.get("config_text")
+        if not isinstance(config_text, str) or not config_text.strip():
+            raise ValueError("'config_text' must be a non-empty velocity.toml or BungeeCord config.yml string.")
+        has_auth_plugin = bool(args.get("has_auth_plugin", False))
+        payload = velocity_config_auditor.audit_velocity_config(
+            config_text,
+            has_auth_plugin=has_auth_plugin,
         )
         return ToolOutcome(_pretty_json(payload))
 
