@@ -3,11 +3,11 @@
 [Tiếng Việt (README.vi.md)](README.vi.md) · [**Flagship Showcase**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [Growth Playbook](docs/GROWTH_STRATEGY.md) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v4.0.0](https://img.shields.io/badge/version-v4.0.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v4.0.0)
+[![Version: v4.1.0](https://img.shields.io/badge/version-v4.1.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v4.1.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
-Flagship **v4.0.0** all-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Wire-Level Login->Config->Play Command Probe + Bounded Multi-Bot Stress Benchmark + Bedrock/Geyser RakNet UDP + Fly.io/K8s/GHA Cloud Grids), 5-phase end-to-end lifecycle orchestrator, persistent freeform multi-turn bot sessions, off-screen PNG visual diff, MP4 timelapse & self-contained dark-mode HTML QA proof artifacts, client/server item-model pack parity & cross-plugin conflict auditor, headless hosting/VPS/2FA/WebSocket/RCON/backup-audit & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a **54-tool stdio MCP server** by **SalyVn / Salyyy**.
+Flagship **v4.1.0** all-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Wire-Level Login->Config->Play Command Probe + Bounded Multi-Bot Stress Benchmark + Bedrock/Geyser RakNet UDP + Fly.io/K8s/GHA Cloud Grids), 5-phase end-to-end lifecycle orchestrator, persistent freeform multi-turn bot sessions, off-screen PNG visual diff, MP4 timelapse & self-contained dark-mode HTML QA proof artifacts, plugin anti-dupe/economy exploit auditor, client/server item-model pack parity & cross-plugin conflict auditor, headless hosting/VPS/2FA/WebSocket/RCON/backup-audit & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a **56-tool stdio MCP server** by **SalyVn / Salyyy**.
 
 ## What Salyyy Minecraft Kit Includes
 
@@ -135,6 +135,8 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_bot_generate_cloud_deploy` | Generate anti-OOM off-screen cloud/VPS deployment templates (`github_actions`, `fly_io` 256MB micro-VM, `vps_systemd` `MemoryMax`, `kubernetes_job`) so bots never burden your laptop. |
 | `mc_bot_stress_benchmark` | Run a bounded (`<= 25` concurrent) pure-Python headless SLP or offline-login stress benchmark measuring p50/p95/p99 latency, success rate, and server headroom at ~18 MB/bot. |
 | `mc_qa_run_full_lifecycle` | Execute the complete 5-phase autonomous QA lifecycle (Resource Governor -> Plugin Conflict Matrix -> Headless Hosting Preflight -> Bot Stage QA -> Self-Contained HTML Proof Artifact + inline PNG snapshot) in one MCP call. |
+| `mc_audit_server_exploits` | Statically audit Java/Kotlin plugin source for classic Minecraft GUI dupes (`EXPLOIT-001`), NaN/negative economy exploits (`EXPLOIT-002`), unchecked `withdrawPlayer` (`EXPLOIT-003`), console command injection (`EXPLOIT-004`), and unsafe deserialization (`EXPLOIT-005`). |
+| `mc_kit_self_doctor` | Diagnose local runtimes (Python, Node, Java, Docker, ffmpeg, xvfb-run, paramiko), `~/.minecraftkit/profiles.json` permissions (`0600`), and catalog integrity with an A–D readiness scorecard. |
 
 ### Exposed MCP Resources & Slash Prompts
 

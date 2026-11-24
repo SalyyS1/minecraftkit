@@ -21,12 +21,14 @@ import bot_session_hub  # noqa: E402
 import bot_stress_harness  # noqa: E402
 import cloud_grid_templates  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
+import exploit_auditor  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
 import pack_parity  # noqa: E402
 import plugin_conflict_auditor  # noqa: E402
 import profile_vault  # noqa: E402
 import qa_report_html  # noqa: E402
+import qa_smoke_doctor  # noqa: E402
 import query_api  # noqa: E402
 import query_sources  # noqa: E402
 import rcon_client  # noqa: E402
@@ -1862,6 +1864,40 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": False},
     },
+    {
+        "name": "mc_audit_server_exploits",
+        "title": "Minecraft Plugin Anti-Dupe, Economy & Security Exploit Auditor",
+        "description": (
+            "Statically audit Java/Kotlin Minecraft plugin source for classic production server dupes "
+            "and security exploits: InventoryClick/Drag GUI dupes (EXPLOIT-001), NaN/negative economy "
+            "money glitches (EXPLOIT-002), unchecked withdrawPlayer (EXPLOIT-003), console command "
+            "injection (EXPLOIT-004), and unsafe Java/SnakeYAML deserialization (EXPLOIT-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source": {"type": "string"},
+                "filename": {"type": "string", "default": "PluginListener.java"},
+            },
+            "required": ["source"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_kit_self_doctor",
+        "title": "MinecraftKit Environment & Autonomous QA Readiness Doctor",
+        "description": (
+            "Diagnose local runtimes (Python, Node, Java, Docker, ffmpeg, xvfb-run, paramiko), "
+            "~/.minecraftkit/profiles.json chmod 0600 permissions, and catalog integrity with an A-D grade."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -2890,6 +2926,8 @@ class MinecraftKitMcpServer:
             "mc_bot_generate_cloud_deploy": self._tool_bot_generate_cloud_deploy,
             "mc_bot_stress_benchmark": self._tool_bot_stress_benchmark,
             "mc_qa_run_full_lifecycle": self._tool_qa_run_full_lifecycle,
+            "mc_audit_server_exploits": self._tool_audit_server_exploits,
+            "mc_kit_self_doctor": self._tool_kit_self_doctor,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9688,6 +9726,19 @@ class MinecraftKitMcpServer:
         if images:
             payload["preview_attached_as_mcp_image"] = True
         return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_audit_server_exploits(self, args: dict[str, Any]) -> ToolOutcome:
+        src = str(args.get("source", ""))
+        if not src.strip():
+            raise ValueError("'source' must be a non-empty Java/Kotlin source string.")
+        payload = exploit_auditor.audit_server_exploits(
+            source=src,
+            filename=str(args.get("filename", "PluginListener.java")),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_kit_self_doctor(self, args: dict[str, Any]) -> ToolOutcome:
+        return ToolOutcome(_pretty_json(qa_smoke_doctor.run_kit_doctor(self.store.root)))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:
