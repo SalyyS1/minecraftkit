@@ -68,7 +68,51 @@ public final class BridgeContractTest {
         assertTrue(!isCommandBlocked("tps", blocked), "tps must be allowed");
         assertTrue(!isCommandBlocked("mmoitems reload", blocked), "plugin reload must be allowed");
 
-        System.out.println("BridgeContractTest: 4/4 PASS");
+        // 5. Real Java 21 loopback HTTP server contract (127.0.0.1 ephemeral port + X-MCKit-Token auth)
+        verifyLoopbackHttpAuth();
+
+        System.out.println("BridgeContractTest: 5/5 PASS");
+    }
+
+    private static void verifyLoopbackHttpAuth() {
+        String expectedToken = "tok_loopback_contract_999";
+        try {
+            var server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+            server.createContext("/api/v1/health", exchange -> {
+                String provided = exchange.getRequestHeaders().getFirst("X-MCKit-Token");
+                int code = constantTimeEquals(expectedToken, provided) ? 200 : 401;
+                byte[] body = (code == 200 ? "{\"ok\":true,\"tps\":20.0}" : "{\"ok\":false,\"error\":\"unauthorized\"}")
+                        .getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(code, body.length);
+                try (var os = exchange.getResponseBody()) {
+                    os.write(body);
+                }
+            });
+            server.start();
+            try {
+                int port = server.getAddress().getPort();
+                var client = java.net.http.HttpClient.newHttpClient();
+                var uri = java.net.URI.create("http://127.0.0.1:" + port + "/api/v1/health");
+
+                var badResp = client.send(
+                        java.net.http.HttpRequest.newBuilder(uri).header("X-MCKit-Token", "wrong").GET().build(),
+                        java.net.http.HttpResponse.BodyHandlers.ofString()
+                );
+                assertTrue(badResp.statusCode() == 401, "invalid token must return 401, got " + badResp.statusCode());
+
+                var okResp = client.send(
+                        java.net.http.HttpRequest.newBuilder(uri).header("X-MCKit-Token", expectedToken).GET().build(),
+                        java.net.http.HttpResponse.BodyHandlers.ofString()
+                );
+                assertTrue(okResp.statusCode() == 200, "valid token must return 200, got " + okResp.statusCode());
+                assertTrue(okResp.body().contains("\"tps\":20.0"), "health payload mismatch: " + okResp.body());
+            } finally {
+                server.stop(0);
+            }
+        } catch (Exception e) {
+            throw new AssertionError("Loopback HTTP contract test failed: " + e.getMessage(), e);
+        }
     }
 
     private static boolean isCommandBlocked(String raw, java.util.List<String> blocked) {

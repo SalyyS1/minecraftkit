@@ -19,7 +19,9 @@ from catalog_io import strict_json_file  # noqa: E402
 import bot_engine  # noqa: E402
 import bot_session_hub  # noqa: E402
 import bot_stress_harness  # noqa: E402
+import ci_workflow_generator  # noqa: E402
 import cloud_grid_templates  # noqa: E402
+import datapack_auditor  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
 import exploit_auditor  # noqa: E402
 import hosting_bridge  # noqa: E402
@@ -1943,6 +1945,49 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_datapack_integrity",
+        "title": "Minecraft 1.21+ / 26.x Datapack Integrity & Performance Auditor",
+        "description": (
+            "Audit a Minecraft datapack directory before deploying to Paper/Folia: flags deprecated 1.20 "
+            "plural folders on pack_format >= 48 (DP-001), pack.mcmeta version mismatches (DP-002), "
+            "malformed JSON files (DP-003), and unfiltered @e selectors or legacy NBT syntax in .mcfunction (DP-004)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "datapack_dir": {"type": "string"},
+                "target_mc_version": {"type": "string", "default": "1.21.4"},
+            },
+            "required": ["datapack_dir"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_generate_ci_workflow",
+        "title": "GitHub Actions Autonomous Minecraft Plugin & Bot QA Workflow Generator",
+        "description": (
+            "Generate a ready-to-commit .github/workflows/mckit-autonomous-qa.yml combining Gradle/Maven build, "
+            "anti-OOM Tier-1 headless bot budget guard, mcstage real-server matrix, dark-mode HTML QA proof upload, "
+            "and SARIF v2.1.0 Code Scanning upload."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "plugin_name": {"type": "string", "default": "MyPlugin"},
+                "build_tool": {"type": "string", "enum": ["gradle", "maven"], "default": "gradle"},
+                "platforms": {"type": "array", "items": {"type": "string"}},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+                "bot_preset": {"type": "string", "default": "rpg_shop_gui"},
+                "concurrent_bots": {"type": "integer", "minimum": 1, "maximum": 20, "default": 5},
+                "include_sarif": {"type": "boolean", "default": True},
+                "include_html_proof": {"type": "boolean", "default": True},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -2975,6 +3020,8 @@ class MinecraftKitMcpServer:
             "mc_kit_self_doctor": self._tool_kit_self_doctor,
             "mc_world_audit_integrity": self._tool_world_audit_integrity,
             "mc_audit_proxy_topology": self._tool_audit_proxy_topology,
+            "mc_audit_datapack_integrity": self._tool_audit_datapack_integrity,
+            "mc_bot_generate_ci_workflow": self._tool_bot_generate_ci_workflow,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9805,6 +9852,30 @@ class MinecraftKitMcpServer:
             paper_global_yml=str(args.get("paper_global_yml", "")),
             backend_server_properties=str(args.get("backend_server_properties", "")),
             geyser_config_yml=str(args.get("geyser_config_yml", "")),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_audit_datapack_integrity(self, args: dict[str, Any]) -> ToolOutcome:
+        dp = str(args.get("datapack_dir", "")).strip()
+        if not dp:
+            raise ValueError("'datapack_dir' must be a non-empty string.")
+        payload = datapack_auditor.audit_datapack_directory(
+            datapack_dir=dp,
+            target_mc_version=str(args.get("target_mc_version", "1.21.4")),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_generate_ci_workflow(self, args: dict[str, Any]) -> ToolOutcome:
+        plats = args.get("platforms")
+        payload = ci_workflow_generator.generate_ci_qa_workflow(
+            plugin_name=str(args.get("plugin_name", "MyPlugin")),
+            build_tool=str(args.get("build_tool", "gradle")),
+            platforms=[str(p) for p in plats] if isinstance(plats, list) else None,
+            mc_version=str(args.get("mc_version", "1.21.4")),
+            bot_preset=str(args.get("bot_preset", "rpg_shop_gui")),
+            concurrent_bots=int(args.get("concurrent_bots", 5)),
+            include_sarif=bool(args.get("include_sarif", True)),
+            include_html_proof=bool(args.get("include_html_proof", True)),
         )
         return ToolOutcome(_pretty_json(payload))
 
