@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "minecraftkit",
-  "version": "6.1.0",
+  "version": "6.2.0",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
