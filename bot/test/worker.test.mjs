@@ -28,3 +28,9 @@ test("bot/pool-runner.mjs enforces anti-OOM max bot concurrency cap", () => {
   assert.match(src, /Math\.min\(25/);
   assert.match(src, /worker\.mjs/);
 });
+
+test("bot/worker.mjs never requires desktop display or GUI launcher", () => {
+  const src = fs.readFileSync(path.join(botDir, "worker.mjs"), "utf8");
+  assert.doesNotMatch(src, /minecraft-launcher|xvfb|electron/i);
+  assert.match(src, /JSON\.stringify/);
+});

@@ -18,6 +18,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 from catalog_io import strict_json_file  # noqa: E402
 import auth_plugin_auditor  # noqa: E402
 import bot_engine  # noqa: E402
+import bot_replay_diff  # noqa: E402
 import bot_session_hub  # noqa: E402
 import bot_stress_harness  # noqa: E402
 import ci_workflow_generator  # noqa: E402
@@ -43,6 +44,7 @@ import query_api  # noqa: E402
 import query_sources  # noqa: E402
 import rcon_client  # noqa: E402
 import release_notes_generator  # noqa: E402
+import shader_pack_auditor  # noqa: E402
 import spark_profile_auditor  # noqa: E402
 import toolchain_bridge  # noqa: E402
 import visual_capture  # noqa: E402
@@ -2216,6 +2218,46 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_audit_shader_pack",
+        "title": "Minecraft 1.21.4+ / 26.3 Vanilla Core & Iris/OptiFine GLSL Shader Auditor",
+        "description": (
+            "Audit GLSL .fsh/.vsh shader source for Minecraft 1.21+ core-profile breaks: missing/legacy "
+            "#version (SHD-001), deprecated OpenGL 2.x built-ins like gl_ModelViewMatrix/texture2D (SHD-002), "
+            "unguarded discard (SHD-003), std140 vec3 UBO alignment bugs (SHD-004), and heavy loops (SHD-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "source": {"type": "string"},
+                "filename": {"type": "string", "default": "rendertype_entity_cutout.fsh"},
+                "target_mc_version": {"type": "string", "default": "1.21.4"},
+            },
+            "required": ["source"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_compare_stage_runs",
+        "title": "Autonomous Bot QA Stage Replay Regression Comparator",
+        "description": (
+            "Compare baseline vs candidate autonomous bot QA stage run JSON results to flag PASS->FAIL "
+            "regressions, latency spikes above max_latency_increase_pct, and newly introduced server errors "
+            "with Markdown + JSON diff output."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "baseline_stages": {"type": "array", "items": {"type": "object"}},
+                "candidate_stages": {"type": "array", "items": {"type": "object"}},
+                "max_latency_increase_pct": {"type": "number", "minimum": 1.0, "default": 30.0},
+            },
+            "required": ["baseline_stages", "candidate_stages"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3260,6 +3302,8 @@ class MinecraftKitMcpServer:
             "mc_bot_simulate_economy_stress": self._tool_bot_simulate_economy_stress,
             "mc_audit_database_pool": self._tool_audit_database_pool,
             "mc_qa_generate_release_notes": self._tool_qa_generate_release_notes,
+            "mc_audit_shader_pack": self._tool_audit_shader_pack,
+            "mc_bot_compare_stage_runs": self._tool_bot_compare_stage_runs,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10237,6 +10281,29 @@ class MinecraftKitMcpServer:
             folia_ready=bool(args.get("folia_ready", True)),
             exploit_audit_grade=str(args.get("exploit_audit_grade", "A")),
             language=str(args.get("language", "bilingual")),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_audit_shader_pack(self, args: dict[str, Any]) -> ToolOutcome:
+        src = str(args.get("source", ""))
+        if not src.strip():
+            raise ValueError("'source' must be a non-empty GLSL string.")
+        payload = shader_pack_auditor.audit_shader_source(
+            source=src,
+            filename=str(args.get("filename", "rendertype_entity_cutout.fsh")),
+            target_mc_version=str(args.get("target_mc_version", "1.21.4")),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_compare_stage_runs(self, args: dict[str, Any]) -> ToolOutcome:
+        base = args.get("baseline_stages")
+        cand = args.get("candidate_stages")
+        if not isinstance(base, list) or not isinstance(cand, list):
+            raise ValueError("'baseline_stages' and 'candidate_stages' must be lists.")
+        payload = bot_replay_diff.compare_bot_stage_runs(
+            baseline_stages=base,
+            candidate_stages=cand,
+            max_latency_increase_pct=float(args.get("max_latency_increase_pct", 30.0)),
         )
         return ToolOutcome(_pretty_json(payload))
 
