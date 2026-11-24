@@ -11,7 +11,7 @@ Don't pitch "just another docs repo." Lead with the **3 unmistakable painkillers
    - Show the visual benchmark: **10 Headless Protocol Bots = 420 MB RAM (0 desktop focus lock)** vs **10 Desktop Minecraft Clients = 26 GB RAM**.
 2. **"Your AI coding agent can now join your server, `/login`, open `/shop`, take a screenshot, read the console crash, and fix the Java bug automatically."**
    - Record a 45-second screen recording showing Claude Code / Cursor calling `mc_run_qa_pipeline`, receiving an inline PNG GUI snapshot in chat, spotting a broken MythicMobs/MMOItems slot, patching the plugin, deploying via SFTP, and passing on the second run.
-3. **"One MCP install unlocks 78 tools, Offline Resource Pack & Stage YAML Pre-Flight Auditors, 10 Bot QA Presets, 3 Auto-Attached Bridge PNG Charts, 6 anti-OOM cloud bot grids (including Oracle Cloud Always-Free 24 GB ARM64), 14 `/mc:*` skills, 41,887 bytecode-verified RPG APIs, and 10 specialized SalyVn CLI tools (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, ...)."**
+3. **"One MCP install unlocks 92 tools (v8.3.0), 6 Auto-Attached Inline PNG Charts (Bridge TPS/Entities/Chunks/Heap, JVM GC Pause, Bot Load-Test), 7-Engine Offline Diagnostics Lab, MythicMobs/MMOItems/Skript/Anti-Cheat/Geyser/Velocity/Paper/Backup-Cron Auditors, Multi-Server Bot Mesh Planner, 6 anti-OOM cloud bot grids (including Oracle Cloud Always-Free 24 GB ARM64 $0/mo), 14 `/mc:*` skills, 41,887 bytecode-verified RPG APIs, and 10 specialized SalyVn CLI tools (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, ...)."**
    - Shareable deep-dive guides ready for Reddit/Discord/Facebook links: [HOSTING_2FA_SFTP_GUIDE.md](HOSTING_2FA_SFTP_GUIDE.md) & [BOT_OPTIMIZATION_BENCHMARKS.md](BOT_OPTIMIZATION_BENCHMARKS.md).
 
 ---
@@ -35,10 +35,10 @@ Don't pitch "just another docs repo." Lead with the **3 unmistakable painkillers
 
 ### Channel A: Official MCP Directories & Awesome Lists (High-Intent AI Developers)
 Submit clean, policy-compliant PRs/listings to:
-- **Glama MCP Directory** (`glama.json` already present — verify score badge is updated for v3.1.0!)
-- **Smithery.ai** (`smithery.yaml` already present — publish v3.1.0 with 33 tools!)
+- **Glama MCP Directory** (`glama.json` already present — verify score badge is updated for v8.3.0!)
+- **Smithery.ai** (`smithery.yaml` already present — publish v8.3.0 with 92 tools!)
 - **Official MCP Registry** (`server.json` already aligned with schema!)
-- **Awesome MCP Servers** (`punkpeye/awesome-mcp-servers`, `wong2/awesome-mcp-servers`, `appcypher/awesome-mcp-servers`) — 1 concise bullet highlighting *33 Minecraft engineering + headless QA bot + SFTP/hosting tools*.
+- **Awesome MCP Servers** (`punkpeye/awesome-mcp-servers`, `wong2/awesome-mcp-servers`, `appcypher/awesome-mcp-servers`) — 1 concise bullet highlighting *92 Minecraft engineering + headless QA bot + SFTP/hosting tools*.
 
 ### Channel B: Global Minecraft Developer Communities
 - **Reddit `r/admincraft` & `r/MinecraftPlugins`**

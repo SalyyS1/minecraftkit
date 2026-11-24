@@ -41,6 +41,7 @@ import geyser_config_auditor  # noqa: E402
 import gif_recorder  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
+import multiserver_mesh_planner  # noqa: E402
 import mythic_mmo_auditor  # noqa: E402
 import pack_auditor  # noqa: E402
 import pack_parity  # noqa: E402
@@ -59,6 +60,7 @@ import rcon_client  # noqa: E402
 import release_notes_generator  # noqa: E402
 import server_fingerprint  # noqa: E402
 import shader_pack_auditor  # noqa: E402
+import skript_auditor  # noqa: E402
 import spark_profile_auditor  # noqa: E402
 import systemd_generator  # noqa: E402
 import toolchain_bridge  # noqa: E402
@@ -2656,6 +2658,45 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_skript_code",
+        "title": "Skript (.sk) TPS Performance & Command-Injection Security Auditor",
+        "description": (
+            "Audit Skript (.sk) scripts offline for sub-5-tick/on-any-move loops (SK-001), world-wide entity/block scans (SK-002), "
+            "unsanitized console command OP injection (SK-003), unbounded persistent list variables (SK-004), and sync SQL/HTTP (SK-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "skript_text": {"type": "string"},
+            },
+            "required": ["skript_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_plan_multiserver_mesh",
+        "title": "Velocity + N-Backend Multi-Server Autonomous Bot QA Mesh Planner",
+        "description": (
+            "Plan an anti-OOM autonomous bot QA mesh across a Velocity proxy and N Paper/Folia backends with staggered joins, "
+            "/server transfer stages, companion bridge loopback URLs, RAM savings vs desktop tabs, and cloud offload advice."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "proxy_host": {"type": "string", "default": "play.example.net"},
+                "proxy_port": {"type": "integer", "default": 25565},
+                "backends": {"type": "array", "items": {"type": "string"}},
+                "bots_per_backend": {"type": "integer", "default": 2},
+                "include_visual_xvfb": {"type": "boolean", "default": False},
+                "has_bedrock_geyser": {"type": "boolean", "default": False},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3720,6 +3761,8 @@ class MinecraftKitMcpServer:
             "mc_ops_plan_proxy_migration": self._tool_ops_plan_proxy_migration,
             "mc_bot_generate_load_test_report": self._tool_bot_generate_load_test_report,
             "mc_ops_audit_crontab_backups": self._tool_ops_audit_crontab_backups,
+            "mc_ops_audit_skript_code": self._tool_ops_audit_skript_code,
+            "mc_bot_plan_multiserver_mesh": self._tool_bot_plan_multiserver_mesh,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10953,6 +10996,25 @@ class MinecraftKitMcpServer:
         if not isinstance(script_text, str) or not script_text.strip():
             raise ValueError("'script_text' must be a non-empty crontab or backup shell script string.")
         payload = backup_cron_auditor.audit_crontab_backups(script_text)
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_skript_code(self, args: dict[str, Any]) -> ToolOutcome:
+        skript_text = args.get("skript_text")
+        if not isinstance(skript_text, str) or not skript_text.strip():
+            raise ValueError("'skript_text' must be a non-empty Skript (.sk) source string.")
+        payload = skript_auditor.audit_skript_code(skript_text)
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_plan_multiserver_mesh(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = multiserver_mesh_planner.plan_multiserver_mesh(
+            proxy_host=str(args.get("proxy_host", "play.example.net")),
+            proxy_port=int(args.get("proxy_port", 25565)),
+            backends=[str(x) for x in args.get("backends", [])] if isinstance(args.get("backends"), list) else None,
+            bots_per_backend=int(args.get("bots_per_backend", 2)),
+            include_visual_xvfb=bool(args.get("include_visual_xvfb", False)),
+            has_bedrock_geyser=bool(args.get("has_bedrock_geyser", False)),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+        )
         return ToolOutcome(_pretty_json(payload))
 
     @staticmethod

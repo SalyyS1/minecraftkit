@@ -711,6 +711,7 @@
       { id: "mc_bot_validate_stage_yaml", cat: "bot", desc: "Pre-flight stage YAML linter catching plaintext passwords, invalid regex & desktop OOM risks." },
       { id: "mc_bot_audit_anti_cheat_compat", cat: "bot", desc: "Audits GrimAC/Vulcan/Matrix/Polar conflicts, PacketEvents, MythicMobs & QA bot bypass perms." },
       { id: "mc_bot_generate_load_test_report", cat: "bot", desc: "Multi-bot stress p50/p95/p99 latency & TPS correlation report with inline PNG chart." },
+      { id: "mc_bot_plan_multiserver_mesh", cat: "bot", desc: "Plans Velocity + N-backend autonomous bot QA meshes with staggered /server transfers." },
       { id: "mc_hosting_connect_plan", cat: "ops", desc: "Zero-screen-lock Pterodactyl, Pelican, Crafty & PufferPanel plan with RFC 6238 TOTP 2FA." },
       { id: "mc_hosting_server_action", cat: "ops", desc: "Headless start/stop/restart/console/status API dispatch with strict token redaction." },
       { id: "mc_sftp_operations", cat: "ops", desc: "Atomic SFTP plugin JAR deploy, safe config patching & automatic .mckit.bak backups." },
@@ -730,6 +731,7 @@
       { id: "mc_ops_audit_velocity_config", cat: "audit", desc: "Velocity/BungeeCord forwarding security auditor (VEL-001..005) with strict secret redaction." },
       { id: "mc_ops_audit_geyser_config", cat: "audit", desc: "GeyserMC/Floodgate Bedrock cross-play auditor (GEY-001..005) for UDP, auth-type & MOTD hygiene." },
       { id: "mc_audit_mythic_mmo_yaml", cat: "audit", desc: "MythicMobs & MMOItems/Crucible YAML lag/exploit linter catching ~onTimer:1 & >64-block @EIR bombs." },
+      { id: "mc_ops_audit_skript_code", cat: "audit", desc: "Skript (.sk) TPS & OP-injection auditor catching every 1 tick, loop all entities & console exploits." },
       { id: "mc_audit_proxy_topology", cat: "audit", desc: "Velocity, Paper, BungeeCord & Geyser-Floodgate forwarding secret & IP spoofing auditor." },
       { id: "mc_audit_permissions_rbac", cat: "audit", desc: "LuckPerms, Vault & plugin.yml wildcard/OP escalation privilege auditor (PERM-001..005)." },
       { id: "mc_audit_database_pool", cat: "audit", desc: "HikariCP, MySQL & SQLite connection pool leak & main-thread blocking auditor (DB-001..005)." },
@@ -754,7 +756,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 90 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 92 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {
