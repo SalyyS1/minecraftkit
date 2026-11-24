@@ -196,6 +196,36 @@
           "    redact_secrets: true"
         ].join("\n")
       }
+    ],
+    pack_cfg: [
+      {
+        label: "Lagging Paper Config + Legacy 1.20.1 Pack",
+        text: [
+          "sync-chunk-writes=true",
+          "view-distance=16",
+          "simulation-distance=12",
+          "region-file-compression=zlib",
+          "monsters: 90",
+          "hopper-check: 1",
+          "per-player-mob-spawns: false",
+          "treasure-maps-find-already-discovered: false",
+          "\"pack_format\": 15",
+          "\"overrides\": [{\"predicate\": {\"custom_model_data\": 1001}}]"
+        ].join("\n")
+      },
+      {
+        label: "Tuned Folia/Paper LZ4 + Clean 1.21.4 Pack",
+        text: [
+          "sync-chunk-writes=false",
+          "view-distance=10",
+          "simulation-distance=6",
+          "region-file-compression=lz4",
+          "monsters: 45",
+          "hopper-check: 3",
+          "per-player-mob-spawns: true",
+          "\"pack_format\": 46"
+        ].join("\n")
+      }
     ]
   };
 
@@ -840,6 +870,7 @@
   var tabProtoSql = document.getElementById("tab-protocol-sql");
   var tabChunkJfr = document.getElementById("tab-chunk-jfr");
   var tabBotOps = document.getElementById("tab-bot-ops");
+  var tabPackCfg = document.getElementById("tab-pack-cfg");
   var presetBox = document.getElementById("preset-buttons");
   var inputHeading = document.getElementById("input-heading");
   var inputSubtitle = document.getElementById("input-subtitle");
@@ -933,6 +964,90 @@
     };
   }
 
+  function analyzePackAndConfig(rawText) {
+    var text = String(rawText || "");
+    var findings = [];
+    if (/^\s*sync-chunk-writes\s*=\s*true\b/mi.test(text)) {
+      findings.push({
+        rule_id: "CFG-001",
+        severity: "critical",
+        frame: "server.properties::sync-chunk-writes",
+        message: "sync-chunk-writes=true stalls tick threads on synchronous disk fsync.",
+        remediation: "Set sync-chunk-writes=false to keep Moonrise chunk I/O asynchronous."
+      });
+    }
+    var simM = text.match(/^\s*simulation-distance\s*[:=]\s*(\d+)/mi);
+    if (simM && parseInt(simM[1], 10) > 8) {
+      findings.push({
+        rule_id: "CFG-002",
+        severity: "high",
+        frame: "server.properties::simulation-distance",
+        message: "simulation-distance=" + simM[1] + " ticks excessive chunks per player.",
+        remediation: "Lower simulation-distance to 6-8 and rely on view-distance for horizon visuals."
+      });
+    }
+    var mobM = text.match(/^\s*monsters\s*[:=]\s*(\d+)/mi);
+    if ((mobM && parseInt(mobM[1], 10) > 50) || /^\s*per-player-mob-spawns\s*[:=]\s*false\b/mi.test(text)) {
+      findings.push({
+        rule_id: "CFG-003",
+        severity: "high",
+        frame: "paper-world-defaults.yml::spawning",
+        message: "Uncapped monsters or disabled per-player-mob-spawns creates mob-farm tick spikes.",
+        remediation: "Enable per-player-mob-spawns: true and cap bukkit.yml monsters at 40-50."
+      });
+    }
+    if (/treasure-maps-find-already-discovered\s*:\s*false/i.test(text)) {
+      findings.push({
+        rule_id: "CFG-004",
+        severity: "high",
+        frame: "paper-world-defaults.yml::treasure-maps",
+        message: "Undiscovered treasure maps trigger multi-second synchronous chunk generation freezes.",
+        remediation: "Set treasure-maps.find-already-discovered to true."
+      });
+    }
+    if (/region-file-compression\s*=\s*(?:zlib|deflate)\b/i.test(text)) {
+      findings.push({
+        rule_id: "CFG-005",
+        severity: "medium",
+        frame: "server.properties::region-file-compression",
+        message: "Legacy zlib/deflate chunk compression is slower than LZ4 on modern NVMe.",
+        remediation: "Switch region-file-compression=lz4."
+      });
+    }
+    var pfM = text.match(/"pack_format"\s*:\s*(\d+)/);
+    if (pfM && parseInt(pfM[1], 10) < 46) {
+      findings.push({
+        rule_id: "PACK-001",
+        severity: "high",
+        frame: "pack.mcmeta::pack_format",
+        message: "pack_format=" + pfM[1] + " predates Minecraft 1.21.4 (expected >= 46).",
+        remediation: "Update pack_format to 46 (1.21.4) or 88 (26.2/26.3) and declare supported_formats."
+      });
+    }
+    if (/"overrides"\s*:\s*\[/.test(text)) {
+      findings.push({
+        rule_id: "PACK-005",
+        severity: "medium",
+        frame: "models/item/*.json::overrides",
+        message: "Legacy models/item overrides array is ignored in Minecraft 1.21.4+.",
+        remediation: "Migrate to assets/<namespace>/items/<id>.json using minecraft:range_dispatch or minecraft:select."
+      });
+    }
+    var score = Math.max(0, 100 - findings.reduce(function (acc, f) {
+      return acc + (f.severity === "critical" ? 30 : (f.severity === "high" ? 15 : 8));
+    }, 0));
+    var grade = score >= 90 ? "A" : (score >= 78 ? "B" : (score >= 62 ? "C" : (score >= 45 ? "D" : "F")));
+    var status = findings.some(function (f) { return f.severity === "critical" || f.severity === "high"; }) ? "fail" : (findings.length ? "warn" : "pass");
+    return {
+      mode: "pack_cfg",
+      status: status,
+      grade: grade,
+      score: score,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
   function renderReport(report) {
     lastReport = report;
     summaryLine.textContent = "Status: " + report.status.toUpperCase() + " | " + report.finding_count + " finding(s)";
@@ -963,6 +1078,13 @@
         [report.bots_planned + " bot(s)", "Fleet Size"],
         [report.estimated_ram_mb + " MB", "Est. RAM"],
         [report.screen_lock_free ? "ZERO LOCK" : "FOCUS LOCK", "Desktop Impact"]
+      ]);
+    } else if (mode === "pack_cfg") {
+      renderMetrics([
+        [report.status.toUpperCase(), "Verdict"],
+        ["Grade " + report.grade, "Health Grade"],
+        [report.score + "/100", "Tuning Score"],
+        [report.finding_count, "Findings"]
       ]);
     } else {
       renderMetrics([
@@ -1008,6 +1130,8 @@
       renderReport(analyzeChunkAndJfr(traceInput.value));
     } else if (mode === "bot_ops") {
       renderReport(analyzeBotAndOps(traceInput.value));
+    } else if (mode === "pack_cfg") {
+      renderReport(analyzePackAndConfig(traceInput.value));
     } else {
       renderReport(analyzeProtocolAndSql(traceInput.value));
     }
@@ -1035,6 +1159,7 @@
     var isProtoSql = mode === "protocol_sql";
     var isChunkJfr = mode === "chunk_jfr";
     var isBotOps = mode === "bot_ops";
+    var isPackCfg = mode === "pack_cfg";
     tabSpark.classList.toggle("is-active", isSpark);
     tabSpark.setAttribute("aria-selected", String(isSpark));
     tabFolia.classList.toggle("is-active", isFolia);
@@ -1051,6 +1176,10 @@
       tabBotOps.classList.toggle("is-active", isBotOps);
       tabBotOps.setAttribute("aria-selected", String(isBotOps));
     }
+    if (tabPackCfg) {
+      tabPackCfg.classList.toggle("is-active", isPackCfg);
+      tabPackCfg.setAttribute("aria-selected", String(isPackCfg));
+    }
     thresholdWrap.hidden = !isSpark;
     domainWrap.hidden = !isFolia;
     if (isSpark) {
@@ -1065,6 +1194,9 @@
     } else if (isBotOps) {
       inputHeading.textContent = "Bot Stage YAML, AuthMe & Proxy Security Pre-Flight";
       inputSubtitle.textContent = "Audits hardcoded bot passwords, online-mode/proxy bypasses, weak RCON/AuthMe hashes, and desktop RAM OOM hazards completely offline.";
+    } else if (isPackCfg) {
+      inputHeading.textContent = "Paper/Purpur/Folia Anti-Lag Config & 1.21.4+ Resource Pack Linter";
+      inputSubtitle.textContent = "Catches sync-chunk-writes, mob-farm/hopper lag, treasure-map freezes, and legacy pack_format/overrides offline (CFG-001..005, PACK-001..005).";
     } else {
       inputHeading.textContent = "Netty StreamCodec or HikariCP / SQL Persistence Snippet";
       inputSubtitle.textContent = "Computes worst-case LEB128/UTF-8 wire-byte budgets (NETTY-001..008) and audits sync JDBC, resource leaks, and Folia callbacks (SQL-001..007).";
@@ -1084,6 +1216,9 @@
   }
   if (tabBotOps) {
     tabBotOps.addEventListener("click", function () { switchMode("bot_ops"); });
+  }
+  if (tabPackCfg) {
+    tabPackCfg.addEventListener("click", function () { switchMode("pack_cfg"); });
   }
   runBtn.addEventListener("click", runAudit);
   sarifBtn.addEventListener("click", function () {

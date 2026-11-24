@@ -36,6 +36,7 @@ import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
 import pack_auditor  # noqa: E402
 import pack_parity  # noqa: E402
+import paper_config_auditor  # noqa: E402
 import permissions_auditor  # noqa: E402
 import plugin_conflict_auditor  # noqa: E402
 import profile_vault  # noqa: E402
@@ -2390,6 +2391,27 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_paper_config",
+        "title": "Paper / Purpur / Spigot / Folia Config Performance & Anti-Lag Auditor",
+        "description": (
+            "Audit server.properties, bukkit.yml, spigot.yml, and paper-world-defaults.yml offline for "
+            "sync-chunk-writes stalls (CFG-001), oversized simulation/view distances (CFG-002), uncapped "
+            "mob spawns & hopper checks (CFG-003), treasure-map sync freezes & disabled anti-xray (CFG-004), "
+            "and compression/Folia chunk safety (CFG-005), returning an A-F score and copy-paste patches."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "config_text": {"type": "string", "description": "Combined or individual server.properties / spigot.yml / bukkit.yml / paper-world-defaults.yml text."},
+                "expected_players": {"type": "integer", "minimum": 1, "default": 50},
+                "is_folia": {"type": "boolean", "default": False},
+            },
+            "required": ["config_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3442,6 +3464,7 @@ class MinecraftKitMcpServer:
             "mc_bot_export_markdown_proof": self._tool_bot_export_markdown_proof,
             "mc_bot_validate_stage_yaml": self._tool_bot_validate_stage_yaml,
             "mc_pack_audit_bundle": self._tool_pack_audit_bundle,
+            "mc_ops_audit_paper_config": self._tool_ops_audit_paper_config,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10523,6 +10546,19 @@ class MinecraftKitMcpServer:
             raise ValueError("'files' must be a non-empty mapping of relative resource-pack paths to JSON content.")
         target_mc_version = str(args.get("target_mc_version", "1.21.4"))
         payload = pack_auditor.audit_resource_pack_bundle(files, target_mc_version=target_mc_version)
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_paper_config(self, args: dict[str, Any]) -> ToolOutcome:
+        config_text = args.get("config_text")
+        if not isinstance(config_text, str) or not config_text.strip():
+            raise ValueError("'config_text' must be a non-empty Paper/Spigot/Bukkit/server.properties snippet.")
+        expected_players = int(args.get("expected_players", 50))
+        is_folia = bool(args.get("is_folia", False))
+        payload = paper_config_auditor.audit_paper_server_config(
+            config_text,
+            expected_players=expected_players,
+            is_folia=is_folia,
+        )
         return ToolOutcome(_pretty_json(payload))
 
     @staticmethod

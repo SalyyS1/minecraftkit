@@ -1,9 +1,9 @@
-# Salyyy Minecraft Kit (v7.0.0 — 78 MCP Tools · Resource Pack Bundle Auditor · Live Stage Pre-Flight · SFTP Auto-Rollback!)
+# Salyyy Minecraft Kit (v7.2.0 — 79 MCP Tools · Paper Anti-Lag Config Auditor · 6-Engine Diagnostics Lab · Resource Pack Auditor!)
 
 [English (README.md)](README.md) · [**Trang Giới Thiệu Chính (Showcase)**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Wiki Song Ngữ](https://salyys1.github.io/minecraftkit/wiki.html) · [Hướng Dẫn Hosting 2FA & SFTP](docs/HOSTING_2FA_SFTP_GUIDE.md) · [Benchmark Tối Ưu RAM Bot](docs/BOT_OPTIMIZATION_BENCHMARKS.md) · [Chiến Lược Cộng Đồng](docs/GROWTH_STRATEGY.md)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v7.0.0](https://img.shields.io/badge/version-v7.0.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v7.0.0)
+[![Version: v7.2.0](https://img.shields.io/badge/version-v7.2.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v7.2.0)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
 Bộ công cụ **AI Engineering, Autonomous Bot QA & Server Ops** toàn diện cho hệ sinh thái Minecraft (`Paper`, `Folia`, `Purpur`, `Velocity`, `Geyser/Bedrock`, `Fabric`, RPG Plugins) với **78 công cụ MCP chuẩn JSON-RPC 2.0**, **14 lệnh/kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ (~18–42 MB RAM/bot, không cần mở app Minecraft, không chiếm màn hình)**, **Kiểm Toán Gói Resource Pack (`pack.mcmeta`, `items/`, trùng glyph Unicode)**, **6 mẫu Cloud/Docker chống nổ RAM (gồm cả Oracle Cloud Always-Free 24 GB ARM64 miễn phí $0/tháng)**, **Kết nối Hosting/VPS có 2FA TOTP & SFTP ngầm (có rollback `.mckit.bak` tự động)**, **Plugin/Mod Companion Java 21**, và **tích hợp trọn bộ 10 repo Minecraft của SalyVn / Salyyy**.
