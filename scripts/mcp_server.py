@@ -32,6 +32,7 @@ import economy_stress_sim  # noqa: E402
 import ecosystem_doctor  # noqa: E402
 import exploit_auditor  # noqa: E402
 import fabric_capture_bridge  # noqa: E402
+import geyser_config_auditor  # noqa: E402
 import gif_recorder  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
@@ -2483,6 +2484,25 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_geyser_config",
+        "title": "GeyserMC & Floodgate Bedrock Crossplay Security & Bandwidth Auditor",
+        "description": (
+            "Audit GeyserMC and Floodgate config.yml offline for insecure auth-type: offline (GEY-001), "
+            "publicly routed Java remote.address (GEY-002), empty Floodgate username-prefix collisions "
+            "(GEY-003), UDP compression misconfiguration (GEY-004), and production debug-mode overhead (GEY-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "config_text": {"type": "string", "description": "Raw GeyserMC and/or Floodgate config.yml content."},
+                "behind_velocity_or_bungee": {"type": "boolean", "default": True},
+            },
+            "required": ["config_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3539,6 +3559,7 @@ class MinecraftKitMcpServer:
             "mc_ops_audit_velocity_config": self._tool_ops_audit_velocity_config,
             "mc_ops_generate_systemd_unit": self._tool_ops_generate_systemd_unit,
             "mc_ops_plan_disaster_recovery": self._tool_ops_plan_disaster_recovery,
+            "mc_ops_audit_geyser_config": self._tool_ops_audit_geyser_config,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10673,6 +10694,16 @@ class MinecraftKitMcpServer:
             offsite_target=str(args.get("offsite_target", "s3")),
             rcon_host=str(args.get("rcon_host", "127.0.0.1")),
             rcon_port=int(args.get("rcon_port", 25575)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_geyser_config(self, args: dict[str, Any]) -> ToolOutcome:
+        config_text = args.get("config_text")
+        if not isinstance(config_text, str) or not config_text.strip():
+            raise ValueError("'config_text' must be a non-empty GeyserMC / Floodgate config.yml string.")
+        payload = geyser_config_auditor.audit_geyser_config(
+            config_text,
+            behind_velocity_or_bungee=bool(args.get("behind_velocity_or_bungee", True)),
         )
         return ToolOutcome(_pretty_json(payload))
 
