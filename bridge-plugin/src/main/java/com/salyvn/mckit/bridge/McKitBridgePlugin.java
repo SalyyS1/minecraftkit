@@ -121,6 +121,8 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.createContext("/api/v1/health", ex -> handleGuarded(ex, this::buildHealthJson));
             httpServer.createContext("/api/v1/metrics", ex -> handleGuarded(ex, this::buildMetricsJson));
             httpServer.createContext("/api/v1/players", ex -> handleGuarded(ex, this::buildPlayersJson));
+            httpServer.createContext("/api/v1/gui", ex -> handleGuarded(ex, () -> buildGuiJson(ex)));
+            httpServer.createContext("/api/v1/worlds", ex -> handleGuarded(ex, this::buildWorldsJson));
             httpServer.createContext("/api/v1/plugins", ex -> handleGuarded(ex, this::buildPluginsJson));
             httpServer.createContext("/api/v1/errors", ex -> handleGuarded(ex, this::buildErrorsJson));
             httpServer.start();
@@ -216,6 +218,56 @@ public final class McKitBridgePlugin extends JavaPlugin {
                 .append("\"food\":").append(p.getFoodLevel()).append(",")
                 .append("\"open_gui_populated_slots\":").append(nonEmptySlots)
                 .append("}");
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    private String buildGuiJson(HttpExchange exchange) {
+        String query = exchange.getRequestURI().getQuery();
+        String targetName = null;
+        if (query != null) {
+            for (String part : query.split("&")) {
+                if (part.startsWith("player=")) {
+                    targetName = part.substring("player=".length());
+                }
+            }
+        }
+        Player target = targetName == null ? null : Bukkit.getPlayerExact(targetName);
+        if (target == null) {
+            return "{\"found\":false,\"slots\":[]}";
+        }
+        InventoryView view = target.getOpenInventory();
+        StringBuilder sb = new StringBuilder("{\"found\":true,\"player\":\"").append(esc(target.getName())).append("\",\"slots\":[");
+        if (view != null && view.getTopInventory() != null) {
+            ItemStack[] contents = view.getTopInventory().getContents();
+            boolean first = true;
+            for (int i = 0; i < contents.length; i++) {
+                ItemStack item = contents[i];
+                if (item == null || item.getType().isAir()) continue;
+                if (!first) sb.append(",");
+                first = false;
+                int enchCount = item.getEnchantments().size();
+                sb.append("{\"slot\":").append(i)
+                    .append(",\"material\":\"").append(esc(item.getType().name()))
+                    .append("\",\"amount\":").append(item.getAmount())
+                    .append(",\"enchantments\":").append(enchCount).append("}");
+            }
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    private String buildWorldsJson() {
+        StringBuilder sb = new StringBuilder("{\"worlds\":[");
+        boolean first = true;
+        for (World w : Bukkit.getWorlds()) {
+            if (!first) sb.append(",");
+            first = false;
+            sb.append("{\"name\":\"").append(esc(w.getName()))
+                .append("\",\"loaded_chunks\":").append(w.getLoadedChunks().length)
+                .append(",\"players\":").append(w.getPlayers().size())
+                .append(",\"entities\":").append(w.getEntityCount()).append("}");
         }
         sb.append("]}");
         return sb.toString();

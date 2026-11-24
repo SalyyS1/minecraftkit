@@ -506,3 +506,101 @@ def assemble_timelapse_video(
         "returncode": result.returncode,
         "stderr_tail": result.stderr[-400:] if result.stderr else "",
     }
+
+
+def decode_rgb_png(png_bytes: bytes) -> tuple[int, int, bytes]:
+    """Decode an uncompressed-filter-0 8-bit RGB PNG (such as MinecraftKit snapshots)."""
+    if not png_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise ValueError("Invalid PNG signature.")
+    pos = 8
+    width = 0
+    height = 0
+    idat_parts: list[bytes] = []
+    while pos + 8 <= len(png_bytes):
+        length, tag = struct.unpack(">I4s", png_bytes[pos : pos + 8])
+        data = png_bytes[pos + 8 : pos + 8 + length]
+        pos += 12 + length
+        if tag == b"IHDR":
+            width, height, bit_depth, color_type, _, _, _ = struct.unpack(">IIBBBBB", data)
+            if bit_depth != 8 or color_type != 2:
+                raise ValueError(f"Only 8-bit RGB PNG supported for stdlib diff (got depth={bit_depth}, type={color_type}).")
+        elif tag == b"IDAT":
+            idat_parts.append(data)
+        elif tag == b"IEND":
+            break
+    raw = zlib.decompress(b"".join(idat_parts))
+    stride = width * 3
+    rgb = bytearray(width * height * 3)
+    for row in range(height):
+        src_start = row * (stride + 1)
+        if raw[src_start] != 0:
+            raise ValueError(f"Unsupported PNG row filter {raw[src_start]} at row {row}.")
+        rgb[row * stride : (row + 1) * stride] = raw[src_start + 1 : src_start + 1 + stride]
+    return width, height, bytes(rgb)
+
+
+def compare_snapshots_png(
+    baseline_png: bytes,
+    candidate_png: bytes,
+    *,
+    channel_tolerance: int = 4,
+) -> dict[str, Any]:
+    """Compute exact pixel visual regression diff and emit a highlighted diff PNG."""
+    w1, h1, rgb1 = decode_rgb_png(baseline_png)
+    w2, h2, rgb2 = decode_rgb_png(candidate_png)
+    if (w1, h1) != (w2, h2):
+        raise ValueError(f"Snapshot dimensions differ: {(w1, h1)} vs {(w2, h2)}")
+
+    diff_canvas = PixelCanvas(w1, h1, BG_BASE)
+    total_pixels = w1 * h1
+    changed_pixels = 0
+    min_x, min_y = w1, h1
+    max_x, max_y = -1, -1
+
+    for y in range(h1):
+        row_off = y * w1 * 3
+        for x in range(w1):
+            idx = row_off + x * 3
+            r1, g1, b1 = rgb1[idx], rgb1[idx + 1], rgb1[idx + 2]
+            r2, g2, b2 = rgb2[idx], rgb2[idx + 1], rgb2[idx + 2]
+            if (
+                abs(r1 - r2) > channel_tolerance
+                or abs(g1 - g2) > channel_tolerance
+                or abs(b1 - b2) > channel_tolerance
+            ):
+                changed_pixels += 1
+                if x < min_x:
+                    min_x = x
+                if y < min_y:
+                    min_y = y
+                if x > max_x:
+                    max_x = x
+                if y > max_y:
+                    max_y = y
+                diff_canvas.set_pixel(x, y, ACCENT_RED)
+            else:
+                # Dim unchanged regions so changed pixels pop visually in chat!
+                diff_canvas.set_pixel(x, y, (r2 // 3, g2 // 3, b2 // 3))
+
+    if changed_pixels > 0:
+        diff_canvas.draw_rect(
+            max(0, min_x - 2),
+            max(0, min_y - 2),
+            min(w1, max_x - min_x + 5),
+            min(h1, max_y - min_y + 5),
+            ACCENT_AMBER,
+            2,
+        )
+
+    changed_pct = round((changed_pixels / max(1, total_pixels)) * 100.0, 4)
+    diff_png = diff_canvas.to_png_bytes()
+    return {
+        "width": w1,
+        "height": h1,
+        "total_pixels": total_pixels,
+        "changed_pixels": changed_pixels,
+        "changed_pct": changed_pct,
+        "identical": changed_pixels == 0,
+        "changed_bbox": None if changed_pixels == 0 else {"x0": min_x, "y0": min_y, "x1": max_x, "y1": max_y},
+        "diff_png_base64": encode_png_base64(diff_png),
+    }

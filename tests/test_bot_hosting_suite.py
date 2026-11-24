@@ -213,6 +213,73 @@ class BotVisualHostingSuiteTests(unittest.TestCase):
         self.assertTrue(body["ok"])
         self.assertEqual(len(body["pipeline_steps"]), 5)
 
+    def test_profile_vault_masks_secrets_and_roundtrips(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            vpath = str(Path(tmpdir) / "profiles.json")
+            saved = self._call_raw("mc_ops_profile_vault", {
+                "action": "save",
+                "name": "salyvn-rpg",
+                "vault_path": vpath,
+                "fields": {
+                    "mc_host": "play.salyvn.net",
+                    "panel_domain": "panel.salyvn.net",
+                    "password": "DoNotLeakPassword!",
+                    "totp_secret": "GEZDGNBVGY3TQOJQ",
+                    "api_key": "env:MCKIT_PANEL_TOKEN",
+                },
+            })
+            txt = saved["content"][0]["text"]
+            self.assertNotIn("DoNotLeakPassword!", txt)
+            self.assertNotIn("GEZDGNBVGY3TQOJQ", txt)
+            self.assertIn("env:MCKIT_PANEL_TOKEN", txt)
+
+            listed = json.loads(self._call_raw("mc_ops_profile_vault", {"action": "list", "vault_path": vpath})["content"][0]["text"])
+            self.assertEqual(listed["profile_count"], 1)
+            deleted = json.loads(self._call_raw("mc_ops_profile_vault", {"action": "delete", "name": "salyvn-rpg", "vault_path": vpath})["content"][0]["text"])
+            self.assertTrue(deleted["deleted"])
+
+    def test_freeform_bot_session_visual_diff_and_timelapse(self) -> None:
+        import tempfile
+        start = self._call_raw("mc_bot_session_start", {
+            "host": "127.0.0.1",
+            "username": "FreeTester",
+            "password": "MyPassword77",
+            "initial_state": {"chat": ["[AuthMe] Please /login <pass>"]},
+        })
+        self.assertEqual(len(start["content"]), 2)
+        self.assertNotIn("MyPassword77", start["content"][0]["text"])
+        s_body = json.loads(start["content"][0]["text"])
+        sid = s_body["session_id"]
+
+        act = self._call_raw("mc_bot_session_action", {
+            "session_id": sid,
+            "action": "command",
+            "message": "/shop",
+            "mock_gui": {"title": "Weapon Shop", "slots": [{"slot": 13, "name": "Excalibur", "count": 1}]},
+        })
+        self.assertEqual(len(act["content"]), 2)
+        a_body = json.loads(act["content"][0]["text"])
+        self.assertEqual(a_body["frame_count"], 2)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tl = self._call_raw("mc_bot_capture_timelapse", {"session_id": sid, "output_dir": tmpdir, "fps": 2})
+            tl_body = json.loads(tl["content"][0]["text"])
+            self.assertEqual(tl_body["frame_count"], 2)
+
+        diff = self._call_raw("mc_bot_visual_diff", {
+            "baseline_state": s_body["state"],
+            "candidate_state": a_body["state"],
+        })
+        self.assertEqual(len(diff["content"]), 2)
+        self.assertEqual(diff["content"][1]["type"], "image")
+        d_body = json.loads(diff["content"][0]["text"])
+        self.assertFalse(d_body["identical"])
+        self.assertGreater(d_body["changed_pixels"], 0)
+
+        stopped = json.loads(self._call_raw("mc_bot_session_stop", {"session_id": sid})["content"][0]["text"])
+        self.assertTrue(stopped["stopped"])
+
 
 if __name__ == "__main__":
     unittest.main()

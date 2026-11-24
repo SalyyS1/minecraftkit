@@ -17,7 +17,9 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 from catalog_io import strict_json_file  # noqa: E402
 import bot_engine  # noqa: E402
+import bot_session_hub  # noqa: E402
 import hosting_bridge  # noqa: E402
+import profile_vault  # noqa: E402
 import query_api  # noqa: E402
 import query_sources  # noqa: E402
 import toolchain_bridge  # noqa: E402
@@ -1380,6 +1382,128 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": False, "openWorldHint": True},
     },
+    {
+        "name": "mc_ops_profile_vault",
+        "title": "Manage Masked Local Hosting, VPS, SFTP & Bot Profiles",
+        "description": (
+            "Save, list, inspect (masked), or delete named local server/hosting/SFTP/2FA profiles in "
+            "~/.minecraftkit/profiles.json (chmod 0600). Supports env:VAR_NAME secret indirection and "
+            "strictly masks inline passwords, API keys, and TOTP seeds."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "action": {"type": "string", "enum": ["list", "get", "save", "delete"]},
+                "name": {"type": "string", "description": "Profile name (e.g. salyvn-rpg-prod)."},
+                "fields": {"type": "object", "description": "Profile fields for action='save'."},
+                "vault_path": {"type": "string", "description": "Optional custom vault JSON file path."},
+            },
+            "required": ["action"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": False},
+    },
+    {
+        "name": "mc_bot_session_start",
+        "title": "Start Interactive Multi-Turn Freeform Headless Bot Session",
+        "description": (
+            "Launch a governed persistent headless bot session (~42 MB RAM, zero screen lock) for freeform "
+            "multi-turn exploration, auto-authenticating when prompts appear and returning an initial PNG snapshot."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string"},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+                "username": {"type": "string"},
+                "version": {"type": "string"},
+                "password": {"type": "string"},
+                "tier": {"type": "string", "enum": ["tier1-protocol", "tier2-docker-visual"]},
+                "initial_state": {"type": "object"},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
+    {
+        "name": "mc_bot_session_action",
+        "title": "Send Freeform Action to Active Headless Bot Session",
+        "description": (
+            "Drive a running headless bot session interactively (command, chat, move, click_slot, close_gui, snapshot) "
+            "and attach an updated off-screen PNG visual snapshot directly to chat."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "session_id": {"type": "string"},
+                "action": {"type": "string", "enum": ["command", "chat", "move", "click_slot", "close_gui", "snapshot"]},
+                "message": {"type": "string"},
+                "slot": {"type": "integer", "minimum": 0, "maximum": 200},
+                "position": {"type": "object"},
+                "mock_reply": {"type": "string"},
+                "mock_gui": {"type": "object"},
+                "capture_snapshot": {"type": "boolean"},
+            },
+            "required": ["session_id", "action"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
+    {
+        "name": "mc_bot_session_stop",
+        "title": "Stop Freeform Bot Session or Inspect Governed Bot Pool",
+        "description": (
+            "Disconnect an active freeform bot session and release its governed memory slot, or pass action='status' "
+            "to inspect all active sessions and total RAM usage."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "action": {"type": "string", "enum": ["stop", "status"]},
+                "session_id": {"type": "string"},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": False},
+    },
+    {
+        "name": "mc_bot_capture_timelapse",
+        "title": "Export Multi-Frame Bot Session Timelapse MP4 via ffmpeg",
+        "description": (
+            "Write all off-screen PNG frames captured during a freeform bot session and assemble an MP4 timelapse "
+            "video via ffmpeg (returning the latest keyframe PNG inline in chat)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "session_id": {"type": "string"},
+                "output_dir": {"type": "string", "description": "Directory for PNG frames and MP4 timelapse."},
+                "fps": {"type": "integer", "minimum": 1, "maximum": 30},
+            },
+            "required": ["session_id"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": False},
+    },
+    {
+        "name": "mc_bot_visual_diff",
+        "title": "Pixel-Exact Visual Regression Diff Between Two Bot Snapshots",
+        "description": (
+            "Compare two bot UI/HUD states (baseline vs candidate) pixel-by-pixel, computing changed pixel percentage "
+            "and bounding box while returning an amber-boxed, red-highlighted visual diff PNG directly into chat."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "baseline_state": {"type": "object", "description": "Baseline bot snapshot state."},
+                "candidate_state": {"type": "object", "description": "Candidate/new build bot snapshot state."},
+                "channel_tolerance": {"type": "integer", "minimum": 0, "maximum": 64},
+            },
+            "required": ["baseline_state", "candidate_state"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -2352,6 +2476,7 @@ class MinecraftKitMcpServer:
 
     def __init__(self, root: Path | None = None) -> None:
         self.store = CatalogStore(root or SCRIPTS_DIR.parent)
+        self.bot_hub = bot_session_hub.BotSessionHub(max_sessions=16, idle_timeout_seconds=300.0)
         self._handlers = {
             "mc_search_api": self._tool_search_api,
             "mc_list_plugins": self._tool_list_plugins,
@@ -2386,6 +2511,12 @@ class MinecraftKitMcpServer:
             "mc_suite_orchestrate": self._tool_suite_orchestrate,
             "mc_bridge_plugin_query": self._tool_bridge_plugin_query,
             "mc_run_qa_pipeline": self._tool_run_qa_pipeline,
+            "mc_ops_profile_vault": self._tool_ops_profile_vault,
+            "mc_bot_session_start": self._tool_bot_session_start,
+            "mc_bot_session_action": self._tool_bot_session_action,
+            "mc_bot_session_stop": self._tool_bot_session_stop,
+            "mc_bot_capture_timelapse": self._tool_bot_capture_timelapse,
+            "mc_bot_visual_diff": self._tool_bot_visual_diff,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -8848,6 +8979,95 @@ class MinecraftKitMcpServer:
             payload["snapshot_attached_as_mcp_image"] = True
             images = ((b64_png, "image/png"),)
         return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_ops_profile_vault(self, args: dict[str, Any]) -> ToolOutcome:
+        action = str(args.get("action", "list")).lower()
+        vault_arg = args.get("vault_path")
+        vpath = Path(str(vault_arg)).expanduser().resolve() if vault_arg else None
+        if action == "list":
+            payload = profile_vault.list_profiles(vault_path=vpath)
+        elif action == "get":
+            name = str(args.get("name", ""))
+            prof = profile_vault.get_profile(name, vault_path=vpath, masked=True)
+            payload = {"found": prof is not None, "profile": prof}
+        elif action == "save":
+            name = str(args.get("name", ""))
+            fields = args.get("fields")
+            if not isinstance(fields, dict):
+                raise ValueError("'fields' must be a JSON object when action='save'.")
+            payload = profile_vault.upsert_profile(name, fields, vault_path=vpath)
+        elif action == "delete":
+            name = str(args.get("name", ""))
+            payload = profile_vault.delete_profile(name, vault_path=vpath)
+        else:
+            raise ValueError(f"Unsupported profile vault action: {action!r}")
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_session_start(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = self.bot_hub.start_session(
+            host=str(args.get("host", "127.0.0.1")),
+            port=int(args.get("port", 25565)),
+            username=str(args.get("username", "MCKitFreeBot")),
+            version=str(args.get("version", "1.21.4")),
+            password=str(args.get("password", "")),
+            tier=str(args.get("tier", "tier1-protocol")),
+            initial_state=args.get("initial_state"),
+        )
+        b64_png = payload.pop("snapshot_png_base64", None)
+        images = ((b64_png, "image/png"),) if isinstance(b64_png, str) and b64_png else ()
+        if images:
+            payload["snapshot_attached_as_mcp_image"] = True
+        return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_bot_session_action(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = self.bot_hub.execute_action(
+            session_id=str(args.get("session_id", "")),
+            action=str(args.get("action", "snapshot")),
+            message=str(args.get("message", "")),
+            slot=args.get("slot"),
+            position=args.get("position"),
+            mock_reply=str(args.get("mock_reply", "")),
+            mock_gui=args.get("mock_gui"),
+            capture_snapshot=bool(args.get("capture_snapshot", True)),
+        )
+        b64_png = payload.pop("snapshot_png_base64", None)
+        images = ((b64_png, "image/png"),) if isinstance(b64_png, str) and b64_png else ()
+        if images:
+            payload["snapshot_attached_as_mcp_image"] = True
+        return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_bot_session_stop(self, args: dict[str, Any]) -> ToolOutcome:
+        action = str(args.get("action", "stop")).lower()
+        if action == "status":
+            return ToolOutcome(_pretty_json(self.bot_hub.pool_status()))
+        sid = str(args.get("session_id", ""))
+        return ToolOutcome(_pretty_json(self.bot_hub.stop_session(sid)))
+
+    def _tool_bot_capture_timelapse(self, args: dict[str, Any]) -> ToolOutcome:
+        sid = str(args.get("session_id", ""))
+        out_raw = args.get("output_dir")
+        out_dir = Path(str(out_raw)).expanduser().resolve() if out_raw else (Path.home() / ".minecraftkit" / "timelapses" / sid)
+        payload = self.bot_hub.export_timelapse(sid, out_dir, fps=int(args.get("fps", 2)))
+        b64_png = payload.pop("latest_png_base64", None)
+        images = ((b64_png, "image/png"),) if isinstance(b64_png, str) and b64_png else ()
+        if images:
+            payload["keyframe_attached_as_mcp_image"] = True
+        return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_bot_visual_diff(self, args: dict[str, Any]) -> ToolOutcome:
+        base_state = args.get("baseline_state")
+        cand_state = args.get("candidate_state")
+        if not isinstance(base_state, dict) or not isinstance(cand_state, dict):
+            raise ValueError("'baseline_state' and 'candidate_state' must be JSON objects.")
+        tol = int(args.get("channel_tolerance", 4))
+        base_png = visual_capture.render_bot_snapshot_png(base_state)
+        cand_png = visual_capture.render_bot_snapshot_png(cand_state)
+        diff = visual_capture.compare_snapshots_png(base_png, cand_png, channel_tolerance=tol)
+        b64_png = diff.pop("diff_png_base64", None)
+        images = ((b64_png, "image/png"),) if isinstance(b64_png, str) and b64_png else ()
+        if images:
+            diff["diff_attached_as_mcp_image"] = True
+        return ToolOutcome(_pretty_json(diff), images=images)
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

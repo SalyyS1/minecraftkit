@@ -3,11 +3,11 @@
 [Tiếng Việt (README.vi.md)](README.vi.md) · [**Flagship Showcase**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [Growth Playbook](docs/GROWTH_STRATEGY.md) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v3.1.0](https://img.shields.io/badge/version-v3.1.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.1.0)
+[![Version: v3.2.0](https://img.shields.io/badge/version-v3.2.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.2.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
-All-in-one Minecraft plugin engineering, autonomous headless bot QA, off-screen visual capture, headless hosting/VPS/2FA & SFTP operations, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 33-tool stdio MCP server by **SalyVn / Salyyy**.
+All-in-one Minecraft plugin engineering, autonomous headless bot QA, persistent freeform multi-turn bot sessions, off-screen PNG visual diff & MP4 timelapse capture, headless hosting/VPS/2FA & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 39-tool stdio MCP server by **SalyVn / Salyyy**.
 
 ## What Salyyy Minecraft Kit Includes
 
@@ -23,7 +23,7 @@ All-in-one Minecraft plugin engineering, autonomous headless bot QA, off-screen 
 - **Unified 10-Repo SalyyS1 Minecraft Toolchain (`scripts/toolchain_bridge.py`)**: Integrates `mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, and `texlab` into a single `mc_run_qa_pipeline` end-to-end automated QA loop.
 - **Offline RPG & Plugin Bytecode API Catalog**: 4,947 plugin-owned types and 41,887 bytecode-verified members across 10 major RPG and server plugins (`ModelEngine`, `MMOItems`, `MMOCore`, `MMOInventory`, `MMOProfiles`, `MythicCrucible`, `MythicDungeons`, `MythicEnchants`, `MythicRPG`, `CoreTools`), plus 103 curated GitHub sources and 901 Mojang release/snapshot records.
 - **14 `/mc:*` Engineering Agent Skills**: Specialized routing skills and slash commands for Claude Code, Cursor, Windsurf, Antigravity, and OpenAI Codex covering `mc:bot`, `mc:build`, `mc:core`, `mc:rpg`, `mc:protocol`, `mc:nms`, `mc:ops`, `mc:pack`, `mc:model`, `mc:qa`, `mc:shader`, `mc:dialog`, `mc:client`, and `mc:suite`.
-- **33-Tool Stdio MCP Server**: Pure Python 3.10+ JSON-RPC 2.0 MCP server (`scripts/mcp_server.py` and `minecraftkit mcp`) with native multimodal PNG image responses for live visual bot testing.
+- **39-Tool Stdio MCP Server**: Pure Python 3.10+ JSON-RPC 2.0 MCP server (`scripts/mcp_server.py` and `minecraftkit mcp`) with native multimodal PNG image responses for live visual bot testing, pixel-exact visual regression diffs, and ffmpeg MP4 timelapses.
 
 ## Quick Install
 
@@ -112,8 +112,14 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_sftp_operations` | Headless SFTP/SSH server operations (`list`, `read`, `tail_log`, safe `.mckit.bak` `patch_config`, atomic `deploy_jar`, `list_crashes`) with path-traversal guards and secret redaction. |
 | `mc_suite_catalog` | Inspect all 10 integrated SalyyS1 Minecraft tools (`mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, `texlab`), local availability, and recipes. |
 | `mc_suite_orchestrate` | Construct or safely execute CLI commands across any integrated SalyyS1 Minecraft tool. |
-| `mc_bridge_plugin_query` | Query the companion loopback token-authenticated `mckit-bridge-plugin` (TPS/MSPT, JVM heap, player GUI states, loaded plugins, grouped SEVERE error ring buffer). |
+| `mc_bridge_plugin_query` | Query the companion loopback token-authenticated `mckit-bridge-plugin` (TPS/MSPT, JVM heap, player GUI states via `/api/v1/gui`, loaded worlds via `/api/v1/worlds`, plugins, grouped SEVERE error ring buffer). |
 | `mc_run_qa_pipeline` | Execute the complete 5-phase automated Minecraft QA loop: resource planning -> static plugin/pack/shader audits -> SFTP/Panel/mcstage deploy -> headless bot stage tests + visual PNG snapshot -> `serverdoctor` triage. |
+| `mc_ops_profile_vault` | Manage masked reusable server/panel/SFTP/bot profiles (`list`, `get`, `save`, `delete`, `export_redacted`) stored with `chmod 0600` in `~/.minecraftkit/profiles.json` and `env:VAR` secret indirection. |
+| `mc_bot_session_start` | Start a governed persistent freeform headless bot session with anti-OOM session cap, auto-auth, and immediate off-screen PNG visual snapshot. |
+| `mc_bot_session_action` | Drive an active freeform bot session step-by-step (`command`, `chat`, `move`, `click_slot`, `look`, `accept_pack`, `wait`, `snapshot`) returning updated HUD/GUI/minimap PNG frames inline in chat. |
+| `mc_bot_session_stop` | Stop a persistent bot session cleanly and return final session telemetry and recorded frame count. |
+| `mc_bot_capture_timelapse` | Assemble recorded frames from a bot session into a real headless H.264 MP4 timelapse video via `ffmpeg` (gracefully degrades to indexed frame manifest if ffmpeg is absent). |
+| `mc_bot_visual_diff` | Compute pixel-exact visual regression diffs between two base64 PNG bot snapshots, returning `diff_ratio`, `changed_pixels`, pass/fail verdict, and a highlighted visual diff PNG inline in chat. |
 
 ### Exposed MCP Resources & Slash Prompts
 
