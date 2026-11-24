@@ -16,7 +16,7 @@
   <main id="showcase-main" class="sc-main">
     <section class="sc-hero">
       <div class="sc-hero-top">
-        <span class="sc-pill">v3.3.0 · 42 MCP Tools · 14 /mc:* Skills · 10 Integrated Repos · Java+Bedrock · Visual Diff &amp; MP4</span>
+        <span class="sc-pill">v3.4.0 · 43 MCP Tools · 14 /mc:* Skills · 10 Integrated Repos · Java+Bedrock · Visual Diff Lab</span>
         <div class="sc-lang-group" role="group" aria-label="Language switcher">
           <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
           <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
@@ -37,8 +37,8 @@
 
       <div class="sc-stats-grid">
         <article class="sc-stat-card">
-          <strong>42</strong>
-          <span data-i18n="stat_mcp">Stdio MCP Tools (PNG Diff, MP4, Bedrock &amp; Presets)</span>
+          <strong>43</strong>
+          <span data-i18n="stat_mcp">Stdio MCP Tools (PNG Diff, MP4, Bedrock &amp; MCStage)</span>
         </article>
         <article class="sc-stat-card">
           <strong>42 MB</strong>
@@ -126,6 +126,30 @@
             <input id="sim-cmd-input" type="text" placeholder="Type freeform command e.g. /shop, /login secret123, /ia..." style="flex:1;min-width:180px;padding:7px 10px;border-radius:6px;border:1px solid #2b3f52;background:#081018;color:#e6f2ff;font-family:monospace;font-size:12.5px">
             <button id="sim-cmd-send" type="button" class="sc-btn sc-btn-primary">Run Bot Action</button>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="visual-diff-lab" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">PIXEL-EXACT VISUAL REGRESSION DIFF (mc_bot_visual_diff)</span>
+        <h2 data-i18n="vdiff_title">Interactive Off-Screen GUI Pixel Diff Lab</h2>
+        <p data-i18n="vdiff_desc">Toggle a simulated plugin regression below. MinecraftKit compares baseline vs candidate PNG captures pixel-by-pixel and returns an amber-boxed, red-highlighted diff directly into chat.</p>
+      </div>
+      <div class="sc-filter-row" id="vdiff-controls"></div>
+      <div class="sc-calc-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        <div class="sc-panel">
+          <h3>Baseline Build</h3>
+          <canvas id="vdiff-base" width="260" height="150" style="width:100%;border-radius:8px;border:1px solid #24374a;background:#081018"></canvas>
+        </div>
+        <div class="sc-panel">
+          <h3>Candidate Build</h3>
+          <canvas id="vdiff-cand" width="260" height="150" style="width:100%;border-radius:8px;border:1px solid #24374a;background:#081018"></canvas>
+        </div>
+        <div class="sc-panel">
+          <h3>Pixel Diff Output</h3>
+          <canvas id="vdiff-out" width="260" height="150" style="width:100%;border-radius:8px;border:1px solid #24374a;background:#081018"></canvas>
+          <p id="vdiff-stats" class="sc-muted" style="margin-top:8px;font-family:monospace;font-size:12px"></p>
         </div>
       </div>
     </section>

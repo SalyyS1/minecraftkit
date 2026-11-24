@@ -1576,6 +1576,29 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True, "openWorldHint": True},
     },
+    {
+        "name": "mc_suite_generate_mcstage_suite",
+        "title": "Generate Synced MCStage v0.9.0 Scenario & GitHub Actions QA Workflow",
+        "description": (
+            "Generate a production mcstage.yml (with bot-probe MCS018, companion mckit-bridge-plugin TPS/GUI assertions "
+            "MCS019, Folia barrier checks, and heap bounds) paired with a ready-to-paste GitHub Actions QA workflow."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "plugin_name": {"type": "string"},
+                "plugin_glob": {"type": "string"},
+                "mc_versions": {"type": "array", "items": {"type": "string"}},
+                "include_folia": {"type": "boolean", "default": True},
+                "include_bridge": {"type": "boolean", "default": True},
+                "bridge_player": {"type": "string"},
+                "expect_gui_title": {"type": "string"},
+                "include_shaders": {"type": "boolean", "default": False},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -2592,6 +2615,7 @@ class MinecraftKitMcpServer:
             "mc_bot_ping_bedrock": self._tool_bot_ping_bedrock,
             "mc_bot_generate_stage_preset": self._tool_bot_generate_stage_preset,
             "mc_hosting_console_stream_plan": self._tool_hosting_console_stream_plan,
+            "mc_suite_generate_mcstage_suite": self._tool_suite_generate_mcstage_suite,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9180,6 +9204,21 @@ class MinecraftKitMcpServer:
             api_key=str(args.get("api_key", "")),
             command=str(args.get("command", "")),
             fetch_live_token=bool(args.get("fetch_live_token", False)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_suite_generate_mcstage_suite(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_vers = args.get("mc_versions")
+        versions = [str(v) for v in raw_vers] if isinstance(raw_vers, list) and raw_vers else None
+        payload = toolchain_bridge.generate_mcstage_suite(
+            plugin_name=str(args.get("plugin_name", "MyRPGPlugin")),
+            plugin_glob=str(args.get("plugin_glob", "build/libs/*.jar")),
+            mc_versions=versions,
+            include_folia=bool(args.get("include_folia", True)),
+            include_bridge=bool(args.get("include_bridge", True)),
+            bridge_player=str(args.get("bridge_player", "")),
+            expect_gui_title=str(args.get("expect_gui_title", "")),
+            include_shaders=bool(args.get("include_shaders", False)),
         )
         return ToolOutcome(_pretty_json(payload))
 

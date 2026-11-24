@@ -324,6 +324,17 @@ class BotVisualHostingSuiteTests(unittest.TestCase):
         self.assertTrue(ws_plan["screen_lock_free"])
         self.assertIn("/api/client/servers/abc123/websocket", ws_plan["credentials_endpoint"])
 
+        mcstage_suite = json.loads(self._call_raw("mc_suite_generate_mcstage_suite", {
+            "plugin_name": "OZbanghoi",
+            "bridge_player": "MCKitTester",
+            "expect_gui_title": "Bang Hoi",
+            "include_shaders": True,
+        })["content"][0]["text"])
+        self.assertEqual(mcstage_suite["mcstage_version"], "0.9.0")
+        self.assertIn("assert-bridge:", mcstage_suite["mcstage_yaml"])
+        self.assertIn('expect-gui-title: "Bang Hoi"', mcstage_suite["mcstage_yaml"])
+        self.assertIn("SalyyS1/mcstage@v0.9.0", mcstage_suite["github_actions_yaml"])
+
 
 if __name__ == "__main__":
     unittest.main()

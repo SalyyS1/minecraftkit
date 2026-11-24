@@ -38,7 +38,7 @@ SUITE_TOOLS: tuple[dict[str, Any], ...] = (
         "sarif_capable": True,
         "env_var": "MCSTAGE_JAR",
         "binary_names": ["mcstage", "mcstage.jar"],
-        "summary": "Real-server integration test runner for Paper, Folia, and Purpur plugins with crash-guard MCS001-MCS017, Folia multi-region lag/recovery, RCON fault injection, JUnit XML, and SARIF v2.1.0.",
+        "summary": "Real-server integration test runner & 6-tool stdio MCP server for Paper, Folia, and Purpur plugins with crash-guard MCS001-MCS020, bot-probe (MCS018), companion bridge TPS/GUI checks (MCS019), baseline report comparator (MCS020), Folia recovery, RCON fault injection, JUnit XML, and SARIF v2.1.0.",
         "example_cmd": "java -jar mcstage.jar test mcstage.yml --accept-eula --sarif build/reports/mcstage.sarif",
     },
     {
@@ -396,4 +396,100 @@ def run_qa_pipeline(
         "pipeline_steps": pipeline_steps,
         "bot_stages": bot_run.get("state", {}).get("stages", []),
         "snapshot_png_base64": bot_run.get("snapshot_png_base64"),
+    }
+
+
+def generate_mcstage_suite(
+    *,
+    plugin_name: str = "MyRPGPlugin",
+    plugin_glob: str = "build/libs/*.jar",
+    mc_versions: list[str] | None = None,
+    include_folia: bool = True,
+    include_bridge: bool = True,
+    bridge_player: str = "",
+    expect_gui_title: str = "",
+    include_shaders: bool = False,
+) -> dict[str, Any]:
+    """Generate a synced mcstage.yml (v0.9.0) + GitHub Actions CI QA workflow integrating MinecraftKit."""
+    versions = mc_versions or ["latest", "26.3"]
+    platforms = ["paper", "folia", "purpur"] if include_folia else ["paper", "purpur"]
+    yaml_lines = [
+        f"name: {plugin_name} real-server + bot + bridge QA suite",
+        f"platforms: [{', '.join(platforms)}]",
+        f"versions: [{', '.join(repr(v).replace(chr(39), chr(34)) for v in versions)}]",
+        "memory: 2G",
+        "crash-guard: true",
+        "plugins:",
+        f"  - {plugin_glob}",
+    ]
+    if include_bridge:
+        yaml_lines.append("  - plugins-qa/mckit-bridge-plugin.jar")
+    yaml_lines.extend([
+        "steps:",
+        f"  - enabled: {plugin_name}",
+        "  - bot-probe:",
+        "      max-latency: 400ms",
+    ])
+    if include_bridge:
+        yaml_lines.extend([
+            "  - assert-bridge:",
+            '      url: "http://127.0.0.1:25590"',
+            "      min-tps: 19.0",
+            "      max-mspt: 35.0",
+            "      max-errors: 0",
+        ])
+        if bridge_player and expect_gui_title:
+            yaml_lines.append(f'      player: "{bridge_player}"')
+            yaml_lines.append(f'      expect-gui-title: "{expect_gui_title}"')
+    if include_folia:
+        yaml_lines.extend([
+            "  - inject-lag:",
+            "      regions: 3",
+            "      mode: merge-split",
+            "      duration: 2s",
+            "  - no-barrier-stall:",
+            "      max-stall: 350ms",
+            '      probe-command: "list"',
+        ])
+    yaml_lines.extend([
+        "  - assert-heap:",
+        "      max-percent: 85",
+        "      window: 2s",
+    ])
+
+    ci_lines = [
+        f"name: {plugin_name} MinecraftKit Full QA",
+        "on: [push, pull_request]",
+        "jobs:",
+        "  qa:",
+        "    runs-on: ubuntu-latest",
+        "    steps:",
+        "      - uses: actions/checkout@v4",
+        "      - uses: actions/setup-java@v4",
+        "        with:",
+        "          distribution: temurin",
+        '          java-version: "21"',
+        "      - name: Build plugin JAR",
+        "        run: ./gradlew build --no-daemon",
+        "      - name: Run MCStage real-server + bot-probe + bridge matrix",
+        "        uses: SalyyS1/mcstage@v0.9.0",
+        "        with:",
+        "          scenario: mcstage.yml",
+        "          accept-eula: true",
+        "          format: json",
+        "          output: build/reports/mcstage-current.json",
+        "          sarif: build/reports/mcstage.sarif",
+    ]
+    if include_shaders:
+        ci_lines.extend([
+            "      - name: Audit GLSL resource-pack shaders (shadersmith)",
+            "        run: java -jar shadersmith.jar check ./pack --target 26.3 --sarif build/reports/shaders.sarif",
+        ])
+
+    return {
+        "plugin_name": plugin_name,
+        "mcstage_version": "0.9.0",
+        "mcstage_yaml": "\n".join(yaml_lines) + "\n",
+        "github_actions_yaml": "\n".join(ci_lines) + "\n",
+        "integrated_tools": ["mcstage", "mckit-bridge-plugin", "foliascan", "pluginscope"] + (["shadersmith"] if include_shaders else []),
     }

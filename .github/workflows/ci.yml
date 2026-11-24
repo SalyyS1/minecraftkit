@@ -43,5 +43,8 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - name: Compile client-mod visual capture bridge
-        run: javac -d /tmp/mckit-client-mod-classes client-mod/src/main/java/com/salyvn/mckit/client/McKitVisualClientMod.java
+      - name: Compile client-mod visual capture bridge & run bridge-plugin contract tests
+        run: |
+          javac -d /tmp/mckit-client-mod-classes client-mod/src/main/java/com/salyvn/mckit/client/McKitVisualClientMod.java
+          javac -d /tmp/mckit-bridge-test bridge-plugin/src/test/java/com/salyvn/mckit/bridge/BridgeContractTest.java
+          java -cp /tmp/mckit-bridge-test com.salyvn.mckit.bridge.BridgeContractTest
