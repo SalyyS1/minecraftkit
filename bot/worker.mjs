@@ -120,6 +120,30 @@ export function evaluateStageAssertion(action, stage, snapshot) {
         : `No entity matching /${pattern}/ within ${maxDist}m`,
     };
   }
+  if (action === "assert_health_above") {
+    const minHealth = Number(stage.min_health ?? stage.threshold ?? 10);
+    const curHealth = Number(snapshot.health ?? 0);
+    return {
+      passed: curHealth >= minHealth,
+      detail: curHealth >= minHealth
+        ? `Health ${curHealth} >= ${minHealth}`
+        : `Health ${curHealth} dropped below ${minHealth}`,
+    };
+  }
+  if (action === "assert_position_near") {
+    const pos = snapshot.position || { x: 0, y: 0, z: 0 };
+    const tx = Number(stage.x ?? 0);
+    const ty = stage.y !== undefined ? Number(stage.y) : pos.y;
+    const tz = Number(stage.z ?? 0);
+    const radius = Number(stage.radius ?? stage.max_distance ?? 8);
+    const dist = Math.hypot((pos.x ?? 0) - tx, (pos.y ?? 0) - ty, (pos.z ?? 0) - tz);
+    return {
+      passed: dist <= radius,
+      detail: dist <= radius
+        ? `Position within ${dist.toFixed(1)}m of (${tx}, ${ty}, ${tz}) <= ${radius}m`
+        : `Position is ${dist.toFixed(1)}m away from (${tx}, ${ty}, ${tz}) (max ${radius}m)`,
+    };
+  }
   return { passed: true, detail: `No-op assertion '${action}'` };
 }
 

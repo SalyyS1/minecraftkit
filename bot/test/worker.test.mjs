@@ -99,6 +99,17 @@ test("evaluateStageAssertion() verifies assert_title and assert_entity_nearby fo
   assert.equal(evaluateStageAssertion("assert_entity_nearby", { pattern: "Far_Villager", max_distance: 20 }, snap).passed, false);
 });
 
+test("evaluateStageAssertion() verifies assert_health_above and assert_position_near for PvP/Warp QA", () => {
+  const snap = {
+    health: 18.5,
+    position: { x: 102.0, y: 65.0, z: -48.5 },
+  };
+  assert.equal(evaluateStageAssertion("assert_health_above", { min_health: 15 }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_health_above", { min_health: 20 }, snap).passed, false);
+  assert.equal(evaluateStageAssertion("assert_position_near", { x: 100, y: 65, z: -50, radius: 5 }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_position_near", { x: 500, z: 500, radius: 10 }, snap).passed, false);
+});
+
 test("pool-runner summarizePoolResults() calculates p50/p95 latency and enforces RAM budget", () => {
   const summary = summarizePoolResults(
     [

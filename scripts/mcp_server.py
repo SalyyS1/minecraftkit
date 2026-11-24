@@ -34,6 +34,7 @@ import fabric_capture_bridge  # noqa: E402
 import gif_recorder  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
+import pack_auditor  # noqa: E402
 import pack_parity  # noqa: E402
 import permissions_auditor  # noqa: E402
 import plugin_conflict_auditor  # noqa: E402
@@ -2365,6 +2366,30 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_pack_audit_bundle",
+        "title": "Resource Pack Bundle Auditor (pack.mcmeta, 1.21.4+ items/, font/ Glyph Collisions)",
+        "description": (
+            "Audit an entire Minecraft resource pack file map (pack.mcmeta, assets/<ns>/items/*.json, "
+            "assets/<ns>/font/*.json, models/item/*.json) offline in pure Python, catching pack_format "
+            "mismatches (PACK-001), illegal uppercase resource paths (PACK-002), broken 1.21.4+ client "
+            "item model wrappers (PACK-003), bitmap font ascent>height & duplicate Unicode glyph codepoint "
+            "collisions (PACK-004), and deprecated overrides arrays (PACK-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "type": "object",
+                    "description": "Mapping of relative pack file path (e.g. 'pack.mcmeta', 'assets/myrpg/items/blade.json') to JSON string or object.",
+                },
+                "target_mc_version": {"type": "string", "default": "1.21.4"},
+            },
+            "required": ["files"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3416,6 +3441,7 @@ class MinecraftKitMcpServer:
             "mc_bot_fingerprint_server": self._tool_bot_fingerprint_server,
             "mc_bot_export_markdown_proof": self._tool_bot_export_markdown_proof,
             "mc_bot_validate_stage_yaml": self._tool_bot_validate_stage_yaml,
+            "mc_pack_audit_bundle": self._tool_pack_audit_bundle,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10489,6 +10515,14 @@ class MinecraftKitMcpServer:
             raise ValueError("'yaml_text' must be a non-empty YAML or JSON stage recipe string.")
         host_ram_gb = float(args.get("host_ram_gb", 8.0))
         payload = bot_engine.validate_stage_yaml(yaml_text, host_ram_gb=host_ram_gb)
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_pack_audit_bundle(self, args: dict[str, Any]) -> ToolOutcome:
+        files = args.get("files")
+        if not isinstance(files, dict) or not files:
+            raise ValueError("'files' must be a non-empty mapping of relative resource-pack paths to JSON content.")
+        target_mc_version = str(args.get("target_mc_version", "1.21.4"))
+        payload = pack_auditor.audit_resource_pack_bundle(files, target_mc_version=target_mc_version)
         return ToolOutcome(_pretty_json(payload))
 
     @staticmethod
