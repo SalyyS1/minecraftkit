@@ -2345,6 +2345,26 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_validate_stage_yaml",
+        "title": "Autonomous Bot Stage YAML/JSON Pre-Flight Security & Anti-OOM Validator",
+        "description": (
+            "Validate a MinecraftKit autonomous bot Stage YAML or JSON recipe before execution, catching "
+            "hardcoded plaintext passwords (STAGE-SEC-001), unknown actions (STAGE-ACT-001), missing "
+            "required params (STAGE-REQ-001), broken regex patterns (STAGE-REGEX-001), and desktop/visual "
+            "fleet RAM overflow (STAGE-OOM-001)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "yaml_text": {"type": "string", "description": "Bot stage recipe YAML or JSON string."},
+                "host_ram_gb": {"type": "number", "minimum": 1.0, "default": 8.0},
+            },
+            "required": ["yaml_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3395,6 +3415,7 @@ class MinecraftKitMcpServer:
             "mc_suite_full_ecosystem_doctor": self._tool_suite_full_ecosystem_doctor,
             "mc_bot_fingerprint_server": self._tool_bot_fingerprint_server,
             "mc_bot_export_markdown_proof": self._tool_bot_export_markdown_proof,
+            "mc_bot_validate_stage_yaml": self._tool_bot_validate_stage_yaml,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10461,6 +10482,14 @@ class MinecraftKitMcpServer:
             "stage_count": len(report["stages"]),
             "markdown": markdown,
         }))
+
+    def _tool_bot_validate_stage_yaml(self, args: dict[str, Any]) -> ToolOutcome:
+        yaml_text = args.get("yaml_text")
+        if not isinstance(yaml_text, str) or not yaml_text.strip():
+            raise ValueError("'yaml_text' must be a non-empty YAML or JSON stage recipe string.")
+        host_ram_gb = float(args.get("host_ram_gb", 8.0))
+        payload = bot_engine.validate_stage_yaml(yaml_text, host_ram_gb=host_ram_gb)
+        return ToolOutcome(_pretty_json(payload))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

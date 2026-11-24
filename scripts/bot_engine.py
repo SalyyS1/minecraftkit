@@ -963,6 +963,268 @@ def build_stage_preset(
     }
 
 
+VALID_STAGE_ACTIONS = frozenset({
+    "join",
+    "auth",
+    "command",
+    "chat",
+    "move",
+    "click_slot",
+    "accept_pack",
+    "assert_chat",
+    "assert_gui",
+    "assert_inventory",
+    "assert_scoreboard",
+    "assert_tps",
+    "assert_title",
+    "assert_entity_nearby",
+    "assert_health_above",
+    "assert_position_near",
+    "capture",
+    "wait",
+    "sleep",
+})
+
+
+def _parse_stage_yaml_or_json(text: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """Pure-Python parser for MinecraftKit Bot Stage YAML or JSON recipes."""
+    stripped = text.strip()
+    if not stripped:
+        return {}, []
+    if stripped.startswith("{") or stripped.startswith("["):
+        data = json.loads(stripped)
+        if isinstance(data, list):
+            return {}, [item for item in data if isinstance(item, dict)]
+        if isinstance(data, dict):
+            stages = data.get("stages")
+            return data, [item for item in stages if isinstance(item, dict)] if isinstance(stages, list) else []
+        return {}, []
+
+    meta: dict[str, Any] = {}
+    stages: list[dict[str, Any]] = []
+    in_stages = False
+    current: dict[str, Any] | None = None
+
+    def _clean_val(raw: str) -> str:
+        val = raw.strip()
+        if (len(val) >= 2) and ((val[0] == val[-1] == '"') or (val[0] == val[-1] == "'")):
+            return val[1:-1]
+        return val
+
+    for raw_line in stripped.splitlines():
+        line = raw_line.rstrip()
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        indent = len(line) - len(line.lstrip(" "))
+        content = line.strip()
+        if indent == 0 and content.startswith("stages:"):
+            in_stages = True
+            continue
+        if not in_stages and indent == 0 and ":" in content:
+            k, _, v = content.partition(":")
+            meta[k.strip()] = _clean_val(v)
+            continue
+        if in_stages:
+            if content.startswith("- "):
+                if current is not None:
+                    stages.append(current)
+                current = {}
+                rest = content[2:].strip()
+                if ":" in rest:
+                    k, _, v = rest.partition(":")
+                    current[k.strip()] = _clean_val(v)
+            elif current is not None and ":" in content:
+                k, _, v = content.partition(":")
+                current[k.strip()] = _clean_val(v)
+    if current is not None:
+        stages.append(current)
+    return meta, stages
+
+
+def validate_stage_yaml(
+    yaml_text: str,
+    *,
+    host_ram_gb: float = 8.0,
+) -> dict[str, Any]:
+    """Pre-flight validator for autonomous Minecraft bot Stage YAML/JSON recipes.
+
+    Detects:
+      - STAGE-SEC-001: Hardcoded plaintext passwords or /login /register secrets
+      - STAGE-ACT-001: Unknown or typo'd stage action names
+      - STAGE-REQ-001: Missing required stage parameters (command, pattern, slot)
+      - STAGE-REGEX-001: Invalid regular expressions in pattern/title_pattern
+      - STAGE-OOM-001: Desktop/visual bot fleet RAM budget overflow (> 65% host RAM)
+    """
+    if not isinstance(yaml_text, str) or not yaml_text.strip():
+        raise ValueError("'yaml_text' must be a non-empty YAML or JSON stage recipe string.")
+
+    findings: list[dict[str, Any]] = []
+    try:
+        meta, stages = _parse_stage_yaml_or_json(yaml_text)
+    except Exception as exc:  # noqa: BLE001
+        return {
+            "ok": False,
+            "status": "fail",
+            "grade": "F",
+            "parsed_stage_count": 0,
+            "findings": [{
+                "rule_id": "STAGE-SYNTAX-001",
+                "severity": "critical",
+                "message": f"Failed to parse stage recipe: {exc}",
+                "remediation": "Provide valid YAML ('stages:' list) or JSON array/object.",
+            }],
+        }
+
+    # 1. Plaintext password check in top-level metadata
+    for key in ("password", "auth_password", "rcon_password", "sftp_password", "totp_secret"):
+        raw_secret = str(meta.get(key, "") or "").strip()
+        if raw_secret and not (
+            raw_secret.startswith("env:")
+            or (raw_secret.startswith("${") and raw_secret.endswith("}"))
+            or raw_secret in ("[REDACTED_PASSWORD]", "<password>")
+        ):
+            findings.append({
+                "rule_id": "STAGE-SEC-001",
+                "severity": "critical",
+                "stage_index": 0,
+                "message": f"Hardcoded plaintext secret detected in top-level '{key}' field.",
+                "remediation": f"Replace '{key}' with 'env:MCKIT_{key.upper()}' or '${{MCKIT_{key.upper()}}}' so credentials never enter git or logs.",
+            })
+
+    # 2. Per-stage checks
+    if not stages:
+        findings.append({
+            "rule_id": "STAGE-REQ-001",
+            "severity": "high",
+            "stage_index": 0,
+            "message": "No executable stages found under 'stages:'.",
+            "remediation": "Add at least one stage item such as '- name: Join server / action: join'.",
+        })
+
+    for idx, st in enumerate(stages, start=1):
+        action = str(st.get("action", "") or "").strip().lower()
+        name = redact_bot_text(str(st.get("name", f"Stage {idx}")))
+        if not action:
+            findings.append({
+                "rule_id": "STAGE-REQ-001",
+                "severity": "high",
+                "stage_index": idx,
+                "stage_name": name,
+                "message": f"Stage #{idx} ({name}) is missing required 'action'.",
+                "remediation": f"Set 'action' to one of: {', '.join(sorted(VALID_STAGE_ACTIONS))}.",
+            })
+            continue
+        if action not in VALID_STAGE_ACTIONS:
+            findings.append({
+                "rule_id": "STAGE-ACT-001",
+                "severity": "high",
+                "stage_index": idx,
+                "stage_name": name,
+                "message": f"Unknown stage action '{action}' in stage #{idx} ({name}).",
+                "remediation": f"Use a supported action: {', '.join(sorted(VALID_STAGE_ACTIONS))}.",
+            })
+
+        cmd = str(st.get("command", "") or "").strip()
+        if action == "command" and not cmd:
+            findings.append({
+                "rule_id": "STAGE-REQ-001",
+                "severity": "high",
+                "stage_index": idx,
+                "stage_name": name,
+                "message": f"Stage #{idx} ({name}) uses action 'command' without a 'command' value.",
+                "remediation": "Provide a slash command such as '/shop' or '/warp arena'.",
+            })
+        if cmd and any(pat.search(cmd) for pat in SECRET_COMMAND_PATTERNS):
+            if "env:" not in cmd and "${" not in cmd and "[REDACTED_PASSWORD]" not in cmd:
+                findings.append({
+                    "rule_id": "STAGE-SEC-001",
+                    "severity": "critical",
+                    "stage_index": idx,
+                    "stage_name": name,
+                    "message": f"Hardcoded plaintext auth command in stage #{idx} ({redact_bot_text(cmd)}).",
+                    "remediation": "Use 'action: auth' with 'env:MCKIT_BOT_PASSWORD' instead of hardcoding /login or /register passwords.",
+                })
+
+        if action in ("assert_chat", "assert_gui", "assert_title", "assert_entity_nearby"):
+            pat = str(st.get("pattern") or st.get("title_pattern") or "").strip()
+            if not pat:
+                findings.append({
+                    "rule_id": "STAGE-REQ-001",
+                    "severity": "high",
+                    "stage_index": idx,
+                    "stage_name": name,
+                    "message": f"Stage #{idx} ({name}) action '{action}' requires a 'pattern' (or 'title_pattern').",
+                    "remediation": "Add a regex pattern to match expected chat, GUI title, HUD title, or nearby entity.",
+                })
+            else:
+                try:
+                    re.compile(pat)
+                except re.error as regex_err:
+                    findings.append({
+                        "rule_id": "STAGE-REGEX-001",
+                        "severity": "high",
+                        "stage_index": idx,
+                        "stage_name": name,
+                        "message": f"Invalid regex in stage #{idx} ({name}): {regex_err}.",
+                        "remediation": "Fix unbalanced brackets or escape regex metacharacters in 'pattern'.",
+                    })
+
+        if action == "click_slot" and "slot" not in st:
+            findings.append({
+                "rule_id": "STAGE-REQ-001",
+                "severity": "high",
+                "stage_index": idx,
+                "stage_name": name,
+                "message": f"Stage #{idx} ({name}) uses 'click_slot' without a numeric 'slot' index.",
+                "remediation": "Set 'slot' to a 0-based inventory/chest slot integer (e.g. slot: 13).",
+            })
+
+    # 3. Anti-OOM fleet check
+    raw_tier = str(meta.get("tier", "tier1-protocol") or "tier1-protocol").strip().lower()
+    try:
+        bot_count = max(1, int(str(meta.get("bots", meta.get("bot_count", 1)) or 1)))
+    except ValueError:
+        bot_count = 1
+    per_bot_mb = TIER_MEMORY_MB.get(raw_tier, 2600 if "desktop" in raw_tier else (1400 if "visual" in raw_tier or "tier2" in raw_tier else 42))
+    est_ram_mb = bot_count * per_bot_mb
+    safe_budget_mb = max(512.0, float(host_ram_gb) * 1024.0 * 0.65)
+    if est_ram_mb > safe_budget_mb:
+        findings.append({
+            "rule_id": "STAGE-OOM-001",
+            "severity": "critical" if est_ram_mb > float(host_ram_gb) * 1024.0 else "warning",
+            "stage_index": 0,
+            "message": f"Fleet ({bot_count} bots on '{raw_tier}') needs ~{est_ram_mb} MB RAM, exceeding safe budget {int(safe_budget_mb)} MB on {host_ram_gb} GB host.",
+            "remediation": "Switch to 'tier1-protocol' (~42 MB/bot) or hybrid 1 Docker/Xvfb visual + N-1 protocol bots, or offload to Oracle Always-Free ARM64 / Hetzner Docker grid.",
+        })
+
+    crit_count = sum(1 for f in findings if f["severity"] == "critical")
+    high_count = sum(1 for f in findings if f["severity"] == "high")
+    warn_count = sum(1 for f in findings if f["severity"] == "warning")
+    if crit_count > 0:
+        status, grade = "fail", "F"
+    elif high_count >= 2:
+        status, grade = "fail", "D"
+    elif high_count == 1:
+        status, grade = "fail", "C"
+    elif warn_count > 0:
+        status, grade = "warn", "B"
+    else:
+        status, grade = "pass", "A"
+
+    return {
+        "ok": crit_count == 0 and high_count == 0,
+        "status": status,
+        "grade": grade,
+        "parsed_stage_count": len(stages),
+        "detected_tier": raw_tier,
+        "bot_count": bot_count,
+        "estimated_ram_mb": est_ram_mb,
+        "host_ram_gb": float(host_ram_gb),
+        "finding_count": len(findings),
+        "findings": findings,
+    }
+
+
 def query_bridge_plugin(
     *,
     base_url: str = "http://127.0.0.1:25590",
