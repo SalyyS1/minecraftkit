@@ -25,6 +25,7 @@ import cloud_grid_templates  # noqa: E402
 import datapack_auditor  # noqa: E402
 import docker_stack_generator  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
+import economy_stress_sim  # noqa: E402
 import exploit_auditor  # noqa: E402
 import fabric_capture_bridge  # noqa: E402
 import gif_recorder  # noqa: E402
@@ -40,6 +41,7 @@ import qa_smoke_doctor  # noqa: E402
 import query_api  # noqa: E402
 import query_sources  # noqa: E402
 import rcon_client  # noqa: E402
+import spark_profile_auditor  # noqa: E402
 import toolchain_bridge  # noqa: E402
 import visual_capture  # noqa: E402
 import vps_ssh_preflight  # noqa: E402
@@ -2124,6 +2126,47 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_spark_profile",
+        "title": "Spark / Paper Timings Tick-Lag & Bottleneck Root-Cause Auditor",
+        "description": (
+            "Analyze Spark profiler or Paper Timings text/summaries to classify tick-loop bottlenecks: "
+            "entity AI (TICK-ENTITY), synchronous chunk/region I/O (TICK-CHUNK), GC STW pauses (TICK-GC), "
+            "blocking SQL/HTTP I/O on tick threads (TICK-BLOCKING-IO), and hotspot plugins (TICK-PLUGIN)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "profile_text": {"type": "string"},
+                "tps": {"type": "number", "default": 20.0},
+                "mspt": {"type": "number", "default": 25.0},
+            },
+            "required": ["profile_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_simulate_economy_stress",
+        "title": "RPG Economy Arbitrage, Craft-Loop & Multi-Bot Dupe-Race Stress Planner",
+        "description": (
+            "Audit shop buy/sell prices and crafting recipes for direct or crafting infinite-money arbitrage "
+            "(ECON-ARB-001) and negative/zero price exploits (ECON-NEG-002), and output a bounded concurrent "
+            "multi-bot race-condition QA stage plan."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "shop_items": {"type": "array", "items": {"type": "object"}},
+                "recipes": {"type": "array", "items": {"type": "object"}},
+                "tax_pct": {"type": "number", "minimum": 0.0, "maximum": 95.0, "default": 0.0},
+                "concurrent_bots": {"type": "integer", "minimum": 2, "maximum": 16, "default": 4},
+            },
+            "required": ["shop_items"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3164,6 +3207,8 @@ class MinecraftKitMcpServer:
             "mc_audit_permissions_rbac": self._tool_audit_permissions_rbac,
             "mc_bot_diagnose_auth_plugin": self._tool_bot_diagnose_auth_plugin,
             "mc_ops_generate_docker_stack": self._tool_ops_generate_docker_stack,
+            "mc_ops_audit_spark_profile": self._tool_ops_audit_spark_profile,
+            "mc_bot_simulate_economy_stress": self._tool_bot_simulate_economy_stress,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10091,6 +10136,30 @@ class MinecraftKitMcpServer:
             concurrent_bots=int(args.get("concurrent_bots", 8)),
             include_velocity=bool(args.get("include_velocity", False)),
             include_visual_bot=bool(args.get("include_visual_bot", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_spark_profile(self, args: dict[str, Any]) -> ToolOutcome:
+        txt = str(args.get("profile_text", ""))
+        if not txt.strip():
+            raise ValueError("'profile_text' must be a non-empty string.")
+        payload = spark_profile_auditor.audit_spark_profile(
+            profile_text=txt,
+            tps=float(args.get("tps", 20.0)),
+            mspt=float(args.get("mspt", 25.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_simulate_economy_stress(self, args: dict[str, Any]) -> ToolOutcome:
+        items = args.get("shop_items")
+        if not isinstance(items, list):
+            raise ValueError("'shop_items' must be a list of item price objects.")
+        recipes = args.get("recipes")
+        payload = economy_stress_sim.audit_economy_and_plan_stress(
+            shop_items=items,
+            recipes=recipes if isinstance(recipes, list) else None,
+            tax_pct=float(args.get("tax_pct", 0.0)),
+            concurrent_bots=int(args.get("concurrent_bots", 4)),
         )
         return ToolOutcome(_pretty_json(payload))
 
