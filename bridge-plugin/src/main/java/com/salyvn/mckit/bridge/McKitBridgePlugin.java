@@ -163,6 +163,7 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.createContext("/api/v1/tps-history", ex -> handleGuarded(ex, this::buildTpsHistoryJson));
             httpServer.createContext("/api/v1/entities", ex -> handleGuarded(ex, this::buildEntitiesJson));
             httpServer.createContext("/api/v1/chunks", ex -> handleGuarded(ex, this::buildChunksJson));
+            httpServer.createContext("/api/v1/memory", ex -> handleGuarded(ex, this::buildMemoryJson));
             httpServer.createContext("/api/v1/players", ex -> handleGuarded(ex, this::buildPlayersJson));
             httpServer.createContext("/api/v1/gui", ex -> handleGuarded(ex, () -> buildGuiJson(ex)));
             httpServer.createContext("/api/v1/worlds", ex -> handleGuarded(ex, this::buildWorldsJson));
@@ -330,6 +331,37 @@ public final class McKitBridgePlugin extends JavaPlugin {
         sb.append("],\"total_loaded_chunks\":").append(totalLoaded)
             .append(",\"total_force_loaded_chunks\":").append(totalForceLoaded).append("}");
         return sb.toString();
+    }
+
+    private String buildMemoryJson() {
+        var memBean = java.lang.management.ManagementFactory.getMemoryMXBean();
+        var heap = memBean.getHeapMemoryUsage();
+        var nonHeap = memBean.getNonHeapMemoryUsage();
+        long heapUsedMb = heap.getUsed() / (1024 * 1024);
+        long heapCommittedMb = heap.getCommitted() / (1024 * 1024);
+        long heapMaxMb = Math.max(1L, (heap.getMax() > 0 ? heap.getMax() : Runtime.getRuntime().maxMemory()) / (1024 * 1024));
+        long nonHeapUsedMb = Math.max(0L, nonHeap.getUsed()) / (1024 * 1024);
+        double pressurePct = Math.min(100.0, (heapUsedMb * 100.0) / heapMaxMb);
+        long gcCount = 0L;
+        long gcTimeMs = 0L;
+        for (var gc : java.lang.management.ManagementFactory.getGarbageCollectorMXBeans()) {
+            long c = gc.getCollectionCount();
+            long t = gc.getCollectionTime();
+            if (c > 0) gcCount += c;
+            if (t > 0) gcTimeMs += t;
+        }
+        var threadBean = java.lang.management.ManagementFactory.getThreadMXBean();
+        return "{"
+            + "\"heap_used_mb\":" + heapUsedMb + ","
+            + "\"heap_committed_mb\":" + heapCommittedMb + ","
+            + "\"heap_max_mb\":" + heapMaxMb + ","
+            + "\"heap_pressure_pct\":" + String.format("%.2f", pressurePct) + ","
+            + "\"non_heap_used_mb\":" + nonHeapUsedMb + ","
+            + "\"gc_count\":" + gcCount + ","
+            + "\"gc_time_ms\":" + gcTimeMs + ","
+            + "\"thread_count\":" + threadBean.getThreadCount() + ","
+            + "\"daemon_threads\":" + threadBean.getDaemonThreadCount()
+            + "}";
     }
 
     private String buildEntitiesJson() {

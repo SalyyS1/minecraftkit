@@ -775,3 +775,60 @@ def render_chunk_density_png(
     footer = f"WORLDS: {len(worlds)}   PEAK DENSITY: {peak_density:.2f} ENT/CHUNK   STATUS: {verdict}"
     canvas.draw_text(12, height - 20, footer, TEXT_MUTED, scale=1, max_chars=76)
     return canvas.to_png_bytes()
+
+
+def render_memory_gauge_png(
+    memory_payload: dict[str, Any],
+    *,
+    width: int = 640,
+    height: int = 220,
+    title: str = "MCKIT BRIDGE JVM HEAP & GC PRESSURE",
+) -> bytes:
+    """Render a zero-dependency dark-mode PNG telemetry gauge for /api/v1/memory."""
+    used_mb = int(memory_payload.get("heap_used_mb", 0) or 0)
+    comm_mb = int(memory_payload.get("heap_committed_mb", used_mb) or used_mb)
+    max_mb = max(1, int(memory_payload.get("heap_max_mb", max(1, used_mb)) or 1))
+    non_heap_mb = int(memory_payload.get("non_heap_used_mb", 0) or 0)
+    pct = float(memory_payload.get("heap_pressure_pct", (used_mb * 100.0) / max_mb) or 0.0)
+    pct = max(0.0, min(100.0, pct))
+    gc_count = int(memory_payload.get("gc_count", 0) or 0)
+    gc_time_ms = int(memory_payload.get("gc_time_ms", 0) or 0)
+    threads = int(memory_payload.get("thread_count", 0) or 0)
+
+    canvas = PixelCanvas(width, height, BG_BASE)
+    canvas.draw_rect(0, 0, width, height, BORDER_SUBTLE, 1)
+    canvas.fill_rect(1, 1, width - 2, 28, BG_PANEL)
+    canvas.draw_text(12, 10, title, ACCENT_CYAN, scale=1, max_chars=48)
+    bar_col = ACCENT_RED if pct >= 85.0 else (ACCENT_AMBER if pct >= 70.0 else ACCENT_EMERALD)
+    canvas.draw_text(width - 195, 10, f"HEAP {pct:5.1f}%  {used_mb}/{max_mb}MB", bar_col, scale=1)
+
+    # Heap gauge bar
+    bx, by, bw, bh = 20, 48, width - 40, 32
+    canvas.draw_text(bx, by - 14, "JVM HEAP UTILIZATION (USED / COMMITTED / MAX)", TEXT_MUTED, scale=1)
+    canvas.fill_rect(bx, by, bw, bh, BG_PANEL)
+    canvas.draw_rect(bx, by, bw, bh, BORDER_SUBTLE, 1)
+    comm_w = max(2, int(round(min(1.0, comm_mb / float(max_mb)) * (bw - 2))))
+    used_w = max(2, int(round((pct / 100.0) * (bw - 2))))
+    canvas.fill_rect(bx + 1, by + 1, comm_w, bh - 2, (36, 56, 76))
+    canvas.fill_rect(bx + 1, by + 1, used_w, bh - 2, bar_col)
+    canvas.draw_text(bx + 10, by + 11, f"USED: {used_mb} MB   COMMITTED: {comm_mb} MB   MAX: {max_mb} MB", TEXT_PRIMARY, scale=1)
+
+    # Telemetry cards row
+    cards = [
+        ("NON-HEAP", f"{non_heap_mb} MB", ACCENT_CYAN),
+        ("GC RUNS", f"{gc_count}", ACCENT_EMERALD),
+        ("GC PAUSE", f"{gc_time_ms} MS", ACCENT_AMBER if gc_time_ms >= 2000 else ACCENT_EMERALD),
+        ("THREADS", f"{threads}", ACCENT_CYAN),
+    ]
+    cw = (width - 64) // 4
+    cy = 104
+    for idx, (lbl, val, col) in enumerate(cards):
+        cx = 20 + idx * (cw + 8)
+        canvas.fill_rect(cx, cy, cw, 64, BG_PANEL)
+        canvas.draw_rect(cx, cy, cw, 64, BORDER_SUBTLE, 1)
+        canvas.draw_text(cx + 10, cy + 12, lbl, TEXT_MUTED, scale=1)
+        canvas.draw_text(cx + 10, cy + 34, val, col, scale=2)
+
+    verdict = "OOM RISK" if pct >= 85.0 else ("ELEVATED" if pct >= 70.0 else "HEALTHY")
+    canvas.draw_text(12, height - 22, f"ANTI-OOM VERDICT: {verdict}   (USE ZGC / -XMS=-XMX FOR ZERO STALLS)", bar_col, scale=1, max_chars=78)
+    return canvas.to_png_bytes()

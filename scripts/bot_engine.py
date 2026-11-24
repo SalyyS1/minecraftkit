@@ -1240,6 +1240,7 @@ def query_bridge_plugin(
         "tps-history": "/api/v1/tps-history",
         "entities": "/api/v1/entities",
         "chunks": "/api/v1/chunks",
+        "memory": "/api/v1/memory",
         "players": "/api/v1/players",
         "errors": "/api/v1/errors",
         "plugins": "/api/v1/plugins",

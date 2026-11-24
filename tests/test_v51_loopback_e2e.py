@@ -233,7 +233,7 @@ class V51LoopbackE2ETests(unittest.TestCase):
             self.assertEqual(comp.returncode, 0, comp.stderr)
             run = subprocess.run([java, "-cp", tmp, "com.salyvn.mckit.bridge.BridgeContractTest"], capture_output=True, text=True, check=False)
             self.assertEqual(run.returncode, 0, run.stderr)
-            self.assertIn("7/7 PASS", run.stdout)
+            self.assertIn("8/8 PASS", run.stdout)
 
             # 2. Compile McKitVisualClientMod cleanly (zero Fabric JAR dependency needed for loopback server)
             client_mod = ROOT / "client-mod" / "src" / "main" / "java" / "com" / "salyvn" / "mckit" / "client" / "McKitVisualClientMod.java"

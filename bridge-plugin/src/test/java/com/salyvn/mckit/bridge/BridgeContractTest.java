@@ -87,7 +87,15 @@ public final class BridgeContractTest {
         double sampleDensity = 320.0 / 160.0;
         assertTrue(zeroDensity == 0.0 && Math.abs(sampleDensity - 2.0) < 1e-9, "chunk density math mismatch");
 
-        System.out.println("BridgeContractTest: 7/7 PASS");
+        // 8. JVM MemoryMXBean & ThreadMXBean telemetry contract (/api/v1/memory)
+        var heap = java.lang.management.ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+        long maxMb = Math.max(1L, (heap.getMax() > 0 ? heap.getMax() : Runtime.getRuntime().maxMemory()) / (1024 * 1024));
+        long usedMb = heap.getUsed() / (1024 * 1024);
+        double pct = Math.min(100.0, (usedMb * 100.0) / maxMb);
+        int threads = java.lang.management.ManagementFactory.getThreadMXBean().getThreadCount();
+        assertTrue(maxMb >= 1 && pct >= 0.0 && pct <= 100.0 && threads >= 1, "memory/thread telemetry invariant failed");
+
+        System.out.println("BridgeContractTest: 8/8 PASS");
     }
 
     private static void verifyLoopbackHttpAuth() {

@@ -1374,9 +1374,9 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
             "properties": {
                 "base_url": {"type": "string", "description": "Bridge plugin base URL (default http://127.0.0.1:25590)."},
                 "token": {"type": "string", "description": "X-MCKit-Token auth secret."},
-                "endpoint": {"type": "string", "enum": ["health", "metrics", "tps-history", "entities", "chunks", "players", "errors", "plugins", "gui", "worlds"], "description": "Bridge endpoint to query (default health)."},
+                "endpoint": {"type": "string", "enum": ["health", "metrics", "tps-history", "entities", "chunks", "memory", "players", "errors", "plugins", "gui", "worlds"], "description": "Bridge endpoint to query (default health)."},
                 "player": {"type": "string", "description": "Optional player username when endpoint='gui'."},
-                "attach_chart": {"type": "boolean", "description": "When endpoint='tps-history' or 'entities', attach an inline dark-mode PNG chart to chat (default true)."},
+                "attach_chart": {"type": "boolean", "description": "When endpoint is 'tps-history', 'entities', 'chunks', or 'memory', attach an inline dark-mode PNG chart to chat (default true)."},
                 "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "description": "HTTP timeout in seconds (default 3.0)."},
             },
             "additionalProperties": False,
@@ -9941,6 +9941,10 @@ class MinecraftKitMcpServer:
                 payload["inline_chart_attached"] = True
             elif endpoint == "chunks":
                 png_bytes = visual_capture.render_chunk_density_png(payload["data"])
+                images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
+                payload["inline_chart_attached"] = True
+            elif endpoint == "memory":
+                png_bytes = visual_capture.render_memory_gauge_png(payload["data"])
                 images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
                 payload["inline_chart_attached"] = True
         return ToolOutcome(_pretty_json(payload), images=images)
