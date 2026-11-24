@@ -659,3 +659,71 @@ def render_tps_sparkline_png(
     footer = f"SAMPLES: {len(tps_vals)}   MIN TPS: {min_tps:.2f}   STATUS: {'HEALTHY' if min_tps >= 18.5 else 'DEGRADED'}"
     canvas.draw_text(12, height - 22, footer, TEXT_MUTED, scale=1, max_chars=74)
     return canvas.to_png_bytes()
+
+
+def render_entity_bar_chart_png(
+    entities_payload: dict[str, Any],
+    *,
+    width: int = 640,
+    height: int = 260,
+    title: str = "MCKIT BRIDGE ENTITY LAG BREAKDOWN",
+) -> bytes:
+    """Render a zero-dependency dark-mode horizontal bar chart PNG for /api/v1/entities."""
+    totals: dict[str, int] = {}
+    world_count = 0
+    grand_total = 0
+
+    worlds = entities_payload.get("worlds") if isinstance(entities_payload, dict) else None
+    if isinstance(worlds, list):
+        world_count = len(worlds)
+        for w in worlds:
+            if not isinstance(w, dict):
+                continue
+            grand_total += int(w.get("total_entities", 0) or 0)
+            top = w.get("top_types")
+            if isinstance(top, dict):
+                for k, v in top.items():
+                    totals[str(k).upper()] = totals.get(str(k).upper(), 0) + int(v or 0)
+            elif isinstance(top, list):
+                for entry in top:
+                    if isinstance(entry, dict) and entry.get("type"):
+                        name = str(entry["type"]).upper()
+                        totals[name] = totals.get(name, 0) + int(entry.get("count", 0) or 0)
+    elif isinstance(entities_payload, dict) and isinstance(entities_payload.get("top_types"), dict):
+        world_count = 1
+        for k, v in entities_payload["top_types"].items():
+            totals[str(k).upper()] = int(v or 0)
+        grand_total = sum(totals.values())
+
+    ranked = sorted(totals.items(), key=lambda kv: (-kv[1], kv[0]))[:8]
+    if grand_total == 0:
+        grand_total = sum(totals.values())
+    max_val = max((c for _, c in ranked), default=1)
+
+    canvas = PixelCanvas(width, height, BG_BASE)
+    canvas.draw_rect(0, 0, width, height, BORDER_SUBTLE, 1)
+    canvas.fill_rect(1, 1, width - 2, 28, BG_PANEL)
+    canvas.draw_text(12, 10, title, ACCENT_CYAN, scale=1, max_chars=50)
+    status_col = ACCENT_RED if max_val >= 250 else (ACCENT_AMBER if max_val >= 100 else ACCENT_EMERALD)
+    canvas.draw_text(width - 210, 10, f"TOTAL {grand_total:5d}  WORLDS {world_count}", status_col, scale=1)
+
+    y = 42
+    bar_x = 178
+    bar_max_w = width - bar_x - 74
+    if not ranked:
+        canvas.draw_text(20, 110, "NO ENTITY SAMPLES AVAILABLE", TEXT_MUTED, scale=1)
+    else:
+        for name, count in ranked:
+            bar_col = ACCENT_RED if count >= 250 else (ACCENT_AMBER if count >= 100 else ACCENT_EMERALD)
+            canvas.draw_text(12, y + 4, name[:24], TEXT_PRIMARY, scale=1, max_chars=24)
+            canvas.fill_rect(bar_x, y, bar_max_w, 16, BG_PANEL)
+            canvas.draw_rect(bar_x, y, bar_max_w, 16, BORDER_SUBTLE, 1)
+            fill_w = max(4, int(round((count / float(max(1, max_val))) * (bar_max_w - 2))))
+            canvas.fill_rect(bar_x + 1, y + 1, fill_w, 14, bar_col)
+            canvas.draw_text(bar_x + bar_max_w + 8, y + 4, f"{count:5d}", bar_col, scale=1)
+            y += 23
+
+    verdict = "HOTSPOT ALERT" if max_val >= 250 else ("WATCH" if max_val >= 100 else "BALANCED")
+    footer = f"TOP TYPES: {len(ranked)}   PEAK TYPE: {max_val}   VERDICT: {verdict}"
+    canvas.draw_text(12, height - 20, footer, TEXT_MUTED, scale=1, max_chars=74)
+    return canvas.to_png_bytes()

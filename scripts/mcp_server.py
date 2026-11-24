@@ -9812,14 +9812,18 @@ class MinecraftKitMcpServer:
         )
         images: tuple[tuple[str, str], ...] = ()
         if (
-            endpoint == "tps-history"
-            and bool(args.get("attach_chart", True))
+            bool(args.get("attach_chart", True))
             and payload.get("reachable")
             and isinstance(payload.get("data"), dict)
         ):
-            samples = payload["data"].get("samples")
-            if isinstance(samples, list) and samples:
-                png_bytes = visual_capture.render_tps_sparkline_png(samples)
+            if endpoint == "tps-history":
+                samples = payload["data"].get("samples")
+                if isinstance(samples, list) and samples:
+                    png_bytes = visual_capture.render_tps_sparkline_png(samples)
+                    images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
+                    payload["inline_chart_attached"] = True
+            elif endpoint == "entities":
+                png_bytes = visual_capture.render_entity_bar_chart_png(payload["data"])
                 images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
                 payload["inline_chart_attached"] = True
         return ToolOutcome(_pretty_json(payload), images=images)

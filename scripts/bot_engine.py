@@ -41,23 +41,23 @@ TIER_MEMORY_MB: dict[str, int] = {
     "desktop-full-client": 2600,
 }
 
-# Auth plugin prompt detection patterns (AuthMe, nLogin, OpeNLogin, LimboAuth, VN servers).
+# Auth plugin prompt detection patterns (AuthMe, nLogin, OpeNLogin, LimboAuth, FastLogin, LoginSecurity, VN servers).
 REGISTER_PATTERNS = (
     re.compile(r"/register\b", re.IGNORECASE),
     re.compile(r"/reg\b", re.IGNORECASE),
-    re.compile(r"đăng\s*ký|dang\s*ky|please\s+register|create\s+an?\s+account", re.IGNORECASE),
+    re.compile(r"đăng\s*ký|dang\s*ky|tạo\s*tài\s*khoản|tao\s*tai\s*khoan|please\s+register|create\s+an?\s+account", re.IGNORECASE),
 )
 LOGIN_PATTERNS = (
     re.compile(r"/login\b", re.IGNORECASE),
     re.compile(r"/l\s+<", re.IGNORECASE),
-    re.compile(r"đăng\s*nhập|dang\s*nhap|please\s+login|log\s+in\s+with", re.IGNORECASE),
+    re.compile(r"đăng\s*nhập|dang\s*nhap|nhập\s*mật\s*khẩu|nhap\s*mat\s*khau|please\s+login|log\s+in\s+with", re.IGNORECASE),
 )
 AUTH_SUCCESS_PATTERNS = (
-    re.compile(r"successfully\s+(logged\s+in|registered)|đăng\s*(nhập|ký)\s*thành\s*công|welcome\s+back", re.IGNORECASE),
+    re.compile(r"successfully\s+(logged\s+in|registered)|đăng\s*(nhập|ký)\s*thành\s*công|welcome\s+back|auto-logged\s+in", re.IGNORECASE),
 )
 
 SECRET_COMMAND_PATTERNS = (
-    re.compile(r"(/(?:login|l|register|reg|changepassword|cpw)\s+)(.+)$", re.IGNORECASE),
+    re.compile(r"(/(?:login|l|register|reg|changepassword|cpw|lac)\s+)(.+)$", re.IGNORECASE),
 )
 
 
@@ -70,6 +70,32 @@ def redact_bot_text(text: str, extra_secrets: tuple[str, ...] = ()) -> str:
         if secret and len(secret) >= 3:
             cleaned = cleaned.replace(secret, "[REDACTED_PASSWORD]")
     return cleaned
+
+
+def export_redacted_markdown_summary(report: dict[str, Any], extra_secrets: tuple[str, ...] = ()) -> str:
+    """Export a secret-free Markdown QA proof table ready for GitHub PRs/Issues/Discord."""
+    target = redact_bot_text(str(report.get("target", "127.0.0.1:25565")), extra_secrets)
+    tier = redact_bot_text(str(report.get("tier", "tier1-protocol")), extra_secrets)
+    stages = report.get("stages") or []
+    passed = sum(1 for s in stages if isinstance(s, dict) and str(s.get("status", "")).lower() in ("pass", "passed", "ok", "true"))
+    total = len(stages)
+    verdict = "PASS" if total > 0 and passed == total else ("EMPTY" if total == 0 else "FAIL")
+    lines = [
+        f"### MinecraftKit Autonomous Bot QA Proof — `{verdict}` ({passed}/{total})",
+        f"- **Target:** `{target}` | **Tier:** `{tier}` | **Screen Lock:** `false`",
+        "",
+        "| # | Stage | Status | Elapsed | Detail |",
+        "|---:|---|---|---:|---|",
+    ]
+    for idx, st in enumerate(stages, start=1):
+        if not isinstance(st, dict):
+            continue
+        name = redact_bot_text(str(st.get("name", f"Stage {idx}")), extra_secrets).replace("|", "/")
+        status = str(st.get("status", "unknown")).upper()
+        ms = st.get("elapsed_ms", 0)
+        detail = redact_bot_text(str(st.get("detail", "")), extra_secrets).replace("|", "/")
+        lines.append(f"| {idx} | {name} | **{status}** | {ms} ms | {detail} |")
+    return "\n".join(lines) + "\n"
 
 
 def _encode_varint(value: int) -> bytes:
