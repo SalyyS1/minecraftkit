@@ -1,6 +1,6 @@
 {
   "name": "minecraftkit",
-  "version": "5.6.0",
+  "version": "5.7.0",
   "description": "Secure CLI installer and doctor for Salyyy Minecraft Kit.",
   "type": "module",
   "bin": {
