@@ -30,11 +30,13 @@ import java.util.logging.Logger;
  * Salyyy MinecraftKit Companion QA Bridge Plugin (Paper & Folia compatible).
  *
  * Exposes a token-authenticated loopback-only (127.0.0.1) HTTP/JSON API for:
- *  - /api/v1/health   : liveness + server version
- *  - /api/v1/metrics  : TPS, MSPT, JVM heap, worlds, chunk & entity totals
- *  - /api/v1/players  : online players, coordinates, health, open GUI slots
- *  - /api/v1/plugins  : loaded plugin list & enabled states
- *  - /api/v1/errors   : bounded ring-buffer of SEVERE/exception server logs
+ *  - /api/v1/health      : liveness + server version
+ *  - /api/v1/metrics     : TPS, MSPT, JVM heap, worlds, chunk & entity totals
+ *  - /api/v1/tps-history : 60-sample rolling TPS/MSPT sparkline ring buffer
+ *  - /api/v1/entities    : per-world entity totals & top entity types (lag diagnosis)
+ *  - /api/v1/players     : online players, coordinates, health, open GUI slots
+ *  - /api/v1/plugins     : loaded plugin list & enabled states
+ *  - /api/v1/errors      : bounded ring-buffer of SEVERE/exception server logs
  *
  * Security: binds strictly to 127.0.0.1, requires constant-time X-MCKit-Token
  * verification, and never exposes remote command execution by default.
@@ -42,12 +44,14 @@ import java.util.logging.Logger;
 public final class McKitBridgePlugin extends JavaPlugin {
 
     private static final int MAX_ERROR_RING = 200;
+    private static final int MAX_TPS_HISTORY = 60;
 
     private HttpServer httpServer;
     private byte[] authTokenBytes;
     private boolean allowRemoteCommands;
     private java.util.List<String> blockedCommandPrefixes = java.util.List.of("op", "deop", "stop", "restart", "ban", "pardon", "whitelist", "execute");
     private final Deque<String> errorRing = new ArrayDeque<>(MAX_ERROR_RING);
+    private final Deque<String> tpsHistoryRing = new ArrayDeque<>(MAX_TPS_HISTORY);
     private Handler julErrorHandler;
 
     @Override
@@ -71,7 +75,25 @@ public final class McKitBridgePlugin extends JavaPlugin {
         }
 
         installErrorCollector();
+        startTpsSampler();
         startLoopbackServer(port);
+    }
+
+    private void startTpsSampler() {
+        Bukkit.getGlobalRegionScheduler().runAtFixedRate(this, task -> {
+            double[] tps = Bukkit.getTPS();
+            double mspt = Bukkit.getAverageTickTime();
+            String sample = "{\"ts\":\"" + Instant.now() + "\",\"tps_1m\":"
+                + String.format(java.util.Locale.ROOT, "%.2f", tps.length > 0 ? tps[0] : 20.0)
+                + ",\"mspt\":" + String.format(java.util.Locale.ROOT, "%.2f", mspt)
+                + ",\"players\":" + Bukkit.getOnlinePlayers().size() + "}";
+            synchronized (tpsHistoryRing) {
+                if (tpsHistoryRing.size() >= MAX_TPS_HISTORY) {
+                    tpsHistoryRing.removeFirst();
+                }
+                tpsHistoryRing.addLast(sample);
+            }
+        }, 20L, 20L);
     }
 
     @Override
@@ -127,6 +149,8 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.setExecutor(Executors.newFixedThreadPool(2));
             httpServer.createContext("/api/v1/health", ex -> handleGuarded(ex, this::buildHealthJson));
             httpServer.createContext("/api/v1/metrics", ex -> handleGuarded(ex, this::buildMetricsJson));
+            httpServer.createContext("/api/v1/tps-history", ex -> handleGuarded(ex, this::buildTpsHistoryJson));
+            httpServer.createContext("/api/v1/entities", ex -> handleGuarded(ex, this::buildEntitiesJson));
             httpServer.createContext("/api/v1/players", ex -> handleGuarded(ex, this::buildPlayersJson));
             httpServer.createContext("/api/v1/gui", ex -> handleGuarded(ex, () -> buildGuiJson(ex)));
             httpServer.createContext("/api/v1/worlds", ex -> handleGuarded(ex, this::buildWorldsJson));
@@ -254,6 +278,46 @@ public final class McKitBridgePlugin extends JavaPlugin {
             + "\"online_players\":" + Bukkit.getOnlinePlayers().size() + ","
             + "\"loaded_chunks\":" + loadedChunks
             + "}";
+    }
+
+    private String buildTpsHistoryJson() {
+        StringBuilder sb = new StringBuilder("{\"max_samples\":").append(MAX_TPS_HISTORY).append(",\"samples\":[");
+        synchronized (tpsHistoryRing) {
+            boolean first = true;
+            for (String s : tpsHistoryRing) {
+                if (!first) sb.append(",");
+                first = false;
+                sb.append(s);
+            }
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    private String buildEntitiesJson() {
+        StringBuilder sb = new StringBuilder("{\"worlds\":[");
+        boolean firstWorld = true;
+        for (World w : Bukkit.getWorlds()) {
+            if (!firstWorld) sb.append(",");
+            firstWorld = false;
+            java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+            int total = 0;
+            for (org.bukkit.entity.Entity ent : w.getEntities()) {
+                total++;
+                counts.merge(ent.getType().name(), 1, Integer::sum);
+            }
+            java.util.List<java.util.Map.Entry<String, Integer>> top = new java.util.ArrayList<>(counts.entrySet());
+            top.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
+            int limit = Math.min(10, top.size());
+            sb.append("{\"world\":\"").append(esc(w.getName())).append("\",\"total\":").append(total).append(",\"top_types\":[");
+            for (int i = 0; i < limit; i++) {
+                if (i > 0) sb.append(",");
+                sb.append("{\"type\":\"").append(esc(top.get(i).getKey())).append("\",\"count\":").append(top.get(i).getValue()).append("}");
+            }
+            sb.append("]}");
+        }
+        sb.append("]}");
+        return sb.toString();
     }
 
     private String buildPlayersJson() {

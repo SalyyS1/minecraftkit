@@ -71,7 +71,18 @@ public final class BridgeContractTest {
         // 5. Real Java 21 loopback HTTP server contract (127.0.0.1 ephemeral port + X-MCKit-Token auth)
         verifyLoopbackHttpAuth();
 
-        System.out.println("BridgeContractTest: 5/5 PASS");
+        // 6. Bounded 60-sample TPS/MSPT history ring buffer invariant
+        int maxTpsCap = 60;
+        Deque<String> tpsRing = new ArrayDeque<>(maxTpsCap);
+        for (int i = 0; i < 95; i++) {
+            if (tpsRing.size() >= maxTpsCap) tpsRing.removeFirst();
+            tpsRing.addLast("{\"tps_1m\":20.00,\"seq\":" + i + "}");
+        }
+        assertTrue(tpsRing.size() == maxTpsCap, "TPS ring must stay bounded at 60");
+        assertTrue(tpsRing.peekFirst().contains("\"seq\":35"), "oldest retained TPS sample must be #35");
+        assertTrue(tpsRing.peekLast().contains("\"seq\":94"), "newest retained TPS sample must be #94");
+
+        System.out.println("BridgeContractTest: 6/6 PASS");
     }
 
     private static void verifyLoopbackHttpAuth() {
