@@ -155,11 +155,70 @@
         "[ClientMod] Resource pack reloaded in 420ms (0 errors)",
         "[MCKit] Attached real rendered PNG + session.mp4"
       ]
+    },
+    {
+      id: "towny-lands",
+      label: "Towny / Lands Claim",
+      header: "MCKitClaimBot @ survival.salyvn.net:25565 (42 MB RAM)",
+      badge: "7/7 PASSED",
+      stages: [
+        ["Join Survival Paper 1.21.4", "PASS"],
+        ["Auto-Auth /login [REDACTED]", "PASS"],
+        ["Run /lands claim & Assert Feedback", "PASS"],
+        ["Open /lands menu Container GUI", "PASS"],
+        ["Verify Roles, Flags & Trust Slots", "PASS"],
+        ["Render Off-Screen Claim PNG", "PASS"]
+      ],
+      slots: { 11: "CLAIM", 13: "ROLES", 15: "FLAGS", 22: "TRUST" },
+      chat: [
+        "[Lands] Chunk (12, -4) claimed for Town SalyVn",
+        "[Lands] Opened Land Management Menu (4 active icons)",
+        "[MCKit] Zero permission leaks; PNG snapshot attached"
+      ]
+    },
+    {
+      id: "skyblock-coop",
+      label: "Skyblock Island Coop",
+      header: "MCKitSkyBot @ skyblock.salyvn.net:25565 (42 MB RAM)",
+      badge: "TPS 20.0",
+      stages: [
+        ["Join BentoBox / SuperiorSkyblock2", "PASS"],
+        ["Auto-Auth /login [REDACTED]", "PASS"],
+        ["Run /is go & Paste Island Schematic", "PASS"],
+        ["Verify Scoreboard Island Level", "PASS"],
+        ["Assert TPS >= 19.0 After Paste", "PASS"],
+        ["Attach Bridge 60s TPS Sparkline PNG", "PASS"]
+      ],
+      slots: { 10: "ISLAND", 12: "COOP", 14: "CHALLENGES", 16: "WARP" },
+      chat: [
+        "[Skyblock] Teleported to Island (Level 124)",
+        "[Bridge] TPS=20.00 MSPT=11.4ms TopEntity=ITEM(12)",
+        "[MCKit] Attached 640x240 inline TPS sparkline PNG"
+      ]
+    },
+    {
+      id: "modelengine-boss",
+      label: "ModelEngine 3D Boss",
+      header: "Hybrid Tier-2 Xvfb + Bridge Entities (1.4 GB Total)",
+      badge: "BOSS OK",
+      stages: [
+        ["Accept ModelEngine Custom Pack", "PASS"],
+        ["Warp /warp boss_arena", "PASS"],
+        ["Verify Custom Entity Hitbox & Count", "PASS"],
+        ["Bridge /api/v1/entities Lag Check", "PASS"],
+        ["Capture Off-Screen Xvfb PNG + GIF", "PASS"]
+      ],
+      slots: { 0: "EXCALIBUR*", 1: "ELIXIR", 4: "BOSS_KEY*", 8: "COMPANION" },
+      chat: [
+        "[ModelEngine] Loaded 18 blueprint animations (0 errors)",
+        "[Bridge] Entities=42 TPS=19.95 MSPT=15.8ms",
+        "[MCKit] Attached keyframe.png + session.gif to chat"
+      ]
     }
   ];
 
   var SUITE_TOOLS = [
-    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner with crash-guard MCS001-MCS017, Folia multi-region lag/recovery, RCON fault injection, JUnit & SARIF.", cmd: "java -jar mcstage.jar test mcstage.yml --accept-eula --sarif mcstage.sarif" },
+    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 15-tool stdio MCP server with crash-guard MCS001-MCS023, probe/check-world/inspect-jar/preflight CLI, 4 init presets, HTML diffs, JUnit & SARIF.", cmd: "java -jar mcstage.jar test mcstage.yml --accept-eula --html matrix.html --sarif mcstage.sarif" },
     { id: "shadersmith", cat: "shaders", lang: "Kotlin", desc: "GLSL core & post-effect shader contract validator, std140 UBO layout checker, and 26.3 migrator.", cmd: "java -jar shadersmith.jar check ./pack --target 26.3 --sarif shaders.sarif" },
     { id: "packmigrate", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic 1.20..26.3 CustomModelData & overlay migrator with perceptual asset dedup.", cmd: "java -jar packmigrate.jar migrate ./old ./new --to 26.3" },
     { id: "packmerge", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic resource pack union compiler for 1.21.4+ item models, fonts, sounds, lang, and atlases.", cmd: "java -jar packmerge.jar merge a.zip b.zip -o merged.zip" },
