@@ -16,7 +16,7 @@
   <main id="showcase-main" class="sc-main">
     <section class="sc-hero">
       <div class="sc-hero-top">
-        <span class="sc-pill">v6.9.0 · 77 MCP Tools · Stage YAML Validator · SFTP Auto-Rollback · 10 Bot QA Presets · 3 Bridge PNGs · 6 Cloud Grids</span>
+        <span class="sc-pill">v7.0.0 · 78 MCP Tools · Live Stage Pre-Flight · Resource Pack Bundle Auditor · SFTP Rollback · 3 Bridge PNGs · 6 Cloud Grids</span>
         <div class="sc-lang-group" role="group" aria-label="Language switcher">
           <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
           <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
@@ -37,8 +37,8 @@
 
       <div class="sc-stats-grid">
         <article class="sc-stat-card">
-          <strong>77</strong>
-          <span data-i18n="stat_mcp">Stdio MCP Tools (Stage YAML Validator, 1-Call Fingerprint, 3 Bridge PNGs, SFTP Rollback, 5-Phase Lifecycle)</span>
+          <strong>78</strong>
+          <span data-i18n="stat_mcp">Stdio MCP Tools (Resource Pack Auditor, Stage YAML Validator, 3 Bridge PNGs, SFTP Rollback, 5-Phase Lifecycle)</span>
         </article>
         <article class="sc-stat-card">
           <strong>42 MB</strong>
@@ -199,8 +199,10 @@
         <pre id="yb-out" class="sc-code-block"></pre>
         <div class="sc-copy-row">
           <button id="yb-copy" type="button" class="sc-btn sc-btn-primary">Copy .mckit-stages.yml</button>
+          <button id="yb-validate" type="button" class="sc-btn sc-btn-ghost">Run Stage Pre-Flight Audit</button>
           <span id="yb-status" class="sc-muted" aria-live="polite"></span>
         </div>
+        <div id="yb-audit-box" class="sc-strategy-box" style="margin-top:10px;display:none" aria-live="polite"></div>
       </div>
 
       <div class="sc-panel" style="margin-top:18px">
@@ -256,7 +258,7 @@
       </div>
 
       <div class="sc-panel" style="margin-top:18px">
-        <h3>Interactive MCP Tool Directory (77 Verified Tools · 1-Click Copy)</h3>
+        <h3>Interactive MCP Tool Directory (78 Verified Tools · 1-Click Copy)</h3>
         <div class="sc-filter-row" style="gap:10px;align-items:center;margin-bottom:10px">
           <input id="tool-search" type="search" placeholder="Search tools (e.g. bot, sftp, totp, shader, folia, world, gif)..." style="flex:1;min-width:220px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:6px 10px">
           <div id="tool-cats" class="sc-filter-row"></div>
