@@ -420,8 +420,115 @@
     initRamCalculator();
     initSimulator();
     initFreeformConsole();
+    initVisualDiffLab();
     initSuite();
     initConfigBuilder();
+  }
+
+  function initVisualDiffLab() {
+    var ctrl = document.getElementById("vdiff-controls");
+    var cBase = document.getElementById("vdiff-base");
+    var cCand = document.getElementById("vdiff-cand");
+    var cOut = document.getElementById("vdiff-out");
+    var stats = document.getElementById("vdiff-stats");
+    if (!ctrl || !cBase || !cCand || !cOut) { return; }
+
+    var MODES = [
+      { id: "slot-shift", label: "Slot #13 Shifted Regression" },
+      { id: "tps-drop", label: "TPS Drop Alert Banner" },
+      { id: "clean", label: "Zero Regression (Identical)" }
+    ];
+
+    function drawGui(ctx, variant) {
+      ctx.fillStyle = "#0b131e";
+      ctx.fillRect(0, 0, 260, 150);
+      ctx.fillStyle = variant === "tps-drop" ? "#5a1d24" : "#152538";
+      ctx.fillRect(8, 8, 244, 22);
+      ctx.fillStyle = variant === "tps-drop" ? "#ff7b89" : "#48e8b2";
+      ctx.font = "bold 11px monospace";
+      ctx.fillText(variant === "tps-drop" ? "RPG SHOP  |  TPS 14.2 (LAG)" : "RPG SHOP  |  TPS 20.0 (OK)", 16, 23);
+
+      for (var r = 0; r < 3; r++) {
+        for (var c = 0; c < 7; c++) {
+          var sx = 14 + c * 34;
+          var sy = 38 + r * 34;
+          ctx.fillStyle = "#121e2c";
+          ctx.fillRect(sx, sy, 28, 28);
+          ctx.strokeStyle = "#2b4257";
+          ctx.strokeRect(sx + 0.5, sy + 0.5, 27, 27);
+        }
+      }
+      // Highlighted Mythic Blade slot
+      var bladeCol = variant === "slot-shift" ? 4 : 3;
+      var bx = 14 + bladeCol * 34;
+      var by = 38 + 34;
+      ctx.fillStyle = "#2d5a48";
+      ctx.fillRect(bx + 2, by + 2, 24, 24);
+      ctx.fillStyle = "#ffe082";
+      ctx.fillRect(bx + 9, by + 6, 10, 14);
+    }
+
+    function render(modeId) {
+      ctrl.querySelectorAll(".sc-chip").forEach(function (b) {
+        b.classList.toggle("is-active", b.getAttribute("data-mode") === modeId);
+      });
+      var ctxB = cBase.getContext("2d");
+      var ctxC = cCand.getContext("2d");
+      var ctxO = cOut.getContext("2d");
+      drawGui(ctxB, "base");
+      drawGui(ctxC, modeId === "clean" ? "base" : modeId);
+
+      var imgB = ctxB.getImageData(0, 0, 260, 150);
+      var imgC = ctxC.getImageData(0, 0, 260, 150);
+      var imgO = ctxO.createImageData(260, 150);
+      var changed = 0;
+      var minX = 260, minY = 150, maxX = -1, maxY = -1;
+      for (var y = 0; y < 150; y++) {
+        for (var x = 0; x < 260; x++) {
+          var i = (y * 260 + x) * 4;
+          var dr = Math.abs(imgB.data[i] - imgC.data[i]);
+          var dg = Math.abs(imgB.data[i + 1] - imgC.data[i + 1]);
+          var db = Math.abs(imgB.data[i + 2] - imgC.data[i + 2]);
+          if (dr > 6 || dg > 6 || db > 6) {
+            changed++;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+            imgO.data[i] = 248;
+            imgO.data[i + 1] = 81;
+            imgO.data[i + 2] = 73;
+            imgO.data[i + 3] = 255;
+          } else {
+            imgO.data[i] = Math.round(imgC.data[i] * 0.45);
+            imgO.data[i + 1] = Math.round(imgC.data[i + 1] * 0.45);
+            imgO.data[i + 2] = Math.round(imgC.data[i + 2] * 0.45);
+            imgO.data[i + 3] = 255;
+          }
+        }
+      }
+      ctxO.putImageData(imgO, 0, 0);
+      if (maxX >= minX) {
+        ctxO.strokeStyle = "#fbbf24";
+        ctxO.lineWidth = 2;
+        ctxO.strokeRect(minX - 2, minY - 2, (maxX - minX) + 4, (maxY - minY) + 4);
+      }
+      var pct = ((changed / (260 * 150)) * 100).toFixed(2);
+      if (stats) {
+        stats.textContent = changed === 0
+          ? "identical: true | changed_pixels: 0 (0.00%)"
+          : "identical: false | changed_pixels: " + changed + " (" + pct + "%) | bbox: [" + minX + "," + minY + "," + maxX + "," + maxY + "]";
+      }
+    }
+
+    MODES.forEach(function (m) {
+      var btn = el("button", "sc-chip", m.label);
+      btn.type = "button";
+      btn.setAttribute("data-mode", m.id);
+      btn.addEventListener("click", function () { render(m.id); });
+      ctrl.append(btn);
+    });
+    render("slot-shift");
   }
 
   function initFreeformConsole() {
