@@ -421,8 +421,84 @@
     initSimulator();
     initFreeformConsole();
     initVisualDiffLab();
+    initOpsLab();
     initSuite();
     initConfigBuilder();
+  }
+
+  function initOpsLab() {
+    var tabs = document.getElementById("ops-lab-tabs");
+    var out = document.getElementById("ops-lab-out");
+    if (!tabs || !out) { return; }
+    var SAMPLES = [
+      {
+        id: "wire-login",
+        label: "Wire Login Probe (~18 MB)",
+        body: JSON.stringify({
+          tool: "mc_bot_login_handshake_probe",
+          host: "127.0.0.1:25565",
+          ram_mb: 18,
+          screen_lock: false,
+          compression_threshold: 256,
+          state_reached: "CONFIGURATION",
+          login_success: { username: "MCKitProtoBot", uuid: "00000000-0000-3000-8000-000000000001" }
+        }, null, 2)
+      },
+      {
+        id: "rcon",
+        label: "Source RCON TCP",
+        body: JSON.stringify({
+          tool: "mc_ops_rcon_execute",
+          host: "127.0.0.1:25575",
+          password: "[REDACTED]",
+          command: "tps",
+          ok: true,
+          response: "TPS from last 1m, 5m, 15m: *20.0, *20.0, *20.0"
+        }, null, 2)
+      },
+      {
+        id: "backup",
+        label: "Backup Integrity Audit",
+        body: JSON.stringify({
+          tool: "mc_hosting_backup_verify",
+          panel_type: "pterodactyl",
+          headless: true,
+          policy: { max_age_hours: 24, min_size_bytes: 1024 },
+          backup_count: 3,
+          newest_backup: { name: "world-2026-11-24.tar.gz", size_bytes: 482910208, age_hours: 1.4 },
+          issues: []
+        }, null, 2)
+      },
+      {
+        id: "html-qa",
+        label: "HTML QA Proof Artifact",
+        body: JSON.stringify({
+          tool: "mc_qa_generate_html_report",
+          verdict: "PASS",
+          passed_stages: 4,
+          total_stages: 4,
+          snapshot_count: 1,
+          preview_attached_as_mcp_image: true,
+          written_path: "reports/qa-proof.html",
+          secrets_redacted: true
+        }, null, 2)
+      }
+    ];
+    function select(id) {
+      tabs.querySelectorAll(".sc-chip").forEach(function (b) {
+        b.classList.toggle("is-active", b.getAttribute("data-lab") === id);
+      });
+      var found = SAMPLES.find(function (s) { return s.id === id; }) || SAMPLES[0];
+      out.textContent = found.body;
+    }
+    SAMPLES.forEach(function (s) {
+      var btn = el("button", "sc-chip", s.label);
+      btn.type = "button";
+      btn.setAttribute("data-lab", s.id);
+      btn.addEventListener("click", function () { select(s.id); });
+      tabs.append(btn);
+    });
+    select("wire-login");
   }
 
   function initVisualDiffLab() {

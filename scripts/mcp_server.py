@@ -21,6 +21,7 @@ import bot_session_hub  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
 import profile_vault  # noqa: E402
+import qa_report_html  # noqa: E402
 import query_api  # noqa: E402
 import query_sources  # noqa: E402
 import rcon_client  # noqa: E402
@@ -1666,6 +1667,58 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": False, "openWorldHint": True},
     },
+    {
+        "name": "mc_qa_generate_html_report",
+        "title": "Self-Contained Executive HTML QA Proof Report Generator",
+        "description": (
+            "Generate a zero-dependency, offline-viewable dark-mode HTML QA proof artifact embedding "
+            "stage pass/fail ledger, TPS/MSPT/RAM metrics, redacted auth/chat transcript, and inline "
+            "base64 PNG off-screen bot snapshots (also returned inline as an MCP image)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "title": {"type": "string", "default": "MinecraftKit Autonomous QA Proof Report"},
+                "server_target": {"type": "string", "default": "127.0.0.1:25565"},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+                "bot_tier": {"type": "string", "default": "tier1-protocol"},
+                "bot_ram_mb": {"type": "number", "default": 42.0},
+                "tps": {"type": "number", "default": 20.0},
+                "mspt": {"type": "number", "default": 12.4},
+                "stages": {"type": "array", "items": {"type": "object"}},
+                "chat_log": {"type": "array", "items": {"type": "string"}},
+                "snapshots_base64": {"type": "array", "items": {"type": "object"}},
+                "auto_render_snapshot": {"type": "boolean", "default": True},
+                "output_path": {"type": "string"},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False},
+    },
+    {
+        "name": "mc_hosting_backup_verify",
+        "title": "Headless Hosting Panel & Local VPS Backup Integrity Verifier",
+        "description": (
+            "Audit Pterodactyl/Pelican/Crafty remote backup snapshots or a local VPS backup directory "
+            "for recency compliance (max_age_hours) and truncated/0-byte archive detection without "
+            "opening any browser window."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "domain": {"type": "string"},
+                "panel_type": {"type": "string", "enum": list(hosting_bridge.SUPPORTED_PANELS), "default": "pterodactyl"},
+                "server_id": {"type": "string"},
+                "api_key": {"type": "string"},
+                "local_backup_dir": {"type": "string"},
+                "max_age_hours": {"type": "number", "minimum": 0.1, "default": 24.0},
+                "min_size_bytes": {"type": "integer", "minimum": 0, "default": 1024},
+                "dry_run": {"type": "boolean", "default": True},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
 )
 
 
@@ -2686,6 +2739,8 @@ class MinecraftKitMcpServer:
             "mc_bot_login_handshake_probe": self._tool_bot_login_handshake_probe,
             "mc_bot_export_stage_yaml": self._tool_bot_export_stage_yaml,
             "mc_ops_rcon_execute": self._tool_ops_rcon_execute,
+            "mc_qa_generate_html_report": self._tool_qa_generate_html_report,
+            "mc_hosting_backup_verify": self._tool_hosting_backup_verify,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9360,6 +9415,40 @@ class MinecraftKitMcpServer:
             password=str(args.get("password", "")),
             command=str(args.get("command", "list")),
             timeout_seconds=float(args.get("timeout_seconds", 4.0)),
+            dry_run=bool(args.get("dry_run", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_qa_generate_html_report(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = qa_report_html.generate_qa_html_report(
+            title=str(args.get("title", "MinecraftKit Autonomous QA Proof Report")),
+            server_target=str(args.get("server_target", "127.0.0.1:25565")),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+            bot_tier=str(args.get("bot_tier", "tier1-protocol")),
+            bot_ram_mb=float(args.get("bot_ram_mb", 42.0)),
+            tps=float(args.get("tps", 20.0)),
+            mspt=float(args.get("mspt", 12.4)),
+            stages=args.get("stages") if isinstance(args.get("stages"), list) else None,
+            chat_log=args.get("chat_log") if isinstance(args.get("chat_log"), list) else None,
+            snapshots_base64=args.get("snapshots_base64") if isinstance(args.get("snapshots_base64"), list) else None,
+            auto_render_snapshot=bool(args.get("auto_render_snapshot", True)),
+            output_path=str(args.get("output_path", "")),
+        )
+        b64_png = payload.pop("preview_png_base64", "")
+        images = ((b64_png, "image/png"),) if isinstance(b64_png, str) and b64_png else ()
+        if images:
+            payload["preview_attached_as_mcp_image"] = True
+        return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_hosting_backup_verify(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = hosting_bridge.verify_backup_plan(
+            domain=str(args.get("domain", "")),
+            panel_type=str(args.get("panel_type", "pterodactyl")),
+            server_id=str(args.get("server_id", "")),
+            api_key=str(args.get("api_key", "")),
+            local_backup_dir=str(args.get("local_backup_dir", "")),
+            max_age_hours=float(args.get("max_age_hours", 24.0)),
+            min_size_bytes=int(args.get("min_size_bytes", 1024)),
             dry_run=bool(args.get("dry_run", True)),
         )
         return ToolOutcome(_pretty_json(payload))

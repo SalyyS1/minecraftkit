@@ -3,11 +3,11 @@
 [Tiếng Việt (README.vi.md)](README.vi.md) · [**Flagship Showcase**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [Growth Playbook](docs/GROWTH_STRATEGY.md) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v3.6.0](https://img.shields.io/badge/version-v3.6.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.6.0)
+[![Version: v3.7.0](https://img.shields.io/badge/version-v3.7.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.7.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
-All-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Wire-Level Offline Login Probe + Bedrock/Geyser RakNet UDP), persistent freeform multi-turn bot sessions, off-screen PNG visual diff & MP4 timelapse capture, headless hosting/VPS/2FA/WebSocket/RCON & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 46-tool stdio MCP server by **SalyVn / Salyyy**.
+All-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Wire-Level Offline Login Probe + Bedrock/Geyser RakNet UDP), persistent freeform multi-turn bot sessions, off-screen PNG visual diff, MP4 timelapse & self-contained dark-mode HTML QA proof artifacts, headless hosting/VPS/2FA/WebSocket/RCON/backup-audit & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 48-tool stdio MCP server by **SalyVn / Salyyy**.
 
 ## What Salyyy Minecraft Kit Includes
 
@@ -23,7 +23,7 @@ All-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + 
 - **Unified 10-Repo SalyyS1 Minecraft Toolchain (`scripts/toolchain_bridge.py`)**: Integrates `mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, and `texlab` into a single `mc_run_qa_pipeline` end-to-end automated QA loop.
 - **Offline RPG & Plugin Bytecode API Catalog**: 4,947 plugin-owned types and 41,887 bytecode-verified members across 10 major RPG and server plugins (`ModelEngine`, `MMOItems`, `MMOCore`, `MMOInventory`, `MMOProfiles`, `MythicCrucible`, `MythicDungeons`, `MythicEnchants`, `MythicRPG`, `CoreTools`), plus 103 curated GitHub sources and 901 Mojang release/snapshot records.
 - **14 `/mc:*` Engineering Agent Skills**: Specialized routing skills and slash commands for Claude Code, Cursor, Windsurf, Antigravity, and OpenAI Codex covering `mc:bot`, `mc:build`, `mc:core`, `mc:rpg`, `mc:protocol`, `mc:nms`, `mc:ops`, `mc:pack`, `mc:model`, `mc:qa`, `mc:shader`, `mc:dialog`, `mc:client`, and `mc:suite`.
-- **43-Tool Stdio MCP Server**: Pure Python 3.10+ JSON-RPC 2.0 MCP server (`scripts/mcp_server.py` and `minecraftkit mcp`) with native multimodal PNG image responses for live visual bot testing, Bedrock/Geyser RakNet UDP pings, plugin stage presets, synced `mcstage v0.9.0` suite generation, pixel-exact visual regression diffs, and ffmpeg MP4 timelapses.
+- **48-Tool Stdio MCP Server**: Pure Python 3.10+ JSON-RPC 2.0 MCP server (`scripts/mcp_server.py` and `minecraftkit mcp`) with native multimodal PNG image responses for live visual bot testing, self-contained HTML QA proof reports, headless backup auditing, Source RCON, wire-level offline login probes, Bedrock/Geyser RakNet UDP pings, plugin stage presets, synced `mcstage` suite generation, pixel-exact visual regression diffs, and ffmpeg MP4 timelapses.
 
 ## Quick Install
 
@@ -127,6 +127,8 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_bot_login_handshake_probe` | Pure-Python wire-level Minecraft 1.20.2–1.21.4+ offline Login -> zlib SetCompression -> LoginSuccess -> Configuration probe (~18 MB RAM, zero Node/client install). |
 | `mc_bot_export_stage_yaml` | Serialize a preset or custom bot QA stage list into a password-redacted `.mckit-stages.yml` recipe for CI or community sharing. |
 | `mc_ops_rcon_execute` | Pure-Python Source RCON TCP command executor & dry-run planner with strict password/secret redaction and payload-size bounds. |
+| `mc_qa_generate_html_report` | Generate a zero-dependency, offline-viewable dark-mode HTML QA proof artifact embedding stage pass/fail ledger, TPS/MSPT/RAM metrics, redacted chat/auth transcript, and inline base64 PNG bot snapshots. |
+| `mc_hosting_backup_verify` | Headlessly audit Pterodactyl/Pelican/Crafty backup endpoints or local VPS backup directories for recency compliance and truncated/0-byte archive detection. |
 
 ### Exposed MCP Resources & Slash Prompts
 

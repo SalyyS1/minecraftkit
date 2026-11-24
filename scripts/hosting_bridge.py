@@ -646,3 +646,152 @@ def get_panel_websocket_plan(
 
     return plan
 
+
+def verify_backup_plan(
+    *,
+    domain: str = "",
+    panel_type: str = "pterodactyl",
+    server_id: str = "",
+    api_key: str = "",
+    local_backup_dir: str = "",
+    max_age_hours: float = 24.0,
+    min_size_bytes: int = 1024,
+    dry_run: bool = True,
+    timeout_seconds: float = 8.0,
+) -> dict[str, Any]:
+    """Audit hosting panel or local VPS backup snapshots for recency & non-truncation.
+
+    Detects stale backups (> max_age_hours) and truncated/empty archives (< min_size_bytes)
+    completely headlessly with strict secret redaction.
+    """
+    panel = panel_type.strip().lower()
+    if panel not in SUPPORTED_PANELS:
+        raise ValueError(f"'panel_type' must be one of {SUPPORTED_PANELS}.")
+    if max_age_hours <= 0:
+        raise ValueError("'max_age_hours' must be positive.")
+    if min_size_bytes < 0:
+        raise ValueError("'min_size_bytes' must be >= 0.")
+
+    if local_backup_dir.strip():
+        from pathlib import Path
+
+        bdir = Path(local_backup_dir.strip()).expanduser().resolve()
+        if not bdir.is_dir():
+            return {
+                "ok": False,
+                "mode": "local_dir",
+                "directory": str(bdir),
+                "error": "Local backup directory does not exist.",
+            }
+        now = time.time()
+        archives = []
+        issues: list[str] = []
+        valid_exts = (".tar.gz", ".tgz", ".zip", ".zst", ".tar", ".gz")
+        for entry in sorted(bdir.iterdir()):
+            if not entry.is_file():
+                continue
+            low = entry.name.lower()
+            if not any(low.endswith(ext) for ext in valid_exts):
+                continue
+            st = entry.stat()
+            age_h = round(max(0.0, (now - st.st_mtime) / 3600.0), 2)
+            too_small = st.st_size < min_size_bytes
+            archives.append({
+                "name": entry.name,
+                "size_bytes": st.st_size,
+                "age_hours": age_h,
+                "truncated_suspect": too_small,
+            })
+            if too_small:
+                issues.append(f"Archive '{entry.name}' is {st.st_size} bytes (< {min_size_bytes} min_size_bytes).")
+
+        archives.sort(key=lambda item: item["age_hours"])
+        if not archives:
+            issues.append("No backup archives (.tar.gz/.tgz/.zip/.zst) found in directory.")
+        elif archives[0]["age_hours"] > max_age_hours:
+            issues.append(
+                f"Newest backup '{archives[0]['name']}' is {archives[0]['age_hours']}h old (exceeds {max_age_hours}h policy)."
+            )
+        return {
+            "ok": len(issues) == 0,
+            "mode": "local_dir",
+            "headless": True,
+            "directory": str(bdir),
+            "backup_count": len(archives),
+            "newest_backup": archives[0] if archives else None,
+            "backups": archives[:20],
+            "issues": issues,
+        }
+
+    if not domain.strip():
+        raise ValueError("Provide either 'domain' (for panel backup audit) or 'local_backup_dir'.")
+    base_url = normalize_panel_url(domain)
+    sid = server_id.strip() or "<server_id>"
+    endpoint = (
+        f"{base_url}/api/v2/servers/{sid}/backups"
+        if panel == "crafty"
+        else f"{base_url}/api/client/servers/{sid}/backups"
+    )
+    token = api_key or os.environ.get("MCKIT_PANEL_TOKEN", "")
+    if dry_run:
+        return {
+            "ok": True,
+            "dry_run": True,
+            "headless": True,
+            "panel_type": panel,
+            "endpoint": endpoint,
+            "policy": {"max_age_hours": max_age_hours, "min_size_bytes": min_size_bytes},
+            "auth_header": "Authorization: Bearer [REDACTED]" if token else "MISSING (set api_key or MCKIT_PANEL_TOKEN)",
+        }
+
+    if not token or not server_id.strip():
+        return {
+            "ok": False,
+            "dry_run": False,
+            "error": "Both 'server_id' and 'api_key' (or MCKIT_PANEL_TOKEN) are required when dry_run=False.",
+        }
+
+    req = urllib.request.Request(
+        endpoint,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json",
+            "User-Agent": "MinecraftKit-MCP/3.7",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:
+            raw = json.loads(resp.read().decode("utf-8", errors="replace"))
+        items = raw.get("data", []) if isinstance(raw, dict) else []
+        issues = []
+        parsed_backups = []
+        for item in items:
+            attrs = item.get("attributes", item) if isinstance(item, dict) else {}
+            size = int(attrs.get("bytes", 0) or 0)
+            name = str(attrs.get("name", attrs.get("uuid", "backup")))
+            ok_flag = bool(attrs.get("is_successful", True))
+            parsed_backups.append({"name": name, "size_bytes": size, "is_successful": ok_flag})
+            if not ok_flag:
+                issues.append(f"Backup '{name}' marked unsuccessful on panel.")
+            if size < min_size_bytes:
+                issues.append(f"Backup '{name}' is {size} bytes (< {min_size_bytes}).")
+        if not parsed_backups:
+            issues.append("No remote backups returned by hosting panel.")
+        return {
+            "ok": len(issues) == 0,
+            "dry_run": False,
+            "headless": True,
+            "panel_type": panel,
+            "backup_count": len(parsed_backups),
+            "backups": parsed_backups[:20],
+            "issues": issues,
+        }
+    except Exception as err:  # noqa: BLE001
+        return {
+            "ok": False,
+            "dry_run": False,
+            "error": redact_secrets(f"{type(err).__name__}: {err}", (token,)),
+        }
+
+
