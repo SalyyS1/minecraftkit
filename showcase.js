@@ -421,9 +421,81 @@
     initSimulator();
     initFreeformConsole();
     initVisualDiffLab();
+    initYamlBuilder();
     initOpsLab();
     initSuite();
     initConfigBuilder();
+  }
+
+  function initYamlBuilder() {
+    var hostIn = document.getElementById("yb-host");
+    var portIn = document.getElementById("yb-port");
+    var verIn = document.getElementById("yb-ver");
+    var authIn = document.getElementById("yb-auth");
+    var guiIn = document.getElementById("yb-gui");
+    var snapIn = document.getElementById("yb-snap");
+    var out = document.getElementById("yb-out");
+    var copyBtn = document.getElementById("yb-copy");
+    var status = document.getElementById("yb-status");
+    if (!hostIn || !out) { return; }
+
+    function render() {
+      var host = String(hostIn.value || "127.0.0.1").replace(/[\r\n"']/g, "").trim() || "127.0.0.1";
+      var port = Math.max(1, Math.min(65535, Number(portIn.value) || 25565));
+      var ver = String(verIn.value || "1.21.4");
+      var lines = [
+        'name: "MinecraftKit Autonomous Bot QA"',
+        "target:",
+        '  host: "' + host + '"',
+        "  port: " + port,
+        '  version: "' + ver + '"',
+        '  tier: "tier1-protocol"',
+        '  password: "env:MCKIT_BOT_PASS"',
+        "  screen_lock_free: true",
+        "stages:",
+        '  - name: "Join & SLP Check"',
+        '    action: "join"',
+        "    max_latency_ms: 400"
+      ];
+      if (authIn && authIn.checked) {
+        lines.push('  - name: "Auto-Auth (AuthMe/nLogin)"');
+        lines.push('    action: "auto_auth"');
+        lines.push("    redact_secrets: true");
+      }
+      if (guiIn && guiIn.checked) {
+        lines.push('  - name: "Open RPG Shop GUI"');
+        lines.push('    action: "command"');
+        lines.push('    command: "/shop"');
+        lines.push('  - name: "Verify GUI Slot & Anti-Dupe"');
+        lines.push('    action: "click_gui"');
+        lines.push("    slot: 13");
+      }
+      if (snapIn && snapIn.checked) {
+        lines.push('  - name: "Capture Off-Screen PNG Proof"');
+        lines.push('    action: "snapshot"');
+        lines.push("    attach_to_chat: true");
+      }
+      out.textContent = lines.join("\n") + "\n";
+    }
+
+    [hostIn, portIn, verIn, authIn, guiIn, snapIn].forEach(function (node) {
+      if (node) {
+        node.addEventListener("input", render);
+        node.addEventListener("change", render);
+      }
+    });
+    if (copyBtn) {
+      copyBtn.addEventListener("click", function () {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(out.textContent).then(function () {
+            if (status) { status.textContent = "Copied .mckit-stages.yml!"; }
+          });
+        } else if (status) {
+          status.textContent = "Select & copy the YAML block above.";
+        }
+      });
+    }
+    render();
   }
 
   function initOpsLab() {

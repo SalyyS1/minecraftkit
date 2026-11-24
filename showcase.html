@@ -16,7 +16,7 @@
   <main id="showcase-main" class="sc-main">
     <section class="sc-hero">
       <div class="sc-hero-top">
-        <span class="sc-pill">v4.2.0 FLAGSHIP · 58 MCP Tools · 14 /mc:* Skills · 10 Integrated Repos · World Integrity + Proxy Security + Anti-Dupe + 5-Phase QA</span>
+        <span class="sc-pill">v4.3.0 FLAGSHIP · 60 MCP Tools · 14 /mc:* Skills · 10 Integrated Repos · Live Stage YAML Builder + Datapack &amp; CI Workflow Gen</span>
         <div class="sc-lang-group" role="group" aria-label="Language switcher">
           <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
           <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
@@ -37,7 +37,7 @@
 
       <div class="sc-stats-grid">
         <article class="sc-stat-card">
-          <strong>58</strong>
+          <strong>60</strong>
           <span data-i18n="stat_mcp">Stdio MCP Tools (Anti-Dupe Auditor, 5-Phase Lifecycle, Stress Bench, Play Bot, HTML Proof)</span>
         </article>
         <article class="sc-stat-card">
@@ -184,6 +184,23 @@
           <p>Runs inside an isolated <code>Dockerfile.visual-bot</code> Xvfb + Mesa + ffmpeg container to capture real shader/resource-pack frames, MP4 timelapses, and single-file dark-mode HTML QA proof artifacts ready for PRs and Discord.</p>
           <code>client-mod/ · mc_qa_generate_html_report · mc_bot_capture_timelapse</code>
         </article>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive Bot Stage YAML Recipe Builder (Redacted · Zero Screen Lock)</h3>
+        <div class="sc-filter-row" style="gap:10px;align-items:center;margin-bottom:10px">
+          <label class="sc-muted">Host <input id="yb-host" type="text" value="127.0.0.1" style="width:120px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Port <input id="yb-port" type="number" value="25565" style="width:78px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Version <select id="yb-ver" style="background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"><option value="1.21.4">1.21.4</option><option value="1.21.11">1.21.11</option><option value="26.3">26.3</option></select></label>
+          <label class="sc-muted"><input id="yb-auth" type="checkbox" checked> Auto-Auth (AuthMe/nLogin)</label>
+          <label class="sc-muted"><input id="yb-gui" type="checkbox" checked> GUI Shop Test</label>
+          <label class="sc-muted"><input id="yb-snap" type="checkbox" checked> Off-Screen PNG Snapshot</label>
+        </div>
+        <pre id="yb-out" class="sc-code-block"></pre>
+        <div class="sc-copy-row">
+          <button id="yb-copy" type="button" class="sc-btn sc-btn-primary">Copy .mckit-stages.yml</button>
+          <span id="yb-status" class="sc-muted" aria-live="polite"></span>
+        </div>
       </div>
 
       <div class="sc-panel" style="margin-top:18px">
