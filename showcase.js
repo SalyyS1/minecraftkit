@@ -482,6 +482,33 @@
           written_path: "reports/qa-proof.html",
           secrets_redacted: true
         }, null, 2)
+      },
+      {
+        id: "cloud-grid",
+        label: "Cloud Fly.io 256MB Grid",
+        body: JSON.stringify({
+          tool: "mc_bot_generate_cloud_deploy",
+          target: "fly_io",
+          filename: "fly.mckit-bot.toml",
+          bot_count: 5,
+          estimated_ram_mb: 336,
+          anti_oom_limit_mb: 420,
+          screen_lock_free: true
+        }, null, 2)
+      },
+      {
+        id: "plugin-matrix",
+        label: "Plugin Conflict Matrix",
+        body: JSON.stringify({
+          tool: "mc_audit_plugin_matrix",
+          platform: "folia",
+          status: "fail",
+          findings: [
+            { rule_id: "CONFLICT-AUTH", severity: "error", plugins: ["AuthMe.jar", "nLogin.jar"] },
+            { rule_id: "CONFLICT-PACK", severity: "error", plugins: ["ItemsAdder.jar", "Nexo.jar"] },
+            { rule_id: "MATRIX-002", severity: "error", missing_dependency: ["mythiclib"] }
+          ]
+        }, null, 2)
       }
     ];
     function select(id) {
