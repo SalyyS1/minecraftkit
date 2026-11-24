@@ -1,8 +1,8 @@
-# Salyyy Minecraft Kit (v3.5.0)
+# Salyyy Minecraft Kit (v3.6.0)
 
 [English (README.md)](README.md) · [**Trang Giới Thiệu Chính (Showcase)**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Wiki Song Ngữ](https://salyys1.github.io/minecraftkit/wiki.html) · [Chiến Lược Cộng Đồng](docs/GROWTH_STRATEGY.md)
 
-Bộ công cụ AI Engineering, **45 công cụ MCP**, **14 kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ không chiếm màn hình (Java SLP + Wire-Level Login Probe ~18MB + Bedrock/Geyser RakNet, Stages & Freeform nhiều lượt)**, **Xuất kịch bản YAML & Preset test sẵn**, **Sinh tự động kịch bản `mcstage v0.9.0` + GitHub Actions QA**, **So sánh ảnh PNG Visual Diff & Quay video MP4 Timelapse chạy ngầm**, **Kho Profile ẩn mật khẩu (`chmod 0600`)**, **Kết nối Hosting/VPS có 2FA, Console WebSocket & SFTP**, **Companion Testing Plugin & Fabric Client Mod**, và **tích hợp trọn bộ 10 công cụ Minecraft của SalyVn / Salyyy**.
+Bộ công cụ AI Engineering, **46 công cụ MCP**, **14 kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ không chiếm màn hình (Java SLP + Wire-Level Login Probe ~18MB + Bedrock/Geyser RakNet, Stages & Freeform nhiều lượt)**, **Xuất kịch bản YAML & Preset test sẵn**, **Sinh tự động kịch bản `mcstage v0.10.0` + GitHub Actions QA**, **So sánh ảnh PNG Visual Diff & Quay video MP4 Timelapse chạy ngầm**, **Kho Profile ẩn mật khẩu (`chmod 0600`)**, **Kết nối Hosting/VPS có 2FA, Console WebSocket, Source RCON & SFTP**, **Companion Testing Plugin & Fabric Client Mod**, và **tích hợp trọn bộ 10 công cụ Minecraft của SalyVn / Salyyy**.
 
 ## Điểm Nổi Bật Ở Bản v3.3.0
 

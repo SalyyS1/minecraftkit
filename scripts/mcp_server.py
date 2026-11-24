@@ -23,6 +23,7 @@ import mc_proto_client  # noqa: E402
 import profile_vault  # noqa: E402
 import query_api  # noqa: E402
 import query_sources  # noqa: E402
+import rcon_client  # noqa: E402
 import toolchain_bridge  # noqa: E402
 import visual_capture  # noqa: E402
 
@@ -1643,6 +1644,28 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_rcon_execute",
+        "title": "Headless Source RCON TCP Command Executor & Dry-Run Planner",
+        "description": (
+            "Execute or dry-run a Minecraft server console command over pure-Python Source RCON TCP "
+            "with zero desktop screen lock, payload-size bounds, and strict password/token redaction."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string"},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25575},
+                "password": {"type": "string"},
+                "command": {"type": "string", "default": "list"},
+                "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "default": 4.0},
+                "dry_run": {"type": "boolean", "default": True},
+            },
+            "required": ["host"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False, "openWorldHint": True},
+    },
 )
 
 
@@ -2662,6 +2685,7 @@ class MinecraftKitMcpServer:
             "mc_suite_generate_mcstage_suite": self._tool_suite_generate_mcstage_suite,
             "mc_bot_login_handshake_probe": self._tool_bot_login_handshake_probe,
             "mc_bot_export_stage_yaml": self._tool_bot_export_stage_yaml,
+            "mc_ops_rcon_execute": self._tool_ops_rcon_execute,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9325,6 +9349,20 @@ class MinecraftKitMcpServer:
             "tier": tier,
             "yaml": yaml_text,
         }))
+
+    def _tool_ops_rcon_execute(self, args: dict[str, Any]) -> ToolOutcome:
+        host = str(args.get("host", "")).strip()
+        if not host:
+            raise ValueError("'host' must be a non-empty string.")
+        payload = rcon_client.execute_rcon_command(
+            host=host,
+            port=int(args.get("port", 25575)),
+            password=str(args.get("password", "")),
+            command=str(args.get("command", "list")),
+            timeout_seconds=float(args.get("timeout_seconds", 4.0)),
+            dry_run=bool(args.get("dry_run", True)),
+        )
+        return ToolOutcome(_pretty_json(payload))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:
