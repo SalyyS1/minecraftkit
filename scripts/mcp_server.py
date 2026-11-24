@@ -27,6 +27,7 @@ import mc_proto_client  # noqa: E402
 import pack_parity  # noqa: E402
 import plugin_conflict_auditor  # noqa: E402
 import profile_vault  # noqa: E402
+import proxy_topology_auditor  # noqa: E402
 import qa_report_html  # noqa: E402
 import qa_smoke_doctor  # noqa: E402
 import query_api  # noqa: E402
@@ -34,6 +35,7 @@ import query_sources  # noqa: E402
 import rcon_client  # noqa: E402
 import toolchain_bridge  # noqa: E402
 import visual_capture  # noqa: E402
+import world_audit_bridge  # noqa: E402
 
 
 PROTOCOL_VERSION = "2025-11-25"
@@ -1898,6 +1900,49 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_world_audit_integrity",
+        "title": "Pure-Python Minecraft World, Anvil .mca & Rollback Safety Auditor",
+        "description": (
+            "Audit a Minecraft world directory with zero JVM required: verifies level.dat GZIP header "
+            "& level.dat_old fallback (WORLD-001), session.lock (WORLD-002), Anvil .mca 4096-byte sector "
+            "alignment & 1024-slot chunk pointers (WORLD-003), corrupt playerdata/*.dat (WORLD-004), "
+            "and oversized region hotspots (WORLD-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "world_dir": {"type": "string"},
+                "require_session_lock_cleared": {"type": "boolean", "default": False},
+                "max_region_mb": {"type": "number", "minimum": 1.0, "default": 64.0},
+            },
+            "required": ["world_dir"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_audit_proxy_topology",
+        "title": "Velocity / Paper / Geyser-Floodgate Proxy Forwarding Security Auditor",
+        "description": (
+            "Audit multi-server Velocity/Paper/Geyser proxy forwarding topology for legacy forwarding "
+            "(PROXY-001), weak/placeholder secrets (PROXY-002), secret or enabled mismatches (PROXY-003), "
+            "exposed wildcard backend online-mode=false UUID spoofing (PROXY-004), and Geyser/Floodgate "
+            "offline auth hazards (PROXY-005). Always redacts raw secrets."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "velocity_toml": {"type": "string", "default": ""},
+                "forwarding_secret": {"type": "string", "default": ""},
+                "paper_global_yml": {"type": "string", "default": ""},
+                "backend_server_properties": {"type": "string", "default": ""},
+                "geyser_config_yml": {"type": "string", "default": ""},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -2928,6 +2973,8 @@ class MinecraftKitMcpServer:
             "mc_qa_run_full_lifecycle": self._tool_qa_run_full_lifecycle,
             "mc_audit_server_exploits": self._tool_audit_server_exploits,
             "mc_kit_self_doctor": self._tool_kit_self_doctor,
+            "mc_world_audit_integrity": self._tool_world_audit_integrity,
+            "mc_audit_proxy_topology": self._tool_audit_proxy_topology,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9739,6 +9786,27 @@ class MinecraftKitMcpServer:
 
     def _tool_kit_self_doctor(self, args: dict[str, Any]) -> ToolOutcome:
         return ToolOutcome(_pretty_json(qa_smoke_doctor.run_kit_doctor(self.store.root)))
+
+    def _tool_world_audit_integrity(self, args: dict[str, Any]) -> ToolOutcome:
+        world_dir = str(args.get("world_dir", "")).strip()
+        if not world_dir:
+            raise ValueError("'world_dir' must be a non-empty string.")
+        payload = world_audit_bridge.audit_world_directory(
+            world_dir=world_dir,
+            require_session_lock_cleared=bool(args.get("require_session_lock_cleared", False)),
+            max_region_mb=float(args.get("max_region_mb", 64.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_audit_proxy_topology(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = proxy_topology_auditor.audit_proxy_topology(
+            velocity_toml=str(args.get("velocity_toml", "")),
+            forwarding_secret=str(args.get("forwarding_secret", "")),
+            paper_global_yml=str(args.get("paper_global_yml", "")),
+            backend_server_properties=str(args.get("backend_server_properties", "")),
+            geyser_config_yml=str(args.get("geyser_config_yml", "")),
+        )
+        return ToolOutcome(_pretty_json(payload))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

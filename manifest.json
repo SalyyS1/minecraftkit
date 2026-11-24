@@ -1,7 +1,7 @@
 {
   "schema_version": 2,
   "name": "minecraftkit",
-  "version": "4.1.0",
+  "version": "4.2.0",
   "research_date": "2026-07-15",
   "catalog": {
     "plugin_count": 10,
@@ -205,8 +205,8 @@
       "sha256": "8d51b1ce5f08a61f36bb198661b2c222d18eb289bcf525d39b6f73cbe728eb1c"
     },
     "web/wiki.html": {
-      "bytes": 8324,
-      "sha256": "bfc2b362ff1cf24c389fd46020fd611a6940ecac60000ab458f482781c8e8000"
+      "bytes": 8620,
+      "sha256": "3d9c69fa2882af171158201dfdc54b208fb576fdbdbffdfb6d52221264b0a725"
     },
     "web/wiki.css": {
       "bytes": 19589,
