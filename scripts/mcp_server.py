@@ -1718,6 +1718,7 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
                 "stages": {"type": "array", "items": {"type": "object"}},
                 "chat_log": {"type": "array", "items": {"type": "string"}},
                 "snapshots_base64": {"type": "array", "items": {"type": "object"}},
+                "entity_worlds": {"type": "array", "items": {"type": "object"}},
                 "auto_render_snapshot": {"type": "boolean", "default": True},
                 "output_path": {"type": "string"},
             },
@@ -2324,6 +2325,25 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
             "additionalProperties": False,
         },
         "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "mc_bot_export_markdown_proof",
+        "title": "Secret-Redacted Markdown Bot QA Proof Exporter",
+        "description": (
+            "Render a paste-ready GitHub PR/Issue/Discord Markdown QA proof table from autonomous bot "
+            "stage results with guaranteed password, /login, /register, and token scrubbing."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "target": {"type": "string", "default": "127.0.0.1:25565"},
+                "tier": {"type": "string", "default": "tier1-protocol"},
+                "stages": {"type": "array", "items": {"type": "object"}},
+                "extra_secrets": {"type": "array", "items": {"type": "string"}},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
     },
 )
 
@@ -3374,6 +3394,7 @@ class MinecraftKitMcpServer:
             "mc_bot_probe_protocol_matrix": self._tool_bot_probe_protocol_matrix,
             "mc_suite_full_ecosystem_doctor": self._tool_suite_full_ecosystem_doctor,
             "mc_bot_fingerprint_server": self._tool_bot_fingerprint_server,
+            "mc_bot_export_markdown_proof": self._tool_bot_export_markdown_proof,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10081,6 +10102,7 @@ class MinecraftKitMcpServer:
             stages=args.get("stages") if isinstance(args.get("stages"), list) else None,
             chat_log=args.get("chat_log") if isinstance(args.get("chat_log"), list) else None,
             snapshots_base64=args.get("snapshots_base64") if isinstance(args.get("snapshots_base64"), list) else None,
+            entity_worlds=args.get("entity_worlds") if isinstance(args.get("entity_worlds"), list) else None,
             auto_render_snapshot=bool(args.get("auto_render_snapshot", True)),
             output_path=str(args.get("output_path", "")),
         )
@@ -10419,6 +10441,22 @@ class MinecraftKitMcpServer:
             timeout_seconds=float(args.get("timeout_seconds", 2.5)),
         )
         return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_export_markdown_proof(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_secrets = args.get("extra_secrets")
+        secrets_tuple = tuple(str(s) for s in raw_secrets if isinstance(s, str)) if isinstance(raw_secrets, list) else ()
+        report = {
+            "target": str(args.get("target", "127.0.0.1:25565")),
+            "tier": str(args.get("tier", "tier1-protocol")),
+            "stages": args.get("stages") if isinstance(args.get("stages"), list) else [],
+        }
+        markdown = bot_engine.export_redacted_markdown_summary(report, extra_secrets=secrets_tuple)
+        return ToolOutcome(_pretty_json({
+            "ok": True,
+            "secrets_redacted": True,
+            "stage_count": len(report["stages"]),
+            "markdown": markdown,
+        }))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

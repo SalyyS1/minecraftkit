@@ -39,6 +39,7 @@ def generate_qa_html_report(
     chat_log: list[str] | None = None,
     snapshots_base64: list[dict[str, str]] | None = None,
     tps_samples: list[dict[str, Any]] | None = None,
+    entity_worlds: list[dict[str, Any]] | None = None,
     include_tps_chart: bool = True,
     auto_render_snapshot: bool = True,
     output_path: str = "",
@@ -103,6 +104,11 @@ def generate_qa_html_report(
         tps_png = visual_capture.render_tps_sparkline_png(chart_samples)
         tps_b64 = base64.b64encode(tps_png).decode("ascii")
         embedded_snaps.append((f"TPS / MSPT Telemetry Sparkline ({tps:.1f} TPS · {mspt:.1f} mspt)", tps_b64))
+
+    if entity_worlds:
+        ent_png = visual_capture.render_entity_bar_chart_png({"worlds": list(entity_worlds)})
+        ent_b64 = base64.b64encode(ent_png).decode("ascii")
+        embedded_snaps.append(("Entity Lag Breakdown Bar Chart (Bridge /api/v1/entities)", ent_b64))
 
     generated_at = _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
