@@ -11,7 +11,7 @@ Don't pitch "just another docs repo." Lead with the **3 unmistakable painkillers
    - Show the visual benchmark: **10 Headless Protocol Bots = 420 MB RAM (0 desktop focus lock)** vs **10 Desktop Minecraft Clients = 26 GB RAM**.
 2. **"Your AI coding agent can now join your server, `/login`, open `/shop`, take a screenshot, read the console crash, and fix the Java bug automatically."**
    - Record a 45-second screen recording showing Claude Code / Cursor calling `mc_run_qa_pipeline`, receiving an inline PNG GUI snapshot in chat, spotting a broken MythicMobs/MMOItems slot, patching the plugin, deploying via SFTP, and passing on the second run.
-3. **"One MCP install unlocks 75 tools, 6 anti-OOM cloud bot grids (including Oracle Cloud Always-Free 24 GB ARM64), 14 `/mc:*` skills, 41,887 bytecode-verified RPG APIs, and 10 specialized SalyVn CLI tools (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, ...)."**
+3. **"One MCP install unlocks 78 tools, Offline Resource Pack & Stage YAML Pre-Flight Auditors, 10 Bot QA Presets, 3 Auto-Attached Bridge PNG Charts, 6 anti-OOM cloud bot grids (including Oracle Cloud Always-Free 24 GB ARM64), 14 `/mc:*` skills, 41,887 bytecode-verified RPG APIs, and 10 specialized SalyVn CLI tools (`mcstage`, `foliascan`, `shadersmith`, `pluginscope`, `serverdoctor`, ...)."**
    - Shareable deep-dive guides ready for Reddit/Discord/Facebook links: [HOSTING_2FA_SFTP_GUIDE.md](HOSTING_2FA_SFTP_GUIDE.md) & [BOT_OPTIMIZATION_BENCHMARKS.md](BOT_OPTIMIZATION_BENCHMARKS.md).
 
 ---
@@ -71,7 +71,7 @@ Submit clean, policy-compliant PRs/listings to:
 
 ### A. Awesome-MCP-Servers PR Snippet (1-line Markdown bullet)
 ```markdown
-- [SalyyS1/minecraftkit](https://github.com/SalyyS1/minecraftkit) 🐍 📇 🏠 - All-in-one Minecraft engineering & QA MCP server (74 tools): 18-42 MB headless test bots (Java SLP, wire-level Login/Play, Bedrock/Geyser RakNet), auto-auth, inline PNG visual diff/GIF/MP4 timelapse, headless 2FA hosting/RCON/SFTP ops, security/exploit/world/shader/spark auditors, 41,887 offline RPG APIs, and 10 integrated Minecraft CLI tools.
+- [SalyyS1/minecraftkit](https://github.com/SalyyS1/minecraftkit) 🐍 📇 🏠 - All-in-one Minecraft engineering & QA MCP server (78 tools): 18-42 MB headless test bots (Java SLP, wire-level Login/Play, Bedrock/Geyser RakNet, 10 QA presets, Stage YAML validator), auto-auth, 3 inline Bridge PNG charts (TPS/Entities/Chunks), visual diff/GIF/MP4 timelapse, offline Resource Pack Bundle Auditor, headless 2FA hosting/RCON/SFTP (with .mckit.bak auto-rollback), security/exploit/world/shader/spark auditors, 41,887 offline RPG APIs, and 10 integrated Minecraft CLI tools.
 ```
 
 ### B. Reddit (`r/admincraft` / `r/MinecraftPlugins`) & PaperMC Showcase Post

@@ -35,6 +35,7 @@ def run_full_qa_lifecycle(
     panel_type: str = "pterodactyl",
     preset: str = "rpg_shop_gui",
     html_output_path: str = "",
+    patched_config_path: str = "",
 ) -> dict[str, Any]:
     """Run a unified, non-destructive end-to-end QA lifecycle plan & proof generator."""
     # Phase 0: Protocol Compatibility Matrix (1.20.4..26.3)
@@ -102,6 +103,26 @@ def run_full_qa_lifecycle(
     html_rep.pop("html", None)  # keep JSON payload concise while preserving written_path & html_bytes
 
     overall_ok = bool(plugin_audit["ok"]) and bool(html_rep["ok"])
+    markdown_proof = bot_engine.export_redacted_markdown_summary({
+        "target": f"{server_host}:{server_port}",
+        "tier": "hybrid-xvfb+protocol" if needs_visual_shaders else "tier1-protocol",
+        "stages": stage_rows,
+    })
+    rollback_plan: dict[str, Any] = {
+        "triggered": (not overall_ok) and bool(patched_config_path.strip()),
+        "reason": "QA failed after config patch — invoke mc_sftp_operations(operation='rollback_config') to restore .mckit.bak"
+        if (not overall_ok) and bool(patched_config_path.strip())
+        else "No rollback needed",
+    }
+    if rollback_plan["triggered"]:
+        rollback_plan["mcp_call"] = {
+            "tool": "mc_sftp_operations",
+            "arguments": {
+                "operation": "rollback_config",
+                "remote_path": patched_config_path.strip(),
+            },
+        }
+
     return {
         "ok": overall_ok,
         "verdict": "PASS" if overall_ok else "FAIL",
@@ -110,6 +131,9 @@ def run_full_qa_lifecycle(
         "platform": platform,
         "mc_version": mc_version,
         "screen_lock_free": True,
+        "badge_json": html_rep.get("badge_json"),
+        "markdown_proof": markdown_proof,
+        "rollback_recovery_plan": rollback_plan,
         "phases": {
             "0_protocol_matrix": {
                 "server_mc": proto_matrix["server"]["mc"],
