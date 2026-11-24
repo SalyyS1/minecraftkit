@@ -719,6 +719,8 @@
       { id: "mc_ops_generate_systemd_unit", cat: "ops", desc: "Hardened Linux systemd unit generator with ZGC/G1GC, MemoryHigh/Max & ProtectSystem=strict." },
       { id: "mc_ops_plan_disaster_recovery", cat: "ops", desc: "Anvil-safe save-off + restic S3/R2/B2/SFTP DR scripts & automated bot restore drill planner." },
       { id: "mc_ops_audit_jvm_gc_log", cat: "ops", desc: "Java 17/21 G1GC/ZGC/Shenandoah GC log analyzer (GC-001..005) with inline PNG pause chart." },
+      { id: "mc_ops_plan_proxy_migration", cat: "ops", desc: "Zero-downtime BungeeCord/Waterfall to Velocity modern forwarding playbook, UFW & rollback." },
+      { id: "mc_qa_generate_discord_webhook_payload", cat: "suite", desc: "Secret-redacted Discord Rich Embed JSON alert builder for autonomous bot QA & TPS regressions." },
       { id: "mc_audit_server_exploits", cat: "audit", desc: "Static security audit for chunk bans, command injection, packet flood & dupe exploits (EXPLOIT-001..005)." },
       { id: "mc_world_audit_integrity", cat: "audit", desc: "Zero-JVM Anvil .mca 4096-byte sector, GZIP level.dat & playerdata corruption scanner (WORLD-001..005)." },
       { id: "mc_pack_audit_bundle", cat: "audit", desc: "Offline Resource Pack auditor catching invalid pack_format, ascent > height & glyph collisions." },
@@ -750,7 +752,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 86 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 88 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {
