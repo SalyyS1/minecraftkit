@@ -581,6 +581,32 @@
             { rule_id: "MATRIX-002", severity: "error", missing_dependency: ["mythiclib"] }
           ]
         }, null, 2)
+      },
+      {
+        id: "docker-stack",
+        label: "Full-Stack Docker Bot Grid",
+        body: JSON.stringify({
+          tool: "mc_ops_generate_docker_stack",
+          filename: "docker-compose.mckit-full.yml",
+          server_type: "FOLIA",
+          mc_version: "1.21.4",
+          concurrent_bots: 10,
+          bot_pool_mem_limit_mb: 548,
+          visual_bot_mem_limit_mb: 1600,
+          screen_lock_free: true
+        }, null, 2)
+      },
+      {
+        id: "rbac-auth",
+        label: "RBAC & AuthMe Security",
+        body: JSON.stringify({
+          tool: "mc_audit_permissions_rbac + mc_bot_diagnose_auth_plugin",
+          grade: "A",
+          wildcards_blocked: true,
+          password_hash: "ARGON2",
+          auto_auth_template: "/login <env:MCKIT_BOT_PASS>",
+          secrets_redacted: true
+        }, null, 2)
       }
     ];
     function select(id) {
