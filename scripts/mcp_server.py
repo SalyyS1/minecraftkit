@@ -18,7 +18,9 @@ if str(SCRIPTS_DIR) not in sys.path:
 from catalog_io import strict_json_file  # noqa: E402
 import bot_engine  # noqa: E402
 import bot_session_hub  # noqa: E402
+import bot_stress_harness  # noqa: E402
 import cloud_grid_templates  # noqa: E402
+import e2e_qa_orchestrator  # noqa: E402
 import hosting_bridge  # noqa: E402
 import mc_proto_client  # noqa: E402
 import pack_parity  # noqa: E402
@@ -1808,6 +1810,58 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_stress_benchmark",
+        "title": "Bounded Concurrent Multi-Bot Handshake Stress Benchmark",
+        "description": (
+            "Run N <= 25 concurrent pure-Python headless SLP or offline-login probes against a test "
+            "server (~18 MB/bot, zero desktop focus lock) to measure p50/p95/p99 latency, success "
+            "rate, and server headroom."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string"},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25565},
+                "bot_count": {"type": "integer", "minimum": 1, "maximum": 25, "default": 5},
+                "mode": {"type": "string", "enum": ["slp", "offline_login"], "default": "slp"},
+                "protocol_version": {"type": "integer", "default": 769},
+                "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 10.0, "default": 3.0},
+            },
+            "required": ["host"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "mc_qa_run_full_lifecycle",
+        "title": "End-to-End 5-Phase Autonomous Minecraft QA Lifecycle & Proof Generator",
+        "description": (
+            "Chain Resource Governor fleet planning, Cross-Plugin Conflict Matrix audit, Headless "
+            "Hosting Panel preflight, Autonomous Bot Stage QA, and Self-Contained Dark-Mode HTML "
+            "Proof generation into one unified screen-lock-free MCP call returning an inline PNG snapshot."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "project_name": {"type": "string", "default": "MyRPGServer"},
+                "server_host": {"type": "string", "default": "127.0.0.1"},
+                "server_port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 25565},
+                "mc_version": {"type": "string", "default": "1.21.4"},
+                "platform": {"type": "string", "enum": ["paper", "folia", "purpur", "velocity"], "default": "paper"},
+                "bot_count": {"type": "integer", "minimum": 1, "maximum": 25, "default": 5},
+                "host_ram_gb": {"type": "number", "minimum": 2.0, "default": 8.0},
+                "needs_visual_shaders": {"type": "boolean", "default": False},
+                "plugins": {"type": "array", "items": {"type": "string"}},
+                "panel_domain": {"type": "string"},
+                "panel_type": {"type": "string", "default": "pterodactyl"},
+                "preset": {"type": "string", "default": "rpg_shop_gui"},
+                "html_output_path": {"type": "string"},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": False},
+    },
 )
 
 
@@ -2834,6 +2888,8 @@ class MinecraftKitMcpServer:
             "mc_pack_verify_parity": self._tool_pack_verify_parity,
             "mc_audit_plugin_matrix": self._tool_audit_plugin_matrix,
             "mc_bot_generate_cloud_deploy": self._tool_bot_generate_cloud_deploy,
+            "mc_bot_stress_benchmark": self._tool_bot_stress_benchmark,
+            "mc_qa_run_full_lifecycle": self._tool_qa_run_full_lifecycle,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -9594,6 +9650,44 @@ class MinecraftKitMcpServer:
             include_visual_xvfb=bool(args.get("include_visual_xvfb", False)),
         )
         return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_stress_benchmark(self, args: dict[str, Any]) -> ToolOutcome:
+        host = str(args.get("host", "")).strip()
+        if not host:
+            raise ValueError("'host' must be a non-empty string.")
+        payload = bot_stress_harness.run_bot_stress_benchmark(
+            host=host,
+            port=int(args.get("port", 25565)),
+            bot_count=int(args.get("bot_count", 5)),
+            mode=str(args.get("mode", "slp")),
+            protocol_version=int(args.get("protocol_version", 769)),
+            timeout_seconds=float(args.get("timeout_seconds", 3.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_qa_run_full_lifecycle(self, args: dict[str, Any]) -> ToolOutcome:
+        raw_plugins = args.get("plugins")
+        plist = [str(p) for p in raw_plugins] if isinstance(raw_plugins, list) else None
+        payload = e2e_qa_orchestrator.run_full_qa_lifecycle(
+            project_name=str(args.get("project_name", "MyRPGServer")),
+            server_host=str(args.get("server_host", "127.0.0.1")),
+            server_port=int(args.get("server_port", 25565)),
+            mc_version=str(args.get("mc_version", "1.21.4")),
+            platform=str(args.get("platform", "paper")),
+            bot_count=int(args.get("bot_count", 5)),
+            host_ram_gb=float(args.get("host_ram_gb", 8.0)),
+            needs_visual_shaders=bool(args.get("needs_visual_shaders", False)),
+            plugins=plist,
+            panel_domain=str(args.get("panel_domain", "")),
+            panel_type=str(args.get("panel_type", "pterodactyl")),
+            preset=str(args.get("preset", "rpg_shop_gui")),
+            html_output_path=str(args.get("html_output_path", "")),
+        )
+        b64_png = payload.pop("preview_png_base64", "")
+        images = ((b64_png, "image/png"),) if isinstance(b64_png, str) and b64_png else ()
+        if images:
+            payload["preview_attached_as_mcp_image"] = True
+        return ToolOutcome(_pretty_json(payload), images=images)
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:
