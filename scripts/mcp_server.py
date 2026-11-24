@@ -18,7 +18,9 @@ if str(SCRIPTS_DIR) not in sys.path:
 from catalog_io import strict_json_file  # noqa: E402
 import anticheat_auditor  # noqa: E402
 import auth_plugin_auditor  # noqa: E402
+import backup_cron_auditor  # noqa: E402
 import bot_engine  # noqa: E402
+import bot_load_test_report  # noqa: E402
 import bot_replay_diff  # noqa: E402
 import bot_session_hub  # noqa: E402
 import bot_stress_harness  # noqa: E402
@@ -2614,6 +2616,46 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_bot_generate_load_test_report",
+        "title": "Multi-Bot Stress Test Latency & TPS Correlation Report + PNG Chart",
+        "description": (
+            "Analyze multi-bot stress benchmark latencies (p50/p95/p99), TPS drops, failure rates, and RAM savings vs "
+            "desktop Minecraft tabs, emitting an A-F grade, shields.io badge JSON, and inline PNG latency chart."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_name": {"type": "string", "default": "MyMinecraftServer"},
+                "bot_count": {"type": "integer", "default": 10},
+                "join_latencies_ms": {"type": "array", "items": {"type": "number"}},
+                "tps_samples": {"type": "array", "items": {"type": "number"}},
+                "failed_joins": {"type": "integer", "default": 0},
+                "bot_ram_mb_total": {"type": "integer"},
+                "attach_chart": {"type": "boolean", "default": True},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_ops_audit_crontab_backups",
+        "title": "Minecraft VPS Crontab & Backup Shell Script Safety Auditor",
+        "description": (
+            "Audit Linux crontab and backup shell scripts offline for hot world backups missing save-off/save-all flush (CRON-001), "
+            "over-frequent schedules (CRON-002), hardcoded RCON/S3/Restic secrets (CRON-003), missing pruning (CRON-004), "
+            "and missing offsite/integrity verification (CRON-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "script_text": {"type": "string"},
+            },
+            "required": ["script_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3676,6 +3718,8 @@ class MinecraftKitMcpServer:
             "mc_audit_mythic_mmo_yaml": self._tool_audit_mythic_mmo_yaml,
             "mc_qa_generate_discord_webhook_payload": self._tool_qa_generate_discord_webhook_payload,
             "mc_ops_plan_proxy_migration": self._tool_ops_plan_proxy_migration,
+            "mc_bot_generate_load_test_report": self._tool_bot_generate_load_test_report,
+            "mc_ops_audit_crontab_backups": self._tool_ops_audit_crontab_backups,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -10883,6 +10927,32 @@ class MinecraftKitMcpServer:
             has_bedrock_geyser=bool(args.get("has_bedrock_geyser", False)),
             mc_version=str(args.get("mc_version", "1.21.4")),
         )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_generate_load_test_report(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = bot_load_test_report.generate_bot_load_test_report(
+            server_name=str(args.get("server_name", "MyMinecraftServer")),
+            bot_count=int(args.get("bot_count", 10)),
+            join_latencies_ms=[float(v) for v in args["join_latencies_ms"]] if isinstance(args.get("join_latencies_ms"), list) else None,
+            tps_samples=[float(v) for v in args["tps_samples"]] if isinstance(args.get("tps_samples"), list) else None,
+            failed_joins=int(args.get("failed_joins", 0)),
+            bot_ram_mb_total=int(args["bot_ram_mb_total"]) if args.get("bot_ram_mb_total") is not None else None,
+        )
+        attach_chart = bool(args.get("attach_chart", True))
+        images: tuple[tuple[str, str], ...] = ()
+        if attach_chart:
+            png_bytes = visual_capture.render_load_test_chart_png(payload)
+            payload["chart_attached"] = True
+            images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
+        else:
+            payload["chart_attached"] = False
+        return ToolOutcome(_pretty_json(payload), images=images)
+
+    def _tool_ops_audit_crontab_backups(self, args: dict[str, Any]) -> ToolOutcome:
+        script_text = args.get("script_text")
+        if not isinstance(script_text, str) or not script_text.strip():
+            raise ValueError("'script_text' must be a non-empty crontab or backup shell script string.")
+        payload = backup_cron_auditor.audit_crontab_backups(script_text)
         return ToolOutcome(_pretty_json(payload))
 
     @staticmethod

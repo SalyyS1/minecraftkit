@@ -710,6 +710,7 @@
       { id: "mc_bot_compare_stage_runs", cat: "bot", desc: "Diffs baseline vs current bot QA runs to catch latency & step regressions in CI." },
       { id: "mc_bot_validate_stage_yaml", cat: "bot", desc: "Pre-flight stage YAML linter catching plaintext passwords, invalid regex & desktop OOM risks." },
       { id: "mc_bot_audit_anti_cheat_compat", cat: "bot", desc: "Audits GrimAC/Vulcan/Matrix/Polar conflicts, PacketEvents, MythicMobs & QA bot bypass perms." },
+      { id: "mc_bot_generate_load_test_report", cat: "bot", desc: "Multi-bot stress p50/p95/p99 latency & TPS correlation report with inline PNG chart." },
       { id: "mc_hosting_connect_plan", cat: "ops", desc: "Zero-screen-lock Pterodactyl, Pelican, Crafty & PufferPanel plan with RFC 6238 TOTP 2FA." },
       { id: "mc_hosting_server_action", cat: "ops", desc: "Headless start/stop/restart/console/status API dispatch with strict token redaction." },
       { id: "mc_sftp_operations", cat: "ops", desc: "Atomic SFTP plugin JAR deploy, safe config patching & automatic .mckit.bak backups." },
@@ -720,6 +721,7 @@
       { id: "mc_ops_plan_disaster_recovery", cat: "ops", desc: "Anvil-safe save-off + restic S3/R2/B2/SFTP DR scripts & automated bot restore drill planner." },
       { id: "mc_ops_audit_jvm_gc_log", cat: "ops", desc: "Java 17/21 G1GC/ZGC/Shenandoah GC log analyzer (GC-001..005) with inline PNG pause chart." },
       { id: "mc_ops_plan_proxy_migration", cat: "ops", desc: "Zero-downtime BungeeCord/Waterfall to Velocity modern forwarding playbook, UFW & rollback." },
+      { id: "mc_ops_audit_crontab_backups", cat: "ops", desc: "Audits Linux VPS crontab/backup scripts for missing save-off, secret leaks & retention pruning." },
       { id: "mc_qa_generate_discord_webhook_payload", cat: "suite", desc: "Secret-redacted Discord Rich Embed JSON alert builder for autonomous bot QA & TPS regressions." },
       { id: "mc_audit_server_exploits", cat: "audit", desc: "Static security audit for chunk bans, command injection, packet flood & dupe exploits (EXPLOIT-001..005)." },
       { id: "mc_world_audit_integrity", cat: "audit", desc: "Zero-JVM Anvil .mca 4096-byte sector, GZIP level.dat & playerdata corruption scanner (WORLD-001..005)." },
@@ -752,7 +754,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 88 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 90 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {

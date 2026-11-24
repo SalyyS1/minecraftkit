@@ -885,3 +885,52 @@ def render_gc_pause_chart_png(
     footer = f"ENGINE: {engine}   PAUSES: {len(pauses)}   P95: {p95_ms:.1f}MS   MAX: {max_ms:.1f}MS   BUDGET: {tick_ms:.0f}MS"
     canvas.draw_text(12, height - 22, footer, TEXT_MUTED, scale=1, max_chars=78)
     return canvas.to_png_bytes()
+
+
+def render_load_test_chart_png(
+    load_report: dict[str, Any],
+    *,
+    width: int = 640,
+    height: int = 240,
+    title: str = "MCKIT BOT STRESS TEST: JOIN LATENCY & TPS",
+) -> bytes:
+    """Render a zero-dependency dark-mode PNG chart for mc_bot_generate_load_test_report."""
+    grade = str(load_report.get("grade", "A"))
+    bots = int(load_report.get("bot_count", 1) or 1)
+    lat = load_report.get("latency_ms") or {}
+    tps = load_report.get("tps") or {}
+    mem = load_report.get("memory_efficiency") or {}
+    p95 = float(lat.get("p95", 0.0) or 0.0)
+    max_lat = max(100.0, float(lat.get("max", 100.0) or 100.0))
+    min_tps = float(tps.get("min", 20.0) or 20.0)
+    samples = [float(v) for v in (lat.get("samples") or [])]
+
+    canvas = PixelCanvas(width, height, BG_BASE)
+    canvas.draw_rect(0, 0, width, height, BORDER_SUBTLE, 1)
+    canvas.fill_rect(1, 1, width - 2, 28, BG_PANEL)
+    canvas.draw_text(12, 10, title, ACCENT_EMERALD, scale=1, max_chars=46)
+    hdr_col = ACCENT_RED if grade in ("D", "F") else (ACCENT_AMBER if grade in ("B", "C") else ACCENT_EMERALD)
+    canvas.draw_text(width - 210, 10, f"GRADE {grade}  {bots} BOTS  TPS {min_tps:.1f}", hdr_col, scale=1)
+
+    gx, gy, gw, gh = 52, 44, width - 72, height - 92
+    canvas.fill_rect(gx, gy, gw, gh, BG_PANEL)
+    canvas.draw_rect(gx, gy, gw, gh, BORDER_SUBTLE, 1)
+    canvas.draw_text(6, gy, f"{int(round(max_lat))}MS", TEXT_MUTED, scale=1)
+    canvas.draw_text(6, gy + gh - 8, "0MS", TEXT_MUTED, scale=1)
+
+    if samples:
+        shown = samples[:36]
+        slot_w = max(4, (gw - 12) // max(1, len(shown)))
+        bar_w = max(2, slot_w - 2)
+        for idx, val in enumerate(shown):
+            bh = max(2, int(round((val / max_lat) * (gh - 6))))
+            bx = gx + 6 + idx * slot_w
+            by = gy + gh - 2 - bh
+            col = ACCENT_RED if val > 1500.0 else (ACCENT_AMBER if val > 500.0 else ACCENT_CYAN)
+            canvas.fill_rect(bx, by, bar_w, bh, col)
+
+    ram_mb = int(mem.get("headless_bot_ram_mb", bots * 42) or (bots * 42))
+    saved_pct = float(mem.get("ram_saved_pct", 98.0) or 98.0)
+    footer = f"P95: {p95:.0f}MS   MIN TPS: {min_tps:.2f}   RAM: {ram_mb}MB ({saved_pct:.1f}% SAVED VS DESKTOP)"
+    canvas.draw_text(12, height - 22, footer, TEXT_MUTED, scale=1, max_chars=78)
+    return canvas.to_png_bytes()
