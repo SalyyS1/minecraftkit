@@ -827,6 +827,50 @@ STAGE_PRESETS: dict[str, dict[str, Any]] = {
             {"name": "Capture multi-region telemetry", "action": "capture"},
         ],
     },
+    "towny_lands_claim": {
+        "title": "Towny / Lands Chunk Claim, Trust & Protection QA",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Tests land/town creation, chunk claim confirmation, permission GUI inspection, and anti-grief chat feedback without desktop windows.",
+        "stages": [
+            {"name": "Join survival server", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Create or inspect land claim", "action": "command", "command": "/lands claim"},
+            {"name": "Verify claim feedback", "action": "assert_chat", "pattern": r"claimed|town|land|chunk|already"},
+            {"name": "Open land settings GUI", "action": "command", "command": "/lands menu"},
+            {"name": "Assert GUI opened", "action": "assert_gui", "pattern": r"land|town|menu|claim"},
+            {"name": "Capture claim UI PNG", "action": "capture"},
+        ],
+    },
+    "skyblock_island_coop": {
+        "title": "BentoBox / SuperiorSkyblock2 Island Creation & Warp QA",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Verifies island generation/teleport, scoreboard island level readout, challenge GUI, and TPS stability during world pasting.",
+        "stages": [
+            {"name": "Join Skyblock server", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Teleport to island", "action": "command", "command": "/is go"},
+            {"name": "Verify island chat confirmation", "action": "assert_chat", "pattern": r"island|teleported|welcome|home"},
+            {"name": "Open island panel", "action": "command", "command": "/is panel"},
+            {"name": "Assert TPS stable after island paste", "action": "assert_tps", "min_tps": 19.0},
+            {"name": "Capture Skyblock HUD PNG", "action": "capture"},
+        ],
+    },
+    "modelengine_boss_arena": {
+        "title": "ModelEngine + MythicMobs Custom 3D Boss Visual & Hitbox QA",
+        "recommended_tier": "tier2-hybrid",
+        "estimated_ram_mb": 1400,
+        "description": "Hybrid Tier-2 off-screen Xvfb visual client + protocol telemetry verifying custom resource pack load, ModelEngine boss spawn, entity count, and TPS >= 19.0.",
+        "stages": [
+            {"name": "Join RPG arena", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Accept ModelEngine resource pack", "action": "accept_pack"},
+            {"name": "Warp to boss arena", "action": "command", "command": "/warp boss_arena"},
+            {"name": "Verify TPS during custom model tick", "action": "assert_tps", "min_tps": 19.0},
+            {"name": "Capture off-screen boss visual PNG", "action": "capture"},
+        ],
+    },
 }
 
 
