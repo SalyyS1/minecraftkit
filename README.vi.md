@@ -1,10 +1,15 @@
-# Salyyy Minecraft Kit (v3.2.0)
+# Salyyy Minecraft Kit (v3.3.0)
 
 [English (README.md)](README.md) · [**Trang Giới Thiệu Chính (Showcase)**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Wiki Song Ngữ](https://salyys1.github.io/minecraftkit/wiki.html) · [Chiến Lược Cộng Đồng](docs/GROWTH_STRATEGY.md)
 
-Bộ công cụ AI Engineering, **39 công cụ MCP**, **14 kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ không chiếm màn hình (theo Stages & Freeform nhiều lượt)**, **So sánh ảnh PNG Visual Diff & Quay video MP4 Timelapse chạy ngầm**, **Kho Profile ẩn mật khẩu (`chmod 0600`)**, **Kết nối Hosting/VPS có 2FA & SFTP**, **Companion Testing Plugin & Fabric Client Mod**, và **tích hợp trọn bộ 10 công cụ Minecraft của SalyVn / Salyyy**.
+Bộ công cụ AI Engineering, **42 công cụ MCP**, **14 kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ không chiếm màn hình (Java SLP + Bedrock/Geyser RakNet, Stages & Freeform nhiều lượt)**, **Preset test sẵn cho AuthMe / Shop GUI / ItemsAdder-Nexo / MythicMobs / Folia**, **So sánh ảnh PNG Visual Diff & Quay video MP4 Timelapse chạy ngầm**, **Kho Profile ẩn mật khẩu (`chmod 0600`)**, **Kết nối Hosting/VPS có 2FA, Console WebSocket & SFTP**, **Companion Testing Plugin & Fabric Client Mod**, và **tích hợp trọn bộ 10 công cụ Minecraft của SalyVn / Salyyy**.
 
-## Điểm Nổi Bật Ở Bản v3.2.0
+## Điểm Nổi Bật Ở Bản v3.3.0
+
+1. **Bedrock/Geyser UDP Ping, Preset Test Chuyên Dụng & WebSocket Console (`mc_bot_ping_bedrock`, `mc_bot_generate_stage_preset`, `mc_hosting_console_stream_plan`)**:
+   - Ping trực tiếp máy chủ crossplay Bedrock/GeyserMC qua giao thức RakNet UDP thuần Python.
+   - 5 bộ kịch bản test dựng sẵn cho máy chủ thực tế (`authme_lobby`, `rpg_shop_gui`, `resource_pack_itemsadder_nexo`, `mythicmobs_dungeon`, `folia_region_stress`).
+   - Hỗ trợ kế hoạch kết nối Live Console WebSocket không chiếm màn hình cho Pterodactyl/Pelican (ẩn hoàn toàn JWT/API key).
 
 1. **Phiên Bot Tự Do Nhiều Lượt, So Sánh Ảnh Visual Diff & Quay Video MP4 (`mc_bot_session_*`, `mc_bot_visual_diff`, `mc_bot_capture_timelapse`)**:
    - AI có thể mở phiên bot sống liên tục (`mc_bot_session_start`), điều khiển từng bước (`mc_bot_session_action`: gõ lệnh, di chuyển, bấm slot GUI, nhận pack, chụp ảnh PNG trả ngay về khung chat), ghép chuỗi khung hình thành **video MP4 chạy ngầm qua `ffmpeg`**, và chạy **so sánh ảnh pixel-exact (`mc_bot_visual_diff`)** tô đỏ vùng GUI/HUD bị lệch sau khi sửa code!

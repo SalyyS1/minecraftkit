@@ -1342,7 +1342,8 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
             "properties": {
                 "base_url": {"type": "string", "description": "Bridge plugin base URL (default http://127.0.0.1:25590)."},
                 "token": {"type": "string", "description": "X-MCKit-Token auth secret."},
-                "endpoint": {"type": "string", "enum": ["health", "metrics", "players", "errors", "plugins"], "description": "Bridge endpoint to query (default health)."},
+                "endpoint": {"type": "string", "enum": ["health", "metrics", "players", "errors", "plugins", "gui", "worlds"], "description": "Bridge endpoint to query (default health)."},
+                "player": {"type": "string", "description": "Optional player username when endpoint='gui'."},
                 "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "description": "HTTP timeout in seconds (default 3.0)."},
             },
             "additionalProperties": False,
@@ -1503,6 +1504,77 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
             "additionalProperties": False,
         },
         "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_ping_bedrock",
+        "title": "Ping Bedrock / GeyserMC Server via Pure-Python UDP RakNet",
+        "description": (
+            "Perform a zero-client UDP RakNet Unconnected Ping (0x01 -> 0x1C) against any Bedrock or GeyserMC/Floodgate "
+            "crossplay server, returning MOTD, protocol version, Bedrock version, online/max players, gamemode, and latency."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "host": {"type": "string", "description": "Server hostname or IP."},
+                "port": {"type": "integer", "minimum": 1, "maximum": 65535, "default": 19132},
+                "timeout_seconds": {"type": "number", "minimum": 0.5, "maximum": 15.0, "default": 3.0},
+            },
+            "required": ["host"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
+    },
+    {
+        "name": "mc_bot_generate_stage_preset",
+        "title": "Generate Autonomous Bot QA Stage Preset for Common Plugin Stacks",
+        "description": (
+            "Generate ready-to-run headless bot QA stage plans tailored for AuthMe/nLogin lobbies, RPG /shop GUIs, "
+            "ItemsAdder/Nexo/Oraxen resource packs, MythicMobs dungeons, or 10-bot Folia region stress tests."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "preset": {
+                    "type": "string",
+                    "enum": [
+                        "authme_lobby",
+                        "rpg_shop_gui",
+                        "resource_pack_itemsadder_nexo",
+                        "mythicmobs_dungeon",
+                        "folia_region_stress",
+                    ],
+                },
+                "command_override": {"type": "string"},
+                "gui_pattern_override": {"type": "string"},
+                "chat_pattern_override": {"type": "string"},
+                "min_tps": {"type": "number", "minimum": 1.0, "maximum": 20.0},
+            },
+            "required": ["preset"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_hosting_console_stream_plan",
+        "title": "Headless Hosting Panel Live Console WebSocket Plan (Pterodactyl / Pelican)",
+        "description": (
+            "Build (or live-fetch with API key) a screen-lock-free Pterodactyl/Pelican live console WebSocket auth "
+            "and command plan with strict JWT token and API key redaction."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "domain": {"type": "string"},
+                "panel_type": {"type": "string", "enum": list(hosting_bridge.SUPPORTED_PANELS)},
+                "server_id": {"type": "string"},
+                "api_key": {"type": "string"},
+                "command": {"type": "string"},
+                "fetch_live_token": {"type": "boolean", "default": False},
+            },
+            "required": ["domain"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True, "openWorldHint": True},
     },
 )
 
@@ -2517,6 +2589,9 @@ class MinecraftKitMcpServer:
             "mc_bot_session_stop": self._tool_bot_session_stop,
             "mc_bot_capture_timelapse": self._tool_bot_capture_timelapse,
             "mc_bot_visual_diff": self._tool_bot_visual_diff,
+            "mc_bot_ping_bedrock": self._tool_bot_ping_bedrock,
+            "mc_bot_generate_stage_preset": self._tool_bot_generate_stage_preset,
+            "mc_hosting_console_stream_plan": self._tool_hosting_console_stream_plan,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -8949,6 +9024,7 @@ class MinecraftKitMcpServer:
             base_url=str(args.get("base_url", "http://127.0.0.1:25590")),
             token=str(args.get("token", "")),
             endpoint=str(args.get("endpoint", "health")),
+            player=str(args.get("player", "")),
             timeout_seconds=float(args.get("timeout_seconds", 3.0)),
         )
         return ToolOutcome(_pretty_json(payload))
@@ -9068,6 +9144,44 @@ class MinecraftKitMcpServer:
         if images:
             diff["diff_attached_as_mcp_image"] = True
         return ToolOutcome(_pretty_json(diff), images=images)
+
+    def _tool_bot_ping_bedrock(self, args: dict[str, Any]) -> ToolOutcome:
+        host = args.get("host")
+        if not isinstance(host, str) or not host.strip():
+            raise ValueError("'host' must be a non-empty string.")
+        payload = bot_engine.ping_bedrock_server(
+            host=host.strip(),
+            port=int(args.get("port", 19132)),
+            timeout_seconds=float(args.get("timeout_seconds", 3.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_generate_stage_preset(self, args: dict[str, Any]) -> ToolOutcome:
+        preset = str(args.get("preset", "")).strip()
+        if not preset:
+            raise ValueError("'preset' must be a non-empty string.")
+        payload = bot_engine.build_stage_preset(
+            preset,
+            command_override=str(args.get("command_override", "")),
+            gui_pattern_override=str(args.get("gui_pattern_override", "")),
+            chat_pattern_override=str(args.get("chat_pattern_override", "")),
+            min_tps=float(args["min_tps"]) if "min_tps" in args and args["min_tps"] is not None else None,
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_hosting_console_stream_plan(self, args: dict[str, Any]) -> ToolOutcome:
+        domain = str(args.get("domain", "")).strip()
+        if not domain:
+            raise ValueError("'domain' must be a non-empty string.")
+        payload = hosting_bridge.get_panel_websocket_plan(
+            domain=domain,
+            panel_type=str(args.get("panel_type", "pterodactyl")),
+            server_id=str(args.get("server_id", "")),
+            api_key=str(args.get("api_key", "")),
+            command=str(args.get("command", "")),
+            fetch_live_token=bool(args.get("fetch_live_token", False)),
+        )
+        return ToolOutcome(_pretty_json(payload))
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

@@ -689,11 +689,187 @@ def run_bot_stages(
     }
 
 
+def ping_bedrock_server(
+    host: str,
+    port: int = 19132,
+    *,
+    timeout_seconds: float = 3.0,
+) -> dict[str, Any]:
+    """Perform a pure-Python UDP RakNet Unconnected Ping (0x01) for Bedrock / GeyserMC servers.
+
+    Parses the RakNet Unconnected Pong (0x1C) semicolon-delimited advertisement:
+      MCPE;<motd>;<protocol>;<version>;<online>;<max>;<server_guid>;<sub_motd>;<gamemode>;...
+    """
+    if not host or not isinstance(host, str):
+        raise ValueError("'host' must be a non-empty hostname or IP address.")
+    if not (1 <= int(port) <= 65535):
+        raise ValueError("'port' must be between 1 and 65535.")
+
+    raknet_magic = bytes.fromhex("00ffff00fefefefefdfdfdfd12345678")
+    ping_time_ms = int(time.time() * 1000) & 0x7FFFFFFFFFFFFFFF
+    client_guid = 0x4D434B4954424F54  # "MCKITBOT"
+    packet = struct.pack(">BQ", 0x01, ping_time_ms) + raknet_magic + struct.pack(">Q", client_guid)
+
+    t0 = time.monotonic()
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.settimeout(timeout_seconds)
+            sock.sendto(packet, (host, int(port)))
+            data, _addr = sock.recvfrom(4096)
+            elapsed_ms = round((time.monotonic() - t0) * 1000.0, 2)
+    except Exception as err:  # noqa: BLE001
+        return {
+            "reachable": False,
+            "edition": "bedrock",
+            "host": host,
+            "port": int(port),
+            "error": f"{type(err).__name__}: {err}",
+        }
+
+    if len(data) < 35 or data[0] != 0x1C:
+        return {
+            "reachable": False,
+            "edition": "bedrock",
+            "host": host,
+            "port": int(port),
+            "error": f"Unexpected RakNet response header (len={len(data)}, id={data[0] if data else None}).",
+        }
+
+    # Layout: 1B id (0x1C) + 8B time + 8B server_guid + 16B magic + 2B str_len + UTF-8 string
+    str_len = struct.unpack(">H", data[33:35])[0]
+    raw_info = data[35 : 35 + str_len].decode("utf-8", errors="replace")
+    parts = raw_info.split(";")
+    return {
+        "reachable": True,
+        "edition": parts[0] if len(parts) > 0 else "MCPE",
+        "host": host,
+        "port": int(port),
+        "latency_ms": elapsed_ms,
+        "motd": parts[1] if len(parts) > 1 else "",
+        "protocol_version": int(parts[2]) if len(parts) > 2 and parts[2].isdigit() else None,
+        "version_name": parts[3] if len(parts) > 3 else "",
+        "players_online": int(parts[4]) if len(parts) > 4 and parts[4].isdigit() else 0,
+        "players_max": int(parts[5]) if len(parts) > 5 and parts[5].isdigit() else 0,
+        "server_guid": parts[6] if len(parts) > 6 else "",
+        "sub_motd": parts[7] if len(parts) > 7 else "",
+        "gamemode": parts[8] if len(parts) > 8 else "",
+        "raw_advertisement": raw_info,
+    }
+
+
+STAGE_PRESETS: dict[str, dict[str, Any]] = {
+    "authme_lobby": {
+        "title": "AuthMe / nLogin Lobby Verification",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Joins server, auto-registers/logs in with redacted credentials, checks lobby scoreboard, and snaps HUD.",
+        "stages": [
+            {"name": "Join lobby", "action": "join"},
+            {"name": "Auto-auth (redacted)", "action": "auth"},
+            {"name": "Verify lobby scoreboard", "action": "assert_scoreboard", "pattern": r"ONLINE|LOBBY|PLAY|TPS"},
+            {"name": "Capture lobby HUD", "action": "capture"},
+        ],
+    },
+    "rpg_shop_gui": {
+        "title": "RPG /shop & Custom GUI Click Verification",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Logs in, opens an RPG shop/menu command, validates populated GUI slots & lore, clicks a slot, and captures the 9x4 chest PNG.",
+        "stages": [
+            {"name": "Join server", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Open RPG menu", "action": "command", "command": "/shop"},
+            {"name": "Verify menu GUI", "action": "assert_gui", "title_pattern": r"SHOP|MENU|RPG"},
+            {"name": "Click item slot", "action": "click_slot", "slot": 13},
+            {"name": "Check server TPS", "action": "assert_tps", "min_tps": 18.5},
+            {"name": "Capture GUI proof", "action": "capture"},
+        ],
+    },
+    "resource_pack_itemsadder_nexo": {
+        "title": "Resource Pack / ItemsAdder / Nexo / Oraxen Visual QA",
+        "recommended_tier": "tier2-docker-visual",
+        "estimated_ram_mb": 1400,
+        "description": "Accepts server resource pack, triggers custom item menu (/ia or /nexo), checks pack status, and captures off-screen Docker/Xvfb PNG.",
+        "stages": [
+            {"name": "Join server", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Accept custom resource pack", "action": "accept_pack"},
+            {"name": "Open custom items menu", "action": "command", "command": "/ia"},
+            {"name": "Verify chat/pack load", "action": "assert_chat", "pattern": r"pack|loaded|menu|opened|items"},
+            {"name": "Capture visual framebuffer", "action": "capture"},
+        ],
+    },
+    "mythicmobs_dungeon": {
+        "title": "MythicMobs / MythicDungeons Combat & TPS Stability",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Enters dungeon/arena, moves to boss coordinates, asserts combat chat telemetry & TPS >= 19.0, and captures entity minimap.",
+        "stages": [
+            {"name": "Join server", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Enter dungeon", "action": "command", "command": "/md play starter"},
+            {"name": "Advance toward boss arena", "action": "move", "x": 16, "y": 64, "z": 24},
+            {"name": "Verify TPS under mob load", "action": "assert_tps", "min_tps": 19.0},
+            {"name": "Capture entity radar PNG", "action": "capture"},
+        ],
+    },
+    "folia_region_stress": {
+        "title": "Folia Multi-Region 10-Bot Concurrency Stress Test",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 420,
+        "description": "Runs 10 staggered headless protocol bots (~420 MB total vs 26 GB desktop) across disjoint regions, verifying zero TPS drops and zero bridge SEVERE errors.",
+        "stages": [
+            {"name": "Join Folia cluster", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Teleport to disjoint region", "action": "move", "x": 1024, "y": 72, "z": -1024},
+            {"name": "Trigger cross-region command", "action": "command", "command": "/warp spawn"},
+            {"name": "Assert regional TPS health", "action": "assert_tps", "min_tps": 19.2},
+            {"name": "Capture multi-region telemetry", "action": "capture"},
+        ],
+    },
+}
+
+
+def build_stage_preset(
+    preset_name: str,
+    *,
+    command_override: str = "",
+    gui_pattern_override: str = "",
+    chat_pattern_override: str = "",
+    min_tps: float | None = None,
+) -> dict[str, Any]:
+    """Return a ready-to-run autonomous bot stage preset customized for common MC plugin stacks."""
+    key = preset_name.strip().lower()
+    if key not in STAGE_PRESETS:
+        raise ValueError(f"Unknown preset {preset_name!r}. Choose one of {sorted(STAGE_PRESETS)}.")
+    base = STAGE_PRESETS[key]
+    stages = [dict(s) for s in base["stages"]]
+    for st in stages:
+        if command_override and st.get("action") == "command":
+            st["command"] = command_override
+        if gui_pattern_override and st.get("action") == "assert_gui":
+            st["title_pattern"] = gui_pattern_override
+        if chat_pattern_override and st.get("action") == "assert_chat":
+            st["pattern"] = chat_pattern_override
+        if min_tps is not None and st.get("action") == "assert_tps":
+            st["min_tps"] = float(min_tps)
+    return {
+        "preset": key,
+        "title": base["title"],
+        "recommended_tier": base["recommended_tier"],
+        "estimated_ram_mb": base["estimated_ram_mb"],
+        "description": base["description"],
+        "available_presets": sorted(STAGE_PRESETS),
+        "stages": stages,
+    }
+
+
 def query_bridge_plugin(
     *,
     base_url: str = "http://127.0.0.1:25590",
     token: str = "",
     endpoint: str = "health",
+    player: str = "",
     timeout_seconds: float = 3.0,
 ) -> dict[str, Any]:
     """Query the optional `mckit-bridge-plugin` HTTP QA inspection bridge."""
@@ -703,6 +879,8 @@ def query_bridge_plugin(
         "players": "/api/v1/players",
         "errors": "/api/v1/errors",
         "plugins": "/api/v1/plugins",
+        "gui": "/api/v1/gui",
+        "worlds": "/api/v1/worlds",
     }
     if endpoint not in allowed_endpoints:
         raise ValueError(f"'endpoint' must be one of {sorted(allowed_endpoints)}.")
@@ -710,7 +888,9 @@ def query_bridge_plugin(
         raise ValueError("Bridge plugin URL must target localhost/127.0.0.1 or HTTPS.")
 
     url = base_url.rstrip("/") + allowed_endpoints[endpoint]
-    headers = {"Accept": "application/json", "User-Agent": "MinecraftKit-MCP/3.1"}
+    if endpoint == "gui" and player:
+        url += "?player=" + urllib.request.quote(player)
+    headers = {"Accept": "application/json", "User-Agent": "MinecraftKit-MCP/3.3"}
     if token:
         headers["X-MCKit-Token"] = token
 

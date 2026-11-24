@@ -3,11 +3,11 @@
 [Tiếng Việt (README.vi.md)](README.vi.md) · [**Flagship Showcase**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Documentation Wiki](https://salyys1.github.io/minecraftkit/wiki.html) · [Growth Playbook](docs/GROWTH_STRATEGY.md) · [npm](https://www.npmjs.com/package/minecraftkit)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v3.2.0](https://img.shields.io/badge/version-v3.2.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.2.0)
+[![Version: v3.3.0](https://img.shields.io/badge/version-v3.3.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v3.3.0)
 [![Glama MCP Score](https://glama.ai/mcp/servers/SalyyS1/minecraftkit/badges/score.svg)](https://glama.ai/mcp/servers/SalyyS1/minecraftkit)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
 
-All-in-one Minecraft plugin engineering, autonomous headless bot QA, persistent freeform multi-turn bot sessions, off-screen PNG visual diff & MP4 timelapse capture, headless hosting/VPS/2FA & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 39-tool stdio MCP server by **SalyVn / Salyyy**.
+All-in-one Minecraft plugin engineering, autonomous headless bot QA (Java SLP + Bedrock/Geyser RakNet UDP), persistent freeform multi-turn bot sessions, off-screen PNG visual diff & MP4 timelapse capture, headless hosting/VPS/2FA/WebSocket & SFTP operations with a masked profile vault, companion Paper/Folia & Fabric testing bridges, 14 `/mc:*` agent skills, interactive GitHub Pages showcase, and a 42-tool stdio MCP server by **SalyVn / Salyyy**.
 
 ## What Salyyy Minecraft Kit Includes
 
@@ -23,7 +23,7 @@ All-in-one Minecraft plugin engineering, autonomous headless bot QA, persistent 
 - **Unified 10-Repo SalyyS1 Minecraft Toolchain (`scripts/toolchain_bridge.py`)**: Integrates `mcstage`, `shadersmith`, `packmigrate`, `packmerge`, `glyphsmith`, `pluginscope`, `serverdoctor`, `foliascan`, `rp-engine`, and `texlab` into a single `mc_run_qa_pipeline` end-to-end automated QA loop.
 - **Offline RPG & Plugin Bytecode API Catalog**: 4,947 plugin-owned types and 41,887 bytecode-verified members across 10 major RPG and server plugins (`ModelEngine`, `MMOItems`, `MMOCore`, `MMOInventory`, `MMOProfiles`, `MythicCrucible`, `MythicDungeons`, `MythicEnchants`, `MythicRPG`, `CoreTools`), plus 103 curated GitHub sources and 901 Mojang release/snapshot records.
 - **14 `/mc:*` Engineering Agent Skills**: Specialized routing skills and slash commands for Claude Code, Cursor, Windsurf, Antigravity, and OpenAI Codex covering `mc:bot`, `mc:build`, `mc:core`, `mc:rpg`, `mc:protocol`, `mc:nms`, `mc:ops`, `mc:pack`, `mc:model`, `mc:qa`, `mc:shader`, `mc:dialog`, `mc:client`, and `mc:suite`.
-- **39-Tool Stdio MCP Server**: Pure Python 3.10+ JSON-RPC 2.0 MCP server (`scripts/mcp_server.py` and `minecraftkit mcp`) with native multimodal PNG image responses for live visual bot testing, pixel-exact visual regression diffs, and ffmpeg MP4 timelapses.
+- **42-Tool Stdio MCP Server**: Pure Python 3.10+ JSON-RPC 2.0 MCP server (`scripts/mcp_server.py` and `minecraftkit mcp`) with native multimodal PNG image responses for live visual bot testing, Bedrock/Geyser RakNet UDP pings, plugin stage presets, pixel-exact visual regression diffs, and ffmpeg MP4 timelapses.
 
 ## Quick Install
 
@@ -120,6 +120,9 @@ If you cloned this repository or installed the skill locally, you can also invok
 | `mc_bot_session_stop` | Stop a persistent bot session cleanly and return final session telemetry and recorded frame count. |
 | `mc_bot_capture_timelapse` | Assemble recorded frames from a bot session into a real headless H.264 MP4 timelapse video via `ffmpeg` (gracefully degrades to indexed frame manifest if ffmpeg is absent). |
 | `mc_bot_visual_diff` | Compute pixel-exact visual regression diffs between two base64 PNG bot snapshots, returning `diff_ratio`, `changed_pixels`, pass/fail verdict, and a highlighted visual diff PNG inline in chat. |
+| `mc_bot_ping_bedrock` | Perform a pure-Python UDP RakNet Unconnected Ping (`0x01` -> `0x1C`) against Bedrock or GeyserMC/Floodgate crossplay servers (MOTD, version, protocol, online/max players, gamemode, latency). |
+| `mc_bot_generate_stage_preset` | Generate customized autonomous bot QA stage presets for `authme_lobby`, `rpg_shop_gui`, `resource_pack_itemsadder_nexo`, `mythicmobs_dungeon`, and `folia_region_stress`. |
+| `mc_hosting_console_stream_plan` | Build or live-fetch a screen-lock-free Pterodactyl/Pelican live console WebSocket handshake & command plan with strict JWT/API-key redaction. |
 
 ### Exposed MCP Resources & Slash Prompts
 

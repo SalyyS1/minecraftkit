@@ -33,3 +33,15 @@ jobs:
 
       - name: Run Node CLI & bootstrap sync checks
         run: npm --prefix npm run check
+
+      - name: Run headless bot worker syntax & guard tests
+        run: node --test bot/test/worker.test.mjs
+
+      - name: Verify companion Fabric client-mod Java 21 compilation
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Compile client-mod visual capture bridge
+        run: javac -d /tmp/mckit-client-mod-classes client-mod/src/main/java/com/salyvn/mckit/client/McKitVisualClientMod.java

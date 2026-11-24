@@ -419,8 +419,39 @@
     initPipeline();
     initRamCalculator();
     initSimulator();
+    initFreeformConsole();
     initSuite();
     initConfigBuilder();
+  }
+
+  function initFreeformConsole() {
+    var input = document.getElementById("sim-cmd-input");
+    var btn = document.getElementById("sim-cmd-send");
+    var chat = document.getElementById("sim-chat-box");
+    var badge = document.getElementById("sim-hud-badge");
+    if (!input || !btn || !chat) { return; }
+
+    function runCmd() {
+      var raw = String(input.value || "").trim();
+      if (!raw) { return; }
+      var redacted = raw.replace(/^(\/(?:login|l|register|reg|changepassword|cpw)\s+)(.+)$/i, "$1[REDACTED_PASSWORD]");
+      chat.append(el("div", "sc-chat-line", "[Bot] " + redacted));
+      if (/^\/(?:login|l|register|reg)\b/i.test(raw)) {
+        chat.append(el("div", "sc-chat-line", "[AuthMe] Authenticated! Password scrubbed from transcript."));
+        if (badge) { badge.textContent = "AUTHENTICATED"; }
+      } else if (/^\/(?:shop|ia|nexo|menu)\b/i.test(raw)) {
+        chat.append(el("div", "sc-chat-line", "[MCKit] GUI opened -> rendered 9x4 PNG diff frame attached to chat."));
+      } else {
+        chat.append(el("div", "sc-chat-line", "[MCKit] Action executed off-screen (42 MB RAM, 0 GUI windows)."));
+      }
+      input.value = "";
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    btn.addEventListener("click", runCmd);
+    input.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") { ev.preventDefault(); runCmd(); }
+    });
   }
 
   if (document.readyState === "loading") {

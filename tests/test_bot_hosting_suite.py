@@ -280,6 +280,50 @@ class BotVisualHostingSuiteTests(unittest.TestCase):
         stopped = json.loads(self._call_raw("mc_bot_session_stop", {"session_id": sid})["content"][0]["text"])
         self.assertTrue(stopped["stopped"])
 
+    def test_bedrock_raknet_udp_ping_presets_and_console_ws_plan(self) -> None:
+        import struct
+        raknet_magic = bytes.fromhex("00ffff00fefefefefdfdfdfd12345678")
+        adv = b"MCPE;SalyVn Crossplay;786;1.21.70;14;100;123456789;GeyserMC;Survival;1;19132;19133;"
+        pong = struct.pack(">BQQ", 0x1C, 12345, 987654321) + raknet_magic + struct.pack(">H", len(adv)) + adv
+
+        udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        udp.bind(("127.0.0.1", 0))
+        port = udp.getsockname()[1]
+
+        def serve_once() -> None:
+            try:
+                _data, addr = udp.recvfrom(1024)
+                udp.sendto(pong, addr)
+            finally:
+                udp.close()
+
+        t = threading.Thread(target=serve_once, daemon=True)
+        t.start()
+        res = json.loads(self._call_raw("mc_bot_ping_bedrock", {"host": "127.0.0.1", "port": port})["content"][0]["text"])
+        t.join(timeout=2)
+        self.assertTrue(res["reachable"])
+        self.assertEqual(res["motd"], "SalyVn Crossplay")
+        self.assertEqual(res["players_online"], 14)
+        self.assertEqual(res["version_name"], "1.21.70")
+
+        preset = json.loads(self._call_raw("mc_bot_generate_stage_preset", {
+            "preset": "rpg_shop_gui",
+            "command_override": "/rpgshop",
+            "min_tps": 19.5,
+        })["content"][0]["text"])
+        self.assertEqual(preset["preset"], "rpg_shop_gui")
+        self.assertTrue(any(s.get("command") == "/rpgshop" for s in preset["stages"]))
+
+        ws_plan = json.loads(self._call_raw("mc_hosting_console_stream_plan", {
+            "domain": "panel.salyvn.net",
+            "panel_type": "pterodactyl",
+            "server_id": "abc123",
+            "command": "tps",
+        })["content"][0]["text"])
+        self.assertTrue(ws_plan["ok"])
+        self.assertTrue(ws_plan["screen_lock_free"])
+        self.assertIn("/api/client/servers/abc123/websocket", ws_plan["credentials_endpoint"])
+
 
 if __name__ == "__main__":
     unittest.main()

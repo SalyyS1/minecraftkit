@@ -144,6 +144,9 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
                 "mc_bot_session_stop",
                 "mc_bot_capture_timelapse",
                 "mc_bot_visual_diff",
+                "mc_bot_ping_bedrock",
+                "mc_bot_generate_stage_preset",
+                "mc_hosting_console_stream_plan",
             ],
         )
         for tool in tools:
@@ -298,7 +301,7 @@ class MinecraftKitMcpServerTests(unittest.TestCase):
         header_part, framed_resp = remainder.split(b"\r\n\r\n", 1)
         declared_len = int(header_part.split(b":", 1)[1].strip())
         self.assertEqual(declared_len, len(framed_resp))
-        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 39)
+        self.assertEqual(len(json.loads(framed_resp.decode("utf-8"))["result"]["tools"]), 42)
 
     def test_resources_and_prompts_endpoints_serve_handbooks_and_routes(self) -> None:
         res_list = self.rpc({"jsonrpc": "2.0", "id": 30, "method": "resources/list"})
@@ -1254,7 +1257,7 @@ dependencies:
         ):
             self.assertIn(expected, codes)
         self.assertEqual(res["sarif_report"]["version"], "2.1.0")
-        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.2.0")
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.3.0")
 
         # Clean bounded RegistryFriendlyByteBuf codec with exact field wire math
         clean_codec = "\n".join([
@@ -1431,7 +1434,7 @@ dependencies:
             "CHUNK-IO-008",
         ):
             self.assertIn(expected, codes)
-        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.2.0")
+        self.assertEqual(res["sarif_report"]["runs"][0]["tool"]["driver"]["semanticVersion"], "3.3.0")
 
         # Healthy sub-critical LZ4 async pipeline passes cleanly
         clean_src = "\n".join([

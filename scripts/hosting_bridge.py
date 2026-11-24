@@ -569,3 +569,80 @@ def sftp_operation(
     finally:
         client.close()
     return {"ok": False, "error": "Unsupported operation"}
+
+
+def get_panel_websocket_plan(
+    *,
+    domain: str,
+    panel_type: str = "pterodactyl",
+    server_id: str = "",
+    api_key: str = "",
+    command: str = "",
+    fetch_live_token: bool = False,
+    timeout_seconds: float = 6.0,
+) -> dict[str, Any]:
+    """Build (or live-fetch) a headless Pterodactyl/Pelican live console WebSocket plan.
+
+    Zero browser windows; JWT tokens and API keys are strictly redacted from any response.
+    """
+    panel = panel_type.strip().lower()
+    if panel not in SUPPORTED_PANELS:
+        raise ValueError(f"'panel_type' must be one of {SUPPORTED_PANELS}.")
+    base_url = normalize_panel_url(domain)
+    sid = server_id.strip() or "<server_id>"
+    ws_endpoint = f"{base_url}/api/client/servers/{sid}/websocket"
+    auth_frame = {"event": "auth", "args": ["<REDACTED_WS_JWT>"]}
+    actions = [
+        {"event": "send logs", "args": [None]},
+        {"event": "send stats", "args": [None]},
+    ]
+    if command:
+        actions.append({"event": "send command", "args": [command]})
+
+    plan: dict[str, Any] = {
+        "ok": True,
+        "panel_type": panel,
+        "base_url": base_url,
+        "server_id": sid,
+        "screen_lock_free": True,
+        "credentials_endpoint": ws_endpoint,
+        "websocket_protocol": {
+            "auth_frame": auth_frame,
+            "action_frames": actions,
+            "reconnect_on_event": "token expiring",
+        },
+        "live_fetch_attempted": False,
+    }
+
+    if fetch_live_token:
+        if panel not in ("pterodactyl", "pelican"):
+            plan["ok"] = False
+            plan["error"] = f"Live WebSocket token fetch is only supported for pterodactyl/pelican (got {panel!r})."
+            return plan
+        if not api_key or not server_id.strip():
+            plan["ok"] = False
+            plan["error"] = "Both 'api_key' and 'server_id' are required for live WebSocket token fetch."
+            return plan
+        plan["live_fetch_attempted"] = True
+        req = urllib.request.Request(
+            ws_endpoint,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Accept": "application/json",
+                "User-Agent": "MinecraftKit-MCP/3.3",
+            },
+            method="GET",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=timeout_seconds) as resp:
+                body = json.loads(resp.read().decode("utf-8", errors="replace"))
+            data = body.get("data", {}) if isinstance(body, dict) else {}
+            plan["socket_url"] = str(data.get("socket", ""))
+            plan["token_received"] = bool(data.get("token"))
+            plan["token_preview"] = "[REDACTED_WS_JWT]" if data.get("token") else ""
+        except Exception as err:  # noqa: BLE001
+            plan["ok"] = False
+            plan["error"] = redact_secrets(f"{type(err).__name__}: {err}", (api_key,))
+
+    return plan
+
