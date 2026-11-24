@@ -16,7 +16,7 @@
   <main id="showcase-main" class="sc-main">
     <section class="sc-hero">
       <div class="sc-hero-top">
-        <span class="sc-pill">v3.6.0 · 46 MCP Tools · 14 /mc:* Skills · 10 Integrated Repos · Wire Login + RCON + Bedrock · Visual Diff Lab</span>
+        <span class="sc-pill">v3.7.0 · 48 MCP Tools · 14 /mc:* Skills · 10 Integrated Repos · HTML QA Proof + Wire Login + RCON + Backup Audit</span>
         <div class="sc-lang-group" role="group" aria-label="Language switcher">
           <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
           <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
@@ -37,8 +37,8 @@
 
       <div class="sc-stats-grid">
         <article class="sc-stat-card">
-          <strong>46</strong>
-          <span data-i18n="stat_mcp">Stdio MCP Tools (Wire Login, RCON, PNG Diff, MP4, Bedrock)</span>
+          <strong>48</strong>
+          <span data-i18n="stat_mcp">Stdio MCP Tools (HTML QA Proof, Wire Login, RCON, PNG Diff, Backup Audit)</span>
         </article>
         <article class="sc-stat-card">
           <strong>42 MB</strong>
@@ -161,10 +161,10 @@
       </div>
       <div class="sc-feature-grid">
         <article class="sc-feature-card">
-          <span class="sc-tag">HEADLESS 2FA</span>
-          <h3>Hosting Panel &amp; RFC 6238 TOTP</h3>
-          <p>Connects off-screen to Pterodactyl, Pelican, Crafty Controller, PufferPanel, and Multicraft via domain, credentials/API key, and built-in pure-Python TOTP 2FA. Passwords and seeds are strictly redacted.</p>
-          <code>mc_hosting_connect_plan · mc_hosting_server_action</code>
+          <span class="sc-tag">HEADLESS 2FA &amp; BACKUPS</span>
+          <h3>Hosting Panel, TOTP 2FA, RCON &amp; Backup Audit</h3>
+          <p>Connects off-screen to Pterodactyl, Pelican, Crafty Controller, PufferPanel, and Multicraft via domain, credentials/API key, pure-Python TOTP 2FA, Source RCON, and automated backup recency/truncation verification.</p>
+          <code>mc_hosting_connect_plan · mc_ops_rcon_execute · mc_hosting_backup_verify</code>
         </article>
         <article class="sc-feature-card">
           <span class="sc-tag">ATOMIC SFTP</span>
@@ -179,11 +179,17 @@
           <code>bridge-plugin/ · mc_bridge_plugin_query</code>
         </article>
         <article class="sc-feature-card">
-          <span class="sc-tag">FABRIC VISUAL MOD</span>
-          <h3>Companion mckit-client-mod + Docker Xvfb</h3>
-          <p>Runs inside an isolated <code>Dockerfile.visual-bot</code> Xvfb + Mesa + ffmpeg container to capture real shader/resource-pack frames and MP4 clips off-screen with zero desktop focus stealing.</p>
-          <code>client-mod/ · docker/docker-compose.testgrid.yml</code>
+          <span class="sc-tag">FABRIC VISUAL MOD &amp; HTML PROOF</span>
+          <h3>Off-Screen Xvfb Visuals &amp; Self-Contained HTML Reports</h3>
+          <p>Runs inside an isolated <code>Dockerfile.visual-bot</code> Xvfb + Mesa + ffmpeg container to capture real shader/resource-pack frames, MP4 timelapses, and single-file dark-mode HTML QA proof artifacts ready for PRs and Discord.</p>
+          <code>client-mod/ · mc_qa_generate_html_report · mc_bot_capture_timelapse</code>
         </article>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive Protocol &amp; Ops Output Preview</h3>
+        <div id="ops-lab-tabs" class="sc-filter-row" style="margin-bottom:10px"></div>
+        <pre id="ops-lab-out" class="sc-code-block"></pre>
       </div>
     </section>
 
