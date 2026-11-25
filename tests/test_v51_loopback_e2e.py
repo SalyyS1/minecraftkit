@@ -233,7 +233,7 @@ class V51LoopbackE2ETests(unittest.TestCase):
             self.assertEqual(comp.returncode, 0, comp.stderr)
             run = subprocess.run([java, "-cp", tmp, "com.salyvn.mckit.bridge.BridgeContractTest"], capture_output=True, text=True, check=False)
             self.assertEqual(run.returncode, 0, run.stderr)
-            self.assertIn("8/8 PASS", run.stdout)
+            self.assertIn("9/9 PASS", run.stdout)
 
             # 2. Compile McKitVisualClientMod cleanly (zero Fabric JAR dependency needed for loopback server)
             client_mod = ROOT / "client-mod" / "src" / "main" / "java" / "com" / "salyvn" / "mckit" / "client" / "McKitVisualClientMod.java"
@@ -268,6 +268,16 @@ class V51LoopbackE2ETests(unittest.TestCase):
                 elif self.path == "/api/v1/entities":
                     body = json.dumps({
                         "worlds": [{"world": "world", "total": 412, "top_types": [{"type": "ITEM", "count": 190}, {"type": "ZOMBIE", "count": 84}]}]
+                    }).encode("utf-8")
+                    self.send_response(200)
+                elif self.path == "/api/v1/threads":
+                    body = json.dumps({
+                        "thread_count": 32,
+                        "daemon_threads": 24,
+                        "peak_threads": 40,
+                        "deadlock_detected": False,
+                        "deadlocked_thread_ids": [],
+                        "sample_threads": [{"name": "Server thread", "state": "RUNNABLE"}],
                     }).encode("utf-8")
                     self.send_response(200)
                 else:
@@ -326,6 +336,26 @@ class V51LoopbackE2ETests(unittest.TestCase):
             resp_ent = json.loads(raw_ent)
             ent_payload = json.loads(resp_ent["result"]["content"][0]["text"])
             self.assertEqual(ent_payload["data"]["worlds"][0]["top_types"][0]["type"], "ITEM")
+
+            raw_thr = srv.handle_message(json.dumps({
+                "jsonrpc": "2.0",
+                "id": 903,
+                "method": "tools/call",
+                "params": {
+                    "name": "mc_bridge_plugin_query",
+                    "arguments": {
+                        "base_url": f"http://127.0.0.1:{port}",
+                        "token": expected_tok,
+                        "endpoint": "threads",
+                    },
+                },
+            }))
+            assert raw_thr is not None
+            resp_thr = json.loads(raw_thr)
+            thr_payload = json.loads(resp_thr["result"]["content"][0]["text"])
+            self.assertTrue(thr_payload["reachable"])
+            self.assertFalse(thr_payload["data"]["deadlock_detected"])
+            self.assertEqual(thr_payload["data"]["thread_count"], 32)
         finally:
             httpd.shutdown()
             httpd.server_close()

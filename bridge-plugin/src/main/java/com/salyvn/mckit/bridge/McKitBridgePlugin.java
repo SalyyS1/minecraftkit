@@ -164,6 +164,7 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.createContext("/api/v1/entities", ex -> handleGuarded(ex, this::buildEntitiesJson));
             httpServer.createContext("/api/v1/chunks", ex -> handleGuarded(ex, this::buildChunksJson));
             httpServer.createContext("/api/v1/memory", ex -> handleGuarded(ex, this::buildMemoryJson));
+            httpServer.createContext("/api/v1/threads", ex -> handleGuarded(ex, this::buildThreadsJson));
             httpServer.createContext("/api/v1/players", ex -> handleGuarded(ex, this::buildPlayersJson));
             httpServer.createContext("/api/v1/gui", ex -> handleGuarded(ex, () -> buildGuiJson(ex)));
             httpServer.createContext("/api/v1/worlds", ex -> handleGuarded(ex, this::buildWorldsJson));
@@ -361,6 +362,42 @@ public final class McKitBridgePlugin extends JavaPlugin {
             + "\"gc_time_ms\":" + gcTimeMs + ","
             + "\"thread_count\":" + threadBean.getThreadCount() + ","
             + "\"daemon_threads\":" + threadBean.getDaemonThreadCount()
+            + "}";
+    }
+
+    private String buildThreadsJson() {
+        var threadBean = java.lang.management.ManagementFactory.getThreadMXBean();
+        long[] deadlocked = threadBean.findDeadlockedThreads();
+        StringBuilder dl = new StringBuilder("[");
+        if (deadlocked != null) {
+            for (int i = 0; i < deadlocked.length; i++) {
+                if (i > 0) dl.append(",");
+                dl.append(deadlocked[i]);
+            }
+        }
+        dl.append("]");
+        StringBuilder top = new StringBuilder("[");
+        var infos = threadBean.getThreadInfo(threadBean.getAllThreadIds(), 0);
+        int added = 0;
+        if (infos != null) {
+            for (var info : infos) {
+                if (info == null) continue;
+                if (added >= 12) break;
+                if (added > 0) top.append(",");
+                top.append("{\"name\":\"").append(esc(info.getThreadName()))
+                    .append("\",\"state\":\"").append(esc(String.valueOf(info.getThreadState())))
+                    .append("\"}");
+                added++;
+            }
+        }
+        top.append("]");
+        return "{"
+            + "\"thread_count\":" + threadBean.getThreadCount() + ","
+            + "\"daemon_threads\":" + threadBean.getDaemonThreadCount() + ","
+            + "\"peak_threads\":" + threadBean.getPeakThreadCount() + ","
+            + "\"deadlock_detected\":" + (deadlocked != null && deadlocked.length > 0) + ","
+            + "\"deadlocked_thread_ids\":" + dl + ","
+            + "\"sample_threads\":" + top
             + "}";
     }
 

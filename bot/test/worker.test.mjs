@@ -110,6 +110,25 @@ test("evaluateStageAssertion() verifies assert_health_above and assert_position_
   assert.equal(evaluateStageAssertion("assert_position_near", { x: 500, z: 500, radius: 10 }, snap).passed, false);
 });
 
+test("evaluateStageAssertion() verifies assert_xp_level_above for RPG leveling & quest QA", () => {
+  const snap = { xp_level: 30 };
+  assert.equal(evaluateStageAssertion("assert_xp_level_above", { min_level: 25 }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_xp_level_above", { min_level: 35 }, snap).passed, false);
+});
+
+test("evaluateStageAssertion() verifies assert_item_lore across inventory and open MMOItems GUI slots", () => {
+  const snap = {
+    inventory: [{ item: "netherite_sword", name: "Crimson Fang", lore: ["+42 Attack Damage", "Soulbound"] }],
+    open_gui: {
+      title: "Mythic Forge",
+      slots: [{ slot: 13, item: "amethyst_shard", name: "Starlight Core", lore: ["Tier: Mythic", "Crit +15%"] }],
+    },
+  };
+  assert.equal(evaluateStageAssertion("assert_item_lore", { pattern: "Soulbound" }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_item_lore", { pattern: "Tier: Mythic" }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_item_lore", { pattern: "Legendary Drop" }, snap).passed, false);
+});
+
 test("pool-runner summarizePoolResults() calculates p50/p95 latency and enforces RAM budget", () => {
   const summary = summarizePoolResults(
     [

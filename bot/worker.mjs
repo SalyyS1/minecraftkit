@@ -144,6 +144,31 @@ export function evaluateStageAssertion(action, stage, snapshot) {
         : `Position is ${dist.toFixed(1)}m away from (${tx}, ${ty}, ${tz}) (max ${radius}m)`,
     };
   }
+  if (action === "assert_xp_level_above") {
+    const minLevel = Number(stage.min_level ?? stage.threshold ?? 1);
+    const curLevel = Number(snapshot.xp_level ?? 0);
+    return {
+      passed: curLevel >= minLevel,
+      detail: curLevel >= minLevel
+        ? `XP level ${curLevel} >= ${minLevel}`
+        : `XP level ${curLevel} below required ${minLevel}`,
+    };
+  }
+  if (action === "assert_item_lore") {
+    const re = new RegExp(pattern, "i");
+    const pool = [...(snapshot.inventory || []), ...((snapshot.open_gui && snapshot.open_gui.slots) || [])];
+    const matched = pool.filter((it) => {
+      const loreText = Array.isArray(it.lore) ? it.lore.join("\n") : String(it.lore || "");
+      return re.test(loreText) || re.test(String(it.name || ""));
+    });
+    const ok = matched.length > 0;
+    return {
+      passed: ok,
+      detail: ok
+        ? `Matched custom item lore/name /${pattern}/ on ${matched.length} slot(s)`
+        : `No inventory or GUI item lore matched /${pattern}/`,
+    };
+  }
   return { passed: true, detail: `No-op assertion '${action}'` };
 }
 
@@ -202,6 +227,7 @@ function snapshotState(bot, ctx) {
     },
     health: Number((bot.health ?? 20).toFixed(1)),
     food: Number((bot.food ?? 20).toFixed(1)),
+    xp_level: Number(bot.experience?.level ?? 0),
     tps: 20.0,
     ram_mb: Number((process.memoryUsage().rss / (1024 * 1024)).toFixed(1)),
     chat: ctx.chat.slice(-40),
@@ -363,7 +389,11 @@ async function main() {
         action === "assert_inventory" ||
         action === "assert_scoreboard" ||
         action === "assert_title" ||
-        action === "assert_entity_nearby"
+        action === "assert_entity_nearby" ||
+        action === "assert_health_above" ||
+        action === "assert_position_near" ||
+        action === "assert_xp_level_above" ||
+        action === "assert_item_lore"
       ) {
         const res = evaluateStageAssertion(action, stage, snapshotState(bot, ctx));
         passed = res.passed;

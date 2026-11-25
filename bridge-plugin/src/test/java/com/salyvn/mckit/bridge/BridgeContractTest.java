@@ -92,10 +92,16 @@ public final class BridgeContractTest {
         long maxMb = Math.max(1L, (heap.getMax() > 0 ? heap.getMax() : Runtime.getRuntime().maxMemory()) / (1024 * 1024));
         long usedMb = heap.getUsed() / (1024 * 1024);
         double pct = Math.min(100.0, (usedMb * 100.0) / maxMb);
-        int threads = java.lang.management.ManagementFactory.getThreadMXBean().getThreadCount();
+        var threadBean = java.lang.management.ManagementFactory.getThreadMXBean();
+        int threads = threadBean.getThreadCount();
         assertTrue(maxMb >= 1 && pct >= 0.0 && pct <= 100.0 && threads >= 1, "memory/thread telemetry invariant failed");
 
-        System.out.println("BridgeContractTest: 8/8 PASS");
+        // 9. JVM ThreadMXBean deadlock & peak thread telemetry contract (/api/v1/threads)
+        long[] deadlocked = threadBean.findDeadlockedThreads();
+        int peakThreads = threadBean.getPeakThreadCount();
+        assertTrue(peakThreads >= threads && (deadlocked == null || deadlocked.length == 0), "thread deadlock telemetry invariant failed");
+
+        System.out.println("BridgeContractTest: 9/9 PASS");
     }
 
     private static void verifyLoopbackHttpAuth() {
