@@ -46,7 +46,7 @@ function printShowcase(metadata, json, output) {
     version: metadata.version,
     mcpTools: 100,
     inlinePngCharts: 7,
-    offlineLabEngines: 9,
+    offlineLabEngines: 10,
     showcase: SHOWCASE_URL,
     wiki: WIKI_URL,
     atlas: ATLAS_URL,

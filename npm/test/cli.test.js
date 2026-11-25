@@ -64,7 +64,7 @@ test("showcase prints live URLs in JSON and text mode", () => {
   const payload = JSON.parse(output[0]);
   assert.equal(payload.mcpTools, 100);
   assert.equal(payload.inlinePngCharts, 7);
-  assert.equal(payload.offlineLabEngines, 9);
+  assert.equal(payload.offlineLabEngines, 10);
   assert.match(payload.showcase, /showcase\.html$/);
   assert.match(payload.playground, /playground\.html$/);
 });
