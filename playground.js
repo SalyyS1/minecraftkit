@@ -1685,6 +1685,25 @@
     copyBtn.textContent = "Copied";
     window.setTimeout(function () { copyBtn.textContent = "Copy JSON"; }, 1200);
   });
+  var dlBtn = document.getElementById("download-json-btn");
+  if (dlBtn) {
+    dlBtn.addEventListener("click", function () {
+      if (!lastReport) { return; }
+      var payload = JSON.stringify(showSarif ? toSarif(lastReport) : lastReport, null, 2);
+      var ext = showSarif ? ".sarif.json" : ".audit.json";
+      var blob = new Blob([payload], { type: "application/json;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "mckit-" + mode + ext;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      dlBtn.textContent = "Saved";
+      window.setTimeout(function () { dlBtn.textContent = "Download JSON"; }, 1200);
+    });
+  }
 
   switchMode("spark");
 }());
