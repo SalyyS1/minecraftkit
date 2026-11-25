@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *   - GET /api/v1/status         : active screen class, FPS, resource pack & shader status
  *   - GET /api/v1/pack-status    : loaded resource packs, active shader pack, FPS, missing assets
  *   - GET /api/v1/shader-info    : active shader pipeline, pack reload duration ms, reload count & error state
+ *   - GET /api/v1/gui-state      : open GUI screen title, slot counts & visual capture readiness
  *   - GET /api/v1/render-metrics : rolling 60-sample FPS/frame-time telemetry & client JVM heap
  *   - GET /api/v1/captures       : newest off-screen PNG/GIF/MP4 files written inside captureDir
  *   - GET /api/v1/errors         : bounded 50-entry resource-pack & shader error ring buffer
@@ -53,6 +54,9 @@ public final class McKitVisualClientMod {
     private final AtomicInteger packReloadCount = new AtomicInteger(0);
     private final AtomicReference<Long> lastReloadDurationMs = new AtomicReference<>(0L);
     private final AtomicReference<String> renderPipeline = new AtomicReference<>("iris-sodium-offscreen");
+    private final AtomicReference<String> activeGuiTitle = new AtomicReference<>("");
+    private final AtomicInteger guiTotalSlots = new AtomicInteger(0);
+    private final AtomicInteger guiPopulatedSlots = new AtomicInteger(0);
     private final Deque<String> errorRing = new ArrayDeque<>(MAX_ERROR_RING);
     private final Deque<Integer> fpsRing = new ArrayDeque<>(MAX_FPS_RING);
     private HttpServer server;
@@ -77,6 +81,7 @@ public final class McKitVisualClientMod {
         ));
         server.createContext("/api/v1/pack-status", exchange -> handleAuth(exchange, expected, this::buildPackStatusJson));
         server.createContext("/api/v1/shader-info", exchange -> handleAuth(exchange, expected, this::buildShaderInfoJson));
+        server.createContext("/api/v1/gui-state", exchange -> handleAuth(exchange, expected, this::buildGuiStateJson));
         server.createContext("/api/v1/render-metrics", exchange -> handleAuth(exchange, expected, this::buildRenderMetricsJson));
         server.createContext("/api/v1/captures", exchange -> handleAuth(exchange, expected, () -> buildCapturesJson(captureDir)));
         server.createContext("/api/v1/errors", exchange -> handleAuth(exchange, expected, this::buildErrorsJson));
@@ -113,6 +118,24 @@ public final class McKitVisualClientMod {
         if (pipelineName != null && !pipelineName.isBlank()) {
             renderPipeline.set(pipelineName);
         }
+    }
+
+    public void recordGuiState(String title, int totalSlots, int populatedSlots) {
+        activeGuiTitle.set(title == null ? "" : title);
+        int tot = Math.max(0, totalSlots);
+        guiTotalSlots.set(tot);
+        guiPopulatedSlots.set(Math.max(0, Math.min(tot, populatedSlots)));
+    }
+
+    private String buildGuiStateJson() {
+        String title = activeGuiTitle.get();
+        boolean isOpen = !title.isBlank() || guiTotalSlots.get() > 0;
+        return "{\"ok\":true,\"offscreen_headless\":true,\"screen\":\"" + esc(lastScreen.get())
+            + "\",\"gui_open\":" + isOpen
+            + ",\"gui_title\":\"" + esc(title)
+            + "\",\"total_slots\":" + guiTotalSlots.get()
+            + ",\"populated_slots\":" + guiPopulatedSlots.get()
+            + ",\"fps\":" + lastFps.get() + "}";
     }
 
     private String buildShaderInfoJson() {
