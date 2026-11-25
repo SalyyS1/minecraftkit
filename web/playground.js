@@ -299,6 +299,46 @@
           "  tax-rate: 5"
         ].join("\n")
       }
+    ],
+    plugin_spigot: [
+      {
+        label: "Legacy Spigot + Unsafe plugin.yml",
+        text: [
+          "settings:",
+          "  bungeecord: true",
+          "  restart-on-crash: true",
+          "spawn-limits:",
+          "  monsters: 120",
+          "entity-activation-range:",
+          "  monsters: 48",
+          "name: LegacyAdminPlugin",
+          "version: 1.0",
+          "main: com.example.LegacyAdmin",
+          "load: STARTUP",
+          "permissions:",
+          "  legacy.admin.*:",
+          "    default: true"
+        ].join("\n")
+      },
+      {
+        label: "Clean Paper 1.21.4 + Folia plugin.yml",
+        text: [
+          "settings:",
+          "  bungeecord: false",
+          "spawn-limits:",
+          "  monsters: 45",
+          "entity-activation-range:",
+          "  monsters: 24",
+          "name: ModernRPGPlugin",
+          "version: 2.1.0",
+          "api-version: '1.21.4'",
+          "folia-supported: true",
+          "main: com.salyvn.rpg.ModernRPG",
+          "permissions:",
+          "  rpg.admin:",
+          "    default: op"
+        ].join("\n")
+      }
     ]
   };
 
@@ -946,6 +986,7 @@
   var tabPackCfg = document.getElementById("tab-pack-cfg");
   var tabMythicMmo = document.getElementById("tab-mythic-mmo");
   var tabSkriptWgEco = document.getElementById("tab-skript-wg-eco");
+  var tabPluginSpigot = document.getElementById("tab-plugin-spigot");
   var presetBox = document.getElementById("preset-buttons");
   var inputHeading = document.getElementById("input-heading");
   var inputSubtitle = document.getElementById("input-subtitle");
@@ -1252,6 +1293,66 @@
     };
   }
 
+  function analyzePluginSpigot(raw) {
+    var findings = [];
+    if (/^\s*bungeecord\s*:\s*true\b/mi.test(raw)) {
+      findings.push({
+        rule_id: "SPG-001", severity: "critical", frame: "spigot.yml::bungeecord",
+        message: "Legacy spigot.yml bungeecord: true enables spoofable legacy IP forwarding.",
+        remediation: "Migrate to Velocity modern forwarding in paper-global.yml and set bungeecord: false."
+      });
+    }
+    var monM = raw.match(/^\s*monsters\s*:\s*(\d+)/mi);
+    if (monM && parseInt(monM[1], 10) > 70) {
+      findings.push({
+        rule_id: "SPG-002", severity: "high", frame: "bukkit.yml::spawn-limits",
+        message: "Excessive monster spawn limit (" + monM[1] + " > 70) spikes mob AI tick cost.",
+        remediation: "Cap bukkit.yml spawn-limits.monsters at 40-55 and tune entity-activation-range."
+      });
+    }
+    if (/^\s*main\s*:/mi.test(raw) && !/^\s*api-version\s*:/mi.test(raw)) {
+      findings.push({
+        rule_id: "PLG-001", severity: "critical", frame: "plugin.yml::api-version",
+        message: "Missing api-version forces expensive legacy Material/NMS bytecode rewriting on every boot.",
+        remediation: "Declare api-version: '1.21.4' (or your target Paper API version)."
+      });
+    }
+    if (/^\s*main\s*:/mi.test(raw) && !/^\s*folia-supported\s*:\s*true\b/mi.test(raw)) {
+      findings.push({
+        rule_id: "PLG-002", severity: "medium", frame: "plugin.yml::folia-supported",
+        message: "Plugin manifest does not declare folia-supported: true and will be refused by Folia servers.",
+        remediation: "Migrate schedulers to RegionScheduler/EntityScheduler and add folia-supported: true."
+      });
+    }
+    if (/^\s*load\s*:\s*STARTUP\b/mi.test(raw)) {
+      findings.push({
+        rule_id: "PLG-003", severity: "high", frame: "plugin.yml::load",
+        message: "load: STARTUP runs before worlds exist and commonly causes NullPointerException on world lookups.",
+        remediation: "Use default POSTWORLD load phase unless registering a custom ChunkGenerator."
+      });
+    }
+    if (/default\s*:\s*true\b/i.test(raw) && /(?:admin|\*)/i.test(raw)) {
+      findings.push({
+        rule_id: "PLG-004", severity: "critical", frame: "plugin.yml::permissions",
+        message: "Wildcard or admin permission defaults to true (grants elevated access to every player!).",
+        remediation: "Set default: op or default: false on all admin/wildcard permission nodes."
+      });
+    }
+    var score = Math.max(0, 100 - findings.reduce(function (acc, f) {
+      return acc + (f.severity === "critical" ? 28 : (f.severity === "high" ? 15 : 8));
+    }, 0));
+    var grade = score >= 90 ? "A" : (score >= 78 ? "B" : (score >= 62 ? "C" : (score >= 45 ? "D" : "F")));
+    var status = findings.some(function (f) { return f.severity === "critical" || f.severity === "high"; }) ? "fail" : (findings.length ? "warn" : "pass");
+    return {
+      mode: "plugin_spigot",
+      status: status,
+      grade: grade,
+      score: score,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
   function renderReport(report) {
     lastReport = report;
     summaryLine.textContent = "Status: " + report.status.toUpperCase() + " | " + report.finding_count + " finding(s)";
@@ -1283,7 +1384,7 @@
         [report.estimated_ram_mb + " MB", "Est. RAM"],
         [report.screen_lock_free ? "ZERO LOCK" : "FOCUS LOCK", "Desktop Impact"]
       ]);
-    } else if (mode === "pack_cfg" || mode === "mythic_mmo" || mode === "skript_wg_eco") {
+    } else if (mode === "pack_cfg" || mode === "mythic_mmo" || mode === "skript_wg_eco" || mode === "plugin_spigot") {
       renderMetrics([
         [report.status.toUpperCase(), "Verdict"],
         ["Grade " + report.grade, "Health Grade"],
@@ -1340,6 +1441,8 @@
       renderReport(analyzeMythicMmo(traceInput.value));
     } else if (mode === "skript_wg_eco") {
       renderReport(analyzeSkriptWgEco(traceInput.value));
+    } else if (mode === "plugin_spigot") {
+      renderReport(analyzePluginSpigot(traceInput.value));
     } else {
       renderReport(analyzeProtocolAndSql(traceInput.value));
     }
@@ -1370,6 +1473,7 @@
     var isPackCfg = mode === "pack_cfg";
     var isMythicMmo = mode === "mythic_mmo";
     var isSkriptWgEco = mode === "skript_wg_eco";
+    var isPluginSpigot = mode === "plugin_spigot";
     tabSpark.classList.toggle("is-active", isSpark);
     tabSpark.setAttribute("aria-selected", String(isSpark));
     tabFolia.classList.toggle("is-active", isFolia);
@@ -1398,6 +1502,10 @@
       tabSkriptWgEco.classList.toggle("is-active", isSkriptWgEco);
       tabSkriptWgEco.setAttribute("aria-selected", String(isSkriptWgEco));
     }
+    if (tabPluginSpigot) {
+      tabPluginSpigot.classList.toggle("is-active", isPluginSpigot);
+      tabPluginSpigot.setAttribute("aria-selected", String(isPluginSpigot));
+    }
     thresholdWrap.hidden = !isSpark;
     domainWrap.hidden = !isFolia;
     if (isSpark) {
@@ -1421,6 +1529,9 @@
     } else if (isSkriptWgEco) {
       inputHeading.textContent = "Skript, WorldGuard Regions & Economy Shop Anti-Dupe Linter";
       inputSubtitle.textContent = "Catches 1-tick Skript loops, console command injection, unprotected spawn TNT/passthrough flags, and buy < sell infinite money exploits offline.";
+    } else if (isPluginSpigot) {
+      inputHeading.textContent = "Bukkit/Spigot YAML & plugin.yml / paper-plugin.yml Pre-Boot Linter";
+      inputSubtitle.textContent = "Catches legacy bungeecord:true spoofing, high spawn-limits, missing api-version, load:STARTUP hazards, and default:true admin wildcards offline.";
     } else {
       inputHeading.textContent = "Netty StreamCodec or HikariCP / SQL Persistence Snippet";
       inputSubtitle.textContent = "Computes worst-case LEB128/UTF-8 wire-byte budgets (NETTY-001..008) and audits sync JDBC, resource leaks, and Folia callbacks (SQL-001..007).";
@@ -1449,6 +1560,9 @@
   }
   if (tabSkriptWgEco) {
     tabSkriptWgEco.addEventListener("click", function () { switchMode("skript_wg_eco"); });
+  }
+  if (tabPluginSpigot) {
+    tabPluginSpigot.addEventListener("click", function () { switchMode("plugin_spigot"); });
   }
   runBtn.addEventListener("click", runAudit);
   sarifBtn.addEventListener("click", function () {

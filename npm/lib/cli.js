@@ -46,7 +46,7 @@ function printShowcase(metadata, json, output) {
     version: metadata.version,
     mcpTools: 100,
     inlinePngCharts: 7,
-    offlineLabEngines: 8,
+    offlineLabEngines: 9,
     showcase: SHOWCASE_URL,
     wiki: WIKI_URL,
     atlas: ATLAS_URL,
@@ -55,7 +55,7 @@ function printShowcase(metadata, json, output) {
   };
   if (json) return output(JSON.stringify(payload, null, 2));
   output([
-    `MinecraftKit ${metadata.version} — Live Web Suite (100 MCP Tools · 7 PNG Charts · 8-Engine Lab)`,
+    `MinecraftKit ${metadata.version} — Live Web Suite (100 MCP Tools · 7 PNG Charts · 9-Engine Lab)`,
     `  Showcase : ${SHOWCASE_URL}`,
     `  Wiki     : ${WIKI_URL}`,
     `  Atlas    : ${ATLAS_URL}`,

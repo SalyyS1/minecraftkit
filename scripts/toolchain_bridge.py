@@ -38,7 +38,7 @@ SUITE_TOOLS: tuple[dict[str, Any], ...] = (
         "sarif_capable": True,
         "env_var": "MCSTAGE_JAR",
         "binary_names": ["mcstage", "mcstage.jar"],
-        "summary": "Real-server integration test runner, DevOps CLI (budget, probe, analyze-log, plan-folia, summary, github-action, inspect-jar, preflight, check-world with dark-mode HTML/SVG reports) & 25-tool stdio MCP server for Paper, Folia, and Purpur plugins with HTML matrix/comparison reports, MCS001-MCS023 crash-guard, JUnit XML, shields.io badges, and SARIF v2.1.0.",
+        "summary": "Real-server integration test runner, DevOps CLI (budget --html, probe, analyze-log, plan-folia --html, summary, github-action, inspect-jar --html, preflight --html, check-world --html, doctor --html) & 27-tool stdio MCP server for Paper, Folia, and Purpur plugins with HTML matrix/comparison reports, MCS001-MCS023 crash-guard, JUnit XML, shields.io badges, and SARIF v2.1.0.",
         "example_cmd": "java -jar mcstage.jar test mcstage.yml --accept-eula --html build/reports/mcstage.html --sarif build/reports/mcstage.sarif",
     },
     {
