@@ -33,6 +33,7 @@ import disaster_recovery_planner  # noqa: E402
 import discord_webhook_builder  # noqa: E402
 import docker_stack_generator  # noqa: E402
 import e2e_qa_orchestrator  # noqa: E402
+import economy_config_auditor  # noqa: E402
 import economy_stress_sim  # noqa: E402
 import ecosystem_doctor  # noqa: E402
 import exploit_auditor  # noqa: E402
@@ -70,6 +71,7 @@ import velocity_config_auditor  # noqa: E402
 import visual_capture  # noqa: E402
 import vps_ssh_preflight  # noqa: E402
 import world_audit_bridge  # noqa: E402
+import worldguard_auditor  # noqa: E402
 
 
 PROTOCOL_VERSION = "2025-11-25"
@@ -2741,6 +2743,43 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_worldguard_regions",
+        "title": "WorldGuard regions.yml Grief-Prevention & Flag-Inheritance Auditor",
+        "description": (
+            "Audit WorldGuard regions.yml offline for missing spawn anti-grief deny flags (WG-001), "
+            "__global__ build:allow on hubs (WG-002), use:deny NPC traps (WG-003), console-command flags (WG-004), "
+            "and priority:0 overlap hazards (WG-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "yaml_text": {"type": "string"},
+                "is_hub_world": {"type": "boolean", "default": False},
+            },
+            "required": ["yaml_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_audit_economy_config",
+        "title": "EssentialsX / ShopGUI+ / AuctionHouse Arbitrage & Anti-Dupe Auditor",
+        "description": (
+            "Audit economy and shop YAML configs offline for infinite-money buyPrice<=sellPrice arbitrage loops (ECO-001), "
+            "negative taxes or IEEE-754 max-money overflows (ECO-002), alt-farm starting balances (ECO-003), "
+            "disabled economy logs (ECO-004), and zero purchase cooldown packet races (ECO-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "config_text": {"type": "string"},
+            },
+            "required": ["config_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3809,6 +3848,8 @@ class MinecraftKitMcpServer:
             "mc_bot_plan_multiserver_mesh": self._tool_bot_plan_multiserver_mesh,
             "mc_ops_audit_spark_heap_summary": self._tool_ops_audit_spark_heap_summary,
             "mc_bot_generate_ci_matrix_workflow": self._tool_bot_generate_ci_matrix_workflow,
+            "mc_ops_audit_worldguard_regions": self._tool_ops_audit_worldguard_regions,
+            "mc_bot_audit_economy_config": self._tool_bot_audit_economy_config,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -11084,6 +11125,23 @@ class MinecraftKitMcpServer:
             concurrent_bots=int(args.get("concurrent_bots", 2)),
             upload_html_proof=bool(args.get("upload_html_proof", True)),
         )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_worldguard_regions(self, args: dict[str, Any]) -> ToolOutcome:
+        yaml_text = args.get("yaml_text")
+        if not isinstance(yaml_text, str) or not yaml_text.strip():
+            raise ValueError("'yaml_text' must be a non-empty WorldGuard regions.yml string.")
+        payload = worldguard_auditor.audit_worldguard_regions(
+            yaml_text,
+            is_hub_world=bool(args.get("is_hub_world", False)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_audit_economy_config(self, args: dict[str, Any]) -> ToolOutcome:
+        config_text = args.get("config_text")
+        if not isinstance(config_text, str) or not config_text.strip():
+            raise ValueError("'config_text' must be a non-empty economy/shop YAML configuration string.")
+        payload = economy_config_auditor.audit_economy_config(config_text)
         return ToolOutcome(_pretty_json(payload))
 
     @staticmethod

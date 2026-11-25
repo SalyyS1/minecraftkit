@@ -739,6 +739,8 @@
       { id: "mc_audit_shader_pack", cat: "audit", desc: "GLSL 1.21+ core shader, std140 UBO & legacy syntax validator (SHD-001..005)." },
       { id: "mc_ops_audit_spark_profile", cat: "audit", desc: "Spark profiler JSON/log analyzer pinpointing entity, chunk, GC & blocking-IO lag spikes." },
       { id: "mc_ops_audit_spark_heap_summary", cat: "audit", desc: "Spark heapsummary memory-leak auditor catching CraftPlayer, LevelChunk & HikariCP leaks." },
+      { id: "mc_ops_audit_worldguard_regions", cat: "audit", desc: "WorldGuard regions.yml anti-grief, flag-inheritance & console-command exploit auditor." },
+      { id: "mc_bot_audit_economy_config", cat: "audit", desc: "EssentialsX/ShopGUI+/AuctionHouse arbitrage loop (buy<=sell) & anti-dupe cooldown auditor." },
       { id: "mc_qa_run_full_lifecycle", cat: "suite", desc: "Single-call E2E pipeline: deploy -> host restart -> bot QA stages -> bridge telemetry -> HTML proof." },
       { id: "mc_suite_full_ecosystem_doctor", cat: "suite", desc: "Unified health check across Python, Node, Java 21, Docker, ffmpeg, companion bridges & 10 repos." },
       { id: "mc_search_rpg_api", cat: "suite", desc: "Offline bytecode-verified search across 41,887 members in 10 RPG plugins (MMOItems, ModelEngine...)." }
@@ -758,7 +760,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 94 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 96 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {
