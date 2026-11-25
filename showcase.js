@@ -528,6 +528,7 @@
     initToolExplorer();
     initVpsPlanner();
     initTpsSparklineLab();
+    initScorecardSim();
   }
 
   function initTpsSparklineLab() {
@@ -1014,6 +1015,44 @@
           auto_auth_template: "/login <env:MCKIT_BOT_PASS>",
           secrets_redacted: true
         }, null, 2)
+      },
+      {
+        id: "totp-sftp",
+        label: "Headless 2FA & Atomic SFTP",
+        body: JSON.stringify({
+          tool: "mc_hosting_connect_plan + mc_sftp_operations",
+          panel_domain: "panel.example.net",
+          totp_2fa: "RFC 6238 (6-digit, redacted seed)",
+          sftp_target: "mcdev@192.0.2.10:22/plugins/MyRPG.jar",
+          atomic_swap: true,
+          backup_created: "plugins/MyRPG.jar.mckit.bak",
+          screen_lock_free: true
+        }, null, 2)
+      },
+      {
+        id: "bridge-threads",
+        label: "Bridge /api/v1/threads",
+        body: JSON.stringify({
+          tool: "mc_bridge_plugin_query (endpoint=threads)",
+          thread_count: 34,
+          daemon_threads: 26,
+          peak_threads: 41,
+          deadlock_detected: false,
+          deadlocked_thread_ids: [],
+          loopback_only: "127.0.0.1:25590"
+        }, null, 2)
+      },
+      {
+        id: "exec-scorecard",
+        label: "#100 GO/NO-GO Scorecard",
+        body: JSON.stringify({
+          tool: "mc_qa_generate_executive_scorecard",
+          decision: "GO",
+          overall_score: 97,
+          grade: "A",
+          gates_passed: "5/5 (Bot QA, TPS/GC, Security, Config, Backup)",
+          inline_png_dashboard_attached: true
+        }, null, 2)
       }
     ];
     function select(id) {
@@ -1167,6 +1206,37 @@
     input.addEventListener("keydown", function (ev) {
       if (ev.key === "Enter") { ev.preventDefault(); runCmd(); }
     });
+  }
+
+  function initScorecardSim() {
+    var botEl = document.getElementById("sc-bot-pct");
+    var tpsEl = document.getElementById("sc-tps");
+    var critEl = document.getElementById("sc-crit");
+    var bkpEl = document.getElementById("sc-bkp");
+    var box = document.getElementById("sc-scorecard-box");
+    if (!botEl || !tpsEl || !critEl || !bkpEl || !box) { return; }
+
+    function recalc() {
+      var bot = Math.max(0, Math.min(100, Number(botEl.value) || 0));
+      var tps = Math.max(0, Math.min(20, Number(tpsEl.value) || 0));
+      var crit = Math.max(0, Number(critEl.value) || 0);
+      var bkp = Math.max(0, Number(bkpEl.value) || 0);
+      var tpsScore = Math.min(100, Math.round((tps / 20.0) * 100));
+      var secScore = Math.max(0, 100 - crit * 35);
+      var bkpScore = bkp <= 24 ? 100 : (bkp <= 48 ? 70 : 30);
+      var overall = Math.round(bot * 0.30 + tpsScore * 0.25 + secScore * 0.30 + bkpScore * 0.15);
+      var decision = (crit > 0 || bot < 80 || tps < 17.5 || overall < 70)
+        ? "NO-GO (BLOCK RELEASE)"
+        : (overall < 88 || bkp > 24 ? "CONDITIONAL GO (REVIEW)" : "GO (READY TO SHIP)");
+      var grade = overall >= 92 ? "A" : (overall >= 82 ? "B" : (overall >= 70 ? "C" : (overall >= 55 ? "D" : "F")));
+      box.textContent = "Decision: " + decision + " | Overall Score: " + overall + "/100 (Grade " + grade + ") | Gates -> Bot QA: " + bot + "%, TPS: " + tps.toFixed(1) + "/20, Criticals: " + crit + ", Backup Age: " + bkp + "h | MCP Tool: mc_qa_generate_executive_scorecard (attaches 7th inline PNG chart)";
+    }
+
+    [botEl, tpsEl, critEl, bkpEl].forEach(function (n) {
+      n.addEventListener("input", recalc);
+      n.addEventListener("change", recalc);
+    });
+    recalc();
   }
 
   if (document.readyState === "loading") {
