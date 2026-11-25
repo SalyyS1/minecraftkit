@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.SalyyS1/minecraftkit",
-  "description": "Flagship v10.3.0 all-in-one Minecraft engineering & autonomous QA MCP server (100 verified tools, 7 inline PNG charts): Paper 26.3, Folia, Skript, WorldGuard, Economy, MythicMobs/MMOItems, Spark Heap, JVM GC, Bukkit/Spigot & plugin.yml auditors, headless test bots (18-42 MB/bot, auto-auth, 14 ready-to-run presets incl. MMOCore ActionBar HUD & Geyser Crossplay, assert_actionbar & assert_gui_title, peak RSS watchdog guard, XP/lore assertions, 24h soak & multi-server mesh planners, 6 hardened anti-OOM cloud/Docker grids including Oracle Always-Free ARM64), companion Paper/Folia bridge plugin (/api/v1/system + /api/v1/gc + /api/v1/threads + /api/v1/worlds, 11/11 Java contract) & Fabric visual mod (/api/v1/gui-state + /api/v1/captures + /api/v1/render-metrics, 8 endpoints), headless hosting/VPS/Pelican/2FA/SFTP (atomic deploy + SHA-256 verify_jar + stat_world + list_files)/RCON ops, 10-engine offline Diagnostics Lab (1-click JSON/SARIF), Interactive Showcase (12 presets, RAM Fleet Presets, Copy MCP, YAML Export), and unified 10-tool SalyyS1 suite doctor (mcstage 38-tool MCP).",
-  "version": "10.3.0",
+  "description": "Flagship v10.4.0 all-in-one Minecraft engineering & autonomous QA MCP server (100 verified tools, 7 inline PNG charts): Paper 26.3, Folia, Skript, WorldGuard, Economy, MythicMobs/MMOItems, Spark Heap, JVM GC, Bukkit/Spigot & plugin.yml auditors, headless test bots (18-42 MB/bot, auto-auth, 15 ready-to-run presets incl. BedWars Arena, MMOCore ActionBar HUD & Geyser Crossplay, live assert_bossbar/assert_actionbar/assert_gui_title, peak RSS watchdog guard, XP/lore assertions, 24h soak & multi-server mesh planners, 6 hardened anti-OOM cloud/Docker grids including Oracle Always-Free ARM64), companion Paper/Folia bridge plugin (/api/v1/system + /api/v1/gc + /api/v1/threads + /api/v1/worlds, 11/11 Java contract) & Fabric visual mod (/api/v1/gui-state + /api/v1/captures + /api/v1/render-metrics, 8 endpoints), headless hosting/VPS/Pelican/2FA/SFTP (atomic deploy + SHA-256 verify_jar + stat_world + list_files)/RCON ops, 10-engine offline Diagnostics Lab (1-click JSON/SARIF), Interactive Showcase (12 presets, RAM Fleet Presets, Copy MCP, YAML Export), and unified 10-tool SalyyS1 suite doctor (mcstage 38-tool MCP).",
+  "version": "10.4.0",
   "repository": {
     "url": "https://github.com/SalyyS1/minecraftkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "minecraftkit",
-      "version": "10.3.0",
+      "version": "10.4.0",
       "transport": {
         "type": "stdio"
       },

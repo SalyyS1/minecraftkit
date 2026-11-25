@@ -187,6 +187,23 @@ export function evaluateStageAssertion(action, stage, snapshot) {
       detail: ok ? `Open GUI title matched /${pattern}/ ("${title}")` : `Open GUI title "${title}" did not match /${pattern}/`,
     };
   }
+  if (action === "assert_bossbar") {
+    const re = new RegExp(pattern, "i");
+    const minHealth = stage.min_health !== undefined ? Number(stage.min_health) : null;
+    const bars = Array.isArray(snapshot.bossbars) ? snapshot.bossbars : [];
+    const matched = bars.find((b) => {
+      const title = String((b && b.title) || "");
+      if (!re.test(title)) return false;
+      if (minHealth !== null && Number(b.health ?? 0) < minHealth) return false;
+      return true;
+    });
+    return {
+      passed: Boolean(matched),
+      detail: matched
+        ? `BossBar matched /${pattern}/ ("${matched.title}", health=${Number(matched.health ?? 0).toFixed(2)})`
+        : `No active BossBar matched /${pattern}/` + (minHealth !== null ? ` with health >= ${minHealth}` : ""),
+    };
+  }
   return { passed: true, detail: `No-op assertion '${action}'` };
 }
 
@@ -251,6 +268,7 @@ function snapshotState(bot, ctx) {
     chat: ctx.chat.slice(-40),
     title: ctx.title,
     actionbar: ctx.actionbar,
+    bossbars: Object.values(ctx.bossbars || {}),
     scoreboard: { title: sb?.title?.toString?.() || "SCOREBOARD", lines: sbLines },
     open_gui: serializeWindow(bot.currentWindow),
     inventory,
@@ -286,6 +304,7 @@ async function main() {
     chat: [],
     title: "",
     actionbar: "",
+    bossbars: {},
     stageResults: [],
     allPassed: true,
   };
@@ -311,6 +330,28 @@ async function main() {
 
   bot.on("actionBar", (jsonMsg) => {
     ctx.actionbar = redact(jsonMsg?.toString?.() || "", password);
+  });
+
+  bot.on("bossBarCreated", (bar) => {
+    if (!bar || !bar.entityUUID) return;
+    ctx.bossbars[String(bar.entityUUID)] = {
+      title: redact(bar.title?.toString?.() || "", password),
+      health: Number(bar.health ?? 1.0),
+      color: String(bar.color || "white"),
+    };
+  });
+
+  bot.on("bossBarUpdated", (bar) => {
+    if (!bar || !bar.entityUUID) return;
+    ctx.bossbars[String(bar.entityUUID)] = {
+      title: redact(bar.title?.toString?.() || "", password),
+      health: Number(bar.health ?? 1.0),
+      color: String(bar.color || "white"),
+    };
+  });
+
+  bot.on("bossBarDeleted", (bar) => {
+    if (bar && bar.entityUUID) delete ctx.bossbars[String(bar.entityUUID)];
   });
 
   bot.on("resourcePack", () => {
@@ -411,7 +452,10 @@ async function main() {
         action === "assert_health_above" ||
         action === "assert_position_near" ||
         action === "assert_xp_level_above" ||
-        action === "assert_item_lore"
+        action === "assert_item_lore" ||
+        action === "assert_actionbar" ||
+        action === "assert_gui_title" ||
+        action === "assert_bossbar"
       ) {
         const res = evaluateStageAssertion(action, stage, snapshotState(bot, ctx));
         passed = res.passed;

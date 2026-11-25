@@ -170,3 +170,17 @@ test("pool-runner checkRssGuard() triggers anti-OOM halt when RSS exceeds budget
   assert.equal(over.within_budget, false);
   assert.equal(over.action, "halt_spawn_anti_oom");
 });
+
+test("evaluateStageAssertion() verifies assert_bossbar title and health threshold", () => {
+  const snap = {
+    bossbars: [
+      { title: "Crimson Dragon [Phase 2] - 02:15", health: 0.72, color: "red" },
+    ],
+  };
+  const pass = evaluateStageAssertion("assert_bossbar", { pattern: "Crimson Dragon", min_health: 0.5 }, snap);
+  assert.equal(pass.passed, true);
+  const lowHp = evaluateStageAssertion("assert_bossbar", { pattern: "Crimson Dragon", min_health: 0.9 }, snap);
+  assert.equal(lowHp.passed, false);
+  const miss = evaluateStageAssertion("assert_bossbar", { pattern: "BedWars" }, snap);
+  assert.equal(miss.passed, false);
+});

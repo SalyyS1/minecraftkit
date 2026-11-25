@@ -1605,6 +1605,7 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
                         "proxy_velocity_transfer",
                         "mmocore_actionbar_hud",
                         "geyser_bedrock_crossplay",
+                        "bedwars_minigame_arena",
                     ],
                 },
                 "command_override": {"type": "string"},

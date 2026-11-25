@@ -1,9 +1,9 @@
-# Salyyy Minecraft Kit (v10.3.0 GRAND FLAGSHIP — 100 MCP Tools · 7 Biểu Đồ PNG · 10-Engine Lab · 14 Bot Presets · Bridge & Client Mod!)
+# Salyyy Minecraft Kit (v10.4.0 GRAND FLAGSHIP — 100 MCP Tools · 7 Biểu Đồ PNG · 10-Engine Lab · 15 Bot Presets · BossBar/ActionBar/GUI QA!)
 
 [English (README.md)](README.md) · [**Trang Giới Thiệu Chính (Showcase)**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Wiki Song Ngữ](https://salyys1.github.io/minecraftkit/wiki.html) · [Hướng Dẫn Hosting 2FA & SFTP](docs/HOSTING_2FA_SFTP_GUIDE.md) · [Benchmark Tối Ưu RAM Bot](docs/BOT_OPTIMIZATION_BENCHMARKS.md) · [Chiến Lược Cộng Đồng](docs/GROWTH_STRATEGY.md)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v10.3.0](https://img.shields.io/badge/version-v10.3.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v10.3.0)
+[![Version: v10.4.0](https://img.shields.io/badge/version-v10.4.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v10.4.0)
 [![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-100%20Tools-1f6feb)](https://modelcontextprotocol.io)
 
 Bộ công cụ **AI Engineering, Autonomous Bot QA & Server Ops** toàn diện cho hệ sinh thái Minecraft (`Paper`, `Folia`, `Purpur`, `Velocity`, `Geyser/Bedrock`, `Fabric`, `MythicMobs`, `MMOItems`, `ModelEngine`, `Skript`, `WorldGuard`) với **100 công cụ MCP chuẩn JSON-RPC 2.0**, **14 lệnh/kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ (~18–42 MB RAM/bot, không cần mở app Minecraft, không chiếm màn hình)**, **7 biểu đồ PNG tự động đính kèm vào chat (TPS, Entity Lag, Chunk Density, JVM Heap, GC Pause, Bot Load-Test, Executive Release Scorecard)**, **Bảng Điểm Quyết Định Ra Mắt GO/NO-GO**, **6 mẫu Cloud/Docker chống nổ RAM (gồm cả Oracle Cloud Always-Free 24 GB ARM64 miễn phí $0/tháng)**, **Kết nối Hosting/VPS có 2FA TOTP & SFTP ngầm (có rollback `.mckit.bak` tự động)**, **Plugin/Mod Companion Java 21**, và **tích hợp trọn bộ 10 repo Minecraft của SalyVn / Salyyy**.
@@ -27,7 +27,7 @@ flowchart LR
 | **Tier-1 Headless Protocol (`bot/` + `mc_proto_client.py`)** | **~180–420 MB** | **Không (0 GUI)** | AuthMe/nLogin, lệnh, Shop/GUI, Inventory, Scoreboard, Stress Test |
 | **Tier-2 Hybrid (1 Docker/Xvfb Visual + 9 Protocol)** | **~1.3 GB** | **Không (chạy ngầm)** | Kiểm tra Shader GLSL, Resource Pack 3D, quay GIF/MP4 |
 
-## Các Nhóm Tính Năng Cốt Lõi (v10.3.0 GRAND FLAGSHIP)
+## Các Nhóm Tính Năng Cốt Lõi (v10.4.0 GRAND FLAGSHIP)
 
 1. **Bot Kiểm Thử Tự Động Không Chiếm Màn Hình (`bot/`, `mc_bot_*`)**:
    - Tự join server Java (`1.20.4`–`26.3`, kiểm tra ma trận ViaVersion/ViaBackwards/Geyser qua `mc_bot_probe_protocol_matrix`) & Bedrock/Geyser UDP (`mc_bot_ping_bedrock`).

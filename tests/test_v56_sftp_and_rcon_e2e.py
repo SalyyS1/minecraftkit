@@ -115,6 +115,7 @@ class V56RconSftpAndPresetsTests(unittest.TestCase):
             "proxy_velocity_transfer",
             "mmocore_actionbar_hud",
             "geyser_bedrock_crossplay",
+            "bedwars_minigame_arena",
         ):
             raw = srv.handle_message(json.dumps({
                 "jsonrpc": "2.0",
