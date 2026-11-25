@@ -16,7 +16,7 @@
   <main id="showcase-main" class="sc-main">
     <section class="sc-hero">
       <div class="sc-hero-top">
-        <span class="sc-pill">v9.8.0 FLAGSHIP · 100 Verified MCP Tools · 7 Inline PNG Charts · 10-Engine Lab · SFTP stat_world &amp; Panel list_files</span>
+        <span class="sc-pill">v9.9.0 FLAGSHIP · 100 Verified MCP Tools · 7 Inline PNG Charts · 10-Engine Lab · 1-Click Fleet Presets &amp; Stage Export</span>
         <div class="sc-lang-group" role="group" aria-label="Language switcher">
           <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
           <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
@@ -74,6 +74,7 @@
 
       <div class="sc-calc-grid">
         <div class="sc-panel">
+          <div id="calc-presets" class="sc-filter-row" style="margin-bottom:12px"></div>
           <div class="sc-control">
             <label for="calc-bots">
               <span data-i18n="calc_bots_lbl">Concurrent Test Bots</span>
@@ -114,6 +115,11 @@
         <div class="sc-panel">
           <h3>Stage Execution Ledger</h3>
           <ul id="sim-stages" class="sc-stage-list"></ul>
+          <div class="sc-copy-row" style="margin-top:12px;gap:8px;display:flex;flex-wrap:wrap">
+            <button id="sim-copy-mcp" type="button" class="sc-btn sc-btn-primary">Copy MCP Call</button>
+            <button id="sim-download-yaml" type="button" class="sc-btn sc-btn-ghost">Download Stage YAML</button>
+            <span id="sim-export-status" class="sc-muted" aria-live="polite"></span>
+          </div>
         </div>
         <div class="sc-panel sc-hud-preview">
           <div class="sc-hud-header">
