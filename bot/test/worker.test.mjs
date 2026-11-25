@@ -9,7 +9,7 @@ import {
   serializeWindow,
   evaluateStageAssertion,
 } from "../worker.mjs";
-import { percentile, summarizePoolResults } from "../pool-runner.mjs";
+import { percentile, checkRssGuard, summarizePoolResults } from "../pool-runner.mjs";
 
 const botDir = path.resolve(import.meta.dirname, "..");
 
@@ -144,6 +144,18 @@ test("pool-runner summarizePoolResults() calculates p50/p95 latency and enforces
   assert.equal(summary.p50_duration_ms, 180);
   assert.equal(summary.p95_duration_ms, 240);
   assert.equal(summary.estimated_total_rss_mb, 120);
+  assert.equal(summary.peak_single_bot_rss_mb, 41.2);
+  assert.equal(summary.avg_rss_mb, 40);
+  assert.ok(summary.ram_saved_vs_desktop_pct > 95);
   assert.equal(summary.within_ram_budget, true);
   assert.equal(percentile([10, 20, 30, 40], 0.5), 20);
+});
+
+test("pool-runner checkRssGuard() triggers anti-OOM halt when RSS exceeds budget", () => {
+  const ok = checkRssGuard(320, 512);
+  assert.equal(ok.within_budget, true);
+  assert.equal(ok.action, "continue");
+  const over = checkRssGuard(640, 512);
+  assert.equal(over.within_budget, false);
+  assert.equal(over.action, "halt_spawn_anti_oom");
 });

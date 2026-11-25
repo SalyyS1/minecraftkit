@@ -7,11 +7,13 @@
  */
 
 import { spawn } from "node:child_process";
+import { writeFileSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const WORKER_PATH = join(__dirname, "worker.mjs");
+const DESKTOP_TAB_RAM_MB = 2600;
 
 export function percentile(values, q) {
   if (!Array.isArray(values) || values.length === 0) return 0;
@@ -20,12 +22,31 @@ export function percentile(values, q) {
   return Number(sorted[idx].toFixed(1));
 }
 
+export function checkRssGuard(totalRssMb, maxRamMb = 1536) {
+  const used = Number(totalRssMb || 0);
+  const limit = Math.max(128, Number(maxRamMb || 1536));
+  const utilizationPct = Number(((used / limit) * 100).toFixed(1));
+  return {
+    within_budget: used <= limit,
+    used_mb: Number(used.toFixed(1)),
+    limit_mb: limit,
+    utilization_pct: utilizationPct,
+    action: used > limit ? "halt_spawn_anti_oom" : "continue",
+  };
+}
+
 export function summarizePoolResults(results, maxRamMb = 1536) {
   const passed = results.filter((r) => r.code === 0).length;
   const durations = results.map((r) => Number(r.duration_ms || 0)).filter((v) => v >= 0);
-  const totalRssMb = Number(
-    results.reduce((acc, r) => acc + Number(r.rss_mb || 42), 0).toFixed(1),
+  const rssSamples = results.map((r) => Number(r.rss_mb || 42));
+  const totalRssMb = Number(rssSamples.reduce((acc, v) => acc + v, 0).toFixed(1));
+  const peakSingleBotRssMb = rssSamples.length ? Number(Math.max(...rssSamples).toFixed(1)) : 0;
+  const avgRssMb = rssSamples.length ? Number((totalRssMb / rssSamples.length).toFixed(1)) : 0;
+  const desktopBaselineMb = Math.max(1, results.length) * DESKTOP_TAB_RAM_MB;
+  const ramSavedPct = Number(
+    Math.max(0, ((desktopBaselineMb - totalRssMb) / desktopBaselineMb) * 100).toFixed(1),
   );
+  const rssGuard = checkRssGuard(totalRssMb, maxRamMb);
   return {
     poolSize: results.length,
     passed,
@@ -34,7 +55,11 @@ export function summarizePoolResults(results, maxRamMb = 1536) {
     p50_duration_ms: percentile(durations, 0.5),
     p95_duration_ms: percentile(durations, 0.95),
     estimated_total_rss_mb: totalRssMb,
-    within_ram_budget: totalRssMb <= maxRamMb,
+    peak_single_bot_rss_mb: peakSingleBotRssMb,
+    avg_rss_mb: avgRssMb,
+    ram_saved_vs_desktop_pct: ramSavedPct,
+    within_ram_budget: rssGuard.within_budget,
+    rss_guard: rssGuard,
     max_ram_budget_mb: maxRamMb,
     results,
   };
@@ -99,8 +124,12 @@ async function main() {
   }
   const results = await Promise.all(jobs);
   const summary = summarizePoolResults(results, cfg.maxRamMb);
-  console.log(JSON.stringify(summary, null, 2));
-  process.exit(summary.passed === summary.poolSize ? 0 : 1);
+  const jsonText = JSON.stringify(summary, null, 2);
+  if (process.env.BOT_REPORT_OUT) {
+    writeFileSync(process.env.BOT_REPORT_OUT, jsonText + "\n", "utf8");
+  }
+  console.log(jsonText);
+  process.exit(summary.passed === summary.poolSize && summary.within_ram_budget ? 0 : 1);
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;

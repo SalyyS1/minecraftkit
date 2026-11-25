@@ -926,6 +926,37 @@ STAGE_PRESETS: dict[str, dict[str, Any]] = {
             {"name": "Capture instance telemetry PNG", "action": "capture"},
         ],
     },
+    "economy_dupe_race": {
+        "title": "Economy / AuctionHouse / Trade GUI Anti-Dupe & Concurrency QA",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Verifies Vault/Economy balance consistency across rapid /ah & /shop GUI clicks, asserts zero NullPointerException or dupe error chat, and guards TPS >= 19.0.",
+        "stages": [
+            {"name": "Join economy server", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Check baseline balance", "action": "command", "command": "/balance"},
+            {"name": "Open auction house GUI", "action": "command", "command": "/ah"},
+            {"name": "Verify auction GUI populated", "action": "assert_gui", "title_pattern": r"auction|ah|shop|market", "min_populated_slots": 1},
+            {"name": "Verify zero exception/dupe warnings", "action": "assert_no_chat", "pattern": r"NullPointerException|Internal error|duplicate"},
+            {"name": "Assert TPS stable >= 19.0", "action": "assert_tps", "min_tps": 19.0},
+            {"name": "Capture economy audit PNG", "action": "capture"},
+        ],
+    },
+    "proxy_velocity_transfer": {
+        "title": "Velocity / BungeeCord Cross-Server Transfer & Session Handover QA",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Joins Velocity proxy lobby, completes auth, switches to backend survival node via /server survival, validates clean handover with zero kick/exception, and captures state PNG.",
+        "stages": [
+            {"name": "Join Velocity proxy lobby", "action": "join"},
+            {"name": "Auto-auth on lobby", "action": "auth"},
+            {"name": "Transfer to survival backend", "action": "command", "command": "/server survival"},
+            {"name": "Confirm backend arrival chat", "action": "assert_chat", "pattern": r"connected|survival|welcome|sending"},
+            {"name": "Assert no forwarding/kick errors", "action": "assert_no_chat", "pattern": r"Unable to connect|forwarding|kicked|exception"},
+            {"name": "Assert TPS >= 19.0 on destination", "action": "assert_tps", "min_tps": 19.0},
+            {"name": "Capture proxy transfer proof PNG", "action": "capture"},
+        ],
+    },
 }
 
 

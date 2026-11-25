@@ -17,7 +17,7 @@ import qa_report_html  # noqa: E402
 
 class PresetsAndBadgeV67Tests(unittest.TestCase):
     def test_ten_bot_stage_presets_including_itemsadder_and_dungeon_boss(self) -> None:
-        self.assertGreaterEqual(len(bot_engine.STAGE_PRESETS), 10)
+        self.assertGreaterEqual(len(bot_engine.STAGE_PRESETS), 12)
         ia = bot_engine.build_stage_preset("itemsadder_nexo_pack")
         self.assertEqual(ia["recommended_tier"], "tier2-hybrid")
         self.assertTrue(any(st.get("action") == "accept_pack" for st in ia["stages"]))
@@ -27,6 +27,14 @@ class PresetsAndBadgeV67Tests(unittest.TestCase):
         actions = {st.get("action") for st in boss["stages"]}
         self.assertIn("assert_entity_nearby", actions)
         self.assertIn("assert_title", actions)
+
+        eco = bot_engine.build_stage_preset("economy_dupe_race")
+        self.assertEqual(eco["recommended_tier"], "tier1-protocol")
+        self.assertTrue(any(st.get("action") == "assert_no_chat" for st in eco["stages"]))
+
+        proxy = bot_engine.build_stage_preset("proxy_velocity_transfer")
+        self.assertEqual(proxy["recommended_tier"], "tier1-protocol")
+        self.assertTrue(any("/server survival" in str(st.get("command", "")) for st in proxy["stages"]))
 
     def test_qa_html_report_emits_shields_endpoint_badge_json(self) -> None:
         rep = qa_report_html.generate_qa_html_report(
