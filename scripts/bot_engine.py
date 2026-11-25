@@ -1275,6 +1275,7 @@ def query_bridge_plugin(
         "chunks": "/api/v1/chunks",
         "memory": "/api/v1/memory",
         "gc": "/api/v1/gc",
+        "system": "/api/v1/system",
         "threads": "/api/v1/threads",
         "players": "/api/v1/players",
         "errors": "/api/v1/errors",

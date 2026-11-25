@@ -165,6 +165,7 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.createContext("/api/v1/chunks", ex -> handleGuarded(ex, this::buildChunksJson));
             httpServer.createContext("/api/v1/memory", ex -> handleGuarded(ex, this::buildMemoryJson));
             httpServer.createContext("/api/v1/gc", ex -> handleGuarded(ex, this::buildGcJson));
+            httpServer.createContext("/api/v1/system", ex -> handleGuarded(ex, this::buildSystemJson));
             httpServer.createContext("/api/v1/threads", ex -> handleGuarded(ex, this::buildThreadsJson));
             httpServer.createContext("/api/v1/players", ex -> handleGuarded(ex, this::buildPlayersJson));
             httpServer.createContext("/api/v1/gui", ex -> handleGuarded(ex, () -> buildGuiJson(ex)));
@@ -394,6 +395,21 @@ public final class McKitBridgePlugin extends JavaPlugin {
             + "\"total_gc_time_ms\":" + totalTimeMs + ","
             + "\"gc_overhead_pct\":" + String.format(java.util.Locale.ROOT, "%.3f", gcOverheadPct) + ","
             + "\"collectors\":" + cols
+            + "}";
+    }
+
+    private String buildSystemJson() {
+        var osBean = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        var rtBean = java.lang.management.ManagementFactory.getRuntimeMXBean();
+        long uptimeSec = Math.max(0L, rtBean.getUptime() / 1000L);
+        return "{"
+            + "\"java_version\":\"" + esc(System.getProperty("java.version", "unknown")) + "\","
+            + "\"os_name\":\"" + esc(osBean.getName()) + "\","
+            + "\"os_arch\":\"" + esc(osBean.getArch()) + "\","
+            + "\"available_processors\":" + osBean.getAvailableProcessors() + ","
+            + "\"system_load_average\":" + String.format(java.util.Locale.ROOT, "%.2f", osBean.getSystemLoadAverage()) + ","
+            + "\"uptime_seconds\":" + uptimeSec + ","
+            + "\"is_folia\":" + isFolia
             + "}";
     }
 

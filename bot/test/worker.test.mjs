@@ -129,6 +129,17 @@ test("evaluateStageAssertion() verifies assert_item_lore across inventory and op
   assert.equal(evaluateStageAssertion("assert_item_lore", { pattern: "Legendary Drop" }, snap).passed, false);
 });
 
+test("evaluateStageAssertion() verifies assert_actionbar and assert_gui_title for MMOCore/RPG GUIs", () => {
+  const snap = {
+    actionbar: "HP: 140/140 | Mana: 85/100 | Stamina: 20/20",
+    open_gui: { title: "RPG Blacksmith Forge", slots: [] },
+  };
+  assert.equal(evaluateStageAssertion("assert_actionbar", { pattern: "Mana:\\s*85/100" }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_actionbar", { pattern: "Rage:" }, snap).passed, false);
+  assert.equal(evaluateStageAssertion("assert_gui_title", { pattern: "Blacksmith Forge" }, snap).passed, true);
+  assert.equal(evaluateStageAssertion("assert_gui_title", { pattern: "Auction House" }, snap).passed, false);
+});
+
 test("pool-runner summarizePoolResults() calculates p50/p95 latency and enforces RAM budget", () => {
   const summary = summarizePoolResults(
     [

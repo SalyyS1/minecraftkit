@@ -233,7 +233,7 @@ class V51LoopbackE2ETests(unittest.TestCase):
             self.assertEqual(comp.returncode, 0, comp.stderr)
             run = subprocess.run([java, "-cp", tmp, "com.salyvn.mckit.bridge.BridgeContractTest"], capture_output=True, text=True, check=False)
             self.assertEqual(run.returncode, 0, run.stderr)
-            self.assertIn("10/10 PASS", run.stdout)
+            self.assertIn("11/11 PASS", run.stdout)
 
             # 2. Compile McKitVisualClientMod cleanly (zero Fabric JAR dependency needed for loopback server)
             client_mod = ROOT / "client-mod" / "src" / "main" / "java" / "com" / "salyvn" / "mckit" / "client" / "McKitVisualClientMod.java"
@@ -287,6 +287,17 @@ class V51LoopbackE2ETests(unittest.TestCase):
                         "total_gc_time_ms": 112,
                         "gc_overhead_pct": 0.187,
                         "collectors": [{"name": "G1 Young Generation", "collections": 14, "time_ms": 112, "avg_pause_ms": 8.0}],
+                    }).encode("utf-8")
+                    self.send_response(200)
+                elif self.path == "/api/v1/system":
+                    body = json.dumps({
+                        "java_version": "21.0.5",
+                        "os_name": "Linux",
+                        "os_arch": "amd64",
+                        "available_processors": 4,
+                        "system_load_average": 0.42,
+                        "uptime_seconds": 3600,
+                        "is_folia": True,
                     }).encode("utf-8")
                     self.send_response(200)
                 else:
@@ -385,6 +396,26 @@ class V51LoopbackE2ETests(unittest.TestCase):
             self.assertTrue(gc_payload["reachable"])
             self.assertEqual(gc_payload["data"]["total_collections"], 14)
             self.assertEqual(gc_payload["data"]["collectors"][0]["name"], "G1 Young Generation")
+
+            raw_sys = srv.handle_message(json.dumps({
+                "jsonrpc": "2.0",
+                "id": 905,
+                "method": "tools/call",
+                "params": {
+                    "name": "mc_bridge_plugin_query",
+                    "arguments": {
+                        "base_url": f"http://127.0.0.1:{port}",
+                        "token": expected_tok,
+                        "endpoint": "system",
+                    },
+                },
+            }))
+            assert raw_sys is not None
+            resp_sys = json.loads(raw_sys)
+            sys_payload = json.loads(resp_sys["result"]["content"][0]["text"])
+            self.assertTrue(sys_payload["reachable"])
+            self.assertEqual(sys_payload["data"]["available_processors"], 4)
+            self.assertTrue(sys_payload["data"]["is_folia"])
         finally:
             httpd.shutdown()
             httpd.server_close()

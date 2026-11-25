@@ -111,7 +111,11 @@ public final class BridgeContractTest {
         double gcOverheadPct = Math.min(100.0, (gcTimeMs * 100.0) / uptimeMs);
         assertTrue(!gcBeans.isEmpty() && gcOverheadPct >= 0.0 && gcOverheadPct <= 100.0, "GC telemetry invariant failed");
 
-        System.out.println("BridgeContractTest: 10/10 PASS");
+        // 11. JVM OperatingSystemMXBean & RuntimeMXBean system telemetry contract (/api/v1/system)
+        var osBean = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
+        assertTrue(osBean.getAvailableProcessors() >= 1 && osBean.getArch() != null && !osBean.getArch().isEmpty(), "system telemetry invariant failed");
+
+        System.out.println("BridgeContractTest: 11/11 PASS");
     }
 
     private static void verifyLoopbackHttpAuth() {

@@ -169,6 +169,24 @@ export function evaluateStageAssertion(action, stage, snapshot) {
         : `No inventory or GUI item lore matched /${pattern}/`,
     };
   }
+  if (action === "assert_actionbar") {
+    const re = new RegExp(pattern, "i");
+    const ab = String(snapshot.actionbar || "");
+    const ok = re.test(ab);
+    return {
+      passed: ok,
+      detail: ok ? `ActionBar matched /${pattern}/` : `ActionBar did not match /${pattern}/ (got "${ab}")`,
+    };
+  }
+  if (action === "assert_gui_title") {
+    const re = new RegExp(pattern, "i");
+    const title = String((snapshot.open_gui && snapshot.open_gui.title) || "");
+    const ok = Boolean(title) && re.test(title);
+    return {
+      passed: ok,
+      detail: ok ? `Open GUI title matched /${pattern}/ ("${title}")` : `Open GUI title "${title}" did not match /${pattern}/`,
+    };
+  }
   return { passed: true, detail: `No-op assertion '${action}'` };
 }
 
