@@ -1603,6 +1603,8 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
                         "dungeon_instance_boss",
                         "economy_dupe_race",
                         "proxy_velocity_transfer",
+                        "mmocore_actionbar_hud",
+                        "geyser_bedrock_crossplay",
                     ],
                 },
                 "command_override": {"type": "string"},

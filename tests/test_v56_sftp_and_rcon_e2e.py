@@ -111,6 +111,10 @@ class V56RconSftpAndPresetsTests(unittest.TestCase):
             "towny_lands_claim",
             "skyblock_island_coop",
             "modelengine_boss_arena",
+            "economy_dupe_race",
+            "proxy_velocity_transfer",
+            "mmocore_actionbar_hud",
+            "geyser_bedrock_crossplay",
         ):
             raw = srv.handle_message(json.dumps({
                 "jsonrpc": "2.0",

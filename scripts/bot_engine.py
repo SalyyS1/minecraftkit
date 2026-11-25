@@ -957,6 +957,37 @@ STAGE_PRESETS: dict[str, dict[str, Any]] = {
             {"name": "Capture proxy transfer proof PNG", "action": "capture"},
         ],
     },
+    "mmocore_actionbar_hud": {
+        "title": "MMOCore / MMOItems Class, Skill Cast & ActionBar HUD QA",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Tests MMOCore class GUI selection, skill casting, live ActionBar Mana/HP/Stamina assertion (assert_actionbar), GUI title verification (assert_gui_title), and zero NullPointerException logs.",
+        "stages": [
+            {"name": "Join RPG server", "action": "join"},
+            {"name": "Auto-auth", "action": "auth"},
+            {"name": "Open MMOCore class menu", "action": "command", "command": "/class"},
+            {"name": "Verify class GUI title", "action": "assert_gui_title", "pattern": r"class|profession|rpg"},
+            {"name": "Verify live ActionBar Mana/HP HUD", "action": "assert_actionbar", "pattern": r"HP|Mana|Stamina|LVL"},
+            {"name": "Assert zero skill/cast exceptions", "action": "assert_no_chat", "pattern": r"NullPointerException|Internal error"},
+            {"name": "Assert TPS >= 19.0", "action": "assert_tps", "min_tps": 19.0},
+            {"name": "Capture MMOCore HUD proof PNG", "action": "capture"},
+        ],
+    },
+    "geyser_bedrock_crossplay": {
+        "title": "GeyserMC / Floodgate Bedrock Crossplay & AuthMe Handshake QA",
+        "recommended_tier": "tier1-protocol",
+        "estimated_ram_mb": 42,
+        "description": "Validates crossplay lobby flow, Floodgate prefix handling without AuthMe collision, menu fallback GUI title, and clean zero-kick transfer across Geyser/Velocity.",
+        "stages": [
+            {"name": "Join crossplay proxy", "action": "join"},
+            {"name": "Verify Floodgate/AuthMe non-conflict", "action": "auth"},
+            {"name": "Open crossplay menu", "action": "command", "command": "/menu"},
+            {"name": "Assert crossplay menu GUI title", "action": "assert_gui_title", "pattern": r"menu|hub|server|shop"},
+            {"name": "Assert zero Bedrock/Floodgate kick errors", "action": "assert_no_chat", "pattern": r"Floodgate|Geyser|invalid uuid|kicked"},
+            {"name": "Assert TPS >= 19.0", "action": "assert_tps", "min_tps": 19.0},
+            {"name": "Capture crossplay proof PNG", "action": "capture"},
+        ],
+    },
 }
 
 
