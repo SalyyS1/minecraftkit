@@ -339,6 +339,40 @@
           "    default: op"
         ].join("\n")
       }
+    ],
+    proxy_geyser_net: [
+      {
+        label: "Exposed Velocity + Offline Geyser + Weak AntiCheat",
+        text: [
+          "online-mode = false",
+          "player-info-forwarding-mode = \"legacy\"",
+          "forwarding-secret = \"changeme\"",
+          "bedrock:",
+          "  port: 19132",
+          "remote:",
+          "  auth-type: offline",
+          "mtu: 1492",
+          "anticheat:",
+          "  exempt-ops: true",
+          "  verbose: true"
+        ].join("\n")
+      },
+      {
+        label: "Hardened Velocity Modern + Floodgate + GrimAC",
+        text: [
+          "online-mode = true",
+          "player-info-forwarding-mode = \"modern\"",
+          "forwarding-secret-file = \"forwarding.secret\"",
+          "bedrock:",
+          "  port: 19132",
+          "remote:",
+          "  auth-type: floodgate",
+          "mtu: 1400",
+          "anticheat:",
+          "  exempt-ops: false",
+          "  verbose: false"
+        ].join("\n")
+      }
     ]
   };
 
@@ -987,6 +1021,7 @@
   var tabMythicMmo = document.getElementById("tab-mythic-mmo");
   var tabSkriptWgEco = document.getElementById("tab-skript-wg-eco");
   var tabPluginSpigot = document.getElementById("tab-plugin-spigot");
+  var tabProxyGeyser = document.getElementById("tab-proxy-geyser");
   var presetBox = document.getElementById("preset-buttons");
   var inputHeading = document.getElementById("input-heading");
   var inputSubtitle = document.getElementById("input-subtitle");
@@ -1353,6 +1388,66 @@
     };
   }
 
+  function analyzeProxyGeyserNet(raw) {
+    var findings = [];
+    if (/player-info-forwarding-mode\s*=\s*["']?(?:legacy|none)["']?/i.test(raw)) {
+      findings.push({
+        rule_id: "VEL-001", severity: "critical", frame: "velocity.toml::player-info-forwarding-mode",
+        message: "Velocity uses legacy/none forwarding instead of modern HMAC-SHA256 forwarding.",
+        remediation: "Set player-info-forwarding-mode = \"modern\" and enable Paper proxies.velocity.enabled."
+      });
+    }
+    if (/^\s*online-mode\s*=\s*false\b/mi.test(raw)) {
+      findings.push({
+        rule_id: "VEL-002", severity: "critical", frame: "velocity.toml::online-mode",
+        message: "Proxy online-mode=false allows cracked UUID spoofing unless strictly fronted by AuthMeVelocity/LimboAuth.",
+        remediation: "Set online-mode = true or verify isolated LimboAuth + firewall backend ports."
+      });
+    }
+    if (/forwarding-secret\s*=\s*["'](?:changeme|secret|password|123456|default)?["']/i.test(raw)) {
+      findings.push({
+        rule_id: "VEL-003", severity: "high", frame: "velocity.toml::forwarding-secret",
+        message: "Weak or placeholder Velocity forwarding secret detected.",
+        remediation: "Use forwarding-secret-file with a 32+ byte random secret kept outside version control."
+      });
+    }
+    if (/auth-type\s*:\s*offline\b/i.test(raw)) {
+      findings.push({
+        rule_id: "GEY-001", severity: "critical", frame: "geyser/config.yml::auth-type",
+        message: "Geyser auth-type: offline disables Floodgate cryptographic identity verification for Bedrock players.",
+        remediation: "Switch remote.auth-type to floodgate (recommended) or online."
+      });
+    }
+    var mtuM = raw.match(/^\s*mtu\s*:\s*(\d+)/mi);
+    if (mtuM && parseInt(mtuM[1], 10) > 1400) {
+      findings.push({
+        rule_id: "GEY-002", severity: "medium", frame: "geyser/config.yml::mtu",
+        message: "Bedrock RakNet MTU (" + mtuM[1] + " > 1400) causes UDP fragmentation and mobile disconnects.",
+        remediation: "Set mtu: 1400 in Geyser config.yml."
+      });
+    }
+    if (/exempt-ops\s*:\s*true\b/i.test(raw) || /^\s*verbose\s*:\s*true\b/mi.test(raw)) {
+      findings.push({
+        rule_id: "AC-001", severity: "high", frame: "anticheat::config.yml",
+        message: "AntiCheat exempt-ops: true or verbose: true weakens compromised-account protection or floods I/O.",
+        remediation: "Disable verbose logging in production and gate exemptions with explicit permission nodes."
+      });
+    }
+    var score = Math.max(0, 100 - findings.reduce(function (acc, f) {
+      return acc + (f.severity === "critical" ? 28 : (f.severity === "high" ? 15 : 8));
+    }, 0));
+    var grade = score >= 90 ? "A" : (score >= 78 ? "B" : (score >= 62 ? "C" : (score >= 45 ? "D" : "F")));
+    var status = findings.some(function (f) { return f.severity === "critical" || f.severity === "high"; }) ? "fail" : (findings.length ? "warn" : "pass");
+    return {
+      mode: "proxy_geyser_net",
+      status: status,
+      grade: grade,
+      score: score,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
   function renderReport(report) {
     lastReport = report;
     summaryLine.textContent = "Status: " + report.status.toUpperCase() + " | " + report.finding_count + " finding(s)";
@@ -1384,7 +1479,7 @@
         [report.estimated_ram_mb + " MB", "Est. RAM"],
         [report.screen_lock_free ? "ZERO LOCK" : "FOCUS LOCK", "Desktop Impact"]
       ]);
-    } else if (mode === "pack_cfg" || mode === "mythic_mmo" || mode === "skript_wg_eco" || mode === "plugin_spigot") {
+    } else if (mode === "pack_cfg" || mode === "mythic_mmo" || mode === "skript_wg_eco" || mode === "plugin_spigot" || mode === "proxy_geyser_net") {
       renderMetrics([
         [report.status.toUpperCase(), "Verdict"],
         ["Grade " + report.grade, "Health Grade"],
@@ -1443,6 +1538,8 @@
       renderReport(analyzeSkriptWgEco(traceInput.value));
     } else if (mode === "plugin_spigot") {
       renderReport(analyzePluginSpigot(traceInput.value));
+    } else if (mode === "proxy_geyser_net") {
+      renderReport(analyzeProxyGeyserNet(traceInput.value));
     } else {
       renderReport(analyzeProtocolAndSql(traceInput.value));
     }
@@ -1474,6 +1571,7 @@
     var isMythicMmo = mode === "mythic_mmo";
     var isSkriptWgEco = mode === "skript_wg_eco";
     var isPluginSpigot = mode === "plugin_spigot";
+    var isProxyGeyser = mode === "proxy_geyser_net";
     tabSpark.classList.toggle("is-active", isSpark);
     tabSpark.setAttribute("aria-selected", String(isSpark));
     tabFolia.classList.toggle("is-active", isFolia);
@@ -1506,6 +1604,10 @@
       tabPluginSpigot.classList.toggle("is-active", isPluginSpigot);
       tabPluginSpigot.setAttribute("aria-selected", String(isPluginSpigot));
     }
+    if (tabProxyGeyser) {
+      tabProxyGeyser.classList.toggle("is-active", isProxyGeyser);
+      tabProxyGeyser.setAttribute("aria-selected", String(isProxyGeyser));
+    }
     thresholdWrap.hidden = !isSpark;
     domainWrap.hidden = !isFolia;
     if (isSpark) {
@@ -1532,6 +1634,9 @@
     } else if (isPluginSpigot) {
       inputHeading.textContent = "Bukkit/Spigot YAML & plugin.yml / paper-plugin.yml Pre-Boot Linter";
       inputSubtitle.textContent = "Catches legacy bungeecord:true spoofing, high spawn-limits, missing api-version, load:STARTUP hazards, and default:true admin wildcards offline.";
+    } else if (isProxyGeyser) {
+      inputHeading.textContent = "Velocity Proxy, GeyserMC/Floodgate & AntiCheat Network Linter";
+      inputSubtitle.textContent = "Catches legacy proxy forwarding, online-mode bypasses, placeholder forwarding secrets, offline Geyser auth, MTU fragmentation, and verbose AntiCheat configs offline.";
     } else {
       inputHeading.textContent = "Netty StreamCodec or HikariCP / SQL Persistence Snippet";
       inputSubtitle.textContent = "Computes worst-case LEB128/UTF-8 wire-byte budgets (NETTY-001..008) and audits sync JDBC, resource leaks, and Folia callbacks (SQL-001..007).";
@@ -1563,6 +1668,9 @@
   }
   if (tabPluginSpigot) {
     tabPluginSpigot.addEventListener("click", function () { switchMode("plugin_spigot"); });
+  }
+  if (tabProxyGeyser) {
+    tabProxyGeyser.addEventListener("click", function () { switchMode("proxy_geyser_net"); });
   }
   runBtn.addEventListener("click", runAudit);
   sarifBtn.addEventListener("click", function () {
