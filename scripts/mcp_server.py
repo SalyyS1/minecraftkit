@@ -1304,9 +1304,10 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
                 "domain": {"type": "string", "description": "Hosting panel domain or URL."},
                 "panel_type": {"type": "string", "enum": ["pterodactyl", "pelican", "crafty", "pufferpanel", "multicraft", "generic"]},
                 "server_id": {"type": "string", "description": "Panel server identifier."},
-                "action": {"type": "string", "enum": ["status", "resources", "start", "stop", "restart", "kill", "command", "backups"]},
+                "action": {"type": "string", "enum": ["status", "resources", "start", "stop", "restart", "kill", "command", "backups", "list_files"]},
                 "api_key": {"type": "string", "description": "Optional Client API key (defaults to MCKIT_PANEL_TOKEN env var; always redacted)."},
                 "command": {"type": "string", "description": "Console command when action='command'."},
+                "directory": {"type": "string", "description": "Remote directory path when action='list_files' (default '/')."},
                 "dry_run": {"type": "boolean", "description": "Preview exact HTTP request without sending (default true)."},
             },
             "required": ["domain", "server_id", "action"],
@@ -1330,7 +1331,7 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
                 "username": {"type": "string", "description": "SFTP username."},
                 "password": {"type": "string", "description": "Optional SFTP password (redacted from outputs)."},
                 "private_key_path": {"type": "string", "description": "Optional path to SSH private key."},
-                "operation": {"type": "string", "enum": ["list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "verify_jar", "list_crashes"]},
+                "operation": {"type": "string", "enum": ["list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "verify_jar", "stat_world", "list_crashes"]},
                 "remote_path": {"type": "string", "description": "Remote POSIX path (default '/')."},
                 "local_path": {"type": "string", "description": "Local file path for deploy_jar."},
                 "tail_lines": {"type": "integer", "minimum": 1, "maximum": 500, "description": "Number of lines for tail_log (default 80)."},
@@ -10327,6 +10328,7 @@ class MinecraftKitMcpServer:
             action=str(args.get("action", "status")),
             api_key=str(args.get("api_key", "")),
             command=str(args.get("command", "")),
+            directory=str(args.get("directory", "/")),
             dry_run=bool(args.get("dry_run", True)),
         )
         return ToolOutcome(_pretty_json(payload))

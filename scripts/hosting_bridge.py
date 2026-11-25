@@ -268,6 +268,7 @@ def execute_hosting_action(
     action: str,
     api_key: str = "",
     command: str = "",
+    directory: str = "/",
     dry_run: bool = True,
     timeout_seconds: float = 8.0,
 ) -> dict[str, Any]:
@@ -275,7 +276,7 @@ def execute_hosting_action(
     panel = panel_type.strip().lower()
     if panel not in SUPPORTED_PANELS:
         raise ValueError(f"'panel_type' must be one of {SUPPORTED_PANELS}.")
-    allowed_actions = ("status", "resources", "start", "stop", "restart", "kill", "command", "backups")
+    allowed_actions = ("status", "resources", "start", "stop", "restart", "kill", "command", "backups", "list_files")
     if action not in allowed_actions:
         raise ValueError(f"'action' must be one of {allowed_actions}.")
     if not server_id or not isinstance(server_id, str):
@@ -286,6 +287,7 @@ def execute_hosting_action(
     base_url = normalize_panel_url(domain)
     token = api_key or os.environ.get("MCKIT_PANEL_TOKEN", "")
     secrets = (token,) if token else ()
+    norm_dir = safe_remote_path(directory or "/")
 
     # Build request specification per panel
     method = "GET"
@@ -301,6 +303,9 @@ def execute_hosting_action(
             url = f"{base_url}/api/client/servers/{server_id}/command"
             method = "POST"
             body_obj = {"command": command.strip()}
+        elif action == "list_files":
+            encoded_dir = urllib.parse.quote(norm_dir, safe="/")
+            url = f"{base_url}/api/client/servers/{server_id}/files/list?directory={encoded_dir}"
         else:
             url = f"{base_url}/api/client/servers/{server_id}/backups"
     elif panel == "crafty":
@@ -314,6 +319,8 @@ def execute_hosting_action(
             url = f"{base_url}/api/v2/servers/{server_id}/stdin"
             method = "POST"
             body_obj = {"command": command.strip()}
+        elif action == "list_files":
+            url = f"{base_url}/api/v2/servers/{server_id}/files"
         else:
             url = f"{base_url}/api/v2/servers/{server_id}/backups"
     else:
@@ -402,7 +409,7 @@ def sftp_operation(
     if not (1 <= int(port) <= 65535):
         raise ValueError("'port' must be between 1 and 65535.")
 
-    allowed_ops = ("list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "verify_jar", "list_crashes")
+    allowed_ops = ("list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "verify_jar", "stat_world", "list_crashes")
     if operation not in allowed_ops:
         raise ValueError(f"'operation' must be one of {allowed_ops}.")
 
@@ -480,6 +487,20 @@ def sftp_operation(
                 "2. Stream remote bytes and assert PK\\x03\\x04 ZIP/JAR magic header",
                 "3. Compute remote SHA-256 and compare against local artifact digest",
                 "4. Fail deployment gate if truncated or checksum differs",
+            ]
+        elif operation == "stat_world":
+            world_root = norm_remote.rstrip("/") or "/world"
+            plan["stat_world_targets"] = {
+                "world_root": world_root,
+                "level_dat": f"{world_root}/level.dat",
+                "session_lock": f"{world_root}/session.lock",
+                "region_dir": f"{world_root}/region",
+            }
+            plan["stat_world_steps"] = [
+                f"1. Stat {world_root}/level.dat and verify GZIP header (0x1f 0x8b)",
+                f"2. Check whether {world_root}/session.lock is present (warn before backup/copy if locked)",
+                f"3. Count Anvil .mca files in {world_root}/region and verify non-zero 4096-byte sector alignment",
+                "4. Pair with mcstage check-world (MCS021) for full deep chunk header inspection",
             ]
         return plan
 
@@ -635,6 +656,47 @@ def sftp_operation(
                     "remote_sha256": remote_sha,
                     "local_sha256": local_sha,
                     "sha256_match": sha_match,
+                }
+
+            if operation == "stat_world":
+                world_root = norm_remote.rstrip("/") or "/world"
+                level_dat_path = posixpath.join(world_root, "level.dat")
+                session_lock_path = posixpath.join(world_root, "session.lock")
+                region_dir_path = posixpath.join(world_root, "region")
+                level_dat_size = 0
+                level_dat_gzip_ok = False
+                try:
+                    with sftp.open(level_dat_path, "rb") as lf:
+                        hdr = lf.read(2)
+                        level_dat_gzip_ok = hdr == b"\x1f\x8b"
+                    level_dat_size = int(sftp.stat(level_dat_path).st_size or 0)
+                except OSError:
+                    level_dat_gzip_ok = False
+                session_lock_present = False
+                try:
+                    sftp.stat(session_lock_path)
+                    session_lock_present = True
+                except OSError:
+                    session_lock_present = False
+                mca_count = 0
+                misaligned_mca = 0
+                try:
+                    for attr in sftp.listdir_attr(region_dir_path):
+                        if attr.filename.endswith(".mca"):
+                            mca_count += 1
+                            if attr.st_size and (attr.st_size % 4096 != 0):
+                                misaligned_mca += 1
+                except OSError:
+                    mca_count = 0
+                return {
+                    "ok": bool(level_dat_gzip_ok and level_dat_size > 0 and misaligned_mca == 0),
+                    "operation": operation,
+                    "world_root": world_root,
+                    "level_dat_size_bytes": level_dat_size,
+                    "level_dat_gzip_valid": level_dat_gzip_ok,
+                    "session_lock_present": session_lock_present,
+                    "region_mca_count": mca_count,
+                    "misaligned_mca_count": misaligned_mca,
                 }
         finally:
             sftp.close()

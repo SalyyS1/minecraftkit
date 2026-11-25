@@ -51,10 +51,11 @@ Connect MinecraftKit to your **Pterodactyl, Pelican, Crafty Controller, PufferPa
 
 Use `mc_sftp_operations` with IP/domain, port (`22` for VPS, `2022` for Pterodactyl Wings), username, and password/key from env:
 
-- **List server tree**: `action="list"`, `remote_path="plugins"`
-- **Tail `latest.log` with SEVERE highlights**: `action="tail_log"`, `remote_path="logs/latest.log"`, `tail_lines=80`
-- **Safe config patch (auto `.mckit.bak`)**: `action="patch_config"`, `remote_path="plugins/MyRPG/config.yml"`
-- **Atomic plugin JAR deploy**: `action="upload_jar"`, `local_path="build/libs/MyRPG.jar"`, `remote_path="plugins/MyRPG.jar"`
+- **List server tree**: `operation="list"`, `remote_path="/plugins"` (or via hosting panel API: `mc_hosting_server_action` with `action="list_files"`, `directory="/plugins"`)
+- **Tail `latest.log` with SEVERE highlights**: `operation="tail_log"`, `remote_path="/logs/latest.log"`, `tail_lines=80`
+- **Safe config patch (auto `.mckit.bak`)**: `operation="patch_config"`, `remote_path="/plugins/MyRPG/config.yml"`
+- **Atomic plugin JAR deploy & SHA-256 verification**: `operation="deploy_jar"`, `local_path="build/libs/MyRPG.jar"`, `remote_path="/plugins/MyRPG.jar"` followed by `operation="verify_jar"` (asserts `PK\x03\x04` ZIP/JAR header + remote SHA-256 match)
+- **Remote Anvil World Integrity Stat (`stat_world`)**: `operation="stat_world"`, `remote_path="/world"` (checks remote `level.dat` GZIP header, `session.lock` state, and `region/*.mca` 4096-byte sector alignment headlessly)
 
 ---
 

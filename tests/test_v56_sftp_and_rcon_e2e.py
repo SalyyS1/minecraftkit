@@ -155,6 +155,57 @@ class V56RconSftpAndPresetsTests(unittest.TestCase):
         self.assertIn("console_ws", pelican["endpoints"])
         self.assertIn("sftp_details", pelican["endpoints"])
 
+    def test_sftp_stat_world_and_hosting_list_files_via_mcp(self) -> None:
+        srv = mcp_server.MinecraftKitMcpServer(ROOT)
+        raw_world = srv.handle_message(json.dumps({
+            "jsonrpc": "2.0",
+            "id": 980,
+            "method": "tools/call",
+            "params": {
+                "name": "mc_sftp_operations",
+                "arguments": {
+                    "host": "10.0.0.12",
+                    "port": 2022,
+                    "username": "mcops",
+                    "password": "UltraHiddenSftpPassword!",
+                    "operation": "stat_world",
+                    "remote_path": "/world",
+                    "dry_run": True,
+                },
+            },
+        }))
+        assert raw_world is not None
+        resp_world = json.loads(raw_world)
+        self.assertFalse(resp_world["result"]["isError"], resp_world)
+        world_data = json.loads(resp_world["result"]["content"][0]["text"])
+        self.assertEqual(world_data["stat_world_targets"]["level_dat"], "/world/level.dat")
+        self.assertEqual(world_data["stat_world_targets"]["session_lock"], "/world/session.lock")
+        self.assertNotIn("UltraHiddenSftpPassword!", raw_world)
+
+        raw_files = srv.handle_message(json.dumps({
+            "jsonrpc": "2.0",
+            "id": 981,
+            "method": "tools/call",
+            "params": {
+                "name": "mc_hosting_server_action",
+                "arguments": {
+                    "domain": "panel.example.gg",
+                    "panel_type": "pelican",
+                    "server_id": "srv42",
+                    "action": "list_files",
+                    "directory": "/plugins",
+                    "api_key": "ptlc_SecretPanelToken999999999999",
+                    "dry_run": True,
+                },
+            },
+        }))
+        assert raw_files is not None
+        resp_files = json.loads(raw_files)
+        self.assertFalse(resp_files["result"]["isError"], resp_files)
+        files_data = json.loads(resp_files["result"]["content"][0]["text"])
+        self.assertIn("/api/client/servers/srv42/files/list?directory=/plugins", files_data["request"]["url"])
+        self.assertNotIn("ptlc_SecretPanelToken999999999999", raw_files)
+
 
 if __name__ == "__main__":
     unittest.main()
