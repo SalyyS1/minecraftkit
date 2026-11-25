@@ -4,213 +4,311 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Offline API reference and addon planning workspace for Minecraft RPG plugin developers.">
-  <title>Salyyy Minecraft Kit | Deep RPG API Workstation</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%2306141b'/%3E%3Cpath d='M14 14h36v36H14z' fill='none' stroke='%2352edc5' stroke-width='4'/%3E%3Cpath d='M22 40V24h6l4 7 4-7h6v16h-5V31l-5 8-5-8v9z' fill='%2383f7dc'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Salyyy Minecraft Kit — All-in-one Minecraft MCP Server, Resource-Optimized Autonomous Test Bots, Headless Hosting/2FA/SFTP Ops, Companion Bridge Plugin & Unified 10-Tool Suite.">
+  <title>Salyyy Minecraft Kit | All-in-One Minecraft MCP, Bot QA & Toolchain Showcase</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23060d14'/%3E%3Cpath d='M12 12h40v40H12z' fill='none' stroke='%2348e8b2' stroke-width='4'/%3E%3Cpath d='M20 42V22h6l6 9 6-9h6v20h-5V30l-7 10-7-10v12z' fill='%2348e8b2'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="shell.css">
+  <link rel="stylesheet" href="showcase.css">
   <script src="shell.js" defer></script>
+  <script src="showcase.js" defer></script>
 </head>
-<body data-page="api">
-  <a class="skip-link" href="#main-content">Skip to workspace</a>
-
-  <header class="app-header">
-    <div class="brand-lockup" aria-label="Salyyy Minecraft Kit">
-      <span class="brand-rune" aria-hidden="true">M::RPG</span>
-      <div>
-        <p class="brand-name">Salyyy Minecraft Kit</p>
-        <p class="brand-subtitle">Deep RPG API workstation</p>
+<body data-page="showcase">
+  <main id="showcase-main" class="sc-main">
+    <section class="sc-hero">
+      <div class="sc-hero-top">
+        <span class="sc-pill">v9.7.0 FLAGSHIP · 100 Verified MCP Tools · 7 Inline PNG Charts · 10-Engine Lab · 10 Showcase Presets · Bridge /gc &amp; Client /shader-info</span>
+        <div class="sc-lang-group" role="group" aria-label="Language switcher">
+          <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
+          <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
+        </div>
       </div>
-    </div>
 
-    <nav class="primary-nav" aria-label="Workspace views">
-      <button class="nav-button is-active" type="button" data-view="api" aria-current="page">API Explorer</button>
-      <button class="nav-button" type="button" data-view="overview">Overview</button>
-      <button class="nav-button" type="button" data-view="architecture">Architecture</button>
-      <button class="nav-button" type="button" data-view="features">Features</button>
-      <button class="nav-button" type="button" data-view="addons">Addon Lab</button>
-      <a class="nav-button atlas-entry-link" href="wiki.html">Kit Wiki</a>
-      <a class="nav-button atlas-entry-link" href="ecosystem.html">Ecosystem Atlas</a>
-    </nav>
+      <h1 class="sc-title" data-i18n="hero_title">The Complete AI Engineering &amp; Autonomous Bot QA Suite for Minecraft</h1>
+      <p class="sc-lead" data-i18n="hero_lead">
+        Build, audit, deploy over SFTP &amp; headless 2FA hosting panels, spawn resource-optimized headless test bots that auto-register/login and return off-screen PNG visual snapshots directly into your AI chat, and orchestrate all 10 SalyVn open-source Minecraft CLI tools from one MCP server.
+      </p>
 
-    <div class="header-counts" aria-label="Published API totals">
-      <span><strong>5,345</strong> types</span>
-      <span><strong>41,887</strong> members</span>
-    </div>
-  </header>
+      <div class="sc-hero-actions">
+        <a class="sc-btn sc-btn-primary" href="#mcp-builder" data-i18n="cta_install">Quick MCP Install</a>
+        <a class="sc-btn sc-btn-ghost" href="#ram-calc" data-i18n="cta_calc">Bot RAM Optimizer</a>
+        <a class="sc-btn sc-btn-ghost" href="playground.html">Diagnostics Lab</a>
+        <a class="sc-btn sc-btn-ghost" href="index.html">41,887 API Explorer</a>
+      </div>
 
-  <main id="main-content" class="app-main" tabindex="-1">
-    <section class="coverage-strip" aria-labelledby="coverage-title">
-      <h1 id="coverage-title" class="visually-hidden">Minecraft RPG API coverage</h1>
-      <div class="metric-cell">
-        <span class="metric-value" id="metric-plugins">10</span>
-        <span class="metric-label">plugin datasets</span>
-      </div>
-      <div class="metric-cell">
-        <span class="metric-value" id="metric-types">5,345</span>
-        <span class="metric-label">published types</span>
-      </div>
-      <div class="metric-cell">
-        <span class="metric-value" id="metric-members">41,887</span>
-        <span class="metric-label">published members</span>
-      </div>
-      <div class="metric-cell">
-        <span class="metric-value">0</span>
-        <span class="metric-label">parse errors</span>
+      <div class="sc-stats-grid">
+        <article class="sc-stat-card">
+          <strong>100</strong>
+          <span data-i18n="stat_mcp">Verified Stdio MCP Tools (7 Inline PNG Charts, Bot QA, 2FA/SFTP, Bridge Plugin &amp; Auditors)</span>
+        </article>
+        <article class="sc-stat-card">
+          <strong>42 MB</strong>
+          <span data-i18n="stat_bot">RAM per Tier-1 Headless Bot (98% lighter)</span>
+        </article>
+        <article class="sc-stat-card">
+          <strong>14</strong>
+          <span data-i18n="stat_skills">/mc:* Skills for Claude, Cursor &amp; Codex</span>
+        </article>
+        <article class="sc-stat-card">
+          <strong>10</strong>
+          <span data-i18n="stat_suite">Integrated SalyVn Minecraft Toolchain Repos</span>
+        </article>
       </div>
     </section>
 
-    <section class="rune-section" aria-labelledby="rune-title">
-      <div class="section-heading-row">
-        <div>
-          <h2 id="rune-title">Dependency rune rail</h2>
-          <p>Select a plugin node to load only its local API shard.</p>
-        </div>
-        <p id="rail-context" class="rail-context" aria-live="polite">Loading local manifest.</p>
+    <section id="pipeline" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">CLOSED-LOOP AUTOMATED QA</span>
+        <h2 data-i18n="pipe_title">5-Phase Autonomous Server &amp; Plugin QA Pipeline</h2>
+        <p data-i18n="pipe_desc">Click any phase below to inspect the exact MCP tool, safety guarantees, and outputs returned directly to your main chat.</p>
       </div>
-      <div id="plugin-rail" class="plugin-rail" aria-label="Plugin datasets" aria-busy="true">
-        <p class="rail-placeholder">Reading data/manifest.js from this folder.</p>
-      </div>
+      <div id="pipeline-steps" class="sc-pipeline-rail" role="tablist" aria-label="QA pipeline phases"></div>
+      <div id="pipeline-detail" class="sc-detail-card" aria-live="polite"></div>
     </section>
 
-    <section class="workspace-shell" aria-label="API intelligence workspace">
-      <div class="workspace-bar">
-        <div>
-          <span class="workspace-label">Active dataset</span>
-          <strong id="active-plugin-name">Waiting for manifest</strong>
-        </div>
-        <label class="plugin-picker-label" for="plugin-select">Plugin</label>
-        <select id="plugin-select" class="plugin-picker" disabled>
-          <option>Loading manifest</option>
-        </select>
-        <span id="dataset-state" class="dataset-state" role="status" aria-live="polite">Idle</span>
+    <section id="ram-calc" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">ZERO SCREEN LOCK · ANTI-OOM RESOURCE GOVERNOR</span>
+        <h2 data-i18n="calc_title">Why 10 Desktop Minecraft Tabs Explode Your PC — And How MinecraftKit Fixes It</h2>
+        <p data-i18n="calc_desc">Simulate your bot fleet below. MinecraftKit splits load across ~42 MB headless protocol bots and optional off-screen Docker/Xvfb visual containers.</p>
       </div>
 
-      <section id="panel-api" class="view-panel" data-view-panel="api" aria-labelledby="api-title">
-        <div class="panel-heading">
-          <div>
-            <h2 id="api-title">API Explorer</h2>
-            <p>Search public and protected bytecode symbols from the selected plugin.</p>
+      <div class="sc-calc-grid">
+        <div class="sc-panel">
+          <div class="sc-control">
+            <label for="calc-bots">
+              <span data-i18n="calc_bots_lbl">Concurrent Test Bots</span>
+              <strong id="calc-bots-val">10 bots</strong>
+            </label>
+            <input id="calc-bots" type="range" min="1" max="25" value="10">
           </div>
-          <p class="shortcut-copy"><kbd>/</kbd> focuses search</p>
-        </div>
-
-        <form id="api-filter-form" class="filter-form" role="search">
-          <div class="field field-search">
-            <label for="api-search">Search symbols</label>
-            <input id="api-search" name="query" type="search" autocomplete="off" spellcheck="false" placeholder="Type, member, package, return type" disabled>
+          <div class="sc-control">
+            <label for="calc-ram">
+              <span data-i18n="calc_ram_lbl">Host RAM Budget</span>
+              <strong id="calc-ram-val">8 GB</strong>
+            </label>
+            <input id="calc-ram" type="range" min="4" max="32" step="4" value="8">
           </div>
-          <div class="field">
-            <label for="scope-filter">Scope</label>
-            <select id="scope-filter" name="scope" disabled>
-              <option value="all">All symbols</option>
-              <option value="type">Types only</option>
-              <option value="member">Members only</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="origin-filter">Origin</label>
-            <select id="origin-filter" name="origin" disabled>
-              <option value="plugin-owned">Plugin-owned</option>
-              <option value="all">All namespace records</option>
-              <option value="bundled-third-party">Bundled third-party</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="kind-filter">Kind</label>
-            <select id="kind-filter" name="kind" disabled>
-              <option value="all">Any kind</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="package-filter">Package</label>
-            <select id="package-filter" name="package" disabled>
-              <option value="all">All packages</option>
-            </select>
-          </div>
-          <label class="check-control" for="deprecated-filter">
-            <input id="deprecated-filter" name="deprecated" type="checkbox" checked disabled>
-            <span>Show deprecated</span>
+          <label class="sc-toggle-row">
+            <input id="calc-visual" type="checkbox" checked>
+            <span data-i18n="calc_visual_lbl">Needs Shader / Resource Pack 3D Visual Capture (enables 1 Docker/Xvfb client + N-1 Protocol bots)</span>
           </label>
-        </form>
-
-        <div class="result-summary">
-          <p id="result-count" aria-live="polite">Load a plugin to inspect symbols.</p>
-          <p id="page-range">No result range</p>
+          <div id="calc-strategy-box" class="sc-strategy-box"></div>
         </div>
 
-        <div class="api-workbench">
-          <div class="result-pane" aria-labelledby="result-pane-title">
-            <h3 id="result-pane-title" class="visually-hidden">API search results</h3>
-            <div id="symbol-list" class="symbol-list" role="list" aria-label="API symbols" aria-busy="true">
-              <div class="empty-state">
-                <strong>Preparing local index</strong>
-                <span>The selected shard will appear here.</span>
-              </div>
-            </div>
-            <div class="pagination" aria-label="Search result pages">
-              <button id="page-previous" type="button" disabled>Previous</button>
-              <span id="page-status">Page 0 of 0</span>
-              <button id="page-next" type="button" disabled>Next</button>
-              <label for="page-size">Rows</label>
-              <select id="page-size" disabled>
-                <option value="24">24</option>
-                <option value="48">48</option>
-                <option value="96">96</option>
-              </select>
-            </div>
-          </div>
-
-          <article id="symbol-detail" class="symbol-detail" aria-labelledby="detail-title" aria-live="polite">
-            <div class="detail-empty">
-              <span class="detail-rune" aria-hidden="true">{ }</span>
-              <h3 id="detail-title">Select a symbol</h3>
-              <p>Type metadata, signatures, inheritance, and source paths appear here.</p>
-            </div>
-          </article>
+        <div class="sc-panel">
+          <h3 data-i18n="calc_bars_title">Estimated RAM Footprint Comparison</h3>
+          <div id="calc-bars" class="sc-bars"></div>
+          <p id="calc-savings" class="sc-savings"></p>
         </div>
-      </section>
-
-      <section id="panel-overview" class="view-panel insight-panel" data-view-panel="overview" aria-labelledby="overview-heading" hidden>
-        <div id="overview-content" class="insight-content">
-          <h2 id="overview-heading">Plugin overview</h2>
-          <p>Curated context will appear after the manifest loads.</p>
-        </div>
-      </section>
-
-      <section id="panel-architecture" class="view-panel insight-panel" data-view-panel="architecture" aria-labelledby="architecture-heading" hidden>
-        <div id="architecture-content" class="insight-content">
-          <h2 id="architecture-heading">Architecture map</h2>
-          <p>Data flow and extension boundaries will appear here.</p>
-        </div>
-      </section>
-
-      <section id="panel-features" class="view-panel insight-panel" data-view-panel="features" aria-labelledby="features-heading" hidden>
-        <div id="features-content" class="insight-content">
-          <h2 id="features-heading">Feature inventory</h2>
-          <p>Feature groups will appear after a plugin is selected.</p>
-        </div>
-      </section>
-
-      <section id="panel-addons" class="view-panel insight-panel" data-view-panel="addons" aria-labelledby="addons-heading" hidden>
-        <div id="addons-content" class="insight-content">
-          <h2 id="addons-heading">Addon Lab</h2>
-          <p>Original cross-plugin addon concepts will appear here.</p>
-        </div>
-      </section>
+      </div>
     </section>
+
+    <section id="bot-sim" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">LIVE STAGE RUNNER &amp; OFF-SCREEN PNG CAPTURE</span>
+        <h2 data-i18n="sim_title">Interactive Autonomous Bot Stage Simulator</h2>
+        <p data-i18n="sim_desc">Preview how MinecraftKit auto-detects AuthMe/nLogin prompts, redacts passwords, verifies custom GUIs, and streams a visual HUD snapshot back to chat.</p>
+      </div>
+      <div class="sc-sim-controls" id="sim-presets"></div>
+      <div class="sc-sim-grid">
+        <div class="sc-panel">
+          <h3>Stage Execution Ledger</h3>
+          <ul id="sim-stages" class="sc-stage-list"></ul>
+        </div>
+        <div class="sc-panel sc-hud-preview">
+          <div class="sc-hud-header">
+            <span id="sim-hud-title">MCKitTester @ play.salyvn.net</span>
+            <span id="sim-hud-badge" class="sc-badge-ok">AUTHENTICATED</span>
+          </div>
+          <div id="sim-gui-grid" class="sc-gui-grid"></div>
+          <div id="sim-chat-box" class="sc-chat-box"></div>
+          <div class="sc-copy-row" style="margin-top:10px;gap:8px;display:flex;flex-wrap:wrap">
+            <input id="sim-cmd-input" type="text" placeholder="Type freeform command e.g. /shop, /login secret123, /ia..." style="flex:1;min-width:180px;padding:7px 10px;border-radius:6px;border:1px solid #2b3f52;background:#081018;color:#e6f2ff;font-family:monospace;font-size:12.5px">
+            <button id="sim-cmd-send" type="button" class="sc-btn sc-btn-primary">Run Bot Action</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="visual-diff-lab" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">PIXEL-EXACT VISUAL REGRESSION DIFF (mc_bot_visual_diff)</span>
+        <h2 data-i18n="vdiff_title">Interactive Off-Screen GUI Pixel Diff Lab</h2>
+        <p data-i18n="vdiff_desc">Toggle a simulated plugin regression below. MinecraftKit compares baseline vs candidate PNG captures pixel-by-pixel and returns an amber-boxed, red-highlighted diff directly into chat.</p>
+      </div>
+      <div class="sc-filter-row" id="vdiff-controls"></div>
+      <div class="sc-calc-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        <div class="sc-panel">
+          <h3>Baseline Build</h3>
+          <canvas id="vdiff-base" width="260" height="150" style="width:100%;border-radius:8px;border:1px solid #24374a;background:#081018"></canvas>
+        </div>
+        <div class="sc-panel">
+          <h3>Candidate Build</h3>
+          <canvas id="vdiff-cand" width="260" height="150" style="width:100%;border-radius:8px;border:1px solid #24374a;background:#081018"></canvas>
+        </div>
+        <div class="sc-panel">
+          <h3>Pixel Diff Output</h3>
+          <canvas id="vdiff-out" width="260" height="150" style="width:100%;border-radius:8px;border:1px solid #24374a;background:#081018"></canvas>
+          <p id="vdiff-stats" class="sc-muted" style="margin-top:8px;font-family:monospace;font-size:12px"></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ops-bridges" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">HOSTING · VPS · SFTP · COMPANION PLUGIN &amp; MOD</span>
+        <h2 data-i18n="ops_title">End-to-End Server Operations Without Touching Your Screen</h2>
+      </div>
+      <div class="sc-feature-grid">
+        <article class="sc-feature-card">
+          <span class="sc-tag">HEADLESS 2FA &amp; BACKUPS</span>
+          <h3>Hosting Panel, TOTP 2FA, RCON &amp; Backup Audit</h3>
+          <p>Connects off-screen to Pterodactyl, Pelican, Crafty Controller, PufferPanel, and Multicraft via domain, credentials/API key, pure-Python TOTP 2FA, Source RCON, and automated backup recency/truncation verification.</p>
+          <code>mc_hosting_connect_plan · mc_ops_rcon_execute · mc_hosting_backup_verify</code>
+        </article>
+        <article class="sc-feature-card">
+          <span class="sc-tag">ATOMIC SFTP</span>
+          <h3>VPS SFTP Deploy &amp; Safe Config Patching</h3>
+          <p>Browse server trees, tail <code>latest.log</code> with stacktrace highlights, patch YAML/properties with automatic <code>.mckit.bak</code> rollback backups, and atomically swap plugin JARs via temp staging + SHA-256.</p>
+          <code>mc_sftp_operations</code>
+        </article>
+        <article class="sc-feature-card">
+          <span class="sc-tag">PAPER / FOLIA PLUGIN</span>
+          <h3>Companion mckit-bridge-plugin</h3>
+          <p>Loopback-only (<code>127.0.0.1:25590</code>) Folia-safe Java 21 plugin with constant-time <code>X-MCKit-Token</code> auth exposing live TPS/MSPT, JVM heap, open player GUI slots, and a 200-entry grouped SEVERE error ring buffer.</p>
+          <code>bridge-plugin/ · mc_bridge_plugin_query</code>
+        </article>
+        <article class="sc-feature-card">
+          <span class="sc-tag">FABRIC VISUAL MOD &amp; HTML PROOF</span>
+          <h3>Off-Screen Xvfb Visuals &amp; Self-Contained HTML Reports</h3>
+          <p>Runs inside an isolated <code>Dockerfile.visual-bot</code> Xvfb + Mesa + ffmpeg container to capture real shader/resource-pack frames, MP4 timelapses, and single-file dark-mode HTML QA proof artifacts ready for PRs and Discord.</p>
+          <code>client-mod/ · mc_qa_generate_html_report · mc_bot_capture_timelapse</code>
+        </article>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive Bot Stage YAML Recipe Builder (Redacted · Zero Screen Lock)</h3>
+        <div class="sc-filter-row" style="gap:10px;align-items:center;margin-bottom:10px">
+          <label class="sc-muted">Host <input id="yb-host" type="text" value="127.0.0.1" style="width:120px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Port <input id="yb-port" type="number" value="25565" style="width:78px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Version <select id="yb-ver" style="background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"><option value="1.21.4">1.21.4</option><option value="1.21.11">1.21.11</option><option value="26.3">26.3</option></select></label>
+          <label class="sc-muted"><input id="yb-auth" type="checkbox" checked> Auto-Auth (AuthMe/nLogin)</label>
+          <label class="sc-muted"><input id="yb-gui" type="checkbox" checked> GUI Shop Test</label>
+          <label class="sc-muted"><input id="yb-snap" type="checkbox" checked> Off-Screen PNG Snapshot</label>
+        </div>
+        <pre id="yb-out" class="sc-code-block"></pre>
+        <div class="sc-copy-row">
+          <button id="yb-copy" type="button" class="sc-btn sc-btn-primary">Copy .mckit-stages.yml</button>
+          <button id="yb-validate" type="button" class="sc-btn sc-btn-ghost">Run Stage Pre-Flight Audit</button>
+          <span id="yb-status" class="sc-muted" aria-live="polite"></span>
+        </div>
+        <div id="yb-audit-box" class="sc-strategy-box" style="margin-top:10px;display:none" aria-live="polite"></div>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive Protocol &amp; Ops Output Preview</h3>
+        <div id="ops-lab-tabs" class="sc-filter-row" style="margin-bottom:10px"></div>
+        <pre id="ops-lab-out" class="sc-code-block"></pre>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Live Bridge TPS / MSPT Sparkline &amp; Entity Lag Preview (640&times;240 Chat PNG)</h3>
+        <div id="tps-lab-tabs" class="sc-filter-row" style="margin-bottom:10px"></div>
+        <canvas id="tps-canvas" width="640" height="220" style="width:100%;max-width:640px;border-radius:8px;border:1px solid #24374a;background:#081018;display:block"></canvas>
+        <p id="tps-stats" class="sc-muted" style="margin-top:8px;font-family:monospace;font-size:12px"></p>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive VPS Anti-OOM JVM &amp; Proxy Firewall Generator</h3>
+        <div class="sc-filter-row" style="gap:10px;align-items:center;margin-bottom:10px">
+          <label class="sc-muted">VPS RAM (GB) <input id="vps-ram" type="number" min="4" max="64" step="2" value="16" style="width:74px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">GC Engine <select id="vps-gc" style="background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"><option value="zgc">Generational ZGC (Java 21+)</option><option value="g1gc">G1GC (Aikar Tuned)</option></select></label>
+          <label class="sc-muted">Topology <select id="vps-topo" style="background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"><option value="velocity">Velocity Modern Forwarding + Geyser</option><option value="standalone">Standalone Paper / Folia Node</option></select></label>
+        </div>
+        <pre id="vps-out" class="sc-code-block"></pre>
+        <div class="sc-copy-row">
+          <button id="vps-copy" type="button" class="sc-btn sc-btn-primary">Copy JVM + UFW Plan</button>
+          <span id="vps-status" class="sc-muted" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive Executive GO / NO-GO Release Readiness Scorecard (100th MCP Tool)</h3>
+        <div class="sc-filter-row" style="gap:12px;align-items:center;margin-bottom:10px">
+          <label class="sc-muted">Bot QA Pass % <input id="sc-bot-pct" type="number" min="0" max="100" value="100" style="width:68px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Avg TPS <input id="sc-tps" type="number" min="5" max="20" step="0.1" value="19.9" style="width:68px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Critical Findings <input id="sc-crit" type="number" min="0" max="20" value="0" style="width:60px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Backup Age (h) <input id="sc-bkp" type="number" min="0" max="168" value="4" style="width:64px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+        </div>
+        <div id="sc-scorecard-box" class="sc-strategy-box" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="suite" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">UNIFIED ECOSYSTEM</span>
+        <h2 data-i18n="suite_title">All 10 Integrated SalyVn Minecraft Open-Source Tools</h2>
+        <p data-i18n="suite_desc">Filter by category to explore every integrated static analyzer, server matrix runner, shader validator, and resource pack compiler.</p>
+      </div>
+      <div id="suite-filters" class="sc-filter-row"></div>
+      <div id="suite-grid" class="sc-suite-grid"></div>
+    </section>
+
+    <section id="mcp-builder" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">ZERO-DEPENDENCY INSTALL</span>
+        <h2 data-i18n="cfg_title">1-Click MCP &amp; Agent Skill Configuration</h2>
+      </div>
+      <div class="sc-panel">
+        <div id="cfg-tabs" class="sc-filter-row"></div>
+        <pre id="cfg-code" class="sc-code-block"></pre>
+        <div class="sc-copy-row">
+          <button id="cfg-copy" type="button" class="sc-btn sc-btn-primary">Copy Snippet</button>
+          <span id="cfg-status" class="sc-muted" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive MCP Tool Directory (100 Verified Tools · 1-Click Copy)</h3>
+        <div class="sc-filter-row" style="gap:10px;align-items:center;margin-bottom:10px">
+          <input id="tool-search" type="search" placeholder="Search tools (e.g. bot, sftp, totp, shader, folia, world, gif)..." style="flex:1;min-width:220px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:6px 10px">
+          <div id="tool-cats" class="sc-filter-row"></div>
+        </div>
+        <div id="tool-count" class="sc-muted" style="margin-bottom:8px"></div>
+        <div id="tool-list" class="sc-suite-grid"></div>
+      </div>
+    </section>
+
+    <section id="quickstart" class="sc-section">
+      <div class="sc-section-head">
+        <span class="sc-eyebrow">3-STEP AUTONOMOUS WORKFLOW (EN / VI)</span>
+        <h2>From Plugin Code to Verified Visual QA Proof in 3 Steps</h2>
+      </div>
+      <div class="sc-feature-grid">
+        <article class="sc-feature-card">
+          <span class="sc-tag">STEP 01 · INSTALL</span>
+          <h3>Connect MCP &amp; Run Ecosystem Doctor</h3>
+          <p>Paste the snippet above into Claude Code, Cursor, Windsurf, or Codex and call <code>mc_suite_full_ecosystem_doctor</code>. Zero desktop bloat, zero telemetry.</p>
+          <code>npx minecraftkit mcp --print-config</code>
+        </article>
+        <article class="sc-feature-card">
+          <span class="sc-tag">STEP 02 · DEPLOY</span>
+          <h3>Connect Hosting/VPS/SFTP Off-Screen</h3>
+          <p>Save credentials once inside the <code>chmod 0600</code> vaulted profile (Pterodactyl/Pelican/Crafty 2FA + SFTP) and upload plugin JARs atomically with automatic <code>.mckit.bak</code> config backups.</p>
+          <code>mc_ops_profile_vault · mc_sftp_operations</code>
+        </article>
+        <article class="sc-feature-card">
+          <span class="sc-tag">STEP 03 · VERIFY</span>
+          <h3>Launch Headless Bot Fleet &amp; Get Chat Proof</h3>
+          <p>Bots auto-join, auto-register/login (passwords scrubbed), test shops/GUIs/Folia regions at ~42 MB RAM each, and attach PNG storyboards, animated GIFs &amp; HTML proof reports directly to chat.</p>
+          <code>mc_qa_run_full_lifecycle · mc_bot_record_stage_gif</code>
+        </article>
+      </div>
+    </section>
+
+    <footer class="sc-footer">
+      <p>Crafted by <strong>SalyVn / Salyyy</strong> · Zero telemetry · 100% local-first · Navigate via top bar to Wiki, Ecosystem Atlas, RPG API Explorer &amp; Diagnostics Lab.</p>
+    </footer>
   </main>
-
-  <footer class="app-footer">
-    <p>Salyyy Minecraft Kit by SalyVn / Salyyy. Local files only; no external asset required.</p>
-    <p id="footer-dataset">Dataset manifest pending.</p>
-  </footer>
-
-  <noscript>
-    <p class="noscript-message">JavaScript is required to index the local API shard. No network connection is used.</p>
-  </noscript>
-
-  <div id="live-status" class="visually-hidden" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
 </body>
 </html>
