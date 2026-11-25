@@ -253,11 +253,51 @@
         "[MCKit] Found entity Crimson_Lich at 11.4m (<= 24m)",
         "[Bridge] Chunks=184 Density=1.2/c TPS=20.00"
       ]
+    },
+    {
+      id: "economy-dupe",
+      label: "Economy Anti-Dupe Race",
+      header: "MCKitEcoBot @ economy.salyvn.net:25565 (42 MB RAM)",
+      badge: "0 DUPES",
+      stages: [
+        ["Join Survival Economy Server", "PASS"],
+        ["Auto-Auth /login [REDACTED]", "PASS"],
+        ["Check Baseline /balance (1,250G)", "PASS"],
+        ["Open /ah AuctionHouse 9x6 GUI", "PASS"],
+        ["Assert Zero NPE / Duplicate Errors", "PASS"],
+        ["Bridge /api/v1/gc Overhead < 1%", "PASS"]
+      ],
+      slots: { 4: "BAL:1250G", 11: "NETHERITE", 13: "MYTHIC_GEM*", 15: "BID_LOG", 22: "CONFIRM" },
+      chat: [
+        "[Vault] Balance: $1,250.00 (no arbitrage loop)",
+        "[AuctionHouse] Opened Market GUI (24 active listings)",
+        "[Bridge] GC overhead=0.19% TPS=20.00 (0 SEVERE)"
+      ]
+    },
+    {
+      id: "velocity-transfer",
+      label: "Velocity Proxy Transfer",
+      header: "MCKitProxyBot @ play.salyvn.net (Lobby -> Survival)",
+      badge: "SYNC OK",
+      stages: [
+        ["Join Velocity 3.4 Modern Proxy", "PASS"],
+        ["Auto-Auth on LimboAuth Lobby", "PASS"],
+        ["Execute /server survival Handover", "PASS"],
+        ["Assert Zero Forwarding / Kick Errors", "PASS"],
+        ["Verify /api/v1/worlds Border & TPS", "PASS"],
+        ["Capture Cross-Server Proof PNG", "PASS"]
+      ],
+      slots: { 0: "COMPASS", 2: "LOBBY", 4: "SURVIVAL*", 6: "SKYBLOCK", 8: "PROFILE" },
+      chat: [
+        "[Velocity] Connecting MCKitProxyBot to survival...",
+        "[Survival] Welcome back! Modern HMAC forwarding verified",
+        "[Bridge] World=world Border=20000.0 TPS=19.98"
+      ]
     }
   ];
 
   var SUITE_TOOLS = [
-    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 27-tool stdio MCP server with crash-guard MCS001-MCS023, HTML/SVG Folia topology/doctor/jar/preflight/world/budget reports, probe CLI, 4 init presets, HTML diffs, badges, JUnit & SARIF.", cmd: "java -jar mcstage.jar budget mcstage.yml --html budget.html" },
+    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 31-tool stdio MCP server with crash-guard MCS001-MCS023, HTML/SVG Folia/doctor/jar/preflight/world/budget/JUnit reports, probe CLI, 4 init presets, HTML diffs, shields.io badges & SARIF.", cmd: "java -jar mcstage.jar preflight ./server --html preflight.html --badge-json preflight-badge.json" },
     { id: "shadersmith", cat: "shaders", lang: "Kotlin", desc: "GLSL core & post-effect shader contract validator, std140 UBO layout checker, and 26.3 migrator.", cmd: "java -jar shadersmith.jar check ./pack --target 26.3 --sarif shaders.sarif" },
     { id: "packmigrate", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic 1.20..26.3 CustomModelData & overlay migrator with perceptual asset dedup.", cmd: "java -jar packmigrate.jar migrate ./old ./new --to 26.3" },
     { id: "packmerge", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic resource pack union compiler for 1.21.4+ item models, fonts, sounds, lang, and atlases.", cmd: "java -jar packmerge.jar merge a.zip b.zip -o merged.zip" },
@@ -273,7 +313,8 @@
     "Claude Code / Codex": "npx minecraftkit install --target both\n\n# Add MCP server (.mcp.json):\n{\n  \"mcpServers\": {\n    \"minecraftkit\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"minecraftkit\", \"mcp\"]\n    }\n  }\n}",
     "Cursor / Windsurf": "{\n  \"mcpServers\": {\n    \"minecraftkit\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\", \"minecraftkit\", \"mcp\"]\n    }\n  }\n}",
     "Direct Python (0ms startup)": "{\n  \"mcpServers\": {\n    \"minecraftkit\": {\n      \"command\": \"python3\",\n      \"args\": [\"-B\", \"/path/to/minecraftkit/scripts/mcp_server.py\"]\n    }\n  }\n}",
-    "Docker Hybrid Bot Grid": "docker compose -f docker/docker-compose.testgrid.yml up --build\n# Runs 8 Tier-1 protocol bots (336 MB) + 1 off-screen Xvfb visual client!"
+    "Docker Hybrid Bot Grid": "docker compose -f docker/docker-compose.testgrid.yml up --build\n# Runs 8 Tier-1 protocol bots (336 MB, pids_limit=128, no-new-privileges) + 1 off-screen Xvfb visual client!",
+    "Oracle Always-Free ARM64 ($0/mo)": "# Generate Oracle Cloud Always-Free 24 GB / 4 OCPU off-screen bot grid:\n# Call MCP tool: mc_bot_generate_cloud_deploy(target='oracle_free_arm64', bot_count=12, include_visual_xvfb=true)\n# Zero laptop load, mem_limit + pids_limit + no-new-privileges hardened!"
   };
 
   function el(tag, className, text) {
