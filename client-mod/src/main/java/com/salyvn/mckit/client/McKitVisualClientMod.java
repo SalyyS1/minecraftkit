@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * MinecraftKit's MCP server can request:
  *   - GET /api/v1/status         : active screen class, FPS, resource pack & shader status
  *   - GET /api/v1/pack-status    : loaded resource packs, active shader pack, FPS, missing assets
+ *   - GET /api/v1/shader-info    : active shader pipeline, pack reload duration ms, reload count & error state
  *   - GET /api/v1/render-metrics : rolling 60-sample FPS/frame-time telemetry & client JVM heap
  *   - GET /api/v1/captures       : newest off-screen PNG/GIF/MP4 files written inside captureDir
  *   - GET /api/v1/errors         : bounded 50-entry resource-pack & shader error ring buffer
@@ -49,6 +50,9 @@ public final class McKitVisualClientMod {
     private final AtomicReference<Double> lastFrameTimeMs = new AtomicReference<>(16.67);
     private final AtomicInteger missingTextures = new AtomicInteger(0);
     private final AtomicInteger missingModels = new AtomicInteger(0);
+    private final AtomicInteger packReloadCount = new AtomicInteger(0);
+    private final AtomicReference<Long> lastReloadDurationMs = new AtomicReference<>(0L);
+    private final AtomicReference<String> renderPipeline = new AtomicReference<>("iris-sodium-offscreen");
     private final Deque<String> errorRing = new ArrayDeque<>(MAX_ERROR_RING);
     private final Deque<Integer> fpsRing = new ArrayDeque<>(MAX_FPS_RING);
     private HttpServer server;
@@ -72,6 +76,7 @@ public final class McKitVisualClientMod {
                 + ",\"last_pack_error\":\"" + esc(lastPackError.get()) + "\"}"
         ));
         server.createContext("/api/v1/pack-status", exchange -> handleAuth(exchange, expected, this::buildPackStatusJson));
+        server.createContext("/api/v1/shader-info", exchange -> handleAuth(exchange, expected, this::buildShaderInfoJson));
         server.createContext("/api/v1/render-metrics", exchange -> handleAuth(exchange, expected, this::buildRenderMetricsJson));
         server.createContext("/api/v1/captures", exchange -> handleAuth(exchange, expected, () -> buildCapturesJson(captureDir)));
         server.createContext("/api/v1/errors", exchange -> handleAuth(exchange, expected, this::buildErrorsJson));
@@ -100,6 +105,26 @@ public final class McKitVisualClientMod {
         }
         missingTextures.set(Math.max(0, missingTexCount));
         missingModels.set(Math.max(0, missingModelCount));
+    }
+
+    public void recordPackReload(long durationMs, String pipelineName) {
+        packReloadCount.incrementAndGet();
+        lastReloadDurationMs.set(Math.max(0L, durationMs));
+        if (pipelineName != null && !pipelineName.isBlank()) {
+            renderPipeline.set(pipelineName);
+        }
+    }
+
+    private String buildShaderInfoJson() {
+        boolean healthy = errorRingSize() == 0 && missingTextures.get() == 0 && missingModels.get() == 0;
+        return "{\"ok\":true,\"offscreen_headless\":true,\"shader_pack\":\"" + esc(activeShaderPack.get())
+            + "\",\"render_pipeline\":\"" + esc(renderPipeline.get())
+            + "\",\"pack_reload_count\":" + packReloadCount.get()
+            + ",\"last_reload_ms\":" + lastReloadDurationMs.get()
+            + ",\"missing_textures\":" + missingTextures.get()
+            + ",\"missing_models\":" + missingModels.get()
+            + ",\"error_count\":" + errorRingSize()
+            + ",\"clean_shader_state\":" + healthy + "}";
     }
 
     public void recordRenderMetrics(int fps, double frameTimeMs) {
