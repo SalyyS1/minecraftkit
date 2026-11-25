@@ -293,11 +293,51 @@
         "[Survival] Welcome back! Modern HMAC forwarding verified",
         "[Bridge] World=world Border=20000.0 TPS=19.98"
       ]
+    },
+    {
+      id: "mmocore-hud",
+      label: "MMOCore ActionBar HUD",
+      header: "MCKitMMOBot @ rpg.salyvn.net:25565 (42 MB RAM)",
+      badge: "HUD OK",
+      stages: [
+        ["Join Paper 26.3 RPG Server", "PASS"],
+        ["Auto-Auth /login [REDACTED]", "PASS"],
+        ["assert_actionbar: Mana/HP/Stamina", "PASS"],
+        ["Open /class Skill Tree GUI", "PASS"],
+        ["assert_gui_title: /class|skills/i", "PASS"],
+        ["Bridge /api/v1/system + PNG Proof", "PASS"]
+      ],
+      slots: { 10: "PALADIN*", 12: "MAGE", 14: "ROGUE", 16: "SKILL_PTS" },
+      chat: [
+        "[MMOCore] ActionBar: HP 420/420 | Mana 185/200 | Stamina 100%",
+        "[MCKit] assert_gui_title matched 'Class Selection' (27 slots)",
+        "[Bridge] Java 21 | 8 cores | TPS=20.00 | 0 SEVERE"
+      ]
+    },
+    {
+      id: "geyser-crossplay",
+      label: "Geyser Bedrock Crossplay",
+      header: "Bedrock UDP Probe + Java Companion (42 MB RAM)",
+      badge: "CROSSPLAY OK",
+      stages: [
+        ["RakNet UDP 19132 Bedrock Ping", "PASS"],
+        ["Verify Floodgate Prefix & MOTD", "PASS"],
+        ["Join Companion Java Bot on 25565", "PASS"],
+        ["Open Crossplay /menu Form GUI", "PASS"],
+        ["assert_gui_title: /menu|play/i", "PASS"],
+        ["Verify Bridge /api/v1/system Health", "PASS"]
+      ],
+      slots: { 11: "SURVIVAL*", 13: "SKYBLOCK", 15: "BEDWARS", 22: "SETTINGS" },
+      chat: [
+        "[Geyser] Bedrock UDP 19132 Online (1.21.60 · 42/200)",
+        "[Floodgate] Prefix '.' verified · 0 protocol mismatch",
+        "[MCKit] Attached crossplay status + GUI proof PNG"
+      ]
     }
   ];
 
   var SUITE_TOOLS = [
-    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 36-tool stdio MCP server with crash-guard MCS001-MCS023, full HTML/SVG/SARIF/Badge suite (Probe, Folia, doctor, jar, preflight, world, compare, budget, JUnit) & 4 init presets.", cmd: "java -jar mcstage.jar probe 127.0.0.1 --port 25565 --badge-json server-badge.json" },
+    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 38-tool stdio MCP server (v0.55.0) with crash-guard MCS001-MCS023, full HTML/SVG/SARIF/Badge suite (Probe, Folia, Rules, Scenario, Doctor, JAR, Preflight, World, Compare, Budget, JUnit) & 4 init presets.", cmd: "java -jar mcstage.jar list-rules --badge-json rules-badge.json" },
     { id: "shadersmith", cat: "shaders", lang: "Kotlin", desc: "GLSL core & post-effect shader contract validator, std140 UBO layout checker, and 26.3 migrator.", cmd: "java -jar shadersmith.jar check ./pack --target 26.3 --sarif shaders.sarif" },
     { id: "packmigrate", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic 1.20..26.3 CustomModelData & overlay migrator with perceptual asset dedup.", cmd: "java -jar packmigrate.jar migrate ./old ./new --to 26.3" },
     { id: "packmerge", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic resource pack union compiler for 1.21.4+ item models, fonts, sounds, lang, and atlases.", cmd: "java -jar packmerge.jar merge a.zip b.zip -o merged.zip" },
