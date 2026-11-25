@@ -1,22 +1,22 @@
-# Salyyy Minecraft Kit (v8.0.0 Flagship — 86 MCP Tools · 7-Engine Offline Lab · 5 Biểu Đồ PNG Trực Tiếp Trong Chat!)
+# Salyyy Minecraft Kit (v8.6.0 CENTURY EDITION — 100 MCP Tools · 7 Biểu Đồ PNG Trực Tiếp · 7-Engine Offline Lab!)
 
 [English (README.md)](README.md) · [**Trang Giới Thiệu Chính (Showcase)**](https://salyys1.github.io/minecraftkit/showcase.html) · [RPG API Explorer](https://salyys1.github.io/minecraftkit/) · [Ecosystem Atlas](https://salyys1.github.io/minecraftkit/ecosystem.html) · [Diagnostics Lab](https://salyys1.github.io/minecraftkit/playground.html) · [Wiki Song Ngữ](https://salyys1.github.io/minecraftkit/wiki.html) · [Hướng Dẫn Hosting 2FA & SFTP](docs/HOSTING_2FA_SFTP_GUIDE.md) · [Benchmark Tối Ưu RAM Bot](docs/BOT_OPTIMIZATION_BENCHMARKS.md) · [Chiến Lược Cộng Đồng](docs/GROWTH_STRATEGY.md)
 
 [![CI](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml/badge.svg)](https://github.com/SalyyS1/minecraftkit/actions/workflows/ci.yml)
-[![Version: v8.0.0](https://img.shields.io/badge/version-v8.0.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v8.0.0)
-[![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-JSON--RPC%202.0-1f6feb)](https://modelcontextprotocol.io)
+[![Version: v8.6.0](https://img.shields.io/badge/version-v8.6.0-blue)](https://github.com/SalyyS1/minecraftkit/releases/tag/v8.6.0)
+[![Protocol: MCP JSON-RPC 2.0](https://img.shields.io/badge/MCP-100%20Tools-1f6feb)](https://modelcontextprotocol.io)
 
-Bộ công cụ **AI Engineering, Autonomous Bot QA & Server Ops** toàn diện cho hệ sinh thái Minecraft (`Paper`, `Folia`, `Purpur`, `Velocity`, `Geyser/Bedrock`, `Fabric`, `MythicMobs`, `MMOItems`, `ModelEngine`) với **86 công cụ MCP chuẩn JSON-RPC 2.0**, **14 lệnh/kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ (~18–42 MB RAM/bot, không cần mở app Minecraft, không chiếm màn hình)**, **5 biểu đồ PNG tự động đính kèm vào chat (TPS, Entity Lag, Chunk Density, JVM Heap, GC Pause)**, **Kiểm Toán MythicMobs/MMOItems, Anti-Cheat, Geyser, Velocity, Paper, Systemd, DR & Resource Pack**, **6 mẫu Cloud/Docker chống nổ RAM (gồm cả Oracle Cloud Always-Free 24 GB ARM64 miễn phí $0/tháng)**, **Kết nối Hosting/VPS có 2FA TOTP & SFTP ngầm (có rollback `.mckit.bak` tự động)**, **Plugin/Mod Companion Java 21**, và **tích hợp trọn bộ 10 repo Minecraft của SalyVn / Salyyy**.
+Bộ công cụ **AI Engineering, Autonomous Bot QA & Server Ops** toàn diện cho hệ sinh thái Minecraft (`Paper`, `Folia`, `Purpur`, `Velocity`, `Geyser/Bedrock`, `Fabric`, `MythicMobs`, `MMOItems`, `ModelEngine`, `Skript`, `WorldGuard`) với **100 công cụ MCP chuẩn JSON-RPC 2.0**, **14 lệnh/kỹ năng `/mc:*`**, **Bot Kiểm Thử Tự Động siêu nhẹ (~18–42 MB RAM/bot, không cần mở app Minecraft, không chiếm màn hình)**, **7 biểu đồ PNG tự động đính kèm vào chat (TPS, Entity Lag, Chunk Density, JVM Heap, GC Pause, Bot Load-Test, Executive Release Scorecard)**, **Bảng Điểm Quyết Định Ra Mắt GO/NO-GO**, **6 mẫu Cloud/Docker chống nổ RAM (gồm cả Oracle Cloud Always-Free 24 GB ARM64 miễn phí $0/tháng)**, **Kết nối Hosting/VPS có 2FA TOTP & SFTP ngầm (có rollback `.mckit.bak` tự động)**, **Plugin/Mod Companion Java 21**, và **tích hợp trọn bộ 10 repo Minecraft của SalyVn / Salyyy**.
 
 ```mermaid
 flowchart LR
-  AI["Trợ lý AI (Claude Code / Cursor / Codex)"] -->|JSON-RPC 2.0 Stdio| MCP["MinecraftKit MCP Server (86 Tools)"]
+  AI["Trợ lý AI (Claude Code / Cursor / Codex)"] -->|JSON-RPC 2.0 Stdio| MCP["MinecraftKit MCP Server (100 Tools)"]
   MCP --> BOT["Tier-1 Bot Protocol (18-42 MB RAM, 0 GUI)"]
   MCP --> VIS["Tier-2 Docker/Xvfb + Fabric Visual Mod (/pack-status)"]
   MCP --> OPS["Hosting 2FA TOTP + SFTP + RCON + Systemd/DR"]
   MCP --> BRIDGE["mckit-bridge-plugin (127.0.0.1 TPS/Entities/Chunks/Memory)"]
   BOT -->|Tự Auth + Ảnh PNG / GIF / Visual Diff| AI
-  BRIDGE -->|5 Biểu Đồ PNG + Bộ Đệm Lỗi SEVERE| AI
+  BRIDGE -->|7 Biểu Đồ PNG + Bộ Đệm Lỗi SEVERE| AI
 ```
 
 ## Vì Sao Không Cần Mở 10 Tab Minecraft?

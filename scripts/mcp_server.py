@@ -24,6 +24,7 @@ import bot_engine  # noqa: E402
 import bot_load_test_report  # noqa: E402
 import bot_replay_diff  # noqa: E402
 import bot_session_hub  # noqa: E402
+import bot_soak_planner  # noqa: E402
 import bot_stress_harness  # noqa: E402
 import ci_workflow_generator  # noqa: E402
 import cloud_grid_templates  # noqa: E402
@@ -50,10 +51,12 @@ import pack_parity  # noqa: E402
 import paper_config_auditor  # noqa: E402
 import permissions_auditor  # noqa: E402
 import plugin_conflict_auditor  # noqa: E402
+import plugin_yml_auditor  # noqa: E402
 import profile_vault  # noqa: E402
 import protocol_version_matrix  # noqa: E402
 import proxy_migration_planner  # noqa: E402
 import proxy_topology_auditor  # noqa: E402
+import qa_executive_scorecard  # noqa: E402
 import qa_report_html  # noqa: E402
 import qa_smoke_doctor  # noqa: E402
 import query_api  # noqa: E402
@@ -65,6 +68,7 @@ import shader_pack_auditor  # noqa: E402
 import skript_auditor  # noqa: E402
 import spark_heap_auditor  # noqa: E402
 import spark_profile_auditor  # noqa: E402
+import spigot_bukkit_auditor  # noqa: E402
 import systemd_generator  # noqa: E402
 import toolchain_bridge  # noqa: E402
 import velocity_config_auditor  # noqa: E402
@@ -2780,6 +2784,82 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
         },
         "annotations": {"readOnlyHint": True},
     },
+    {
+        "name": "mc_ops_audit_bukkit_spigot_yml",
+        "title": "bukkit.yml & spigot.yml Anti-Lag & Forwarding Auditor",
+        "description": (
+            "Audit bukkit.yml and spigot.yml offline for high monster spawn limits (SPG-001), wide entity activation ranges (SPG-002), "
+            "small item merge radii (SPG-003), oversized mob-spawn-range (SPG-004), and legacy bungeecord:true spoofing risk (SPG-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "config_text": {"type": "string"},
+            },
+            "required": ["config_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_ops_audit_plugin_yml",
+        "title": "plugin.yml & paper-plugin.yml Manifest Security & Folia Auditor",
+        "description": (
+            "Audit plugin.yml / paper-plugin.yml offline for missing api-version (PLG-001), missing folia-supported flag (PLG-002), "
+            "unguarded commands (PLG-003), default:true admin permissions (PLG-004), and missing main class (PLG-005)."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "manifest_text": {"type": "string"},
+                "target_folia": {"type": "boolean", "default": False},
+            },
+            "required": ["manifest_text"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_bot_plan_soak_test",
+        "title": "Overnight / 24h Autonomous Bot Soak-Test & Heap-Leak Slope Planner",
+        "description": (
+            "Plan a multi-hour anti-OOM headless bot soak test (~42 MB/bot, 0 GUI) with Bridge /api/v1/memory & TPS sampling "
+            "guardrails, heap-growth leak thresholds, and Oracle Always-Free 24GB ARM64 cloud offload."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "server_host": {"type": "string", "default": "127.0.0.1"},
+                "server_port": {"type": "integer", "default": 25565},
+                "duration_hours": {"type": "integer", "default": 8},
+                "concurrent_bots": {"type": "integer", "default": 6},
+                "sample_interval_sec": {"type": "integer", "default": 60},
+                "max_heap_growth_mb_per_hour": {"type": "number", "default": 25.0},
+                "min_tps_floor": {"type": "number", "default": 19.0},
+            },
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
+    {
+        "name": "mc_qa_generate_executive_scorecard",
+        "title": "Unified Executive Release-Readiness Scorecard (GO/NO-GO + PNG Dashboard)",
+        "description": (
+            "Aggregate multiple MinecraftKit audit & autonomous bot QA grades into a single GO / CONDITIONAL-GO / NO-GO "
+            "release decision with Markdown PR table, shields.io badge JSON, and an auto-attached inline PNG scorecard dashboard."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "release_name": {"type": "string", "default": "Server Release"},
+                "checks": {"type": "array", "items": {"type": "object"}},
+                "attach_chart": {"type": "boolean", "default": True},
+            },
+            "required": ["checks"],
+            "additionalProperties": False,
+        },
+        "annotations": {"readOnlyHint": True},
+    },
 )
 
 
@@ -3850,6 +3930,10 @@ class MinecraftKitMcpServer:
             "mc_bot_generate_ci_matrix_workflow": self._tool_bot_generate_ci_matrix_workflow,
             "mc_ops_audit_worldguard_regions": self._tool_ops_audit_worldguard_regions,
             "mc_bot_audit_economy_config": self._tool_bot_audit_economy_config,
+            "mc_ops_audit_bukkit_spigot_yml": self._tool_ops_audit_bukkit_spigot_yml,
+            "mc_ops_audit_plugin_yml": self._tool_ops_audit_plugin_yml,
+            "mc_bot_plan_soak_test": self._tool_bot_plan_soak_test,
+            "mc_qa_generate_executive_scorecard": self._tool_qa_generate_executive_scorecard,
         }
 
     def handle_message(self, raw: str) -> str | None:
@@ -11143,6 +11227,53 @@ class MinecraftKitMcpServer:
             raise ValueError("'config_text' must be a non-empty economy/shop YAML configuration string.")
         payload = economy_config_auditor.audit_economy_config(config_text)
         return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_bukkit_spigot_yml(self, args: dict[str, Any]) -> ToolOutcome:
+        config_text = args.get("config_text")
+        if not isinstance(config_text, str) or not config_text.strip():
+            raise ValueError("'config_text' must be a non-empty bukkit.yml or spigot.yml string.")
+        payload = spigot_bukkit_auditor.audit_bukkit_spigot_yml(config_text)
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_ops_audit_plugin_yml(self, args: dict[str, Any]) -> ToolOutcome:
+        manifest_text = args.get("manifest_text")
+        if not isinstance(manifest_text, str) or not manifest_text.strip():
+            raise ValueError("'manifest_text' must be a non-empty plugin.yml or paper-plugin.yml string.")
+        payload = plugin_yml_auditor.audit_plugin_yml(
+            manifest_text,
+            target_folia=bool(args.get("target_folia", False)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_bot_plan_soak_test(self, args: dict[str, Any]) -> ToolOutcome:
+        payload = bot_soak_planner.plan_bot_soak_test(
+            server_host=str(args.get("server_host", "127.0.0.1")),
+            server_port=int(args.get("server_port", 25565)),
+            duration_hours=int(args.get("duration_hours", 8)),
+            concurrent_bots=int(args.get("concurrent_bots", 6)),
+            sample_interval_sec=int(args.get("sample_interval_sec", 60)),
+            max_heap_growth_mb_per_hour=float(args.get("max_heap_growth_mb_per_hour", 25.0)),
+            min_tps_floor=float(args.get("min_tps_floor", 19.0)),
+        )
+        return ToolOutcome(_pretty_json(payload))
+
+    def _tool_qa_generate_executive_scorecard(self, args: dict[str, Any]) -> ToolOutcome:
+        checks = args.get("checks")
+        if not isinstance(checks, list) or not checks:
+            raise ValueError("'checks' must be a non-empty list of {name, grade, detail?} objects.")
+        payload = qa_executive_scorecard.generate_executive_scorecard(
+            release_name=str(args.get("release_name", "Server Release")),
+            checks=checks,
+        )
+        attach_chart = bool(args.get("attach_chart", True))
+        images: tuple[tuple[str, str], ...] = ()
+        if attach_chart:
+            png_bytes = visual_capture.render_executive_scorecard_png(payload)
+            payload["chart_attached"] = True
+            images = ((visual_capture.encode_png_base64(png_bytes), "image/png"),)
+        else:
+            payload["chart_attached"] = False
+        return ToolOutcome(_pretty_json(payload), images=images)
 
     @staticmethod
     def _result_response(msg_id: Any, result: dict[str, Any]) -> str:

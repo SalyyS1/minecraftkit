@@ -934,3 +934,45 @@ def render_load_test_chart_png(
     footer = f"P95: {p95:.0f}MS   MIN TPS: {min_tps:.2f}   RAM: {ram_mb}MB ({saved_pct:.1f}% SAVED VS DESKTOP)"
     canvas.draw_text(12, height - 22, footer, TEXT_MUTED, scale=1, max_chars=78)
     return canvas.to_png_bytes()
+
+
+def render_executive_scorecard_png(
+    scorecard: dict[str, Any],
+    *,
+    width: int = 640,
+    height: int = 260,
+    title: str = "MCKIT RELEASE READINESS SCORECARD (100 MCP TOOLS)",
+) -> bytes:
+    """Render a zero-dependency dark-mode PNG dashboard for mc_qa_generate_executive_scorecard."""
+    decision = str(scorecard.get("decision", "GO"))
+    grade = str(scorecard.get("overall_grade", "A"))
+    score = float(scorecard.get("overall_score", 100.0) or 0.0)
+    checks = [c for c in (scorecard.get("checks") or []) if isinstance(c, dict)][:7]
+
+    canvas = PixelCanvas(width, height, BG_BASE)
+    canvas.draw_rect(0, 0, width, height, BORDER_SUBTLE, 1)
+    canvas.fill_rect(1, 1, width - 2, 28, BG_PANEL)
+    canvas.draw_text(12, 10, title, ACCENT_CYAN, scale=1, max_chars=48)
+    dec_col = ACCENT_RED if decision == "NO-GO" else (ACCENT_AMBER if decision == "CONDITIONAL-GO" else ACCENT_EMERALD)
+    canvas.draw_text(width - 195, 10, f"{decision}  GRADE {grade} ({score:.0f})", dec_col, scale=1)
+
+    y = 42
+    bar_x = 200
+    bar_w = width - bar_x - 84
+    for row in checks:
+        name = str(row.get("name", "check")).upper()[:26]
+        g = str(row.get("grade", "A"))
+        pts = int(row.get("score", 100) or 0)
+        bcol = ACCENT_RED if g in ("D", "F") else (ACCENT_AMBER if g == "C" else ACCENT_EMERALD)
+        canvas.draw_text(12, y + 4, name, TEXT_PRIMARY, scale=1, max_chars=26)
+        canvas.fill_rect(bar_x, y, bar_w, 16, BG_PANEL)
+        canvas.draw_rect(bar_x, y, bar_w, 16, BORDER_SUBTLE, 1)
+        fw = max(4, int(round((pts / 100.0) * (bar_w - 2))))
+        canvas.fill_rect(bar_x + 1, y + 1, fw, 14, bcol)
+        canvas.draw_text(bar_x + bar_w + 8, y + 4, f"GR {g} ({pts:3d})", bcol, scale=1)
+        y += 26
+
+    blockers = int(scorecard.get("blocker_count", 0) or 0)
+    footer = f"CHECKS: {len(checks)}   BLOCKERS: {blockers}   VERDICT: {decision}   OVERALL: {score:.1f}/100"
+    canvas.draw_text(12, height - 20, footer, TEXT_MUTED, scale=1, max_chars=78)
+    return canvas.to_png_bytes()

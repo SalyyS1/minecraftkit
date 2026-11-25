@@ -713,6 +713,7 @@
       { id: "mc_bot_generate_load_test_report", cat: "bot", desc: "Multi-bot stress p50/p95/p99 latency & TPS correlation report with inline PNG chart." },
       { id: "mc_bot_plan_multiserver_mesh", cat: "bot", desc: "Plans Velocity + N-backend autonomous bot QA meshes with staggered /server transfers." },
       { id: "mc_bot_generate_ci_matrix_workflow", cat: "bot", desc: "Generates .github/workflows/mckit-bot-qa.yml running Tier-1 headless bots in CI." },
+      { id: "mc_bot_plan_soak_test", cat: "bot", desc: "Plans overnight/24h anti-OOM bot soak tests with heap-leak slope & Bridge TPS guardrails." },
       { id: "mc_hosting_connect_plan", cat: "ops", desc: "Zero-screen-lock Pterodactyl, Pelican, Crafty & PufferPanel plan with RFC 6238 TOTP 2FA." },
       { id: "mc_hosting_server_action", cat: "ops", desc: "Headless start/stop/restart/console/status API dispatch with strict token redaction." },
       { id: "mc_sftp_operations", cat: "ops", desc: "Atomic SFTP plugin JAR deploy, safe config patching & automatic .mckit.bak backups." },
@@ -741,6 +742,9 @@
       { id: "mc_ops_audit_spark_heap_summary", cat: "audit", desc: "Spark heapsummary memory-leak auditor catching CraftPlayer, LevelChunk & HikariCP leaks." },
       { id: "mc_ops_audit_worldguard_regions", cat: "audit", desc: "WorldGuard regions.yml anti-grief, flag-inheritance & console-command exploit auditor." },
       { id: "mc_bot_audit_economy_config", cat: "audit", desc: "EssentialsX/ShopGUI+/AuctionHouse arbitrage loop (buy<=sell) & anti-dupe cooldown auditor." },
+      { id: "mc_ops_audit_bukkit_spigot_yml", cat: "audit", desc: "bukkit.yml & spigot.yml entity activation, merge radius & BungeeCord spoofing auditor." },
+      { id: "mc_ops_audit_plugin_yml", cat: "audit", desc: "plugin.yml / paper-plugin.yml API, Folia flag & default:true admin permission auditor." },
+      { id: "mc_qa_generate_executive_scorecard", cat: "suite", desc: "100th MCP Tool! Unified GO/NO-GO release readiness scorecard with inline PNG dashboard." },
       { id: "mc_qa_run_full_lifecycle", cat: "suite", desc: "Single-call E2E pipeline: deploy -> host restart -> bot QA stages -> bridge telemetry -> HTML proof." },
       { id: "mc_suite_full_ecosystem_doctor", cat: "suite", desc: "Unified health check across Python, Node, Java 21, Docker, ffmpeg, companion bridges & 10 repos." },
       { id: "mc_search_rpg_api", cat: "suite", desc: "Offline bytecode-verified search across 41,887 members in 10 RPG plugins (MMOItems, ModelEngine...)." }
@@ -760,7 +764,7 @@
         return okCat && okQ;
       });
       if (countEl) {
-        countEl.textContent = "Showing " + matches.length + " featured tools out of 96 live stdio MCP tools (filter by keyword or category).";
+        countEl.textContent = "Showing " + matches.length + " featured tools out of 100 live stdio MCP tools (filter by keyword or category).";
       }
       clear(listEl);
       matches.forEach(function (tool) {
