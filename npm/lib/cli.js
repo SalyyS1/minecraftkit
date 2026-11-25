@@ -12,6 +12,7 @@ function printCommands(json, output) {
 export function buildBotPlan({ bots = 10, ramGb = 8, visual = false } = {}) {
   const count = Math.max(1, Math.min(25, bots));
   const hostGb = Math.max(2, Math.min(256, ramGb));
+  const tier0Mb = count * 18;
   const tier1Mb = count * 42;
   const recommendedMb = visual ? 1400 + Math.max(0, count - 1) * 42 : tier1Mb;
   const desktopTabsMb = count * 2600;
@@ -25,12 +26,14 @@ export function buildBotPlan({ bots = 10, ramGb = 8, visual = false } = {}) {
     strategy: visual
       ? `hybrid-1-xvfb-plus-${Math.max(0, count - 1)}-protocol`
       : "tier1-headless-protocol",
+    tier0WireProbeRamMb: tier0Mb,
     estimatedRamMb: recommendedMb,
     desktopTabsRamMb: desktopTabsMb,
     ramSavingsPercent: savingsPct,
     safeLocalBudgetMb: budgetMb,
     fitsLocalHost: fitsLocal,
     screenLockFree: true,
+    cloudOffloadTarget: "oracle_free_arm64 ($0/mo, 24 GB RAM, 4 OCPU)",
     recommendation: fitsLocal
       ? "Run locally with zero screen/focus lock."
       : "Offload visual Docker/Xvfb container to cloud grid (oracle_free_arm64 or fly_io)."
@@ -41,6 +44,9 @@ function printShowcase(metadata, json, output) {
   const payload = {
     name: metadata.name,
     version: metadata.version,
+    mcpTools: 100,
+    inlinePngCharts: 7,
+    offlineLabEngines: 8,
     showcase: SHOWCASE_URL,
     wiki: WIKI_URL,
     atlas: ATLAS_URL,
@@ -49,7 +55,7 @@ function printShowcase(metadata, json, output) {
   };
   if (json) return output(JSON.stringify(payload, null, 2));
   output([
-    `MinecraftKit ${metadata.version} — Live Web Suite`,
+    `MinecraftKit ${metadata.version} — Live Web Suite (100 MCP Tools · 7 PNG Charts · 8-Engine Lab)`,
     `  Showcase : ${SHOWCASE_URL}`,
     `  Wiki     : ${WIKI_URL}`,
     `  Atlas    : ${ATLAS_URL}`,

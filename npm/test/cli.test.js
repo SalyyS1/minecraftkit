@@ -47,7 +47,9 @@ test("bot-plan computes anti-OOM RAM savings and cloud offload advice", () => {
   const plan = JSON.parse(output[0]);
   assert.equal(plan.bots, 10);
   assert.equal(plan.screenLockFree, true);
+  assert.equal(plan.tier0WireProbeRamMb, 180);
   assert.equal(plan.estimatedRamMb, 1400 + 9 * 42);
+  assert.match(plan.cloudOffloadTarget, /oracle_free_arm64/);
   assert.ok(plan.ramSavingsPercent > 90);
   assert.equal(plan.fitsLocalHost, true);
 });
@@ -60,6 +62,9 @@ test("showcase prints live URLs in JSON and text mode", () => {
   });
   assert.equal(code, 0);
   const payload = JSON.parse(output[0]);
+  assert.equal(payload.mcpTools, 100);
+  assert.equal(payload.inlinePngCharts, 7);
+  assert.equal(payload.offlineLabEngines, 8);
   assert.match(payload.showcase, /showcase\.html$/);
   assert.match(payload.playground, /playground\.html$/);
 });

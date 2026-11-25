@@ -16,7 +16,7 @@
   <main id="showcase-main" class="sc-main">
     <section class="sc-hero">
       <div class="sc-hero-top">
-        <span class="sc-pill">v8.7.0 CENTURY · 100 Verified MCP Tools · 7 Inline PNG Charts · 8-Engine Offline Lab · Zero Screen Lock</span>
+        <span class="sc-pill">v8.8.0 CENTURY · 100 Verified MCP Tools · 7 Inline PNG Charts · 8-Engine Offline Lab · Zero Screen Lock</span>
         <div class="sc-lang-group" role="group" aria-label="Language switcher">
           <button type="button" class="sc-lang-btn is-active" data-sc-lang="en">EN</button>
           <button type="button" class="sc-lang-btn" data-sc-lang="vi">VI</button>
@@ -230,6 +230,17 @@
           <button id="vps-copy" type="button" class="sc-btn sc-btn-primary">Copy JVM + UFW Plan</button>
           <span id="vps-status" class="sc-muted" aria-live="polite"></span>
         </div>
+      </div>
+
+      <div class="sc-panel" style="margin-top:18px">
+        <h3>Interactive Executive GO / NO-GO Release Readiness Scorecard (100th MCP Tool)</h3>
+        <div class="sc-filter-row" style="gap:12px;align-items:center;margin-bottom:10px">
+          <label class="sc-muted">Bot QA Pass % <input id="sc-bot-pct" type="number" min="0" max="100" value="100" style="width:68px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Avg TPS <input id="sc-tps" type="number" min="5" max="20" step="0.1" value="19.9" style="width:68px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Critical Findings <input id="sc-crit" type="number" min="0" max="20" value="0" style="width:60px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+          <label class="sc-muted">Backup Age (h) <input id="sc-bkp" type="number" min="0" max="168" value="4" style="width:64px;background:#0a1520;color:#e6f3ff;border:1px solid #24374a;border-radius:6px;padding:4px 8px"></label>
+        </div>
+        <div id="sc-scorecard-box" class="sc-strategy-box" aria-live="polite"></div>
       </div>
     </section>
 
