@@ -135,6 +135,9 @@ services:
   mckit-protocol-pool:
     image: ghcr.io/salyys1/minecraftkit-protocol-bot:latest
     init: true
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
     mem_limit: {mem_limit_mb}m
     environment:
       MC_HOST: "{server_host}"
@@ -172,6 +175,9 @@ services:
   mckit-protocol-pool:
     image: ghcr.io/salyys1/minecraftkit-protocol-bot:latest
     init: true
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
     mem_limit: {max(256, bots * 48 + 96)}m
     environment:
       MC_HOST: "{server_host}"

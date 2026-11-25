@@ -125,6 +125,36 @@ class V56RconSftpAndPresetsTests(unittest.TestCase):
             self.assertEqual(data["preset"], preset)
             self.assertGreaterEqual(len(data["stages"]), 4)
 
+    def test_sftp_verify_jar_and_pelican_console_hints(self) -> None:
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            jar = Path(td) / "SamplePlugin.jar"
+            jar.write_bytes(b"PK\x03\x04fake-jar-bytes")
+            plan = hosting_bridge.sftp_operation(
+                host="10.0.0.9",
+                port=2022,
+                username="mcops",
+                password="SecretSftpPass!",
+                operation="verify_jar",
+                remote_path="/plugins/SamplePlugin.jar",
+                local_path=str(jar),
+                dry_run=True,
+            )
+            self.assertTrue(plan["dry_run"])
+            self.assertTrue(plan["local_artifact_check"]["exists"])
+            self.assertTrue(plan["local_artifact_check"]["is_valid_zip_jar"])
+            self.assertEqual(len(plan["local_artifact_check"]["sha256"]), 64)
+            self.assertNotIn("SecretSftpPass!", json.dumps(plan))
+
+        pelican = hosting_bridge.build_hosting_connection_plan(
+            domain="pelican.example.gg",
+            panel_type="pelican",
+            server_id="srv99",
+            has_api_key=True,
+        )
+        self.assertIn("console_ws", pelican["endpoints"])
+        self.assertIn("sftp_details", pelican["endpoints"])
+
 
 if __name__ == "__main__":
     unittest.main()

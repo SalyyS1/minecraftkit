@@ -18,6 +18,9 @@ services:
       - BOT_MAX_RAM_MB=${BOT_MAX_RAM_MB:-512}
       - BOT_AUTH_PASSWORD=${MCKIT_BOT_PASSWORD:-}
     mem_limit: 512m
+    pids_limit: 128
+    security_opt:
+      - no-new-privileges:true
     cpus: 1.5
     deploy:
       resources:
@@ -47,6 +50,9 @@ services:
       - LIBGL_ALWAYS_SOFTWARE=1
       - GALLIUM_DRIVER=llvmpipe
     mem_limit: 2048m
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true
     cpus: 2.0
     deploy:
       resources:

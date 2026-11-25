@@ -1330,7 +1330,7 @@ TOOL_DEFINITIONS: tuple[dict[str, Any], ...] = (
                 "username": {"type": "string", "description": "SFTP username."},
                 "password": {"type": "string", "description": "Optional SFTP password (redacted from outputs)."},
                 "private_key_path": {"type": "string", "description": "Optional path to SSH private key."},
-                "operation": {"type": "string", "enum": ["list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "list_crashes"]},
+                "operation": {"type": "string", "enum": ["list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "verify_jar", "list_crashes"]},
                 "remote_path": {"type": "string", "description": "Remote POSIX path (default '/')."},
                 "local_path": {"type": "string", "description": "Local file path for deploy_jar."},
                 "tail_lines": {"type": "integer", "minimum": 1, "maximum": 500, "description": "Number of lines for tail_log (default 80)."},

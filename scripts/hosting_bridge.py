@@ -190,6 +190,8 @@ def build_hosting_connection_plan(
             "status": f"{base_url}/api/client/servers/{server_id or '<server_id>'}/resources",
             "power": f"{base_url}/api/client/servers/{server_id or '<server_id>'}/power",
             "command": f"{base_url}/api/client/servers/{server_id or '<server_id>'}/command",
+            "console_ws": f"{base_url}/api/client/servers/{server_id or '<server_id>'}/websocket",
+            "sftp_details": f"{base_url}/api/client/servers/{server_id or '<server_id>'}",
         },
         "crafty": {
             "auth": f"{base_url}/api/v2/auth/login",
@@ -400,7 +402,7 @@ def sftp_operation(
     if not (1 <= int(port) <= 65535):
         raise ValueError("'port' must be between 1 and 65535.")
 
-    allowed_ops = ("list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "list_crashes")
+    allowed_ops = ("list", "read", "tail_log", "patch_config", "rollback_config", "deploy_jar", "verify_jar", "list_crashes")
     if operation not in allowed_ops:
         raise ValueError(f"'operation' must be one of {allowed_ops}.")
 
@@ -455,6 +457,29 @@ def sftp_operation(
                 f"2. Copy current broken file to {norm_remote}.mckit.broken",
                 f"3. Atomically restore {norm_remote}.mckit.bak -> {norm_remote}",
                 "4. Restart server headlessly via hosting panel & re-verify with bot probe",
+            ]
+        elif operation == "verify_jar":
+            local_sha = None
+            local_is_zip = None
+            local_size = None
+            if local_path and os.path.isfile(local_path):
+                with open(local_path, "rb") as lf:
+                    raw_local = lf.read()
+                local_size = len(raw_local)
+                local_is_zip = raw_local[:4] == b"PK\x03\x04"
+                local_sha = hashlib.sha256(raw_local).hexdigest()
+            plan["local_artifact_check"] = {
+                "local_path": local_path or None,
+                "exists": local_sha is not None,
+                "size_bytes": local_size,
+                "is_valid_zip_jar": local_is_zip,
+                "sha256": local_sha,
+            }
+            plan["verify_jar_steps"] = [
+                f"1. Stat remote plugin JAR {norm_remote} via SFTP",
+                "2. Stream remote bytes and assert PK\\x03\\x04 ZIP/JAR magic header",
+                "3. Compute remote SHA-256 and compare against local artifact digest",
+                "4. Fail deployment gate if truncated or checksum differs",
             ]
         return plan
 
@@ -577,6 +602,39 @@ def sftp_operation(
                     "remote_path": norm_remote,
                     "local_sha256": sha,
                     "atomic_swap": True,
+                }
+
+            if operation == "verify_jar":
+                hasher = hashlib.sha256()
+                total_bytes = 0
+                magic = b""
+                with sftp.open(norm_remote, "rb") as rf:
+                    while True:
+                        chunk = rf.read(65536)
+                        if not chunk:
+                            break
+                        if not magic:
+                            magic = chunk[:4]
+                        total_bytes += len(chunk)
+                        hasher.update(chunk)
+                remote_sha = hasher.hexdigest()
+                is_valid_zip = magic == b"PK\x03\x04"
+                local_sha = None
+                sha_match = None
+                if local_path and os.path.isfile(local_path):
+                    with open(local_path, "rb") as lf:
+                        local_sha = hashlib.sha256(lf.read()).hexdigest()
+                    sha_match = remote_sha == local_sha
+                integrity_ok = bool(is_valid_zip and total_bytes > 0 and (sha_match is not False))
+                return {
+                    "ok": integrity_ok,
+                    "operation": operation,
+                    "remote_path": norm_remote,
+                    "remote_size_bytes": total_bytes,
+                    "is_valid_zip_jar": is_valid_zip,
+                    "remote_sha256": remote_sha,
+                    "local_sha256": local_sha,
+                    "sha256_match": sha_match,
                 }
         finally:
             sftp.close()

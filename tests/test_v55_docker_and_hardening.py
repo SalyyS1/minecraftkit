@@ -25,6 +25,8 @@ class V55DockerHardeningTests(unittest.TestCase):
         self.assertIn("host.docker.internal:host-gateway", text)
         self.assertIn("mem_limit: 512m", text)
         self.assertIn("mem_limit: 2048m", text)
+        self.assertIn("pids_limit: 128", text)
+        self.assertIn("no-new-privileges:true", text)
         self.assertIn("BOT_MAX_RAM_MB", text)
 
     def test_capture_xvfb_script_passes_bash_syntax_and_emits_keyframe_and_gif(self) -> None:
