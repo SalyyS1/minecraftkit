@@ -259,6 +259,46 @@
           "  - damage{amount=12} @PIR{r=8} ~onAttack"
         ].join("\n")
       }
+    ],
+    skript_wg_eco: [
+      {
+        label: "Lagging Skript + Spawn Grief + Shop Dupe",
+        text: [
+          "every 1 tick:",
+          "  loop all entities:",
+          "    set {mob::%loop-entity%} to location of loop-entity",
+          "    execute console command \"give %arg-1% diamond\"",
+          "spawn:",
+          "  priority: 0",
+          "  flags:",
+          "    pvp: allow",
+          "    tnt: allow",
+          "    passthrough: allow",
+          "diamond_block:",
+          "  buy: 100",
+          "  sell: 250",
+          "  starting-balance: 50000000"
+        ].join("\n")
+      },
+      {
+        label: "Clean Hardened Skript, Spawn & Economy",
+        text: [
+          "every 5 seconds:",
+          "  loop all players:",
+          "    send action bar \"Welcome\" to loop-player",
+          "spawn:",
+          "  priority: 10",
+          "  flags:",
+          "    pvp: deny",
+          "    tnt: deny",
+          "    mob-spawning: deny",
+          "diamond_block:",
+          "  buy: 450",
+          "  sell: 180",
+          "  starting-balance: 500",
+          "  tax-rate: 5"
+        ].join("\n")
+      }
     ]
   };
 
@@ -905,6 +945,7 @@
   var tabBotOps = document.getElementById("tab-bot-ops");
   var tabPackCfg = document.getElementById("tab-pack-cfg");
   var tabMythicMmo = document.getElementById("tab-mythic-mmo");
+  var tabSkriptWgEco = document.getElementById("tab-skript-wg-eco");
   var presetBox = document.getElementById("preset-buttons");
   var inputHeading = document.getElementById("input-heading");
   var inputSubtitle = document.getElementById("input-subtitle");
@@ -1142,6 +1183,75 @@
     };
   }
 
+  function analyzeSkriptWgEco(raw) {
+    var findings = [];
+    if (/^\s*every\s+[1-4]\s+ticks?\s*:/mi.test(raw)) {
+      findings.push({
+        rule_id: "SK-001", severity: "critical", frame: "Skript::every-tick",
+        message: "Sub-5-tick Skript periodic loop executes on the main tick thread and collapses TPS.",
+        remediation: "Raise interval to 'every 2 seconds:' or switch to event-driven triggers."
+      });
+    }
+    if (/loop\s+all\s+(?:entities|blocks)\b/i.test(raw)) {
+      findings.push({
+        rule_id: "SK-002", severity: "critical", frame: "Skript::loop-all",
+        message: "Unbounded 'loop all entities/blocks' scans every loaded chunk in every world.",
+        remediation: "Scope to 'loop all entities in radius 16 around player:'."
+      });
+    }
+    if (/execute\s+console\s+command\s+"[^"]*%(?:arg-\d+|message|chat)%/i.test(raw)) {
+      findings.push({
+        rule_id: "SK-003", severity: "critical", frame: "Skript::console-inject",
+        message: "Unsanitized player input interpolated into 'execute console command' allows privilege escalation.",
+        remediation: "Use native Skript effects or strictly validate against an alphanumeric whitelist."
+      });
+    }
+    if (/(?:spawn|hub|lobby)[\s\S]{0,160}?\b(?:tnt|creeper-explosion|fire-spread)\s*:\s*allow\b/i.test(raw)) {
+      findings.push({
+        rule_id: "WG-001", severity: "critical", frame: "WorldGuard::spawn-grief",
+        message: "Protected spawn/hub region allows TNT, creeper explosion, or fire-spread.",
+        remediation: "Set tnt: deny, creeper-explosion: deny, and fire-spread: deny on spawn regions."
+      });
+    }
+    if (/(?:spawn|hub|lobby)[\s\S]{0,160}?\bpassthrough\s*:\s*allow\b/i.test(raw)) {
+      findings.push({
+        rule_id: "WG-002", severity: "high", frame: "WorldGuard::passthrough",
+        message: "passthrough: allow bypasses default WorldGuard build protection on a hub/spawn region.",
+        remediation: "Remove passthrough: allow or set build: deny explicitly."
+      });
+    }
+    var buyM = raw.match(/\bbuy(?:-price)?\s*:\s*(-?\d+(?:\.\d+)?)/i);
+    var sellM = raw.match(/\bsell(?:-price)?\s*:\s*(-?\d+(?:\.\d+)?)/i);
+    if (buyM && sellM && parseFloat(sellM[1]) > parseFloat(buyM[1]) && parseFloat(buyM[1]) > 0) {
+      findings.push({
+        rule_id: "ECO-001", severity: "critical", frame: "ShopGUI::buy-sell-dupe",
+        message: "Infinite money exploit: sell price (" + sellM[1] + ") exceeds buy price (" + buyM[1] + ").",
+        remediation: "Enforce sell price <= 50-70% of buy price across all shop items."
+      });
+    }
+    var startBalM = raw.match(/\bstarting-balance\s*:\s*(\d+)/i);
+    if (startBalM && parseInt(startBalM[1], 10) >= 1000000) {
+      findings.push({
+        rule_id: "ECO-003", severity: "high", frame: "Economy::starting-balance",
+        message: "Excessive starting-balance (" + startBalM[1] + ") fuels alt-account inflation farming.",
+        remediation: "Cap starting-balance <= 5,000 and add transaction tax sinks."
+      });
+    }
+    var score = Math.max(0, 100 - findings.reduce(function (acc, f) {
+      return acc + (f.severity === "critical" ? 28 : (f.severity === "high" ? 15 : 8));
+    }, 0));
+    var grade = score >= 90 ? "A" : (score >= 78 ? "B" : (score >= 62 ? "C" : (score >= 45 ? "D" : "F")));
+    var status = findings.some(function (f) { return f.severity === "critical" || f.severity === "high"; }) ? "fail" : (findings.length ? "warn" : "pass");
+    return {
+      mode: "skript_wg_eco",
+      status: status,
+      grade: grade,
+      score: score,
+      finding_count: findings.length,
+      findings: findings
+    };
+  }
+
   function renderReport(report) {
     lastReport = report;
     summaryLine.textContent = "Status: " + report.status.toUpperCase() + " | " + report.finding_count + " finding(s)";
@@ -1173,7 +1283,7 @@
         [report.estimated_ram_mb + " MB", "Est. RAM"],
         [report.screen_lock_free ? "ZERO LOCK" : "FOCUS LOCK", "Desktop Impact"]
       ]);
-    } else if (mode === "pack_cfg" || mode === "mythic_mmo") {
+    } else if (mode === "pack_cfg" || mode === "mythic_mmo" || mode === "skript_wg_eco") {
       renderMetrics([
         [report.status.toUpperCase(), "Verdict"],
         ["Grade " + report.grade, "Health Grade"],
@@ -1228,6 +1338,8 @@
       renderReport(analyzePackAndConfig(traceInput.value));
     } else if (mode === "mythic_mmo") {
       renderReport(analyzeMythicMmo(traceInput.value));
+    } else if (mode === "skript_wg_eco") {
+      renderReport(analyzeSkriptWgEco(traceInput.value));
     } else {
       renderReport(analyzeProtocolAndSql(traceInput.value));
     }
@@ -1257,6 +1369,7 @@
     var isBotOps = mode === "bot_ops";
     var isPackCfg = mode === "pack_cfg";
     var isMythicMmo = mode === "mythic_mmo";
+    var isSkriptWgEco = mode === "skript_wg_eco";
     tabSpark.classList.toggle("is-active", isSpark);
     tabSpark.setAttribute("aria-selected", String(isSpark));
     tabFolia.classList.toggle("is-active", isFolia);
@@ -1281,6 +1394,10 @@
       tabMythicMmo.classList.toggle("is-active", isMythicMmo);
       tabMythicMmo.setAttribute("aria-selected", String(isMythicMmo));
     }
+    if (tabSkriptWgEco) {
+      tabSkriptWgEco.classList.toggle("is-active", isSkriptWgEco);
+      tabSkriptWgEco.setAttribute("aria-selected", String(isSkriptWgEco));
+    }
     thresholdWrap.hidden = !isSpark;
     domainWrap.hidden = !isFolia;
     if (isSpark) {
@@ -1301,6 +1418,9 @@
     } else if (isMythicMmo) {
       inputHeading.textContent = "MythicMobs Skill/Mob & MMOItems/Crucible YAML Linter";
       inputSubtitle.textContent = "Detects sub-5-tick ~onTimer loops, >64-block @EIR chunk scans, >500 particle floods, negative costs, and missing cooldowns offline (RPG-001..005).";
+    } else if (isSkriptWgEco) {
+      inputHeading.textContent = "Skript, WorldGuard Regions & Economy Shop Anti-Dupe Linter";
+      inputSubtitle.textContent = "Catches 1-tick Skript loops, console command injection, unprotected spawn TNT/passthrough flags, and buy < sell infinite money exploits offline.";
     } else {
       inputHeading.textContent = "Netty StreamCodec or HikariCP / SQL Persistence Snippet";
       inputSubtitle.textContent = "Computes worst-case LEB128/UTF-8 wire-byte budgets (NETTY-001..008) and audits sync JDBC, resource leaks, and Folia callbacks (SQL-001..007).";
@@ -1326,6 +1446,9 @@
   }
   if (tabMythicMmo) {
     tabMythicMmo.addEventListener("click", function () { switchMode("mythic_mmo"); });
+  }
+  if (tabSkriptWgEco) {
+    tabSkriptWgEco.addEventListener("click", function () { switchMode("skript_wg_eco"); });
   }
   runBtn.addEventListener("click", runAudit);
   sarifBtn.addEventListener("click", function () {

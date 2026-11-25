@@ -257,7 +257,7 @@
   ];
 
   var SUITE_TOOLS = [
-    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 21-tool stdio MCP server with crash-guard MCS001-MCS023, budget/probe/check-world/inspect-jar/preflight CLI, 4 init presets, HTML diffs, badges, JUnit & SARIF.", cmd: "java -jar mcstage.jar budget mcstage.yml --host-ram-gb 7 --max-shards 4" },
+    { id: "mcstage", cat: "runtime-testing", lang: "Kotlin", desc: "Real Paper/Folia/Purpur matrix runner & 25-tool stdio MCP server with crash-guard MCS001-MCS023, HTML/SVG Folia topology/doctor/jar/preflight reports, budget/probe/check-world CLI, 4 init presets, HTML diffs, badges, JUnit & SARIF.", cmd: "java -jar mcstage.jar preflight ./server --html preflight.html" },
     { id: "shadersmith", cat: "shaders", lang: "Kotlin", desc: "GLSL core & post-effect shader contract validator, std140 UBO layout checker, and 26.3 migrator.", cmd: "java -jar shadersmith.jar check ./pack --target 26.3 --sarif shaders.sarif" },
     { id: "packmigrate", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic 1.20..26.3 CustomModelData & overlay migrator with perceptual asset dedup.", cmd: "java -jar packmigrate.jar migrate ./old ./new --to 26.3" },
     { id: "packmerge", cat: "resource-pack", lang: "Kotlin", desc: "Deterministic resource pack union compiler for 1.21.4+ item models, fonts, sounds, lang, and atlases.", cmd: "java -jar packmerge.jar merge a.zip b.zip -o merged.zip" },
