@@ -233,7 +233,7 @@ class V51LoopbackE2ETests(unittest.TestCase):
             self.assertEqual(comp.returncode, 0, comp.stderr)
             run = subprocess.run([java, "-cp", tmp, "com.salyvn.mckit.bridge.BridgeContractTest"], capture_output=True, text=True, check=False)
             self.assertEqual(run.returncode, 0, run.stderr)
-            self.assertIn("9/9 PASS", run.stdout)
+            self.assertIn("10/10 PASS", run.stdout)
 
             # 2. Compile McKitVisualClientMod cleanly (zero Fabric JAR dependency needed for loopback server)
             client_mod = ROOT / "client-mod" / "src" / "main" / "java" / "com" / "salyvn" / "mckit" / "client" / "McKitVisualClientMod.java"
@@ -278,6 +278,15 @@ class V51LoopbackE2ETests(unittest.TestCase):
                         "deadlock_detected": False,
                         "deadlocked_thread_ids": [],
                         "sample_threads": [{"name": "Server thread", "state": "RUNNABLE"}],
+                    }).encode("utf-8")
+                    self.send_response(200)
+                elif self.path == "/api/v1/gc":
+                    body = json.dumps({
+                        "uptime_ms": 60000,
+                        "total_collections": 14,
+                        "total_gc_time_ms": 112,
+                        "gc_overhead_pct": 0.187,
+                        "collectors": [{"name": "G1 Young Generation", "collections": 14, "time_ms": 112, "avg_pause_ms": 8.0}],
                     }).encode("utf-8")
                     self.send_response(200)
                 else:
@@ -356,6 +365,26 @@ class V51LoopbackE2ETests(unittest.TestCase):
             self.assertTrue(thr_payload["reachable"])
             self.assertFalse(thr_payload["data"]["deadlock_detected"])
             self.assertEqual(thr_payload["data"]["thread_count"], 32)
+
+            raw_gc = srv.handle_message(json.dumps({
+                "jsonrpc": "2.0",
+                "id": 904,
+                "method": "tools/call",
+                "params": {
+                    "name": "mc_bridge_plugin_query",
+                    "arguments": {
+                        "base_url": f"http://127.0.0.1:{port}",
+                        "token": expected_tok,
+                        "endpoint": "gc",
+                    },
+                },
+            }))
+            assert raw_gc is not None
+            resp_gc = json.loads(raw_gc)
+            gc_payload = json.loads(resp_gc["result"]["content"][0]["text"])
+            self.assertTrue(gc_payload["reachable"])
+            self.assertEqual(gc_payload["data"]["total_collections"], 14)
+            self.assertEqual(gc_payload["data"]["collectors"][0]["name"], "G1 Young Generation")
         finally:
             httpd.shutdown()
             httpd.server_close()

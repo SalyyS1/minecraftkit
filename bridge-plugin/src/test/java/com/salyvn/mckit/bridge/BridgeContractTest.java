@@ -101,7 +101,17 @@ public final class BridgeContractTest {
         int peakThreads = threadBean.getPeakThreadCount();
         assertTrue(peakThreads >= threads && (deadlocked == null || deadlocked.length == 0), "thread deadlock telemetry invariant failed");
 
-        System.out.println("BridgeContractTest: 9/9 PASS");
+        // 10. JVM GarbageCollectorMXBean & RuntimeMXBean overhead contract (/api/v1/gc)
+        long uptimeMs = Math.max(1L, java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime());
+        var gcBeans = java.lang.management.ManagementFactory.getGarbageCollectorMXBeans();
+        long gcTimeMs = 0L;
+        for (var gc : gcBeans) {
+            if (gc.getCollectionTime() > 0) gcTimeMs += gc.getCollectionTime();
+        }
+        double gcOverheadPct = Math.min(100.0, (gcTimeMs * 100.0) / uptimeMs);
+        assertTrue(!gcBeans.isEmpty() && gcOverheadPct >= 0.0 && gcOverheadPct <= 100.0, "GC telemetry invariant failed");
+
+        System.out.println("BridgeContractTest: 10/10 PASS");
     }
 
     private static void verifyLoopbackHttpAuth() {

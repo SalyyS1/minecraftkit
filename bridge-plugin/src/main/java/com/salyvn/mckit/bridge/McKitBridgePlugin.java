@@ -164,6 +164,7 @@ public final class McKitBridgePlugin extends JavaPlugin {
             httpServer.createContext("/api/v1/entities", ex -> handleGuarded(ex, this::buildEntitiesJson));
             httpServer.createContext("/api/v1/chunks", ex -> handleGuarded(ex, this::buildChunksJson));
             httpServer.createContext("/api/v1/memory", ex -> handleGuarded(ex, this::buildMemoryJson));
+            httpServer.createContext("/api/v1/gc", ex -> handleGuarded(ex, this::buildGcJson));
             httpServer.createContext("/api/v1/threads", ex -> handleGuarded(ex, this::buildThreadsJson));
             httpServer.createContext("/api/v1/players", ex -> handleGuarded(ex, this::buildPlayersJson));
             httpServer.createContext("/api/v1/gui", ex -> handleGuarded(ex, () -> buildGuiJson(ex)));
@@ -365,6 +366,37 @@ public final class McKitBridgePlugin extends JavaPlugin {
             + "}";
     }
 
+    private String buildGcJson() {
+        long uptimeMs = Math.max(1L, java.lang.management.ManagementFactory.getRuntimeMXBean().getUptime());
+        long totalCount = 0L;
+        long totalTimeMs = 0L;
+        StringBuilder cols = new StringBuilder("[");
+        boolean first = true;
+        for (var gc : java.lang.management.ManagementFactory.getGarbageCollectorMXBeans()) {
+            long c = Math.max(0L, gc.getCollectionCount());
+            long t = Math.max(0L, gc.getCollectionTime());
+            double avgMs = c > 0 ? ((double) t / c) : 0.0;
+            totalCount += c;
+            totalTimeMs += t;
+            if (!first) cols.append(",");
+            first = false;
+            cols.append("{\"name\":\"").append(esc(gc.getName()))
+                .append("\",\"collections\":").append(c)
+                .append(",\"time_ms\":").append(t)
+                .append(",\"avg_pause_ms\":").append(String.format(java.util.Locale.ROOT, "%.2f", avgMs))
+                .append("}");
+        }
+        cols.append("]");
+        double gcOverheadPct = Math.min(100.0, (totalTimeMs * 100.0) / uptimeMs);
+        return "{"
+            + "\"uptime_ms\":" + uptimeMs + ","
+            + "\"total_collections\":" + totalCount + ","
+            + "\"total_gc_time_ms\":" + totalTimeMs + ","
+            + "\"gc_overhead_pct\":" + String.format(java.util.Locale.ROOT, "%.3f", gcOverheadPct) + ","
+            + "\"collectors\":" + cols
+            + "}";
+    }
+
     private String buildThreadsJson() {
         var threadBean = java.lang.management.ManagementFactory.getThreadMXBean();
         long[] deadlocked = threadBean.findDeadlockedThreads();
@@ -500,7 +532,12 @@ public final class McKitBridgePlugin extends JavaPlugin {
             if (!first) sb.append(",");
             first = false;
             sb.append("{\"name\":\"").append(esc(w.getName()))
-                .append("\",\"loaded_chunks\":").append(w.getLoadedChunks().length)
+                .append("\",\"environment\":\"").append(esc(w.getEnvironment().name()))
+                .append("\",\"difficulty\":\"").append(esc(w.getDifficulty().name()))
+                .append("\",\"time\":").append(w.getTime())
+                .append(",\"has_storm\":").append(w.hasStorm())
+                .append(",\"world_border_size\":").append(String.format(java.util.Locale.ROOT, "%.1f", w.getWorldBorder().getSize()))
+                .append(",\"loaded_chunks\":").append(w.getLoadedChunks().length)
                 .append(",\"players\":").append(w.getPlayers().size())
                 .append(",\"entities\":").append(w.getEntityCount()).append("}");
         }
