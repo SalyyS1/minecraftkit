@@ -14,7 +14,7 @@ Connect MinecraftKit to your **Pterodactyl, Pelican, Crafty Controller, PufferPa
 | **RFC 6238 TOTP 2FA** | Pure-Python HMAC-SHA1 6-digit OTP generator (`mc_hosting_connect_plan`) computes live 2FA codes locally from `env:MCKIT_TOTP_SECRET` without opening a browser or phone app. |
 | **Atomic JAR Swaps** | `mc_sftp_operations` uploads to `.tmp`, verifies SHA-256 checksum, then atomically renames into `plugins/` so a mid-upload crash never corrupts your server. |
 | **Automatic `.mckit.bak` Rollback** | Config edits automatically save a timestamped `.mckit.bak` backup before patching. |
-| **Loopback-Only Companion Bridges** | `mckit-bridge-plugin` (`127.0.0.1:25590`) and `mckit-visual-client-mod` bind strictly to localhost with constant-time `X-MCKit-Token` verification. |
+| **Loopback-Only Companion Bridges** | `mckit-bridge-plugin` (`127.0.0.1:25590`, including live `/api/v1/threads` deadlock telemetry) and `mckit-visual-client-mod` (`/api/v1/captures`, `/api/v1/render-metrics`, `/api/v1/pack-status`) bind strictly to localhost with constant-time `X-MCKit-Token` verification. |
 
 ---
 

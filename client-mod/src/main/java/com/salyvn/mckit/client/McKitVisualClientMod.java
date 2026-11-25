@@ -7,14 +7,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,16 +28,19 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * Designed to run inside an isolated Xvfb/Docker headless visual container so
  * MinecraftKit's MCP server can request:
- *   - GET /api/v1/status      : active screen class, FPS, resource pack & shader status
- *   - GET /api/v1/pack-status : loaded resource packs, active shader pack, FPS, missing assets
- *   - GET /api/v1/errors      : bounded 50-entry resource-pack & shader error ring buffer
- *   - GET /api/v1/screenshot  : triggers off-screen framebuffer PNG capture (no focus steal)
+ *   - GET /api/v1/status         : active screen class, FPS, resource pack & shader status
+ *   - GET /api/v1/pack-status    : loaded resource packs, active shader pack, FPS, missing assets
+ *   - GET /api/v1/render-metrics : rolling 60-sample FPS/frame-time telemetry & client JVM heap
+ *   - GET /api/v1/captures       : newest off-screen PNG/GIF/MP4 files written inside captureDir
+ *   - GET /api/v1/errors         : bounded 50-entry resource-pack & shader error ring buffer
+ *   - GET /api/v1/screenshot     : triggers off-screen framebuffer PNG capture (no focus steal)
  *
  * Bind strictly to 127.0.0.1 with X-MCKit-Token authentication.
  */
 public final class McKitVisualClientMod {
 
     private static final int MAX_ERROR_RING = 50;
+    private static final int MAX_FPS_RING = 60;
     private final AtomicReference<String> lastScreen = new AtomicReference<>("TitleScreen");
     private final AtomicReference<String> lastPackError = new AtomicReference<>("");
     private final AtomicReference<String> activeShaderPack = new AtomicReference<>("vanilla");
@@ -44,6 +50,7 @@ public final class McKitVisualClientMod {
     private final AtomicInteger missingTextures = new AtomicInteger(0);
     private final AtomicInteger missingModels = new AtomicInteger(0);
     private final Deque<String> errorRing = new ArrayDeque<>(MAX_ERROR_RING);
+    private final Deque<Integer> fpsRing = new ArrayDeque<>(MAX_FPS_RING);
     private HttpServer server;
     private ExecutorService executor;
 
@@ -65,6 +72,8 @@ public final class McKitVisualClientMod {
                 + ",\"last_pack_error\":\"" + esc(lastPackError.get()) + "\"}"
         ));
         server.createContext("/api/v1/pack-status", exchange -> handleAuth(exchange, expected, this::buildPackStatusJson));
+        server.createContext("/api/v1/render-metrics", exchange -> handleAuth(exchange, expected, this::buildRenderMetricsJson));
+        server.createContext("/api/v1/captures", exchange -> handleAuth(exchange, expected, () -> buildCapturesJson(captureDir)));
         server.createContext("/api/v1/errors", exchange -> handleAuth(exchange, expected, this::buildErrorsJson));
         server.createContext("/api/v1/screenshot", exchange -> handleAuth(exchange, expected, () ->
             "{\"ok\":true,\"queued\":true,\"offscreen\":true,\"capture_dir\":\"" + esc(captureDir.toString()) + "\"}"
@@ -94,8 +103,92 @@ public final class McKitVisualClientMod {
     }
 
     public void recordRenderMetrics(int fps, double frameTimeMs) {
-        lastFps.set(Math.max(0, fps));
+        int clamped = Math.max(0, fps);
+        lastFps.set(clamped);
         lastFrameTimeMs.set(Math.max(0.0, frameTimeMs));
+        synchronized (fpsRing) {
+            if (fpsRing.size() >= MAX_FPS_RING) {
+                fpsRing.removeFirst();
+            }
+            fpsRing.addLast(clamped);
+        }
+    }
+
+    private String buildRenderMetricsJson() {
+        Runtime rt = Runtime.getRuntime();
+        long usedMb = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024);
+        long maxMb = Math.max(1L, rt.maxMemory() / (1024 * 1024));
+        int minFps;
+        double avgFps;
+        int samples;
+        synchronized (fpsRing) {
+            samples = fpsRing.size();
+            if (samples == 0) {
+                minFps = lastFps.get();
+                avgFps = lastFps.get();
+            } else {
+                int minVal = Integer.MAX_VALUE;
+                long sum = 0L;
+                for (int v : fpsRing) {
+                    if (v < minVal) minVal = v;
+                    sum += v;
+                }
+                minFps = minVal;
+                avgFps = (double) sum / samples;
+            }
+        }
+        return "{\"ok\":true,\"offscreen_headless\":true,\"fps\":" + lastFps.get()
+            + ",\"min_fps\":" + minFps
+            + ",\"avg_fps\":" + String.format(Locale.ROOT, "%.2f", avgFps)
+            + ",\"samples\":" + samples
+            + ",\"frame_time_ms\":" + String.format(Locale.ROOT, "%.2f", lastFrameTimeMs.get())
+            + ",\"heap_used_mb\":" + usedMb
+            + ",\"heap_max_mb\":" + maxMb
+            + ",\"screen\":\"" + esc(lastScreen.get()) + "\"}";
+    }
+
+    private String buildCapturesJson(Path captureDir) {
+        List<Path> found = new ArrayList<>();
+        if (captureDir != null && Files.isDirectory(captureDir)) {
+            try (var stream = Files.list(captureDir)) {
+                stream.filter(Files::isRegularFile).forEach(p -> {
+                    String lower = p.getFileName().toString().toLowerCase(Locale.ROOT);
+                    if (lower.endsWith(".png") || lower.endsWith(".gif") || lower.endsWith(".mp4")) {
+                        found.add(p);
+                    }
+                });
+            } catch (IOException ignored) {
+                // Return empty list if directory cannot be listed.
+            }
+        }
+        found.sort(Comparator.comparingLong((Path p) -> {
+            try {
+                return Files.getLastModifiedTime(p).toMillis();
+            } catch (IOException e) {
+                return 0L;
+            }
+        }).reversed());
+        StringBuilder sb = new StringBuilder("{\"ok\":true,\"capture_dir\":\"")
+            .append(esc(captureDir == null ? "" : captureDir.toString()))
+            .append("\",\"count\":").append(Math.min(50, found.size()))
+            .append(",\"files\":[");
+        int limit = Math.min(50, found.size());
+        for (int i = 0; i < limit; i++) {
+            Path p = found.get(i);
+            long size = 0L;
+            long mtime = 0L;
+            try {
+                size = Files.size(p);
+                mtime = Files.getLastModifiedTime(p).toMillis();
+            } catch (IOException ignored) {
+            }
+            if (i > 0) sb.append(",");
+            sb.append("{\"name\":\"").append(esc(p.getFileName().toString()))
+                .append("\",\"bytes\":").append(size)
+                .append(",\"modified_ms\":").append(mtime).append("}");
+        }
+        sb.append("]}");
+        return sb.toString();
     }
 
     private String buildPackStatusJson() {

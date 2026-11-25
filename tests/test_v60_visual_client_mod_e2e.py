@@ -30,12 +30,15 @@ public final class VisualModRuntimeHarness {
     public static void main(String[] args) throws Exception {
         McKitVisualClientMod mod = new McKitVisualClientMod();
         String token = "mckit-loopback-secret-v60";
-        mod.startBridge(0, token, Path.of("/tmp/mckit-visual-test"));
+        Path capDir = java.nio.file.Files.createTempDirectory("mckit-visual-cap-");
+        java.nio.file.Files.write(capDir.resolve("stage-01-shop.png"), new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A});
+        mod.startBridge(0, token, capDir);
         try {
             int port = mod.getBoundPort();
             if (port <= 0) throw new AssertionError("Expected ephemeral bound port > 0");
             mod.recordScreen("ShopInventoryScreen");
             mod.recordPackStatus(java.util.List.of("vanilla", "SalyRPG_Pack_v2"), "ComplementaryUnbound_r5.2", 0, 1);
+            mod.recordRenderMetrics(58, 17.24);
             mod.recordRenderMetrics(74, 13.51);
             mod.recordPackError("Shader uniform u_FogColor missing");
 
@@ -62,6 +65,18 @@ public final class VisualModRuntimeHarness {
                     .GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
+            HttpResponse<String> renderMetrics = client.send(
+                HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/v1/render-metrics"))
+                    .header("X-MCKit-Token", token)
+                    .GET().build(),
+                HttpResponse.BodyHandlers.ofString()
+            );
+            HttpResponse<String> captures = client.send(
+                HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/v1/captures"))
+                    .header("X-MCKit-Token", token)
+                    .GET().build(),
+                HttpResponse.BodyHandlers.ofString()
+            );
             HttpResponse<String> errors = client.send(
                 HttpRequest.newBuilder(URI.create("http://127.0.0.1:" + port + "/api/v1/errors"))
                     .header("X-MCKit-Token", token)
@@ -74,12 +89,14 @@ public final class VisualModRuntimeHarness {
                     .GET().build(),
                 HttpResponse.BodyHandlers.ofString()
             );
-            if (status.statusCode() != 200 || packStatus.statusCode() != 200 || errors.statusCode() != 200 || shot.statusCode() != 200) {
+            if (status.statusCode() != 200 || packStatus.statusCode() != 200 || renderMetrics.statusCode() != 200 || captures.statusCode() != 200 || errors.statusCode() != 200 || shot.statusCode() != 200) {
                 throw new AssertionError("Expected 200 from all authorized endpoints");
             }
-            System.out.println("{\"status\":" + status.body() + ",\"pack_status\":" + packStatus.body() + ",\"errors\":" + errors.body() + ",\"shot\":" + shot.body() + "}");
+            System.out.println("{\"status\":" + status.body() + ",\"pack_status\":" + packStatus.body() + ",\"render_metrics\":" + renderMetrics.body() + ",\"captures\":" + captures.body() + ",\"errors\":" + errors.body() + ",\"shot\":" + shot.body() + "}");
         } finally {
             mod.stopBridge();
+            java.nio.file.Files.deleteIfExists(capDir.resolve("stage-01-shop.png"));
+            java.nio.file.Files.deleteIfExists(capDir);
         }
     }
 }
@@ -147,6 +164,11 @@ class VisualClientModAndCloudV60Tests(unittest.TestCase):
             self.assertEqual(payload["pack_status"]["missing_models"], 1)
             self.assertIn("SalyRPG_Pack_v2", payload["pack_status"]["active_packs"])
             self.assertTrue(payload["pack_status"]["offscreen_headless"])
+            self.assertEqual(payload["render_metrics"]["min_fps"], 58)
+            self.assertEqual(payload["render_metrics"]["samples"], 2)
+            self.assertGreaterEqual(payload["render_metrics"]["heap_max_mb"], 1)
+            self.assertEqual(payload["captures"]["count"], 1)
+            self.assertEqual(payload["captures"]["files"][0]["name"], "stage-01-shop.png")
             self.assertIn("u_FogColor", payload["errors"]["errors"][0]["message"])
             self.assertTrue(payload["shot"]["offscreen"])
 

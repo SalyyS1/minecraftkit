@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.SalyyS1/minecraftkit",
-  "description": "Flagship v8.8.0 all-in-one Minecraft engineering & autonomous QA MCP server (100 verified tools, 7 inline PNG charts): Paper 26.3, Folia, Skript, WorldGuard, Economy, MythicMobs/MMOItems, Spark Heap, JVM GC, Bukkit/Spigot & plugin.yml auditors, headless test bots (18-42 MB/bot, auto-auth, XP/lore assertions, 24h soak & multi-server mesh planners, 6 anti-OOM cloud/Docker grids including Oracle Always-Free ARM64), companion Paper/Folia bridge plugin (with live /api/v1/threads deadlock telemetry) & Fabric visual mod, headless hosting/VPS/2FA/SFTP/RCON ops, 8-engine offline Diagnostics Lab, Interactive GO/NO-GO Scorecard Simulator & PNG, and unified 10-tool SalyyS1 suite doctor.",
-  "version": "8.8.0",
+  "description": "Flagship v8.9.0 all-in-one Minecraft engineering & autonomous QA MCP server (100 verified tools, 7 inline PNG charts): Paper 26.3, Folia, Skript, WorldGuard, Economy, MythicMobs/MMOItems, Spark Heap, JVM GC, Bukkit/Spigot & plugin.yml auditors, headless test bots (18-42 MB/bot, auto-auth, XP/lore assertions, 24h soak & multi-server mesh planners, 6 anti-OOM cloud/Docker grids including Oracle Always-Free ARM64), companion Paper/Folia bridge plugin (/api/v1/threads deadlock telemetry) & Fabric visual mod (/api/v1/captures + /api/v1/render-metrics), headless hosting/VPS/2FA/SFTP/RCON ops, 8-engine offline Diagnostics Lab, Interactive GO/NO-GO Scorecard Simulator & PNG, and unified 10-tool SalyyS1 suite doctor.",
+  "version": "8.9.0",
   "repository": {
     "url": "https://github.com/SalyyS1/minecraftkit",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "minecraftkit",
-      "version": "8.8.0",
+      "version": "8.9.0",
       "transport": {
         "type": "stdio"
       },
